@@ -36,7 +36,9 @@ def p_statement(p):
     '''statement : variable_decl
                 | function_decl
                 | show_stmt
+                | read_stmt
                 | if_stmt
+                | when_stmt
                 | while_stmt
                 | return_stmt
                 | expression_stmt
@@ -205,7 +207,9 @@ def p_expression_terminals(p):
                  | list_expression
                  | map_expression
                  | member_expression
-                 | index_expression'''
+                 | index_expression
+                 | slice_expression
+                 | ref_expression'''
     p[0] = p[1]
 
 def p_member_expression(p):
