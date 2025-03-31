@@ -17,7 +17,7 @@ CYAN="\033[0;36m"
 NC="\033[0m" # No Color
 
 # Version
-RAZEN_VERSION="beta v0.1.1"
+RAZEN_VERSION="beta v0.1.2"
 RAZEN_REPO="https://raw.githubusercontent.com/BasaiCorp/razen-lang/main"
 
 # Print banner
@@ -33,47 +33,12 @@ echo -e "${YELLOW}Programming Language ${PURPLE}$RAZEN_VERSION${NC}"
 echo -e "${CYAN}By Prathmesh Barot, Basai Corporation${NC}"
 echo -e "${YELLOW}Copyright © 2025 Prathmesh Barot${NC}\n"
 
-# Check for update flag
-if [ "$1" == "update" ] || [ "$1" == "--update" ]; then
-    echo -e "${YELLOW}Checking for Razen updates...${NC}"
-    
-    # Create temporary directory
-    TMP_DIR=$(mktemp -d)
-    cd "$TMP_DIR"
-    
-    # Download version check file
-    if ! curl -s -o version.txt "$RAZEN_REPO/version" &>/dev/null; then
-        echo -e "${RED}Failed to check for updates. Please check your internet connection.${NC}"
-        rm -rf "$TMP_DIR"
-        exit 1
-    fi
-    
-    # Read latest version
-    LATEST_VERSION=$(cat version.txt 2>/dev/null || echo "unknown")
-    
-    if [ "$LATEST_VERSION" == "$RAZEN_VERSION" ]; then
-        echo -e "${GREEN}Razen is already up to date ($RAZEN_VERSION).${NC}"
-        rm -rf "$TMP_DIR"
-        exit 0
-    else
-        echo -e "${YELLOW}New version available: $LATEST_VERSION${NC}"
-        echo -e "${YELLOW}Current version: $RAZEN_VERSION${NC}"
-        echo -e "${YELLOW}Updating Razen...${NC}"
-        
-        # Download the latest installer
-        if curl -s -o install.sh "$RAZEN_REPO/install.sh" &>/dev/null; then
-            chmod +x install.sh
-            # Run the installer
-            bash install.sh
-            rm -rf "$TMP_DIR"
-            exit $?
-        else
-            echo -e "${RED}Failed to download the latest installer.${NC}"
-            rm -rf "$TMP_DIR"
-            exit 1
-        fi
-    fi
-fi
+# Prepare installation
+echo -e "${YELLOW}Preparing Razen installation...${NC}"
+
+# Create temporary directory for installation
+TMP_DIR=$(mktemp -d)
+echo -e "  ${GREEN}✓${NC} Created temporary directory for installation"
 
 # Check for uninstall flag
 if [ "$1" == "--uninstall" ]; then
@@ -105,57 +70,87 @@ if [ "$1" == "--uninstall" ]; then
         echo -e "  ${GREEN}✓${NC} Removed symlink /usr/bin/razen-run"
     fi
     
+    if [ -d "/usr/local/lib/razen" ]; then
+        sudo rm -rf /usr/local/lib/razen
+        echo -e "  ${GREEN}✓${NC} Removed /usr/local/lib/razen directory"
+    fi
+    
     echo -e "\n${GREEN}✅ Razen has been successfully uninstalled!${NC}"
     exit 0
 fi
 
-# Detect if being run via pipe (wget/curl)
-IS_PIPED=false
-if [ ! -t 0 ]; then  # Check if stdin is not a terminal
-    IS_PIPED=true
-fi
-
-# Check if we need to set up the environment
-if $IS_PIPED || [ ! -f "main.py" ]; then
-    echo -e "${YELLOW}Setting up Razen installation environment...${NC}"
+# Check for update flag
+if [ "$1" == "update" ] || [ "$1" == "--update" ]; then
+    echo -e "${YELLOW}Checking for Razen updates...${NC}"
     
-    # Create temporary directory for installation
-    TMP_DIR=$(mktemp -d)
-    cd "$TMP_DIR"
-    
-    echo -e "${YELLOW}Downloading Razen files...${NC}"
-    
-    # Download main.py
-    if ! curl -s -o main.py "$RAZEN_REPO/main.py" &>/dev/null; then
-        echo -e "${RED}Failed to download main.py. Please check your internet connection.${NC}"
+    # Download version check file
+    if ! curl -s -o "$TMP_DIR/version.txt" "$RAZEN_REPO/version" &>/dev/null; then
+        echo -e "${RED}Failed to check for updates. Please check your internet connection.${NC}"
         rm -rf "$TMP_DIR"
         exit 1
     fi
-    echo -e "  ${GREEN}✓${NC} Downloaded main.py"
     
-    # Create directories
-    mkdir -p examples parser utils
+    # Read latest version
+    LATEST_VERSION=$(cat "$TMP_DIR/version.txt" 2>/dev/null || echo "unknown")
     
-    # Download parser files
-    curl -s -o parser/__init__.py "$RAZEN_REPO/parser/__init__.py" &>/dev/null
-    curl -s -o parser/lexer.py "$RAZEN_REPO/parser/lexer.py" &>/dev/null
-    curl -s -o parser/ast.py "$RAZEN_REPO/parser/ast.py" &>/dev/null
-    curl -s -o parser/parser.py "$RAZEN_REPO/parser/parser.py" &>/dev/null
-    echo -e "  ${GREEN}✓${NC} Downloaded parser modules"
-    
-    # Download utils files
-    curl -s -o utils/__init__.py "$RAZEN_REPO/utils/__init__.py" &>/dev/null
-    curl -s -o utils/interpreter.py "$RAZEN_REPO/utils/interpreter.py" &>/dev/null
-    curl -s -o utils/runtime.py "$RAZEN_REPO/utils/runtime.py" &>/dev/null
-    echo -e "  ${GREEN}✓${NC} Downloaded utility modules"
-    
-    # Set RAZEN_DIR to the temporary directory
-    RAZEN_DIR="$TMP_DIR"
-else
-    # Check if script is being run directly
-    SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
-    RAZEN_DIR="$SCRIPT_DIR"
+    if [ "$LATEST_VERSION" == "$RAZEN_VERSION" ]; then
+        echo -e "${GREEN}Razen is already up to date ($RAZEN_VERSION).${NC}"
+        rm -rf "$TMP_DIR"
+        exit 0
+    else
+        echo -e "${YELLOW}New version available: $LATEST_VERSION${NC}"
+        echo -e "${YELLOW}Current version: $RAZEN_VERSION${NC}"
+        echo -e "${YELLOW}Updating Razen...${NC}"
+        
+        # Download the latest installer
+        if ! curl -s -o "$TMP_DIR/install.sh" "$RAZEN_REPO/install.sh" &>/dev/null; then
+            echo -e "${RED}Failed to download the latest installer.${NC}"
+            rm -rf "$TMP_DIR"
+            exit 1
+        fi
+        
+        # Make it executable
+        chmod +x "$TMP_DIR/install.sh"
+        
+        # Run the installer with the latest version
+        bash "$TMP_DIR/install.sh"
+        
+        # Clean up and exit
+        rm -rf "$TMP_DIR"
+        exit $?
+    fi
 fi
+
+# Download necessary files
+echo -e "${YELLOW}Downloading Razen files...${NC}"
+cd "$TMP_DIR"
+
+# Download main.py
+if ! curl -s -o "$TMP_DIR/main.py" "$RAZEN_REPO/main.py" &>/dev/null; then
+    echo -e "${RED}Failed to download main.py. Please check your internet connection.${NC}"
+    rm -rf "$TMP_DIR"
+    exit 1
+fi
+echo -e "  ${GREEN}✓${NC} Downloaded main.py"
+
+# Create directories
+mkdir -p "$TMP_DIR/examples" "$TMP_DIR/parser" "$TMP_DIR/utils"
+
+# Download parser files
+curl -s -o "$TMP_DIR/parser/__init__.py" "$RAZEN_REPO/parser/__init__.py" &>/dev/null
+curl -s -o "$TMP_DIR/parser/lexer.py" "$RAZEN_REPO/parser/lexer.py" &>/dev/null
+curl -s -o "$TMP_DIR/parser/ast.py" "$RAZEN_REPO/parser/ast.py" &>/dev/null
+curl -s -o "$TMP_DIR/parser/parser.py" "$RAZEN_REPO/parser/parser.py" &>/dev/null
+echo -e "  ${GREEN}✓${NC} Downloaded parser modules"
+
+# Download utils files
+curl -s -o "$TMP_DIR/utils/__init__.py" "$RAZEN_REPO/utils/__init__.py" &>/dev/null
+curl -s -o "$TMP_DIR/utils/interpreter.py" "$RAZEN_REPO/utils/interpreter.py" &>/dev/null
+curl -s -o "$TMP_DIR/utils/runtime.py" "$RAZEN_REPO/utils/runtime.py" &>/dev/null
+echo -e "  ${GREEN}✓${NC} Downloaded utility modules"
+
+# Set RAZEN_DIR to the temporary directory
+RAZEN_DIR="$TMP_DIR"
 
 # Check for existing installation
 if [ -f "/usr/local/bin/razen" ]; then
@@ -165,10 +160,7 @@ if [ -f "/usr/local/bin/razen" ]; then
     echo
     if [[ ! $REPLY =~ ^[Yy]$ ]]; then
         echo -e "${BLUE}Installation cancelled.${NC}"
-        # Clean up if we created a temp directory
-        if [ -n "$TMP_DIR" ] && [ -d "$TMP_DIR" ]; then
-            rm -rf "$TMP_DIR"
-        fi
+        rm -rf "$TMP_DIR"
         exit 0
     fi
     
@@ -194,14 +186,25 @@ if [ -f "/usr/local/bin/razen" ]; then
         sudo rm /usr/bin/razen-run
     fi
     
+    if [ -d "/usr/local/lib/razen" ]; then
+        sudo rm -rf /usr/local/lib/razen
+    fi
+    
     echo -e "${GREEN}✓${NC} Previous installation removed."
 fi
 
-echo -e "${YELLOW}Installing Razen $RAZEN_VERSION in secure root locations...${NC}"
-echo -e "${YELLOW}This ensures only authorized users can modify the language core.${NC}"
+echo -e "${YELLOW}Installing Razen $RAZEN_VERSION...${NC}"
 
 # Create main runner script
 echo -e "${YELLOW}Creating Razen launcher script...${NC}"
+
+# Create permanent installation directory
+echo -e "${YELLOW}Installing to /usr/local/lib/razen...${NC}"
+sudo mkdir -p /usr/local/lib/razen
+sudo cp -r "$TMP_DIR"/* /usr/local/lib/razen/
+sudo chmod -R 755 /usr/local/lib/razen
+INSTALL_DIR="/usr/local/lib/razen"
+echo -e "  ${GREEN}✓${NC} Installed Razen core files"
 
 LAUNCHER_SCRIPT=$(cat <<EOF
 #!/usr/bin/env bash
@@ -215,7 +218,23 @@ SCRIPT_NAME=\$(basename "\$0")
 # Check for update command
 if [ "\$1" = "update" ]; then
     echo "Updating Razen to the latest version..."
-    bash "$RAZEN_DIR/install.sh" update
+    
+    # Create temporary directory
+    TMP_UPDATE_DIR=\$(mktemp -d)
+    
+    # Download the latest installer
+    if ! curl -s -o "\$TMP_UPDATE_DIR/install.sh" "$RAZEN_REPO/install.sh" &>/dev/null; then
+        echo "Failed to download the latest installer. Please check your internet connection."
+        rm -rf "\$TMP_UPDATE_DIR"
+        exit 1
+    fi
+    
+    # Make it executable and run with sudo to ensure proper permissions
+    chmod +x "\$TMP_UPDATE_DIR/install.sh"
+    sudo bash "\$TMP_UPDATE_DIR/install.sh" update
+    
+    # Clean up
+    rm -rf "\$TMP_UPDATE_DIR"
     exit \$?
 fi
 
@@ -239,7 +258,7 @@ elif [ "\$SCRIPT_NAME" = "razen-run" ]; then
     fi
     
     # Run with minimal output through our wrapper
-    python3 "$RAZEN_DIR/main.py" --mode=run "\$1" | grep -v "^DEBUG:" | grep -v "^Loaded" | grep -v "^Parser" | grep -v "^--- "
+    python3 "$INSTALL_DIR/main.py" --mode=run "\$1" | grep -v "^DEBUG:" | grep -v "^Loaded" | grep -v "^Parser" | grep -v "^--- "
     exit \${PIPESTATUS[0]}
 else
     MODE="run"
@@ -296,7 +315,7 @@ if [ "\$1" = "help" ] || [ "\$1" = "--help" ] || [ "\$1" = "-h" ]; then
 fi
 
 # Run main.py with appropriate mode
-python3 "$RAZEN_DIR/main.py" --mode=\$MODE "\$@"
+python3 "$INSTALL_DIR/main.py" --mode=\$MODE "\$@"
 exit \$?
 EOF
 )
@@ -321,30 +340,18 @@ echo -e "  ${GREEN}✓${NC} Created symlink /usr/bin/razen-test"
 sudo ln -sf /usr/local/bin/razen /usr/bin/razen-run
 echo -e "  ${GREEN}✓${NC} Created symlink /usr/bin/razen-run"
 
-# Create installation directory if it was downloaded
-if [ -n "$TMP_DIR" ] && [ -d "$TMP_DIR" ]; then
-    # Create a permanent installation directory
-    sudo mkdir -p /usr/local/lib/razen
-    sudo cp -r "$TMP_DIR"/* /usr/local/lib/razen/
-    sudo chmod -R 755 /usr/local/lib/razen
-    
-    # Update RAZEN_DIR to point to the permanent location
-    RAZEN_DIR="/usr/local/lib/razen"
-    
-    # Fix the launcher script to point to the right location
-    sudo sed -i "s|$TMP_DIR|$RAZEN_DIR|g" /usr/local/bin/razen
-fi
-
 # Create version file for future updates
-echo "$RAZEN_VERSION" > "$RAZEN_DIR/version"
+echo "$RAZEN_VERSION" > "$INSTALL_DIR/version"
 
-# Create examples directory if it doesn't exist
-if [ ! -d "$RAZEN_DIR/examples" ]; then
-    echo -e "${YELLOW}Creating examples directory...${NC}"
-    mkdir -p "$RAZEN_DIR/examples"
+# Also save the installer itself
+sudo cp "$0" "$INSTALL_DIR/install.sh" 2>/dev/null || echo "$0" | sudo tee "$INSTALL_DIR/install.sh" > /dev/null
+sudo chmod +x "$INSTALL_DIR/install.sh"
+
+# Create examples directory
+echo -e "${YELLOW}Creating examples...${NC}"
     
-    # Create a simple hello world example
-    cat > "$RAZEN_DIR/examples/hello_world.rzn" <<EOL
+# Create a simple hello world example
+cat > "$INSTALL_DIR/examples/hello_world.rzn" <<EOL
 // Basic Hello World example
 // Powered by Razen $RAZEN_VERSION - © 2025 Prathmesh Barot, Basai Corporation
 
@@ -356,8 +363,8 @@ read user_input = "What's your name? "
 show "Nice to meet you, \${user_input}!"
 EOL
 
-    # Create a more advanced example
-    cat > "$RAZEN_DIR/examples/calculator.rzn" <<EOL
+# Create a more advanced example
+cat > "$INSTALL_DIR/examples/calculator.rzn" <<EOL
 // Simple calculator example
 // Powered by Razen $RAZEN_VERSION - © 2025 Prathmesh Barot, Basai Corporation
 
@@ -397,8 +404,7 @@ if operation == "/" {
 }
 EOL
 
-    echo -e "  ${GREEN}✓${NC} Created example programs"
-fi
+echo -e "  ${GREEN}✓${NC} Created example programs"
 
 # Create a test script to verify installation works correctly
 TEST_SCRIPT=$(mktemp)
@@ -437,15 +443,15 @@ if [[ ! "\$VERSION_OUTPUT" == *"$RAZEN_VERSION"* ]]; then
 fi
 
 # Test new command (in temp directory)
-TMP_DIR=\$(mktemp -d)
-cd "\$TMP_DIR"
+TMP_TEST_DIR=\$(mktemp -d)
+cd "\$TMP_TEST_DIR"
 razen new test_program &>/dev/null
 if [ ! -f "test_program.rzn" ]; then
     echo "Error: new command not working correctly"
-    rm -rf "\$TMP_DIR"
+    rm -rf "\$TMP_TEST_DIR"
     exit 1
 fi
-rm -rf "\$TMP_DIR"
+rm -rf "\$TMP_TEST_DIR"
 
 echo "All tests passed!"
 exit 0
@@ -461,10 +467,8 @@ else
 fi
 rm "$TEST_SCRIPT"
 
-# Clean up temporary directory if created
-if [ -n "$TMP_DIR" ] && [ -d "$TMP_DIR" ]; then
-    rm -rf "$TMP_DIR"
-fi
+# Clean up temporary directory
+rm -rf "$TMP_DIR"
 
 # Check if installation was successful
 if [ -x "/usr/local/bin/razen" ]; then
@@ -484,12 +488,11 @@ if [ -x "/usr/local/bin/razen" ]; then
     echo -e "  ${YELLOW}razen new hello.rzn${NC} - Create a new hello.rzn program"
     
     echo -e "\n${BLUE}To uninstall:${NC}"
-    echo -e "  ${YELLOW}bash install.sh --uninstall${NC}"
+    echo -e "  ${YELLOW}sudo /usr/local/lib/razen/install.sh --uninstall${NC}"
     
     echo -e "\n${GREEN}Note:${NC} Razen is installed in root-protected locations for security."
     echo -e "This prevents unauthorized modifications to the core language."
-    echo -e "\n${BLUE}Check the examples directory for sample programs.${NC}"
-    echo -e "${BLUE}Official website and documentation coming soon!${NC}"
+    echo -e "\n${BLUE}Official website and documentation coming soon!${NC}"
 else
     echo -e "\n${RED}❌ Installation failed.${NC}"
     echo -e "${RED}Please check the error messages above.${NC}"
