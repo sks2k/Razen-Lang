@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+
+# Get the directory where this script is located
+SCRIPT_DIR=$(dirname "$0")
+# Assume main.py is in the parent directory of SCRIPT_DIR
+PROJECT_ROOT=$(cd "$SCRIPT_DIR/.." && pwd)
+MAIN_PY="$PROJECT_ROOT/main.py"
+
+# Check if filename argument is provided
+if [ -z "$1" ]; then
+  echo "Usage: razen <filename.rzn>"
+  exit 1
+fi
+
+FILENAME="$1"
+shift # Remove filename from args, allowing potential future flags
+
+# Check if main.py exists
+if [ ! -f "$MAIN_PY" ]; then
+  echo "Error: main.py not found at $MAIN_PY"
+  exit 1
+fi
+
+# Execute the main Python script in 'run' mode
+# Pass remaining arguments ($@) if any are needed in the future
+python3 "$MAIN_PY" --mode=run "$FILENAME" "$@"
+
+# Capture the exit code from the Python script
+exit $?

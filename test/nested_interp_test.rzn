@@ -1,0 +1,14 @@
+let name = "World"
+let greeting = "Hello, ${name}!"
+show "The greeting is: ${greeting}"
+
+// Test more complex nested interpolation
+let value = 42
+let template = "Value is: ${value}"
+show "The message says: ${template} (parsed)"
+
+// Test triple nested interpolation
+let inner = "inner value"
+let middle = "middle with ${inner}"
+let outer = "outer with ${middle}"
+show "Nested three levels: ${outer}"

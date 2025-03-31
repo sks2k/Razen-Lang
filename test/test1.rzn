@@ -1,0 +1,38 @@
+let money = 150000  
+let price = 145677  
+take product = "iPhone"  
+take buyer = "Prathmesh"  
+
+// Check affordability  
+let can_afford = money >= price  
+
+if can_afford {
+    show "${product} is affordable for you ${buyer}."  
+} 
+
+if can_afford == false {
+    show "${product} is not affordable for you ${buyer}."  
+}
+
+// Purchase process  
+read want_to_buy = "Do you want to buy ${product}? (yes/no): "  
+
+if want_to_buy == "yes" {
+    if can_afford {
+        diff new_money = money - price   // Use diff directly  
+        show "Purchase successful! New balance: ${new_money}"
+        show "Your ${product} will be delivered soon!"
+    }
+}
+
+if want_to_buy != "yes" {
+    show "Purchase cancelled." 
+    let new_money = money  
+}
+
+if can_afford == false {
+    show "Purchase cancelled due to insufficient funds." 
+    let new_money = money  
+}
+
+show "Final balance: ${new_money}"

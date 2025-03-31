@@ -1,0 +1,73 @@
+// 1️⃣ General Purpose Variables for basic data types:
+
+let => for numbers.  
+take => for strings.  
+hold => for boolean (true/false).  
+put => for mixed types.  
+
+
+// 2️⃣ Mathematical Variables for calculations & math operations:
+
+sum => for total.  
+diff => for difference.  
+prod => for multiplication.  
+div => for division.  
+mod => for modulus.  
+
+
+// 3️⃣ Logical Variables For conditions, booleans, and comparisons:
+
+if => for conditional blocks.
+else => for alternative blocks.
+is => for conditions.  
+when => for checks.  
+not => for negation.  
+
+// 4️⃣ String Variables for text & strings:
+
+text => for string data.  
+concat => for joining strings.  
+slice => for cutting strings.  
+len => for string length.  
+
+// 5️⃣ List & Array Variables for collections:
+
+list => for simple arrays.  
+arr => for fixed-size arrays.  
+append => for adding elements.  
+remove => for deleting elements.    
+
+
+// 6️⃣ Dictionary/Map Variables for key-value pairs:
+
+map => for dictionaries.  
+key => to access keys.  
+value => to access values.  
+
+// 7️⃣ Date & Time Variables for timestamps & time:
+
+current => for current time.  
+now => for current timestamp.  
+year => for year.  
+month => for month.  
+day => for day.  
+hour => for hour.  
+minute => for minute.  
+second => for second.  
+
+// 8️⃣ User-Defined Variables for custom variables:
+
+store => for reusable values.  
+box => for storing temporary data.  
+ref => for reference variables.  
+
+// 8️⃣ User-Defined Variables for custom variables:
+
+store => for reusable values.  
+box => for storing temporary data.  
+ref => for reference variables.  
+
+// 9️⃣ Input/Output Variables
+show => for printing output
+print => Alias for outputting values (consider removing if 'show' is primary)
+read => for reading input

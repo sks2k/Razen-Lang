@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+
+SCRIPT_DIR=$(dirname "$0")
+PROJECT_ROOT=$(cd "$SCRIPT_DIR/.." && pwd)
+MAIN_PY="$PROJECT_ROOT/main.py"
+
+if [ -z "$1" ]; then
+  echo "Usage: razen-debug <filename.rzn> [options]"
+  echo "Options passed after filename are forwarded to main.py (e.g., --show-tokens)"
+  exit 1
+fi
+
+FILENAME="$1"
+shift
+
+if [ ! -f "$MAIN_PY" ]; then
+  echo "Error: main.py not found at $MAIN_PY"
+  exit 1
+fi
+
+# Execute the main Python script in 'debug' mode
+python3 "$MAIN_PY" --mode=debug "$FILENAME" "$@"
+
+exit $?
