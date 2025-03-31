@@ -193,6 +193,9 @@ fi
 # Download Razen files
 echo -e "${YELLOW}Downloading Razen files...${NC}"
 
+# Create necessary directories
+mkdir -p "$TMP_DIR/scripts"
+
 # Download main.py
 if ! curl -s -o "$TMP_DIR/main.py" "$RAZEN_REPO/main.py" &>/dev/null; then
     echo -e "${RED}Failed to download main.py${NC}"
@@ -263,6 +266,14 @@ sudo cp "$TMP_DIR/ast.py" "$INSTALL_DIR/"
 sudo cp "$TMP_DIR/utils.py" "$INSTALL_DIR/"
 sudo cp "$TMP_DIR/error.py" "$INSTALL_DIR/"
 sudo cp -r "$TMP_DIR/scripts" "$INSTALL_DIR/"
+
+# Create version file with proper permissions
+echo "$RAZEN_VERSION" | sudo tee "$INSTALL_DIR/version" > /dev/null
+
+# Set proper permissions
+sudo chmod -R 755 "$INSTALL_DIR"
+sudo chown -R root:root "$INSTALL_DIR"
+
 echo -e "  ${GREEN}✓${NC} Copied files to installation directory"
 
 # Create symbolic links
