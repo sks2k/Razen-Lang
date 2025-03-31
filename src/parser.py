@@ -41,7 +41,8 @@ def p_statement(p):
                 | return_stmt
                 | expression_stmt
                 | block_stmt
-                | empty_stmt'''
+                | empty_stmt
+                | reference_decl'''
     p[0] = p[1]
 
 def p_block_stmt(p):
@@ -320,18 +321,22 @@ def p_error(p):
 
 # --- Build the parser ---
 try:
-    output_dir = os.path.dirname(os.path.abspath(__file__))
-    tabmodule_name = "parser_parsetab"
+    # Get the current directory
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    
+    # Initialize the parser with correct paths
     parser = yacc.yacc(
         debug=True,
         write_tables=True,
         optimize=False,
         errorlog=yacc.NullLogger(),
-        tabmodule=f'src.{tabmodule_name}',
-        outputdir=output_dir
+        tabmodule='parser_parsetab',  # Changed from src.parser_parsetab
+        outputdir=current_dir  # Use current directory
     )
 except Exception as e:
     print(f"Error initializing parser: {e}")
+    import traceback
+    traceback.print_exc()
     raise
 
 def parse(code_string, debug=False):
@@ -476,5 +481,5 @@ if __name__ == '__main__':
 
 # Add a new rule for reference declarations
 def p_reference_decl(p):
-    '''reference_decl : REF ID ASSIGN AMPERSAND ID'''
+    '''reference_decl : REF ID ASSIGN AMPERSAND ID SEMICOLON'''
     p[0] = ('var_decl', p[1], p[2], ('reference', p[5]))

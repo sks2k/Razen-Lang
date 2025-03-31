@@ -54,6 +54,7 @@ def read_variables_from_file():
             'COMMA', 'COLON',
             'DOT',
             'AMPERSAND',
+            'SEMICOLON',
             
             # Interpolation Tokens
             'STRING_START', 'STRING_END', 'INTERPOL_START', 'INTERPOL_END',
@@ -145,6 +146,7 @@ else:
         'COMMA', 'COLON',            # Separators
         'DOT',                       # Property access
         'AMPERSAND',                 # Reference operator
+        'SEMICOLON',                 # Newly added semicolon
         
         # Interpolation Tokens
         'STRING_START',  # "
@@ -239,6 +241,7 @@ class Lexer:
     t_COLON = r':'
     t_DOT = r'\.'
     t_AMPERSAND = r'&'
+    t_SEMICOLON = r';'
 
     def t_FLOAT(self, t):
         r'\d+\.\d*([eE][-+]?\d+)?|\.\d+([eE][-+]?\d+)?'
