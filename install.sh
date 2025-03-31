@@ -169,8 +169,16 @@ if [ "$1" == "--uninstall" ]; then
     exit 0
 fi
 
+# Check for force update flag
+if [ "$1" == "--force-update" ]; then
+    echo -e "${YELLOW}Force update mode activated. Will replace all existing files.${NC}"
+    FORCE_UPDATE=true
+else
+    FORCE_UPDATE=false
+fi
+
 # Check for update flag or if already installed
-if [ "$1" == "update" ] || [ "$1" == "--update" ] || [ -f "/usr/local/bin/razen" ]; then
+if [ "$1" == "update" ] || [ "$1" == "--update" ] || [ -f "/usr/local/bin/razen" ] && [ "$FORCE_UPDATE" != "true" ]; then
     # Check for updates
     check_for_updates
     UPDATE_STATUS=$?
@@ -256,19 +264,26 @@ echo -e "  ${GREEN}✓${NC} Made scripts executable"
 
 # Create installation directory
 INSTALL_DIR="/usr/local/lib/razen"
+
+# Check if installation directory exists
 if [ -d "$INSTALL_DIR" ]; then
-    echo -e "${YELLOW}Razen is already installed.${NC}"
-    echo -e "${YELLOW}New Razen commands are available with this version.${NC}"
-    read -p "Do you want to update Razen? (y/n): " -n 1 -r
-    echo
-    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-        echo -e "${BLUE}Installation cancelled.${NC}"
-        echo -e "${GREEN}Tip:${NC} You can use 'razen-update' to update Razen later."
-        rm -rf "$TMP_DIR"
-        exit 0
+    if [ "$FORCE_UPDATE" == "true" ]; then
+        echo -e "${YELLOW}Removing existing Razen installation...${NC}"
+        sudo rm -rf "$INSTALL_DIR"
+    else
+        echo -e "${YELLOW}Razen is already installed.${NC}"
+        echo -e "${YELLOW}New Razen commands are available with this version.${NC}"
+        read -p "Do you want to update Razen? (y/n): " -n 1 -r
+        echo
+        if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+            echo -e "${BLUE}Installation cancelled.${NC}"
+            echo -e "${GREEN}Tip:${NC} You can use 'razen-update' to update Razen later."
+            rm -rf "$TMP_DIR"
+            exit 0
+        fi
+        echo -e "${YELLOW}Updating Razen...${NC}"
+        sudo rm -rf "$INSTALL_DIR"
     fi
-    echo -e "${YELLOW}Updating Razen...${NC}"
-    sudo rm -rf "$INSTALL_DIR"
 fi
 
 sudo mkdir -p "$INSTALL_DIR"
@@ -282,6 +297,19 @@ sudo cp "$TMP_DIR/main.py" "$INSTALL_DIR/"
 sudo cp "$TMP_DIR/parser/"*.py "$INSTALL_DIR/parser/"
 sudo cp "$TMP_DIR/utils/"*.py "$INSTALL_DIR/utils/"
 sudo cp "$TMP_DIR/scripts/"* "$INSTALL_DIR/scripts/"
+
+# Download and save the latest installer script for future updates
+if ! curl -s -o "$TMP_DIR/install.sh" "$RAZEN_REPO/install.sh" &>/dev/null; then
+    echo -e "${YELLOW}Warning: Could not download latest installer script. Using current version instead.${NC}"
+    # If we're running from a downloaded script, copy it
+    if [ -f "$0" ] && [[ "$0" != "/usr/local/bin/"* ]]; then
+        sudo cp "$0" "$INSTALL_DIR/install.sh"
+    fi
+else
+    sudo cp "$TMP_DIR/install.sh" "$INSTALL_DIR/install.sh"
+    sudo chmod +x "$INSTALL_DIR/install.sh"
+    echo -e "${GREEN}  ✓${NC} Saved latest installer script for future updates"
+fi
 
 # Create version file with proper permissions
 echo "$RAZEN_VERSION" | sudo tee "$INSTALL_DIR/version" > /dev/null

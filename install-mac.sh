@@ -195,13 +195,21 @@ if [ $? -ne 0 ]; then
 fi
 echo -e "${GREEN}  ✓ Created temporary directory${NC}"
 
+# Check for force update flag
+if [ "$1" == "--force-update" ]; then
+    echo -e "${YELLOW}Force update mode activated. Will replace all existing files.${NC}"
+    FORCE_UPDATE=true
+else
+    FORCE_UPDATE=false
+fi
+
 # Check for uninstall flag
 if [ "$1" == "--uninstall" ]; then
     uninstall_razen
 fi
 
 # Check for update flag or if already installed
-if [ "$1" == "update" ] || [ "$1" == "--update" ] || [ -f "/usr/local/bin/razen" ]; then
+if [ "$1" == "update" ] || [ "$1" == "--update" ] || [ -f "/usr/local/bin/razen" ] && [ "$FORCE_UPDATE" != "true" ]; then
     # Check for updates
     check_for_updates
     UPDATE_STATUS=$?
@@ -239,17 +247,22 @@ if ! mkdir -p "$INSTALL_DIR"; then
 fi
 echo -e "${GREEN}  ✓ Created installation directory${NC}"
 
-# Check if already installed
+# Check if installation directory exists
 if [ -d "$INSTALL_DIR" ] && [ -f "$INSTALL_DIR/version" ]; then
-    echo -e "${YELLOW}Razen is already installed.${NC}"
-    echo -e "${YELLOW}New Razen commands are available with this version.${NC}"
-    read -p "Do you want to update Razen? (y/n): " -n 1 -r
-    echo
-    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-        echo -e "${BLUE}Installation cancelled.${NC}"
-        echo -e "${GREEN}Tip:${NC} You can use 'razen-update' to update Razen later."
-        rm -rf "$TMP_DIR"
-        exit 0
+    if [ "$FORCE_UPDATE" == "true" ]; then
+        echo -e "${YELLOW}Removing existing Razen installation...${NC}"
+        sudo rm -rf "$INSTALL_DIR"
+    else
+        echo -e "${YELLOW}Razen is already installed.${NC}"
+        echo -e "${YELLOW}New Razen commands are available with this version.${NC}"
+        read -p "Do you want to update Razen? (y/n): " -n 1 -r
+        echo
+        if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+            echo -e "${BLUE}Installation cancelled.${NC}"
+            echo -e "${GREEN}Tip:${NC} You can use 'razen-update' to update Razen later."
+            rm -rf "$TMP_DIR"
+            exit 0
+        fi
     fi
 fi
 
