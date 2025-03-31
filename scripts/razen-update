@@ -12,86 +12,133 @@ PURPLE="\033[0;35m"
 CYAN="\033[0;36m"
 NC="\033[0m" # No Color
 
+# Repository URL
 RAZEN_REPO="https://raw.githubusercontent.com/BasaiCorp/razen-lang/main"
-RAZEN_VERSION="beta v0.1.3"
 
-echo -e "${BLUE}Razen Update Utility${NC}"
-echo -e "${BLUE}====================${NC}"
-echo ""
+# Print banner
+echo -e "${BLUE}"
+echo "██████╗  █████╗ ███████╗███████╗███╗   ██╗"
+echo "██╔══██╗██╔══██╗╚══███╔╝██╔════╝████╗  ██║"
+echo "██████╔╝███████║  ███╔╝ █████╗  ██╔██╗ ██║"
+echo "██╔══██╗██╔══██║ ███╔╝  ██╔══╝  ██║╚██╗██║"
+echo "██║  ██║██║  ██║███████╗███████╗██║ ╚████║"
+echo "╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝╚══════╝╚═╝  ╚═══╝"
+echo -e "${NC}"
+echo -e "${YELLOW}Razen Updater${NC}"
+echo -e "${CYAN}By Prathmesh Barot, Basai Corporation${NC}"
+echo -e "${YELLOW}Copyright © 2025 Prathmesh Barot${NC}\n"
 
-# Check if curl is installed
-if ! command -v curl &>/dev/null; then
-    echo -e "${RED}Error: curl is not installed. Please install curl to update Razen.${NC}"
+# Function to detect OS
+detect_os() {
+    if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+        echo "linux"
+    elif [[ "$OSTYPE" == "darwin"* ]]; then
+        echo "macos"
+    elif [[ "$OSTYPE" == "cygwin" || "$OSTYPE" == "msys" || "$OSTYPE" == "win32" ]]; then
+        echo "windows"
+    else
+        echo "unknown"
+    fi
+}
+
+# Detect the OS
+OS=$(detect_os)
+echo -e "${YELLOW}Detected OS: ${GREEN}$OS${NC}\n"
+
+# Check for version file in possible installation locations
+if [ "$OS" == "linux" ]; then
+    if [ -f "/usr/local/lib/razen/version" ]; then
+        VERSION_FILE="/usr/local/lib/razen/version"
+        INSTALL_SCRIPT="install.sh"
+    else
+        echo -e "${RED}Razen installation not found.${NC}"
+        echo -e "${YELLOW}Please install Razen first.${NC}"
+        exit 1
+    fi
+elif [ "$OS" == "macos" ]; then
+    if [ -f "/usr/local/razen/version" ]; then
+        VERSION_FILE="/usr/local/razen/version"
+        INSTALL_SCRIPT="install-mac.sh"
+    else
+        echo -e "${RED}Razen installation not found.${NC}"
+        echo -e "${YELLOW}Please install Razen first.${NC}"
+        exit 1
+    fi
+elif [ "$OS" == "windows" ]; then
+    if [ -f "/mnt/c/Program Files/Razen/version" ]; then
+        VERSION_FILE="/mnt/c/Program Files/Razen/version"
+        echo -e "${YELLOW}Windows installation detected.${NC}"
+        echo -e "${YELLOW}Please use PowerShell to update Windows installations.${NC}"
+        echo -e "${GREEN}Run: ${CYAN}.\install.ps1 update${NC}"
+        exit 0
+    else
+        echo -e "${RED}Razen installation not found.${NC}"
+        echo -e "${YELLOW}Please install Razen first.${NC}"
+        exit 1
+    fi
+else
+    echo -e "${RED}Unsupported operating system: $OS${NC}"
     exit 1
 fi
 
-# Get current version
-CURRENT_VERSION=$(razen version 2>/dev/null | head -n1 | cut -d' ' -f3- || echo "unknown")
-echo -e "${YELLOW}Current version:${NC} ${PURPLE}$CURRENT_VERSION${NC}"
+# Check current version
+CURRENT_VERSION=$(cat "$VERSION_FILE" 2>/dev/null || echo "unknown")
+echo -e "${YELLOW}Current version: ${GREEN}$CURRENT_VERSION${NC}"
 
 # Create temporary directory
 TMP_DIR=$(mktemp -d)
 echo -e "${YELLOW}Checking for updates...${NC}"
 
-# Download version file
+# Download latest version information
 if ! curl -s -o "$TMP_DIR/version.txt" "$RAZEN_REPO/version" &>/dev/null; then
-    echo -e "${RED}Error: Failed to check for updates.${NC}"
-    echo -e "${YELLOW}Please check your internet connection or try again later.${NC}"
+    echo -e "${RED}Failed to check for updates. Please check your internet connection.${NC}"
     rm -rf "$TMP_DIR"
     exit 1
 fi
 
-# Read latest version
+# Get latest version
 LATEST_VERSION=$(cat "$TMP_DIR/version.txt" 2>/dev/null || echo "unknown")
+echo -e "${YELLOW}Latest version: ${GREEN}$LATEST_VERSION${NC}"
 
 # Compare versions
-if [ "$LATEST_VERSION" == "unknown" ]; then
-    echo -e "${RED}Error: Could not determine the latest version.${NC}"
-    echo -e "${YELLOW}Please try again later or check the repository status.${NC}"
-    rm -rf "$TMP_DIR"
-    exit 1
-fi
-
-echo -e "${YELLOW}Latest version:${NC}  ${PURPLE}$LATEST_VERSION${NC}"
-echo ""
-
-# Check if update is needed
 if [ "$LATEST_VERSION" == "$CURRENT_VERSION" ]; then
     echo -e "${GREEN}Razen is already up to date.${NC}"
     rm -rf "$TMP_DIR"
     exit 0
-fi
-
-# Ask for confirmation
-echo -e "${YELLOW}New version available! Updating Razen...${NC}"
-read -p "Do you want to continue? (y/n): " -n 1 -r
-echo
-if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-    echo -e "${BLUE}Update cancelled.${NC}"
+else
+    echo -e "${YELLOW}New version available: $LATEST_VERSION${NC}"
+    read -p "Do you want to update Razen? (y/n): " -n 1 -r
+    echo
+    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+        echo -e "${BLUE}Update cancelled.${NC}"
+        rm -rf "$TMP_DIR"
+        exit 0
+    fi
+    
+    # Download and run the appropriate installer
+    if [ "$OS" == "linux" ] || [ "$OS" == "macos" ]; then
+        echo -e "${YELLOW}Downloading the latest installer...${NC}"
+        if ! curl -s -o "$TMP_DIR/$INSTALL_SCRIPT" "$RAZEN_REPO/$INSTALL_SCRIPT" &>/dev/null; then
+            echo -e "${RED}Failed to download the installer. Please check your internet connection.${NC}"
+            rm -rf "$TMP_DIR"
+            exit 1
+        fi
+        
+        # Make it executable
+        chmod +x "$TMP_DIR/$INSTALL_SCRIPT"
+        
+        # Run the installer with the update flag
+        echo -e "${YELLOW}Running the installer...${NC}"
+        sudo "$TMP_DIR/$INSTALL_SCRIPT" --update
+        
+        # Check the result
+        if [ $? -eq 0 ]; then
+            echo -e "${GREEN}Update completed successfully.${NC}"
+        else
+            echo -e "${RED}Update failed. Please try again later.${NC}"
+        fi
+    fi
+    
+    # Clean up
     rm -rf "$TMP_DIR"
-    exit 0
 fi
-
-# Download latest installer
-echo -e "${YELLOW}Downloading latest installer...${NC}"
-if ! curl -s -o "$TMP_DIR/install.sh" "$RAZEN_REPO/install.sh" &>/dev/null; then
-    echo -e "${RED}Error: Failed to download the installer.${NC}"
-    echo -e "${YELLOW}Please check your internet connection or try again later.${NC}"
-    rm -rf "$TMP_DIR"
-    exit 1
-fi
-echo -e "${GREEN}✓ Downloaded latest installer${NC}"
-
-# Make installer executable
-chmod +x "$TMP_DIR/install.sh"
-
-# Run installer
-echo -e "${YELLOW}Running installer to update Razen...${NC}"
-echo -e "${YELLOW}You may be prompted for your password to install updates.${NC}"
-echo ""
-bash "$TMP_DIR/install.sh"
-
-# Clean up
-rm -rf "$TMP_DIR"
-
-echo -e "${GREEN}✅ Update completed successfully!${NC}"

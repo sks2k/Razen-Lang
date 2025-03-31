@@ -1,24 +1,46 @@
 #!/usr/bin/env bash
 
+# Get the directory where this script is located
 SCRIPT_DIR=$(dirname "$0")
+
+# First try the development directory structure (script is in scripts/)
 PROJECT_ROOT=$(cd "$SCRIPT_DIR/.." && pwd)
 MAIN_PY="$PROJECT_ROOT/main.py"
 
+# If main.py doesn't exist there, check installation directories
+if [ ! -f "$MAIN_PY" ]; then
+  # Check installation in /usr/local/lib/razen
+  if [ -f "/usr/local/lib/razen/main.py" ]; then
+    MAIN_PY="/usr/local/lib/razen/main.py"
+  # Check installation in /usr/local/razen (macOS)
+  elif [ -f "/usr/local/razen/main.py" ]; then
+    MAIN_PY="/usr/local/razen/main.py"
+  # Check Windows paths if running in WSL
+  elif [ -f "/mnt/c/Program Files/Razen/main.py" ]; then
+    MAIN_PY="/mnt/c/Program Files/Razen/main.py"
+  fi
+fi
+
+# Check if filename argument is provided
 if [ -z "$1" ]; then
-  echo "Usage: razen-debug <filename.rzn> [options]"
-  echo "Options passed after filename are forwarded to main.py (e.g., --show-tokens)"
+  echo "Usage: razen-debug <filename.rzn>"
   exit 1
 fi
 
 FILENAME="$1"
-shift
+shift # Remove filename from args, allowing potential future flags
 
+# Check if main.py exists
 if [ ! -f "$MAIN_PY" ]; then
   echo "Error: main.py not found at $MAIN_PY"
+  echo "Please ensure Razen is properly installed."
   exit 1
 fi
 
-# Execute the main Python script in 'debug' mode
+# Set the DEBUG environment variable to 1
+export DEBUG=1
+
+# Run main.py with the debug flag and any other arguments passed
 python3 "$MAIN_PY" --mode=debug "$FILENAME" "$@"
 
 exit $?
