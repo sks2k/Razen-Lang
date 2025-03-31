@@ -13,9 +13,12 @@ $RAZEN_VERSION = "beta v0.1.3"
 function Write-ColorOutput {
     param(
         [string]$Text,
-        [string]$Color
+        [string]$Color = "White"
     )
-    Write-Host $Text -ForegroundColor $Color
+    $originalColor = $Host.UI.RawUI.ForegroundColor
+    $Host.UI.RawUI.ForegroundColor = $Color
+    Write-Host $Text
+    $Host.UI.RawUI.ForegroundColor = $originalColor
 }
 
 # Function to check for updates
@@ -49,7 +52,7 @@ function Perform-Update {
     
     try {
         $installerUrl = "$RAZEN_REPO/install.ps1"
-        $installerFile = Join-Path $env:TEMP "install.ps1"
+        $installerFile = Join-Path $env:TEMP "razen-update-installer.ps1"
         Invoke-WebRequest -Uri $installerUrl -OutFile $installerFile -ErrorAction Stop
         
         # Run the installer with the latest version
@@ -71,6 +74,11 @@ function Create-Symlinks {
     
     Write-ColorOutput "Creating symbolic links..." "Yellow"
     $scriptsDir = Join-Path $InstallDir "scripts"
+    
+    # Ensure Razen directory exists in Program Files
+    if (-not (Test-Path "$env:ProgramFiles\Razen")) {
+        New-Item -ItemType Directory -Path "$env:ProgramFiles\Razen" -Force | Out-Null
+    }
     
     foreach ($script in $Scripts) {
         $target = Join-Path $scriptsDir $script
@@ -95,6 +103,32 @@ function Create-Symlinks {
         }
     }
     
+    # Create symlinks in Windows directory for system-wide access (similar to /usr/bin on Linux)
+    foreach ($script in $Scripts) {
+        $source = Join-Path $env:ProgramFiles "Razen\$script"
+        $destination = Join-Path $env:windir "System32\$script.cmd"
+        
+        if (Test-Path $source) {
+            try {
+                # Create a CMD wrapper for each script
+                $cmdContent = "@echo off`nC:\Program Files\Razen\$script %*"
+                
+                # Remove existing file if it exists
+                if (Test-Path $destination) {
+                    Remove-Item $destination -Force
+                }
+                
+                # Write the CMD wrapper
+                Set-Content -Path $destination -Value $cmdContent -Force
+                Write-ColorOutput "  ✓ Created system shortcut for $script" "Green"
+            } catch {
+                Write-ColorOutput "  ✗ Failed to create system shortcut for $script" "Red"
+                Write-ColorOutput "    Error: $_" "Red"
+                return 1
+            }
+        }
+    }
+    
     return 0
 }
 
@@ -105,12 +139,21 @@ function Uninstall-Razen {
     $scripts = @("razen", "razen-debug", "razen-test", "razen-run", "razen-update", "razen-help")
     $installDir = "C:\Program Files\Razen"
     
-    # Remove symbolic links
+    # Remove symbolic links from Razen directory
     foreach ($script in $scripts) {
         $link = Join-Path $env:ProgramFiles "Razen\$script"
         if (Test-Path $link) {
             Remove-Item $link -Force
             Write-ColorOutput "  ✓ Removed symbolic link for $script" "Green"
+        }
+    }
+    
+    # Remove system-wide CMD wrappers
+    foreach ($script in $scripts) {
+        $cmdFile = Join-Path $env:windir "System32\$script.cmd"
+        if (Test-Path $cmdFile) {
+            Remove-Item $cmdFile -Force
+            Write-ColorOutput "  ✓ Removed system shortcut for $script" "Green"
         }
     }
     
@@ -146,6 +189,9 @@ Write-ColorOutput "Programming Language $RAZEN_VERSION" "Yellow"
 Write-ColorOutput "By Prathmesh Barot, Basai Corporation" "Cyan"
 Write-ColorOutput "Copyright © 2025 Prathmesh Barot`n" "Yellow"
 
+# Small delay to make the banner more readable
+Start-Sleep -Seconds 1
+
 # Check if running as administrator
 $isAdmin = ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
 if (-not $isAdmin) {
@@ -164,13 +210,17 @@ if ($args[0] -eq "--uninstall") {
     Uninstall-Razen
 }
 
-# Check for update flag or if already installed
+# Create installation directory
 $installDir = "C:\Program Files\Razen"
-if ($args[0] -eq "update" -or $args[0] -eq "--update" -or (Test-Path (Join-Path $installDir "razen"))) {
+
+# Check for update flag or if already installed
+if ($args[0] -eq "update" -or $args[0] -eq "--update" -or (Test-Path (Join-Path $installDir "version"))) {
+    # Check for updates
     $updateStatus = Check-ForUpdates
     
     if ($updateStatus -eq 2) {
-        $response = Read-Host "Do you want to update Razen? (y/n)"
+        Write-ColorOutput "Do you want to update Razen? (y/n)" "Yellow"
+        $response = Read-Host
         if ($response -notmatch '^[Yy]$') {
             Write-ColorOutput "Update cancelled." "Blue"
             Write-ColorOutput "Tip: You can use 'razen-update' to update Razen later." "Green"
@@ -185,15 +235,28 @@ if ($args[0] -eq "update" -or $args[0] -eq "--update" -or (Test-Path (Join-Path 
         }
         exit 0
     } elseif ($updateStatus -eq 0) {
-        Write-ColorOutput "Razen is already up to date." "Green"
-        exit 0
+        if ($args[0] -ne "update" -and $args[0] -ne "--update") {
+            # If already installed and not explicitly updating
+            Write-ColorOutput "Razen is already installed." "Yellow"
+            Write-ColorOutput "New Razen commands are available with this version." "Yellow"
+            Write-ColorOutput "Do you want to reinstall/update Razen? (y/n)" "Yellow"
+            $response = Read-Host
+            if ($response -notmatch '^[Yy]$') {
+                Write-ColorOutput "Installation cancelled." "Blue"
+                Write-ColorOutput "Tip: You can use 'razen-update' to update Razen later." "Green"
+                exit 0
+            }
+        } else {
+            Write-ColorOutput "Razen is already up to date." "Green"
+            exit 0
+        }
     } else {
         Write-ColorOutput "Failed to check for updates." "Red"
         exit 1
     }
 }
 
-# Create installation directory
+# Create temporary directory
 Write-ColorOutput "Creating installation directory..." "Yellow"
 try {
     New-Item -ItemType Directory -Force -Path $installDir | Out-Null
@@ -207,6 +270,9 @@ try {
 # Create temporary directory
 $TMP_DIR = Join-Path $env:TEMP "razen-install"
 try {
+    if (Test-Path $TMP_DIR) {
+        Remove-Item -Path $TMP_DIR -Recurse -Force -ErrorAction SilentlyContinue
+    }
     New-Item -ItemType Directory -Force -Path $TMP_DIR | Out-Null
     Write-ColorOutput "  ✓ Created temporary directory" "Green"
 } catch {
@@ -230,7 +296,16 @@ $files = @(
 
 foreach ($file in $files) {
     $url = "$RAZEN_REPO/$file"
-    $outFile = Join-Path $TMP_DIR (Split-Path $file -Leaf)
+    $directory = Split-Path -Parent $file
+    $filename = Split-Path -Leaf $file
+    $outPath = Join-Path $TMP_DIR $directory
+    
+    # Create directory structure if needed
+    if ($directory -and -not (Test-Path $outPath)) {
+        New-Item -ItemType Directory -Force -Path $outPath | Out-Null
+    }
+    
+    $outFile = Join-Path $TMP_DIR $file
     try {
         Invoke-WebRequest -Uri $url -OutFile $outFile -ErrorAction Stop
         Write-ColorOutput "  ✓ Downloaded $file" "Green"
@@ -278,7 +353,23 @@ foreach ($script in $scripts) {
 # Copy files to installation directory
 Write-ColorOutput "`nInstalling files..." "Yellow"
 try {
-    Copy-Item -Path "$TMP_DIR\*" -Destination $installDir -Recurse -Force
+    # Create parser and utils directories in the installation directory
+    New-Item -ItemType Directory -Force -Path "$installDir\parser" | Out-Null
+    New-Item -ItemType Directory -Force -Path "$installDir\utils" | Out-Null
+    New-Item -ItemType Directory -Force -Path "$installDir\scripts" | Out-Null
+    
+    # Copy main.py
+    Copy-Item -Path "$TMP_DIR\main.py" -Destination "$installDir" -Force
+    
+    # Copy parser files
+    Copy-Item -Path "$TMP_DIR\parser\*.py" -Destination "$installDir\parser" -Force
+    
+    # Copy utils files
+    Copy-Item -Path "$TMP_DIR\utils\*.py" -Destination "$installDir\utils" -Force
+    
+    # Copy scripts
+    Copy-Item -Path "$TMP_DIR\scripts\*" -Destination "$installDir\scripts" -Force
+    
     Write-ColorOutput "  ✓ Copied files to installation directory" "Green"
 } catch {
     Write-ColorOutput "  ✗ Failed to copy files to installation directory" "Red"
