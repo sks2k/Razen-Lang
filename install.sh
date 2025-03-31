@@ -229,7 +229,7 @@ fi
 echo -e "  ${GREEN}✓${NC} Downloaded main.py"
 
 # Download src files
-for file in lexer.py parser.py interpreter.py runtime.py razen_parsetab.py parser_parsetab.py parser.out; do
+for file in lexer.py parser.py interpreter.py runtime.py; do
     if ! curl -s -o "$TMP_DIR/src/$file" "$RAZEN_REPO/src/$file" &>/dev/null; then
         echo -e "${RED}Failed to download src/$file${NC}"
         rm -rf "$TMP_DIR"
@@ -241,21 +241,23 @@ done
 # Download properties files
 for file in variables.rzn keywords.rzn operators.rzn; do
     if ! curl -s -o "$TMP_DIR/properties/$file" "$RAZEN_REPO/properties/$file" &>/dev/null; then
-        echo -e "${RED}Failed to download properties/$file${NC}"
-        rm -rf "$TMP_DIR"
-        exit 1
+        # Create empty file if download fails
+        touch "$TMP_DIR/properties/$file"
+        echo -e "  ${YELLOW}⚠${NC} Created empty properties/$file"
+    else
+        echo -e "  ${GREEN}✓${NC} Downloaded properties/$file"
     fi
-    echo -e "  ${GREEN}✓${NC} Downloaded properties/$file"
 done
 
 # Download script files
 for script in razen razen-debug razen-test razen-run razen-update razen-help; do
     if ! curl -s -o "$TMP_DIR/scripts/$script" "$RAZEN_REPO/scripts/$script" &>/dev/null; then
-        echo -e "${RED}Failed to download $script${NC}"
-        rm -rf "$TMP_DIR"
-        exit 1
+        # Create empty file if download fails
+        touch "$TMP_DIR/scripts/$script"
+        echo -e "  ${YELLOW}⚠${NC} Created empty scripts/$script"
+    else
+        echo -e "  ${GREEN}✓${NC} Downloaded scripts/$script"
     fi
-    echo -e "  ${GREEN}✓${NC} Downloaded scripts/$script"
 done
 
 # Make scripts executable
@@ -294,8 +296,7 @@ echo -e "  ${GREEN}✓${NC} Created installation directory"
 
 # Copy files to installation directory
 sudo cp "$TMP_DIR/main.py" "$INSTALL_DIR/"
-sudo cp "$TMP_DIR/src/"*.py "$INSTALL_DIR/src/"
-sudo cp "$TMP_DIR/src/parser.out" "$INSTALL_DIR/src/"
+sudo cp "$TMP_DIR/src/"*.py "$INSTALL_DIR/src/" 2>/dev/null || true
 sudo cp "$TMP_DIR/properties/"*.rzn "$INSTALL_DIR/properties/"
 sudo cp "$TMP_DIR/scripts/"* "$INSTALL_DIR/scripts/"
 
@@ -353,13 +354,13 @@ try:
     from parser import *
     
     # Force clean build
-    yacc.yacc(
+    parser = yacc.yacc(
         debug=True,
         write_tables=True,
         tabmodule='parser_parsetab',
         outputdir='.',
         optimize=False,
-        errorlog=yacc.NullLogger()
+        errorlog=yacc.PlyLogger(sys.stderr)  # Enable error logging
     )
     print('Parser tables generated successfully')
 except Exception as e:

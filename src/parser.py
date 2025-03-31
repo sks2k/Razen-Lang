@@ -150,6 +150,11 @@ def p_expression_stmt(p):
     '''expression_stmt : expression SEMICOLON'''
     p[0] = ('expression_stmt', p[1])
 
+# Add a new rule for reference declarations
+def p_reference_decl(p):
+    '''reference_decl : REF ID ASSIGN AMPERSAND ID SEMICOLON'''
+    p[0] = ('var_decl', p[1], p[2], ('reference', p[5]))
+
 # --- Expressions ---
 precedence = (
     ('left', 'OR'),
@@ -328,14 +333,14 @@ try:
     # Get the current directory
     current_dir = os.path.dirname(os.path.abspath(__file__))
     
-    # Initialize the parser with correct paths
+    # Initialize the parser with debug mode
     parser = yacc.yacc(
         debug=True,
         write_tables=True,
         optimize=False,
-        errorlog=yacc.NullLogger(),
-        tabmodule='parser_parsetab',  # Changed from src.parser_parsetab
-        outputdir=current_dir  # Use current directory
+        errorlog=yacc.PlyLogger(sys.stderr),  # Enable error logging
+        tabmodule='parser_parsetab',
+        outputdir=current_dir
     )
 except Exception as e:
     print(f"Error initializing parser: {e}")
@@ -482,8 +487,3 @@ if __name__ == '__main__':
         print(f"\n--- Error Test {i+1} ---")
         print(f"Code:\n```\n{err_code}\n```")
         parse(err_code)
-
-# Add a new rule for reference declarations
-def p_reference_decl(p):
-    '''reference_decl : REF ID ASSIGN AMPERSAND ID SEMICOLON'''
-    p[0] = ('var_decl', p[1], p[2], ('reference', p[5]))
