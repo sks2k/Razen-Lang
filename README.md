@@ -1,4 +1,4 @@
-# Razen Programming Language (beta v0.1.2)
+# Razen Programming Language (beta v0.1.3)
 
 ## Overview
 Razen is a modern, intuitive programming language designed for clarity, performance, and ease of use. With a clean syntax inspired by Python and strong type safety, Razen offers an excellent balance between development speed and runtime performance.
@@ -14,19 +14,35 @@ Developed by Prathmesh Barot, Basai Corporation.
 - **Expressive Conditionals**: Clean if/else syntax with support for nested conditions
 - **Interactive Mode**: Built-in REPL for testing code snippets
 - **Lightweight**: Small footprint with minimal dependencies
+- **Cross-platform support**: Works on Linux, macOS, and Windows
 
 ## Installation
 
-### One-Command Installation
-
-Using wget:
+### Linux
 ```bash
-wget -qO- "https://raw.githubusercontent.com/BasaiCorp/razen-lang/main/install.sh" | bash
+# Using curl
+curl -o install.sh "https://raw.githubusercontent.com/BasaiCorp/razen-lang/main/install.sh" && chmod +x install.sh && sudo ./install.sh
+
+# Using wget
+wget -O install.sh "https://raw.githubusercontent.com/BasaiCorp/razen-lang/main/install.sh" && chmod +x install.sh && sudo ./install.sh
 ```
 
-Using curl:
+### macOS
 ```bash
-curl -o install.sh "https://raw.githubusercontent.com/BasaiCorp/razen-lang/main/install.sh" && chmod +x install.sh && ./install.sh
+# Using curl
+curl -o install-mac.sh "https://raw.githubusercontent.com/BasaiCorp/razen-lang/main/install-mac.sh" && chmod +x install-mac.sh && sudo ./install-mac.sh
+
+# Using Homebrew (coming soon)
+brew install razen
+```
+
+### Windows
+```powershell
+# Using PowerShell (Run as Administrator)
+Invoke-WebRequest -Uri "https://raw.githubusercontent.com/BasaiCorp/razen-lang/main/install.ps1" -OutFile "install.ps1"; .\install.ps1
+
+# Using Command Prompt (coming soon)
+curl -o install.bat "https://raw.githubusercontent.com/BasaiCorp/razen-lang/main/install.bat" && install.bat
 ```
 
 This will download and install Razen globally on your system, making the `razen` command available from anywhere.

@@ -3,7 +3,7 @@
 # Razen Language Installer Script
 # Author: Prathmesh Barot
 # Copyright © 2025 Prathmesh Barot, Basai Corporation
-# Version: beta v0.1.2
+# Version: beta v0.1.3
 
 set -e  # Exit on error
 
@@ -17,7 +17,7 @@ CYAN="\033[0;36m"
 NC="\033[0m" # No Color
 
 # Version
-RAZEN_VERSION="beta v0.1.2"
+RAZEN_VERSION="beta v0.1.3"
 RAZEN_REPO="https://raw.githubusercontent.com/BasaiCorp/razen-lang/main"
 
 # Function to create symbolic links

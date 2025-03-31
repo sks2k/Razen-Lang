@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Razen Language Help Script
 # Copyright © 2025 Prathmesh Barot, Basai Corporation
-# Version: beta v0.1.2
+# Version: beta v0.1.3
 
 # ANSI colors
 BLUE="\033[0;34m"
@@ -21,7 +21,7 @@ echo "██╔══██╗██╔══██║ ███╔╝  ██�
 echo "██║  ██║██║  ██║███████╗███████╗██║ ╚████║"
 echo "╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝╚══════╝╚═╝  ╚═══╝"
 echo -e "${NC}"
-echo -e "${YELLOW}Programming Language ${PURPLE}beta v0.1.2${NC}"
+echo -e "${YELLOW}Programming Language ${PURPLE}beta v0.1.3${NC}"
 echo -e "${CYAN}By Prathmesh Barot, Basai Corporation${NC}"
 echo -e "${YELLOW}Copyright © 2025 Prathmesh Barot${NC}\n"
 
