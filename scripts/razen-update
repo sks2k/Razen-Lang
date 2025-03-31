@@ -1,4 +1,4 @@
- #!/usr/bin/env bash
+#!/usr/bin/env bash
 # Razen Language Update Script
 # Copyright © 2025 Prathmesh Barot, Basai Corporation
 # Version: beta v0.1.2
@@ -19,53 +19,79 @@ echo -e "${BLUE}Razen Update Utility${NC}"
 echo -e "${BLUE}====================${NC}"
 echo ""
 
+# Check if curl is installed
+if ! command -v curl &>/dev/null; then
+    echo -e "${RED}Error: curl is not installed. Please install curl to update Razen.${NC}"
+    exit 1
+fi
+
+# Get current version
+CURRENT_VERSION=$(razen version 2>/dev/null | head -n1 | cut -d' ' -f3- || echo "unknown")
+echo -e "${YELLOW}Current version:${NC} ${PURPLE}$CURRENT_VERSION${NC}"
+
 # Create temporary directory
-TMP_UPDATE_DIR=$(mktemp -d)
+TMP_DIR=$(mktemp -d)
 echo -e "${YELLOW}Checking for updates...${NC}"
 
-# Download version check file
-if ! curl -s -o "$TMP_UPDATE_DIR/version.txt" "$RAZEN_REPO/version" &>/dev/null; then
-    echo -e "${RED}Failed to check for updates. Please check your internet connection.${NC}"
-    rm -rf "$TMP_UPDATE_DIR"
+# Download version file
+if ! curl -s -o "$TMP_DIR/version.txt" "$RAZEN_REPO/version" &>/dev/null; then
+    echo -e "${RED}Error: Failed to check for updates.${NC}"
+    echo -e "${YELLOW}Please check your internet connection or try again later.${NC}"
+    rm -rf "$TMP_DIR"
     exit 1
 fi
 
 # Read latest version
-LATEST_VERSION=$(cat "$TMP_UPDATE_DIR/version.txt" 2>/dev/null || echo "unknown")
-CURRENT_VERSION="$RAZEN_VERSION"
+LATEST_VERSION=$(cat "$TMP_DIR/version.txt" 2>/dev/null || echo "unknown")
 
-echo -e "${YELLOW}Current version:${NC} ${PURPLE}$CURRENT_VERSION${NC}"
+# Compare versions
+if [ "$LATEST_VERSION" == "unknown" ]; then
+    echo -e "${RED}Error: Could not determine the latest version.${NC}"
+    echo -e "${YELLOW}Please try again later or check the repository status.${NC}"
+    rm -rf "$TMP_DIR"
+    exit 1
+fi
+
 echo -e "${YELLOW}Latest version:${NC}  ${PURPLE}$LATEST_VERSION${NC}"
 echo ""
 
+# Check if update is needed
 if [ "$LATEST_VERSION" == "$CURRENT_VERSION" ]; then
     echo -e "${GREEN}Razen is already up to date.${NC}"
-    rm -rf "$TMP_UPDATE_DIR"
-    exit 0
-else
-    echo -e "${YELLOW}New version available! Updating Razen...${NC}"
-    
-    # Download the latest installer
-    if ! curl -s -o "$TMP_UPDATE_DIR/install.sh" "$RAZEN_REPO/install.sh" &>/dev/null; then
-        echo -e "${RED}Failed to download the latest installer. Please check your internet connection.${NC}"
-        rm -rf "$TMP_UPDATE_DIR"
-        exit 1
-    fi
-    
-    echo -e "${GREEN}✓${NC} Downloaded latest installer"
-    
-    # Make it executable
-    chmod +x "$TMP_UPDATE_DIR/install.sh"
-    
-    # Run the installer with sudo to ensure proper permissions
-    echo -e "${YELLOW}Running installer to update Razen...${NC}"
-    echo -e "${YELLOW}You may be prompted for your password to install updates.${NC}"
-    echo ""
-    sudo bash "$TMP_UPDATE_DIR/install.sh"
-    
-    # Clean up
-    rm -rf "$TMP_UPDATE_DIR"
-    
-    echo -e "${GREEN}✅ Update completed successfully!${NC}"
+    rm -rf "$TMP_DIR"
     exit 0
 fi
+
+# Ask for confirmation
+echo -e "${YELLOW}New version available! Updating Razen...${NC}"
+read -p "Do you want to continue? (y/n): " -n 1 -r
+echo
+if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+    echo -e "${BLUE}Update cancelled.${NC}"
+    rm -rf "$TMP_DIR"
+    exit 0
+fi
+
+# Download latest installer
+echo -e "${YELLOW}Downloading latest installer...${NC}"
+if ! curl -s -o "$TMP_DIR/install.sh" "$RAZEN_REPO/install.sh" &>/dev/null; then
+    echo -e "${RED}Error: Failed to download the installer.${NC}"
+    echo -e "${YELLOW}Please check your internet connection or try again later.${NC}"
+    rm -rf "$TMP_DIR"
+    exit 1
+fi
+echo -e "${GREEN}✓ Downloaded latest installer${NC}"
+
+# Make installer executable
+chmod +x "$TMP_DIR/install.sh"
+
+# Run installer
+echo -e "${YELLOW}Running installer to update Razen...${NC}"
+echo -e "${YELLOW}You may be prompted for your password to install updates.${NC}"
+echo ""
+bash "$TMP_DIR/install.sh"
+
+# Clean up
+rm -rf "$TMP_DIR"
+
+echo -e "${GREEN}✅ Update completed successfully!${NC}"
