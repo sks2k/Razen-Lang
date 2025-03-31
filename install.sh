@@ -215,11 +215,6 @@ fi
 # Download Razen files
 echo -e "${YELLOW}Downloading Razen files...${NC}"
 
-# Create necessary directories in temp folder
-mkdir -p "$TMP_DIR/scripts"
-mkdir -p "$TMP_DIR/src"
-mkdir -p "$TMP_DIR/properties"
-
 # Download main.py
 if ! curl -s -o "$TMP_DIR/main.py" "$RAZEN_REPO/main.py" &>/dev/null; then
     echo -e "${RED}Failed to download main.py${NC}"
@@ -227,6 +222,14 @@ if ! curl -s -o "$TMP_DIR/main.py" "$RAZEN_REPO/main.py" &>/dev/null; then
     exit 1
 fi
 echo -e "  ${GREEN}✓${NC} Downloaded main.py"
+
+# Download requirements.txt
+if ! curl -s -o "$TMP_DIR/requirements.txt" "$RAZEN_REPO/requirements.txt" &>/dev/null; then
+    echo -e "${RED}Failed to download requirements.txt${NC}"
+    rm -rf "$TMP_DIR"
+    exit 1
+fi
+echo -e "  ${GREEN}✓${NC} Downloaded requirements.txt"
 
 # Download src files
 for file in lexer.py parser.py interpreter.py runtime.py; do
@@ -328,7 +331,7 @@ echo -e "  ${GREEN}✓${NC} Copied files to installation directory"
 
 # Install Python dependencies
 echo -e "${YELLOW}Installing Python dependencies...${NC}"
-if ! pip3 install --user -r requirements.txt; then
+if ! pip3 install --user -r "$TMP_DIR/requirements.txt"; then
     echo -e "${RED}Failed to install Python dependencies. Please install them manually:${NC}"
     echo -e "  pip3 install --user -r requirements.txt"
     rm -rf "$TMP_DIR"
