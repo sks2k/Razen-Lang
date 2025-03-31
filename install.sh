@@ -3,7 +3,7 @@
 # Razen Language Installer Script
 # Author: Prathmesh Barot
 # Copyright © 2025 Prathmesh Barot, Basai Corporation
-# Version: beta v0.1.1
+# Version: beta v0.1.2
 
 set -e  # Exit on error
 
@@ -44,32 +44,19 @@ echo -e "  ${GREEN}✓${NC} Created temporary directory for installation"
 if [ "$1" == "--uninstall" ]; then
     echo -e "${YELLOW}Uninstalling Razen...${NC}"
     
-    # Remove binaries and symlinks
-    if [ -f "/usr/local/bin/razen" ]; then
-        sudo rm /usr/local/bin/razen
-        echo -e "  ${GREEN}✓${NC} Removed /usr/local/bin/razen"
-    fi
+    # Remove all binary and script symlinks
+    for cmd in razen razen-debug razen-test razen-run razen-update razen-help; do
+        if [ -f "/usr/local/bin/$cmd" ]; then
+            sudo rm "/usr/local/bin/$cmd"
+            echo -e "  ${GREEN}✓${NC} Removed /usr/local/bin/$cmd"
+        fi
+        if [ -L "/usr/bin/$cmd" ]; then
+            sudo rm "/usr/bin/$cmd"
+            echo -e "  ${GREEN}✓${NC} Removed symlink /usr/bin/$cmd"
+        fi
+    done
     
-    if [ -L "/usr/bin/razen" ]; then
-        sudo rm /usr/bin/razen
-        echo -e "  ${GREEN}✓${NC} Removed symlink /usr/bin/razen"
-    fi
-    
-    if [ -L "/usr/bin/razen-debug" ]; then
-        sudo rm /usr/bin/razen-debug
-        echo -e "  ${GREEN}✓${NC} Removed symlink /usr/bin/razen-debug"
-    fi
-    
-    if [ -L "/usr/bin/razen-test" ]; then
-        sudo rm /usr/bin/razen-test
-        echo -e "  ${GREEN}✓${NC} Removed symlink /usr/bin/razen-test"
-    fi
-    
-    if [ -L "/usr/bin/razen-run" ]; then
-        sudo rm /usr/bin/razen-run
-        echo -e "  ${GREEN}✓${NC} Removed symlink /usr/bin/razen-run"
-    fi
-    
+    # Remove installation directory
     if [ -d "/usr/local/lib/razen" ]; then
         sudo rm -rf /usr/local/lib/razen
         echo -e "  ${GREEN}✓${NC} Removed /usr/local/lib/razen directory"
@@ -134,7 +121,7 @@ fi
 echo -e "  ${GREEN}✓${NC} Downloaded main.py"
 
 # Create directories
-mkdir -p "$TMP_DIR/examples" "$TMP_DIR/parser" "$TMP_DIR/utils"
+mkdir -p "$TMP_DIR/examples" "$TMP_DIR/parser" "$TMP_DIR/utils" "$TMP_DIR/scripts"
 
 # Download parser files
 curl -s -o "$TMP_DIR/parser/__init__.py" "$RAZEN_REPO/parser/__init__.py" &>/dev/null
@@ -148,6 +135,19 @@ curl -s -o "$TMP_DIR/utils/__init__.py" "$RAZEN_REPO/utils/__init__.py" &>/dev/n
 curl -s -o "$TMP_DIR/utils/interpreter.py" "$RAZEN_REPO/utils/interpreter.py" &>/dev/null
 curl -s -o "$TMP_DIR/utils/runtime.py" "$RAZEN_REPO/utils/runtime.py" &>/dev/null
 echo -e "  ${GREEN}✓${NC} Downloaded utility modules"
+
+# Download script files
+curl -s -o "$TMP_DIR/scripts/razen" "$RAZEN_REPO/scripts/razen" &>/dev/null
+curl -s -o "$TMP_DIR/scripts/razen-debug" "$RAZEN_REPO/scripts/razen-debug" &>/dev/null
+curl -s -o "$TMP_DIR/scripts/razen-test" "$RAZEN_REPO/scripts/razen-test" &>/dev/null
+curl -s -o "$TMP_DIR/scripts/razen-run" "$RAZEN_REPO/scripts/razen-run" &>/dev/null
+curl -s -o "$TMP_DIR/scripts/razen-update" "$RAZEN_REPO/scripts/razen-update" &>/dev/null
+curl -s -o "$TMP_DIR/scripts/razen-help" "$RAZEN_REPO/scripts/razen-help" &>/dev/null
+echo -e "  ${GREEN}✓${NC} Downloaded script files"
+
+# Make scripts executable
+chmod +x "$TMP_DIR/scripts/"*
+echo -e "  ${GREEN}✓${NC} Made scripts executable"
 
 # Set RAZEN_DIR to the temporary directory
 RAZEN_DIR="$TMP_DIR"
@@ -166,26 +166,18 @@ if [ -f "/usr/local/bin/razen" ]; then
     
     # Remove existing installation
     echo -e "${YELLOW}Removing existing installation...${NC}"
-    if [ -f "/usr/local/bin/razen" ]; then
-        sudo rm /usr/local/bin/razen
-    fi
     
-    if [ -L "/usr/bin/razen" ]; then
-        sudo rm /usr/bin/razen
-    fi
+    # Remove all binary and script symlinks
+    for cmd in razen razen-debug razen-test razen-run razen-update razen-help; do
+        if [ -f "/usr/local/bin/$cmd" ]; then
+            sudo rm "/usr/local/bin/$cmd"
+        fi
+        if [ -L "/usr/bin/$cmd" ]; then
+            sudo rm "/usr/bin/$cmd"
+        fi
+    done
     
-    if [ -L "/usr/bin/razen-debug" ]; then
-        sudo rm /usr/bin/razen-debug
-    fi
-    
-    if [ -L "/usr/bin/razen-test" ]; then
-        sudo rm /usr/bin/razen-test
-    fi
-    
-    if [ -L "/usr/bin/razen-run" ]; then
-        sudo rm /usr/bin/razen-run
-    fi
-    
+    # Remove installation directory
     if [ -d "/usr/local/lib/razen" ]; then
         sudo rm -rf /usr/local/lib/razen
     fi
@@ -195,9 +187,6 @@ fi
 
 echo -e "${YELLOW}Installing Razen $RAZEN_VERSION...${NC}"
 
-# Create main runner script
-echo -e "${YELLOW}Creating Razen launcher script...${NC}"
-
 # Create permanent installation directory
 echo -e "${YELLOW}Installing to /usr/local/lib/razen...${NC}"
 sudo mkdir -p /usr/local/lib/razen
@@ -206,146 +195,51 @@ sudo chmod -R 755 /usr/local/lib/razen
 INSTALL_DIR="/usr/local/lib/razen"
 echo -e "  ${GREEN}✓${NC} Installed Razen core files"
 
-LAUNCHER_SCRIPT=$(cat <<EOF
-#!/usr/bin/env bash
-# Razen Language Launcher
-# Copyright © 2025 Prathmesh Barot, Basai Corporation
-# Version: $RAZEN_VERSION
-
-# Get the script name that was called
-SCRIPT_NAME=\$(basename "\$0")
-
-# Check for update command
-if [ "\$1" = "update" ]; then
-    echo "Updating Razen to the latest version..."
-    
-    # Create temporary directory
-    TMP_UPDATE_DIR=\$(mktemp -d)
-    
-    # Download the latest installer
-    if ! curl -s -o "\$TMP_UPDATE_DIR/install.sh" "$RAZEN_REPO/install.sh" &>/dev/null; then
-        echo "Failed to download the latest installer. Please check your internet connection."
-        rm -rf "\$TMP_UPDATE_DIR"
-        exit 1
-    fi
-    
-    # Make it executable and run with sudo to ensure proper permissions
-    chmod +x "\$TMP_UPDATE_DIR/install.sh"
-    sudo bash "\$TMP_UPDATE_DIR/install.sh" update
-    
-    # Clean up
-    rm -rf "\$TMP_UPDATE_DIR"
-    exit \$?
-fi
-
-# Check for version command
-if [ "\$1" = "version" ] || [ "\$1" = "--version" ] || [ "\$1" = "-v" ]; then
-    echo "Razen $RAZEN_VERSION"
-    echo "Copyright © 2025 Prathmesh Barot, Basai Corporation"
-    exit 0
-fi
-
-# Determine which mode to use based on the script name
-if [ "\$SCRIPT_NAME" = "razen-debug" ]; then
-    MODE="debug"
-elif [ "\$SCRIPT_NAME" = "razen-test" ]; then
-    MODE="test"
-elif [ "\$SCRIPT_NAME" = "razen-run" ]; then
-    # Special case for razen-run (clean output)
-    if [ -z "\$1" ]; then
-        echo "Usage: \$SCRIPT_NAME <filename.rzn>"
-        exit 1
-    fi
-    
-    # Run with minimal output through our wrapper
-    python3 "$INSTALL_DIR/main.py" --mode=run "\$1" | grep -v "^DEBUG:" | grep -v "^Loaded" | grep -v "^Parser" | grep -v "^--- "
-    exit \${PIPESTATUS[0]}
-else
-    MODE="run"
-fi
-
-# Check if creating a new file
-if [ "\$1" = "new" ] && [ -n "\$2" ]; then
-    if [[ "\$2" != *.rzn ]]; then
-        FILENAME="\$2.rzn"
-    else
-        FILENAME="\$2"
-    fi
-    
-    echo "// New Razen program created on \$(date)" > "\$FILENAME"
-    echo "// Powered by Razen $RAZEN_VERSION - © 2025 Prathmesh Barot" >> "\$FILENAME"
-    echo "" >> "\$FILENAME"
-    echo "// Your code goes here" >> "\$FILENAME"
-    echo "let message = \"Hello, World!\"" >> "\$FILENAME"
-    echo "show \"\${message}\"" >> "\$FILENAME"
-    echo "" >> "\$FILENAME"
-    echo "// Read user input" >> "\$FILENAME"
-    echo "read user_input = \"What's your name? \"" >> "\$FILENAME"
-    echo "show \"Nice to meet you, \${user_input}!\"" >> "\$FILENAME"
-    
-    echo "Created new Razen program: \$FILENAME"
-    exit 0
-fi
-
-# Display help if requested
-if [ "\$1" = "help" ] || [ "\$1" = "--help" ] || [ "\$1" = "-h" ]; then
-    echo "Razen $RAZEN_VERSION - Programming Language"
-    echo "Copyright © 2025 Prathmesh Barot, Basai Corporation"
-    echo ""
-    echo "Usage:"
-    echo "  razen [command] [options]"
-    echo ""
-    echo "Commands:"
-    echo "  <filename.rzn>     Run a Razen script"
-    echo "  new <filename>     Create a new Razen program"
-    echo "  update             Update Razen to the latest version"
-    echo "  version            Display version information"
-    echo "  help               Display this help message"
-    echo ""
-    echo "Alternate modes:"
-    echo "  razen-debug        Run a script in debug mode"
-    echo "  razen-test         Run a script in test mode"
-    echo "  razen-run          Run a script with clean output"
-    echo ""
-    echo "Examples:"
-    echo "  razen hello.rzn"
-    echo "  razen new myprogram"
-    echo "  razen-run examples/hello_world.rzn"
-    exit 0
-fi
-
-# Run main.py with appropriate mode
-python3 "$INSTALL_DIR/main.py" --mode=\$MODE "\$@"
-exit \$?
-EOF
-)
-
-# Install the main script
-echo -e "${YELLOW}Installing Razen to /usr/local/bin/razen...${NC}"
-echo "$LAUNCHER_SCRIPT" | sudo tee /usr/local/bin/razen > /dev/null
-sudo chmod +x /usr/local/bin/razen
-echo -e "  ${GREEN}✓${NC} Installed /usr/local/bin/razen"
-
 # Create symbolic links
 echo -e "${YELLOW}Creating symbolic links...${NC}"
+
+# Main razen command
+sudo ln -sf "$INSTALL_DIR/scripts/razen" /usr/local/bin/razen
+echo -e "  ${GREEN}✓${NC} Created /usr/local/bin/razen"
 sudo ln -sf /usr/local/bin/razen /usr/bin/razen
 echo -e "  ${GREEN}✓${NC} Created symlink /usr/bin/razen"
 
-sudo ln -sf /usr/local/bin/razen /usr/bin/razen-debug
+# Debug mode
+sudo ln -sf "$INSTALL_DIR/scripts/razen" /usr/local/bin/razen-debug
+echo -e "  ${GREEN}✓${NC} Created /usr/local/bin/razen-debug"
+sudo ln -sf /usr/local/bin/razen-debug /usr/bin/razen-debug
 echo -e "  ${GREEN}✓${NC} Created symlink /usr/bin/razen-debug"
 
-sudo ln -sf /usr/local/bin/razen /usr/bin/razen-test
+# Test mode
+sudo ln -sf "$INSTALL_DIR/scripts/razen" /usr/local/bin/razen-test
+echo -e "  ${GREEN}✓${NC} Created /usr/local/bin/razen-test"
+sudo ln -sf /usr/local/bin/razen-test /usr/bin/razen-test
 echo -e "  ${GREEN}✓${NC} Created symlink /usr/bin/razen-test"
 
-sudo ln -sf /usr/local/bin/razen /usr/bin/razen-run
+# Run mode
+sudo ln -sf "$INSTALL_DIR/scripts/razen" /usr/local/bin/razen-run
+echo -e "  ${GREEN}✓${NC} Created /usr/local/bin/razen-run"
+sudo ln -sf /usr/local/bin/razen-run /usr/bin/razen-run
 echo -e "  ${GREEN}✓${NC} Created symlink /usr/bin/razen-run"
+
+# Update script
+sudo ln -sf "$INSTALL_DIR/scripts/razen-update" /usr/local/bin/razen-update
+echo -e "  ${GREEN}✓${NC} Created /usr/local/bin/razen-update"
+sudo ln -sf /usr/local/bin/razen-update /usr/bin/razen-update
+echo -e "  ${GREEN}✓${NC} Created symlink /usr/bin/razen-update"
+
+# Help script
+sudo ln -sf "$INSTALL_DIR/scripts/razen-help" /usr/local/bin/razen-help
+echo -e "  ${GREEN}✓${NC} Created /usr/local/bin/razen-help"
+sudo ln -sf /usr/local/bin/razen-help /usr/bin/razen-help
+echo -e "  ${GREEN}✓${NC} Created symlink /usr/bin/razen-help"
+
+# Also save the installer itself
+sudo cp "$0" "$INSTALL_DIR/install.sh" 2>/dev/null || sudo sh -c "cat > $INSTALL_DIR/install.sh" <<< "$(cat $0)"
+sudo chmod +x "$INSTALL_DIR/install.sh"
 
 # Create version file for future updates
 echo "$RAZEN_VERSION" > "$INSTALL_DIR/version"
-
-# Also save the installer itself
-sudo cp "$0" "$INSTALL_DIR/install.sh" 2>/dev/null || echo "$0" | sudo tee "$INSTALL_DIR/install.sh" > /dev/null
-sudo chmod +x "$INSTALL_DIR/install.sh"
 
 # Create examples directory
 echo -e "${YELLOW}Creating examples...${NC}"
@@ -415,25 +309,13 @@ cat > "$TEST_SCRIPT" <<EOL
 echo "Testing Razen installation..."
 
 # Test commands exist
-if ! command -v razen &>/dev/null; then
-    echo "Error: razen command not found"
-    exit 1
-fi
-
-if ! command -v razen-run &>/dev/null; then
-    echo "Error: razen-run command not found"
-    exit 1
-fi
-
-if ! command -v razen-debug &>/dev/null; then
-    echo "Error: razen-debug command not found"
-    exit 1
-fi
-
-if ! command -v razen-test &>/dev/null; then
-    echo "Error: razen-test command not found"
-    exit 1
-fi
+for cmd in razen razen-debug razen-test razen-run razen-update razen-help; do
+    if ! command -v \$cmd &>/dev/null; then
+        echo "Error: \$cmd command not found"
+        exit 1
+    fi
+    echo "  ✓ \$cmd is available"
+done
 
 # Test version command
 VERSION_OUTPUT=\$(razen version 2>&1)
@@ -441,6 +323,7 @@ if [[ ! "\$VERSION_OUTPUT" == *"$RAZEN_VERSION"* ]]; then
     echo "Error: version command not working correctly"
     exit 1
 fi
+echo "  ✓ Version command works"
 
 # Test new command (in temp directory)
 TMP_TEST_DIR=\$(mktemp -d)
@@ -451,7 +334,16 @@ if [ ! -f "test_program.rzn" ]; then
     rm -rf "\$TMP_TEST_DIR"
     exit 1
 fi
+echo "  ✓ New command works"
 rm -rf "\$TMP_TEST_DIR"
+
+# Test help command
+HELP_OUTPUT=\$(razen-help 2>&1)
+if [[ ! "\$HELP_OUTPUT" == *"USAGE"* ]]; then
+    echo "Error: help command not working correctly"
+    exit 1
+fi
+echo "  ✓ Help command works"
 
 echo "All tests passed!"
 exit 0
@@ -475,13 +367,13 @@ if [ -x "/usr/local/bin/razen" ]; then
     echo -e "\n${GREEN}✅ Razen $RAZEN_VERSION has been successfully installed!${NC}"
     echo -e "${BLUE}You can now use the following commands:${NC}"
     echo -e "  ${YELLOW}razen${NC} - Run a Razen script"
-    echo -e "  ${YELLOW}razen-debug${NC} - Run a Razen script in debug mode"
-    echo -e "  ${YELLOW}razen-test${NC} - Run a Razen script in test mode"
-    echo -e "  ${YELLOW}razen-run${NC} - Run a Razen script with clean output"
+    echo -e "  ${YELLOW}razen-debug${NC} - Run a script in debug mode"
+    echo -e "  ${YELLOW}razen-test${NC} - Run a script in test mode"
+    echo -e "  ${YELLOW}razen-run${NC} - Run a script with clean output"
+    echo -e "  ${YELLOW}razen-update${NC} - Update Razen to the latest version"
+    echo -e "  ${YELLOW}razen-help${NC} - Display help information"
     echo -e "  ${YELLOW}razen new myprogram${NC} - Create a new Razen program"
-    echo -e "  ${YELLOW}razen update${NC} - Update Razen to the latest version"
     echo -e "  ${YELLOW}razen version${NC} - Display version information"
-    echo -e "  ${YELLOW}razen help${NC} - Display help information"
     
     echo -e "\n${BLUE}Examples:${NC}"
     echo -e "  ${YELLOW}razen-run examples/hello_world.rzn${NC} - Run the hello world example"

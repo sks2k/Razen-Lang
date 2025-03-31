@@ -1,0 +1,71 @@
+ #!/usr/bin/env bash
+# Razen Language Update Script
+# Copyright © 2025 Prathmesh Barot, Basai Corporation
+# Version: beta v0.1.2
+
+# Colors for terminal output
+GREEN="\033[0;32m"
+RED="\033[0;31m"
+YELLOW="\033[0;33m"
+BLUE="\033[0;34m"
+PURPLE="\033[0;35m"
+CYAN="\033[0;36m"
+NC="\033[0m" # No Color
+
+RAZEN_REPO="https://raw.githubusercontent.com/BasaiCorp/razen-lang/main"
+RAZEN_VERSION="beta v0.1.2"
+
+echo -e "${BLUE}Razen Update Utility${NC}"
+echo -e "${BLUE}====================${NC}"
+echo ""
+
+# Create temporary directory
+TMP_UPDATE_DIR=$(mktemp -d)
+echo -e "${YELLOW}Checking for updates...${NC}"
+
+# Download version check file
+if ! curl -s -o "$TMP_UPDATE_DIR/version.txt" "$RAZEN_REPO/version" &>/dev/null; then
+    echo -e "${RED}Failed to check for updates. Please check your internet connection.${NC}"
+    rm -rf "$TMP_UPDATE_DIR"
+    exit 1
+fi
+
+# Read latest version
+LATEST_VERSION=$(cat "$TMP_UPDATE_DIR/version.txt" 2>/dev/null || echo "unknown")
+CURRENT_VERSION="$RAZEN_VERSION"
+
+echo -e "${YELLOW}Current version:${NC} ${PURPLE}$CURRENT_VERSION${NC}"
+echo -e "${YELLOW}Latest version:${NC}  ${PURPLE}$LATEST_VERSION${NC}"
+echo ""
+
+if [ "$LATEST_VERSION" == "$CURRENT_VERSION" ]; then
+    echo -e "${GREEN}Razen is already up to date.${NC}"
+    rm -rf "$TMP_UPDATE_DIR"
+    exit 0
+else
+    echo -e "${YELLOW}New version available! Updating Razen...${NC}"
+    
+    # Download the latest installer
+    if ! curl -s -o "$TMP_UPDATE_DIR/install.sh" "$RAZEN_REPO/install.sh" &>/dev/null; then
+        echo -e "${RED}Failed to download the latest installer. Please check your internet connection.${NC}"
+        rm -rf "$TMP_UPDATE_DIR"
+        exit 1
+    fi
+    
+    echo -e "${GREEN}✓${NC} Downloaded latest installer"
+    
+    # Make it executable
+    chmod +x "$TMP_UPDATE_DIR/install.sh"
+    
+    # Run the installer with sudo to ensure proper permissions
+    echo -e "${YELLOW}Running installer to update Razen...${NC}"
+    echo -e "${YELLOW}You may be prompted for your password to install updates.${NC}"
+    echo ""
+    sudo bash "$TMP_UPDATE_DIR/install.sh"
+    
+    # Clean up
+    rm -rf "$TMP_UPDATE_DIR"
+    
+    echo -e "${GREEN}✅ Update completed successfully!${NC}"
+    exit 0
+fi

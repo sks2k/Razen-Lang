@@ -1,0 +1,56 @@
+#!/usr/bin/env bash
+# Razen Language Help Script
+# Copyright © 2025 Prathmesh Barot, Basai Corporation
+# Version: beta v0.1.2
+
+# ANSI colors
+BLUE="\033[0;34m"
+GREEN="\033[0;32m"
+YELLOW="\033[0;33m"
+PURPLE="\033[0;35m"
+CYAN="\033[0;36m"
+NC="\033[0m" # No Color
+
+# Print banner
+echo -e "${BLUE}"
+echo "██████╗  █████╗ ███████╗███████╗███╗   ██╗"
+echo "██╔══██╗██╔══██╗╚══███╔╝██╔════╝████╗  ██║"
+echo "██████╔╝███████║  ███╔╝ █████╗  ██╔██╗ ██║"
+echo "██╔══██╗██╔══██║ ███╔╝  ██╔══╝  ██║╚██╗██║"
+echo "██║  ██║██║  ██║███████╗███████╗██║ ╚████║"
+echo "╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝╚══════╝╚═╝  ╚═══╝"
+echo -e "${NC}"
+echo -e "${YELLOW}Programming Language ${PURPLE}beta v0.1.2${NC}"
+echo -e "${CYAN}By Prathmesh Barot, Basai Corporation${NC}"
+echo -e "${YELLOW}Copyright © 2025 Prathmesh Barot${NC}\n"
+
+echo -e "${GREEN}USAGE:${NC}"
+echo -e "  razen [command] [options]"
+echo ""
+echo -e "${GREEN}COMMANDS:${NC}"
+echo -e "  ${YELLOW}<filename.rzn>${NC}     Run a Razen script"
+echo -e "  ${YELLOW}new <filename>${NC}     Create a new Razen program"
+echo -e "  ${YELLOW}version${NC}            Display version information"
+echo -e "  ${YELLOW}help${NC}               Display this help message"
+echo -e "  ${YELLOW}uninstall${NC}          Uninstall Razen Language"
+echo ""
+echo -e "${GREEN}TOOLS:${NC}"
+echo -e "  ${YELLOW}razen-debug${NC}        Run a script in debug mode"
+echo -e "  ${YELLOW}razen-test${NC}         Run a script in test mode"
+echo -e "  ${YELLOW}razen-run${NC}          Run a script with clean output"
+echo -e "  ${YELLOW}razen-update${NC}       Update Razen to the latest version"
+echo -e "  ${YELLOW}razen-help${NC}         Display this help message"
+echo ""
+echo -e "${GREEN}EXAMPLES:${NC}"
+echo -e "  ${YELLOW}razen hello.rzn${NC}"
+echo -e "  ${YELLOW}razen new myprogram${NC}"
+echo -e "  ${YELLOW}razen-run examples/hello_world.rzn${NC}"
+echo -e "  ${YELLOW}razen-update${NC}"
+echo ""
+echo -e "${GREEN}FILES LOCATION:${NC}"
+echo -e "  Core files:    /usr/local/lib/razen"
+echo -e "  Examples:      /usr/local/lib/razen/examples"
+echo -e "  Scripts:       /usr/local/lib/razen/scripts"
+echo ""
+echo -e "${GREEN}UNINSTALL:${NC}"
+echo -e "  sudo /usr/local/lib/razen/install.sh --uninstall" 

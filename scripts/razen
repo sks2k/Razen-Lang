@@ -6,23 +6,115 @@ SCRIPT_DIR=$(dirname "$0")
 PROJECT_ROOT=$(cd "$SCRIPT_DIR/.." && pwd)
 MAIN_PY="$PROJECT_ROOT/main.py"
 
-# Check if filename argument is provided
-if [ -z "$1" ]; then
-  echo "Usage: razen <filename.rzn>"
-  exit 1
+# Colors for terminal output
+GREEN="\033[0;32m"
+RED="\033[0;31m"
+YELLOW="\033[0;33m"
+BLUE="\033[0;34m"
+NC="\033[0m" # No Color
+
+# Handle commands
+if [ "$1" == "new" ]; then
+    if [ -z "$2" ]; then
+        echo -e "${RED}Error: Missing filename${NC}"
+        echo "Usage: razen new <filename>"
+        exit 1
+    fi
+    
+    # Create a new Razen file
+    FILENAME="$2"
+    if [[ "$FILENAME" != *.rzn ]]; then
+        FILENAME="${FILENAME}.rzn"
+    fi
+    
+    echo -e "${YELLOW}Creating new Razen program: ${FILENAME}${NC}"
+    
+    cat > "$FILENAME" << EOF
+// New Razen program created on $(date)
+// Powered by Razen Language
+
+// Your code goes here
+let message = "Hello, World!"
+show "\${message}"
+
+// Read user input
+read user_input = "What's your name? "
+show "Nice to meet you, \${user_input}!"
+EOF
+    
+    echo -e "${GREEN}✓${NC} Created $FILENAME"
+    exit 0
+    
+elif [ "$1" == "version" ] || [ "$1" == "--version" ] || [ "$1" == "-v" ]; then
+    echo "Razen Language beta v0.1.2"
+    echo "Copyright © 2025 Prathmesh Barot, Basai Corporation"
+    exit 0
+    
+elif [ "$1" == "help" ] || [ "$1" == "--help" ] || [ "$1" == "-h" ]; then
+    # Call the help script if available, otherwise show basic help
+    if command -v razen-help &>/dev/null; then
+        razen-help
+    else
+        echo "Razen Language - Usage:"
+        echo "  razen <filename.rzn>     Run a Razen script"
+        echo "  razen new <filename>     Create a new Razen program"
+        echo "  razen version            Display version information"
+        echo "  razen help               Display this help message"
+        echo "  razen uninstall          Uninstall Razen"
+    fi
+    exit 0
+    
+elif [ "$1" == "uninstall" ]; then
+    echo -e "${YELLOW}Uninstalling Razen...${NC}"
+    echo -e "${RED}This will remove all Razen files and scripts.${NC}"
+    read -p "Are you sure you want to uninstall Razen? (y/n): " -n 1 -r
+    echo
+    
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+        # Check if the install.sh script exists
+        INSTALL_SCRIPT="/usr/local/lib/razen/install.sh"
+        if [ -f "$INSTALL_SCRIPT" ]; then
+            sudo "$INSTALL_SCRIPT" --uninstall
+        else
+            echo -e "${RED}Error: Installer script not found at $INSTALL_SCRIPT${NC}"
+            echo "Please run: sudo <path-to-install.sh> --uninstall"
+            exit 1
+        fi
+    else
+        echo -e "${BLUE}Uninstallation cancelled.${NC}"
+    fi
+    exit 0
+    
+elif [ -z "$1" ]; then
+    # No arguments provided, show usage
+    echo -e "${YELLOW}Razen Language Interpreter${NC}"
+    echo "Usage: razen <filename.rzn>"
+    echo "       razen new <filename>"
+    echo "       razen help"
+    echo "       razen version"
+    echo "       razen uninstall"
+    exit 1
 fi
 
+# Assume first argument is the filename to run
 FILENAME="$1"
 shift # Remove filename from args, allowing potential future flags
 
 # Check if main.py exists
 if [ ! -f "$MAIN_PY" ]; then
-  echo "Error: main.py not found at $MAIN_PY"
-  exit 1
+    echo -e "${RED}Error: main.py not found at $MAIN_PY${NC}"
+    exit 1
+fi
+
+# Check if the file exists
+if [ ! -f "$FILENAME" ]; then
+    echo -e "${RED}Error: File '$FILENAME' not found${NC}"
+    exit 1
 fi
 
 # Execute the main Python script in 'run' mode
 # Pass remaining arguments ($@) if any are needed in the future
+echo -e "${YELLOW}Running $FILENAME...${NC}"
 python3 "$MAIN_PY" --mode=run "$FILENAME" "$@"
 
 # Capture the exit code from the Python script

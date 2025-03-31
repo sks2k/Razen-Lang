@@ -35,7 +35,7 @@ This will download and install Razen globally on your system, making the `razen`
 
 To update Razen to the latest version:
 ```bash
-razen update
+razen-update
 ```
 
 This will automatically check for updates and install the newest version if available.
@@ -44,7 +44,12 @@ This will automatically check for updates and install the newest version if avai
 
 To uninstall Razen:
 ```bash
-bash install.sh --uninstall
+razen uninstall
+```
+
+Alternatively:
+```bash
+sudo /usr/local/lib/razen/install.sh --uninstall
 ```
 
 ## Usage
@@ -52,11 +57,19 @@ bash install.sh --uninstall
 ### Command Reference
 
 ```bash
-razen                      # Run a Razen script
-razen new myprogram.rzn    # Create a new Razen program
-razen update               # Update to the latest version
+# Core Commands
+razen <filename.rzn>       # Run a Razen script
+razen new <filename>       # Create a new Razen program
 razen version              # Display version information
 razen help                 # Show help information
+razen uninstall            # Uninstall Razen
+
+# Specialized Tools
+razen-debug <filename.rzn> # Debug mode with detailed output
+razen-test <filename.rzn>  # Test mode for testing scripts
+razen-run <filename.rzn>   # Clean mode (only shows program output)
+razen-update               # Update to the latest version
+razen-help                 # Display detailed help with formatting
 ```
 
 ### Running Scripts
@@ -70,13 +83,21 @@ razen-run path/to/script.rzn   # Clean mode (only shows program output)
 
 ### Creating Your First Razen Program
 
-Create a file named `hello.rzn`:
-```razen
-// My first Razen program
-let name = "World"
-show "Hello, ${name}!"
+You can create a new Razen program with a template:
+```bash
+razen new hello
+```
 
-// Ask for user input
+This creates a new file `hello.rzn` with a Hello World template:
+```razen
+// New Razen program created on [current date]
+// Powered by Razen Language
+
+// Your code goes here
+let message = "Hello, World!"
+show "${message}"
+
+// Read user input
 read user_input = "What's your name? "
 show "Nice to meet you, ${user_input}!"
 ```
@@ -120,6 +141,26 @@ show "${outer}"
 ```
 
 Check the `examples` folder for more sample programs and tutorials.
+
+## Command Details
+
+### razen-update
+A dedicated command to check for and install updates from the main repository. It shows the current version and latest available version, then performs the update if a newer version is available.
+
+### razen-help
+A colorful, well-formatted help command that displays comprehensive information about all available Razen commands, tools, and usage examples.
+
+### razen new
+Creates a new Razen program with a template to help you get started quickly. Automatically adds the `.rzn` extension if not provided.
+
+### razen uninstall
+Safely removes all Razen files and symbolic links from your system. Provides confirmation before proceeding.
+
+## File Locations
+
+- **Core files**: `/usr/local/lib/razen`
+- **Examples**: `/usr/local/lib/razen/examples`
+- **Scripts**: `/usr/local/lib/razen/scripts`
 
 ## License
 Razen is licensed under a custom license. See the [LICENSE](./LICENSE) file for details.
