@@ -17,7 +17,7 @@ CYAN="\033[0;36m"
 NC="\033[0m" # No Color
 
 # Version
-RAZEN_VERSION="beta v0.1.3"
+RAZEN_VERSION="beta v0.1.36"
 RAZEN_REPO="https://raw.githubusercontent.com/BasaiCorp/razen-lang/main"
 
 # Function to create symbolic links

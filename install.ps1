@@ -7,7 +7,7 @@
 
 # Repository URL
 $RAZEN_REPO = "https://raw.githubusercontent.com/BasaiCorp/razen-lang/main"
-$RAZEN_VERSION = "beta v0.1.3"
+$RAZEN_VERSION = "beta v0.1.36"
 
 # Function to print colored text
 function Write-ColorOutput {
