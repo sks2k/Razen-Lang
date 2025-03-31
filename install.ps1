@@ -1,13 +1,29 @@
 # Razen Language Installer for Windows
 # Copyright © 2025 Prathmesh Barot, Basai Corporation
-# Version: beta v0.1.3
+# Version: beta v0.1.36
 
 # Enable TLS 1.2 for all web requests
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
 # Repository URL
 $RAZEN_REPO = "https://raw.githubusercontent.com/BasaiCorp/razen-lang/main"
-$RAZEN_VERSION = "beta v0.1.36"
+
+# Get version from the version file
+if (Test-Path "version") {
+    $RAZEN_VERSION = Get-Content "version" -Raw
+} else {
+    # Download version file if not present
+    try {
+        Invoke-WebRequest -Uri "$RAZEN_REPO/version" -OutFile "version" -ErrorAction Stop
+        $RAZEN_VERSION = Get-Content "version" -Raw
+    } catch {
+        Write-Host "Failed to download version information. Using default version." -ForegroundColor Red
+        $RAZEN_VERSION = "beta v0.1.36"
+    }
+}
+
+# Remove any trailing whitespace or newlines
+$RAZEN_VERSION = $RAZEN_VERSION.Trim()
 
 # Function to print colored text
 function Write-ColorOutput {

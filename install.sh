@@ -3,7 +3,7 @@
 # Razen Language Installer Script
 # Author: Prathmesh Barot
 # Copyright © 2025 Prathmesh Barot, Basai Corporation
-# Version: beta v0.1.3
+# Version: beta v0.1.36
 
 set -e  # Exit on error
 
@@ -16,9 +16,23 @@ PURPLE="\033[0;35m"
 CYAN="\033[0;36m"
 NC="\033[0m" # No Color
 
-# Version
-RAZEN_VERSION="beta v0.1.36"
+# Repository URL
 RAZEN_REPO="https://raw.githubusercontent.com/BasaiCorp/razen-lang/main"
+
+# Get version from the version file
+if [ -f "version" ]; then
+    RAZEN_VERSION=$(cat version)
+else
+    # Download version file if not present
+    if ! curl -s -o version "$RAZEN_REPO/version" &>/dev/null; then
+        echo -e "${RED}Failed to download version information. Using default version.${NC}"
+        RAZEN_VERSION="beta v0.1.36"
+    else
+        RAZEN_VERSION=$(cat version)
+    fi
+fi
+
+echo -e "${YELLOW}Installing Razen ${PURPLE}$RAZEN_VERSION${NC}"
 
 # Function to create symbolic links
 create_symlinks() {

@@ -12,12 +12,15 @@ if [ ! -f "$MAIN_PY" ]; then
   # Check installation in /usr/local/lib/razen
   if [ -f "/usr/local/lib/razen/main.py" ]; then
     MAIN_PY="/usr/local/lib/razen/main.py"
+    INSTALL_DIR="/usr/local/lib/razen"
   # Check installation in /usr/local/razen (macOS)
   elif [ -f "/usr/local/razen/main.py" ]; then
     MAIN_PY="/usr/local/razen/main.py"
+    INSTALL_DIR="/usr/local/razen"
   # Check Windows paths if running in WSL
   elif [ -f "/mnt/c/Program Files/Razen/main.py" ]; then
     MAIN_PY="/mnt/c/Program Files/Razen/main.py"
+    INSTALL_DIR="/mnt/c/Program Files/Razen"
   fi
 fi
 
@@ -34,6 +37,18 @@ RED="\033[0;31m"
 YELLOW="\033[0;33m"
 BLUE="\033[0;34m"
 NC="\033[0m" # No Color
+
+# Function to get the current version
+get_version() {
+  # First check for version file in the installation directory
+  if [ -n "$INSTALL_DIR" ] && [ -f "$INSTALL_DIR/version" ]; then
+    cat "$INSTALL_DIR/version"
+  elif [ -f "$PROJECT_ROOT/version" ]; then
+    cat "$PROJECT_ROOT/version"
+  else
+    echo "beta v0.1.36" # Fallback version
+  fi
+}
 
 # Handle commands
 if [ "$1" == "new" ]; then
@@ -68,7 +83,8 @@ EOF
     exit 0
     
 elif [ "$1" == "version" ] || [ "$1" == "--version" ] || [ "$1" == "-v" ]; then
-    echo "Razen Language beta v0.1.3"
+    VERSION=$(get_version)
+    echo "Razen Language $VERSION"
     echo "Copyright © 2025 Prathmesh Barot, Basai Corporation"
     exit 0
     
@@ -93,13 +109,35 @@ elif [ "$1" == "uninstall" ]; then
     echo
     
     if [[ $REPLY =~ ^[Yy]$ ]]; then
-        # Check if the install.sh script exists
-        INSTALL_SCRIPT="/usr/local/lib/razen/install.sh"
-        if [ -f "$INSTALL_SCRIPT" ]; then
-            sudo "$INSTALL_SCRIPT" --uninstall
+        # Check if we're in Linux or macOS
+        if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+            # Check if the install.sh script exists
+            INSTALL_SCRIPT="/usr/local/lib/razen/install.sh"
+            if [ -f "$INSTALL_SCRIPT" ]; then
+                sudo "$INSTALL_SCRIPT" --uninstall
+            else
+                echo -e "${RED}Error: Installer script not found at $INSTALL_SCRIPT${NC}"
+                echo "Please run: sudo <path-to-install.sh> --uninstall"
+                exit 1
+            fi
+        elif [[ "$OSTYPE" == "darwin"* ]]; then
+            # macOS specific uninstall
+            INSTALL_SCRIPT="/usr/local/razen/install-mac.sh"
+            if [ -f "$INSTALL_SCRIPT" ]; then
+                sudo "$INSTALL_SCRIPT" --uninstall
+            else
+                echo -e "${RED}Error: Installer script not found at $INSTALL_SCRIPT${NC}"
+                echo "Please run: sudo <path-to-install-mac.sh> --uninstall"
+                exit 1
+            fi
+        elif [[ "$OSTYPE" == "cygwin" || "$OSTYPE" == "msys" || "$OSTYPE" == "win32" ]]; then
+            # Windows specific message
+            echo -e "${YELLOW}Windows installation detected.${NC}"
+            echo -e "${YELLOW}Please use PowerShell to uninstall:${NC}"
+            echo -e "${GREEN}Run: ${CYAN}.\\install.ps1 --uninstall${NC}"
+            exit 0
         else
-            echo -e "${RED}Error: Installer script not found at $INSTALL_SCRIPT${NC}"
-            echo "Please run: sudo <path-to-install.sh> --uninstall"
+            echo -e "${RED}Could not determine operating system.${NC}"
             exit 1
         fi
     else

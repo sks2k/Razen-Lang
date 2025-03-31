@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Razen Language Update Script
 # Copyright © 2025 Prathmesh Barot, Basai Corporation
-# Version: beta v0.1.3
+# Version: beta v0.1.36
 
 # Colors for terminal output
 GREEN="\033[0;32m"

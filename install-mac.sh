@@ -2,11 +2,23 @@
 
 # Razen Language Installer for macOS
 # Copyright © 2025 Prathmesh Barot, Basai Corporation
-# Version: beta v0.1.3
+# Version: beta v0.1.36
 
 # Repository URL
 RAZEN_REPO="https://raw.githubusercontent.com/BasaiCorp/razen-lang/main"
-RAZEN_VERSION="beta v0.1.36"
+
+# Get version from the version file
+if [ -f "version" ]; then
+    RAZEN_VERSION=$(cat version)
+else
+    # Download version file if not present
+    if ! curl -s -o version "$RAZEN_REPO/version" &>/dev/null; then
+        echo -e "${RED}Failed to download version information. Using default version.${NC}"
+        RAZEN_VERSION="beta v0.1.36"
+    else
+        RAZEN_VERSION=$(cat version)
+    fi
+fi
 
 # Colors for output
 BLUE='\033[0;34m'
@@ -161,7 +173,7 @@ cat << "EOF"
 ╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝╚══════╝╚═╝  ╚═══╝
 EOF
 
-echo -e "${YELLOW}Programming Language ${PURPLE}${RAZEN_VERSION}${NC}"
+echo -e "${YELLOW}Programming Language ${PURPLE}$RAZEN_VERSION${NC}"
 echo -e "${CYAN}By Prathmesh Barot, Basai Corporation${NC}"
 echo -e "${YELLOW}Copyright © 2025 Prathmesh Barot${NC}\n"
 sleep 1  # Add a small delay to make the banner more readable
