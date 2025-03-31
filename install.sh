@@ -156,16 +156,38 @@ RAZEN_DIR="$TMP_DIR"
 if [ -f "/usr/local/bin/razen" ]; then
     echo -e "${YELLOW}Razen is already installed.${NC}"
     
-    read -p "Do you want to reinstall? (y/n): " -n 1 -r
+    # Check if there are any missing commands
+    MISSING_COMMANDS=false
+    for cmd in razen-update razen-help; do
+        if ! command -v $cmd &>/dev/null; then
+            MISSING_COMMANDS=true
+            break
+        fi
+    done
+    
+    # Check installed version
+    CURRENT_VERSION=$(razen version 2>/dev/null | head -n1 | cut -d' ' -f3- || echo "unknown")
+    
+    if [ "$MISSING_COMMANDS" = true ]; then
+        echo -e "${YELLOW}New Razen commands are available with this version.${NC}"
+    fi
+    
+    if [ "$CURRENT_VERSION" != "$RAZEN_VERSION" ]; then
+        echo -e "${YELLOW}New version available: $RAZEN_VERSION${NC}"
+        echo -e "${YELLOW}Current installed version: $CURRENT_VERSION${NC}"
+    fi
+    
+    read -p "Do you want to update Razen? (y/n): " -n 1 -r
     echo
     if [[ ! $REPLY =~ ^[Yy]$ ]]; then
         echo -e "${BLUE}Installation cancelled.${NC}"
+        echo -e "${GREEN}Tip:${NC} You can use 'razen-update' to update Razen later."
         rm -rf "$TMP_DIR"
         exit 0
     fi
     
     # Remove existing installation
-    echo -e "${YELLOW}Removing existing installation...${NC}"
+    echo -e "${YELLOW}Updating Razen installation...${NC}"
     
     # Remove all binary and script symlinks
     for cmd in razen razen-debug razen-test razen-run razen-update razen-help; do
@@ -198,41 +220,19 @@ echo -e "  ${GREEN}✓${NC} Installed Razen core files"
 # Create symbolic links
 echo -e "${YELLOW}Creating symbolic links...${NC}"
 
-# Main razen command
-sudo ln -sf "$INSTALL_DIR/scripts/razen" /usr/local/bin/razen
-echo -e "  ${GREEN}✓${NC} Created /usr/local/bin/razen"
-sudo ln -sf /usr/local/bin/razen /usr/bin/razen
-echo -e "  ${GREEN}✓${NC} Created symlink /usr/bin/razen"
+# Create a list of all scripts to create symlinks for
+SCRIPTS="razen razen-debug razen-test razen-run razen-update razen-help"
 
-# Debug mode
-sudo ln -sf "$INSTALL_DIR/scripts/razen" /usr/local/bin/razen-debug
-echo -e "  ${GREEN}✓${NC} Created /usr/local/bin/razen-debug"
-sudo ln -sf /usr/local/bin/razen-debug /usr/bin/razen-debug
-echo -e "  ${GREEN}✓${NC} Created symlink /usr/bin/razen-debug"
-
-# Test mode
-sudo ln -sf "$INSTALL_DIR/scripts/razen" /usr/local/bin/razen-test
-echo -e "  ${GREEN}✓${NC} Created /usr/local/bin/razen-test"
-sudo ln -sf /usr/local/bin/razen-test /usr/bin/razen-test
-echo -e "  ${GREEN}✓${NC} Created symlink /usr/bin/razen-test"
-
-# Run mode
-sudo ln -sf "$INSTALL_DIR/scripts/razen" /usr/local/bin/razen-run
-echo -e "  ${GREEN}✓${NC} Created /usr/local/bin/razen-run"
-sudo ln -sf /usr/local/bin/razen-run /usr/bin/razen-run
-echo -e "  ${GREEN}✓${NC} Created symlink /usr/bin/razen-run"
-
-# Update script
-sudo ln -sf "$INSTALL_DIR/scripts/razen-update" /usr/local/bin/razen-update
-echo -e "  ${GREEN}✓${NC} Created /usr/local/bin/razen-update"
-sudo ln -sf /usr/local/bin/razen-update /usr/bin/razen-update
-echo -e "  ${GREEN}✓${NC} Created symlink /usr/bin/razen-update"
-
-# Help script
-sudo ln -sf "$INSTALL_DIR/scripts/razen-help" /usr/local/bin/razen-help
-echo -e "  ${GREEN}✓${NC} Created /usr/local/bin/razen-help"
-sudo ln -sf /usr/local/bin/razen-help /usr/bin/razen-help
-echo -e "  ${GREEN}✓${NC} Created symlink /usr/bin/razen-help"
+# Create symbolic links for each script
+for script in $SCRIPTS; do
+    # Create link in /usr/local/bin
+    sudo ln -sf "$INSTALL_DIR/scripts/$script" "/usr/local/bin/$script"
+    echo -e "  ${GREEN}✓${NC} Created /usr/local/bin/$script"
+    
+    # Create symlink in /usr/bin
+    sudo ln -sf "/usr/local/bin/$script" "/usr/bin/$script"
+    echo -e "  ${GREEN}✓${NC} Created symlink /usr/bin/$script"
+done
 
 # Also save the installer itself
 sudo cp "$0" "$INSTALL_DIR/install.sh" 2>/dev/null || sudo sh -c "cat > $INSTALL_DIR/install.sh" <<< "$(cat $0)"
@@ -364,7 +364,13 @@ rm -rf "$TMP_DIR"
 
 # Check if installation was successful
 if [ -x "/usr/local/bin/razen" ]; then
-    echo -e "\n${GREEN}✅ Razen $RAZEN_VERSION has been successfully installed!${NC}"
+    # Check if this was an update
+    if [ -n "$CURRENT_VERSION" ] && [ "$CURRENT_VERSION" != "$RAZEN_VERSION" ]; then
+        echo -e "\n${GREEN}✅ Razen has been successfully updated from $CURRENT_VERSION to $RAZEN_VERSION!${NC}"
+    else
+        echo -e "\n${GREEN}✅ Razen $RAZEN_VERSION has been successfully installed!${NC}"
+    fi
+    
     echo -e "${BLUE}You can now use the following commands:${NC}"
     echo -e "  ${YELLOW}razen${NC} - Run a Razen script"
     echo -e "  ${YELLOW}razen-debug${NC} - Run a script in debug mode"
@@ -378,9 +384,10 @@ if [ -x "/usr/local/bin/razen" ]; then
     echo -e "\n${BLUE}Examples:${NC}"
     echo -e "  ${YELLOW}razen-run examples/hello_world.rzn${NC} - Run the hello world example"
     echo -e "  ${YELLOW}razen new hello.rzn${NC} - Create a new hello.rzn program"
+    echo -e "  ${YELLOW}razen-update${NC} - Check for and install updates"
     
     echo -e "\n${BLUE}To uninstall:${NC}"
-    echo -e "  ${YELLOW}sudo /usr/local/lib/razen/install.sh --uninstall${NC}"
+    echo -e "  ${YELLOW}razen uninstall${NC}"
     
     echo -e "\n${GREEN}Note:${NC} Razen is installed in root-protected locations for security."
     echo -e "This prevents unauthorized modifications to the core language."
