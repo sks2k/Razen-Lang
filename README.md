@@ -26,7 +26,7 @@ wget -qO- "https://raw.githubusercontent.com/BasaiCorp/razen-lang/main/install.s
 
 Using curl:
 ```bash
-curl -s "https://raw.githubusercontent.com/BasaiCorp/razen-lang/main/install.sh" | bash
+curl -o install.sh "https://raw.githubusercontent.com/BasaiCorp/razen-lang/main/install.sh" && chmod +x install.sh && ./install.sh
 ```
 
 This will download and install Razen globally on your system, making the `razen` command available from anywhere.
