@@ -229,7 +229,7 @@ fi
 echo -e "  ${GREEN}✓${NC} Downloaded main.py"
 
 # Download src files
-for file in lexer.py parser.py interpreter.py runtime.py; do
+for file in lexer.py parser.py interpreter.py runtime.py razen_parsetab_interp.py parser_parsetab.py; do
     if ! curl -s -o "$TMP_DIR/src/$file" "$RAZEN_REPO/src/$file" &>/dev/null; then
         echo -e "${RED}Failed to download src/$file${NC}"
         rm -rf "$TMP_DIR"
@@ -326,9 +326,9 @@ echo -e "  ${GREEN}✓${NC} Copied files to installation directory"
 
 # Install Python dependencies
 echo -e "${YELLOW}Installing Python dependencies...${NC}"
-if ! pip3 install -r requirements.txt; then
+if ! pip3 install --user -r requirements.txt; then
     echo -e "${RED}Failed to install Python dependencies. Please install them manually:${NC}"
-    echo -e "  pip3 install ply colorama rich"
+    echo -e "  pip3 install --user -r requirements.txt"
     rm -rf "$TMP_DIR"
     exit 1
 fi
