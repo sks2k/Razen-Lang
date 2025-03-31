@@ -207,8 +207,10 @@ fi
 # Download Razen files
 echo -e "${YELLOW}Downloading Razen files...${NC}"
 
-# Create necessary directories
+# Create necessary directories in temp folder
 mkdir -p "$TMP_DIR/scripts"
+mkdir -p "$TMP_DIR/parser"
+mkdir -p "$TMP_DIR/utils"
 
 # Download main.py
 if ! curl -s -o "$TMP_DIR/main.py" "$RAZEN_REPO/main.py" &>/dev/null; then
@@ -220,22 +222,22 @@ echo -e "  ${GREEN}✓${NC} Downloaded main.py"
 
 # Download parser modules
 for module in parser.py lexer.py ast.py; do
-    if ! curl -s -o "$TMP_DIR/$module" "$RAZEN_REPO/parser/$module" &>/dev/null; then
+    if ! curl -s -o "$TMP_DIR/parser/$module" "$RAZEN_REPO/parser/$module" &>/dev/null; then
         echo -e "${RED}Failed to download $module${NC}"
         rm -rf "$TMP_DIR"
         exit 1
     fi
-    echo -e "  ${GREEN}✓${NC} Downloaded $module"
+    echo -e "  ${GREEN}✓${NC} Downloaded parser/$module"
 done
 
 # Download utility modules
 for module in utils.py error.py; do
-    if ! curl -s -o "$TMP_DIR/$module" "$RAZEN_REPO/utils/$module" &>/dev/null; then
+    if ! curl -s -o "$TMP_DIR/utils/$module" "$RAZEN_REPO/utils/$module" &>/dev/null; then
         echo -e "${RED}Failed to download $module${NC}"
         rm -rf "$TMP_DIR"
         exit 1
     fi
-    echo -e "  ${GREEN}✓${NC} Downloaded $module"
+    echo -e "  ${GREEN}✓${NC} Downloaded utils/$module"
 done
 
 # Download script files
@@ -245,11 +247,11 @@ for script in razen razen-debug razen-test razen-run razen-update razen-help; do
         rm -rf "$TMP_DIR"
         exit 1
     fi
-    echo -e "  ${GREEN}✓${NC} Downloaded $script"
+    echo -e "  ${GREEN}✓${NC} Downloaded scripts/$script"
 done
 
 # Make scripts executable
-chmod +x "$TMP_DIR/scripts/*"
+chmod +x "$TMP_DIR/scripts/"*
 echo -e "  ${GREEN}✓${NC} Made scripts executable"
 
 # Create installation directory
@@ -270,19 +272,24 @@ if [ -d "$INSTALL_DIR" ]; then
 fi
 
 sudo mkdir -p "$INSTALL_DIR"
+sudo mkdir -p "$INSTALL_DIR/parser"
+sudo mkdir -p "$INSTALL_DIR/utils"
+sudo mkdir -p "$INSTALL_DIR/scripts"
 echo -e "  ${GREEN}✓${NC} Created installation directory"
 
 # Copy files to installation directory
 sudo cp "$TMP_DIR/main.py" "$INSTALL_DIR/"
-sudo cp "$TMP_DIR/parser.py" "$INSTALL_DIR/"
-sudo cp "$TMP_DIR/lexer.py" "$INSTALL_DIR/"
-sudo cp "$TMP_DIR/ast.py" "$INSTALL_DIR/"
-sudo cp "$TMP_DIR/utils.py" "$INSTALL_DIR/"
-sudo cp "$TMP_DIR/error.py" "$INSTALL_DIR/"
-sudo cp -r "$TMP_DIR/scripts" "$INSTALL_DIR/"
+sudo cp "$TMP_DIR/parser/"*.py "$INSTALL_DIR/parser/"
+sudo cp "$TMP_DIR/utils/"*.py "$INSTALL_DIR/utils/"
+sudo cp "$TMP_DIR/scripts/"* "$INSTALL_DIR/scripts/"
 
 # Create version file with proper permissions
 echo "$RAZEN_VERSION" | sudo tee "$INSTALL_DIR/version" > /dev/null
+
+# Create an empty __init__.py file in each directory to make them proper Python packages
+sudo touch "$INSTALL_DIR/__init__.py"
+sudo touch "$INSTALL_DIR/parser/__init__.py"
+sudo touch "$INSTALL_DIR/utils/__init__.py"
 
 # Set proper permissions
 sudo chmod -R 755 "$INSTALL_DIR"

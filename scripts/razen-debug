@@ -30,6 +30,20 @@ fi
 FILENAME="$1"
 shift # Remove filename from args, allowing potential future flags
 
+# Get absolute path of the file
+if [[ "$FILENAME" == /* ]]; then
+    # File already has an absolute path
+    ABSOLUTE_PATH="$FILENAME"
+else
+    # Convert to absolute path
+    ABSOLUTE_PATH="$(cd "$(dirname "$FILENAME")" 2>/dev/null && pwd)/$(basename "$FILENAME")"
+    
+    # If the directory doesn't exist, try current directory
+    if [ $? -ne 0 ]; then
+        ABSOLUTE_PATH="$(pwd)/$(basename "$FILENAME")"
+    fi
+fi
+
 # Check if main.py exists
 if [ ! -f "$MAIN_PY" ]; then
   echo "Error: main.py not found at $MAIN_PY"
@@ -37,10 +51,16 @@ if [ ! -f "$MAIN_PY" ]; then
   exit 1
 fi
 
+# Check if the file exists
+if [ ! -f "$ABSOLUTE_PATH" ]; then
+    echo "Error: File '$FILENAME' not found"
+    exit 1
+fi
+
 # Set the DEBUG environment variable to 1
 export DEBUG=1
 
 # Run main.py with the debug flag and any other arguments passed
-python3 "$MAIN_PY" --mode=debug "$FILENAME" "$@"
+python3 "$MAIN_PY" --mode=debug "$ABSOLUTE_PATH" "$@"
 
 exit $?

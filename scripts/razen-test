@@ -28,16 +28,21 @@ if [ ! -f "$MAIN_PY" ]; then
   exit 1
 fi
 
-if [ -z "$1" ]; then
-  echo "Usage: razen-test <filename.rzn> [options]"
-  echo "Options passed after filename are forwarded to main.py (e.g., --show-ast)"
-  exit 1
+# Process arguments to get absolute path if it's a directory
+if [ -n "$1" ] && [ -d "$1" ]; then
+    # If a directory is provided, convert to absolute path
+    if [[ "$1" == /* ]]; then
+        # Directory already has an absolute path
+        TEST_PATH="$1"
+    else
+        # Convert to absolute path
+        TEST_PATH="$(cd "$1" 2>/dev/null && pwd)"
+    fi
+    shift
+    python3 "$MAIN_PY" --mode=test "$TEST_PATH" "$@"
+else
+    # Run main.py in test mode with all arguments passed
+    python3 "$MAIN_PY" --mode=test "$@"
 fi
-
-FILENAME="$1"
-shift
-
-# Execute the main Python script in 'test' mode
-python3 "$MAIN_PY" --mode=test "$FILENAME" "$@"
 
 exit $?

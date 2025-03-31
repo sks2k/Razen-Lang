@@ -145,10 +145,36 @@ elif [ "$1" == "uninstall" ]; then
     fi
     exit 0
     
+elif [ "$1" == "run" ] && [ -n "$2" ]; then
+    # Run mode with filename
+    FILENAME="$2"
+    shift 2  # Remove 'run' and filename from args
+    
+    # Get absolute path of the file
+    if [[ "$FILENAME" == /* ]]; then
+        # File already has an absolute path
+        ABSOLUTE_PATH="$FILENAME"
+    else
+        # Convert to absolute path
+        ABSOLUTE_PATH="$(cd "$(dirname "$FILENAME")" && pwd)/$(basename "$FILENAME")"
+    fi
+    
+    # Check if the file exists
+    if [ ! -f "$ABSOLUTE_PATH" ]; then
+        echo -e "${RED}Error: File '$FILENAME' not found${NC}"
+        exit 1
+    fi
+    
+    # Execute the main Python script in 'run' mode
+    echo -e "${YELLOW}Running $FILENAME...${NC}"
+    python3 "$MAIN_PY" --mode=run "$ABSOLUTE_PATH" "$@"
+    exit $?
+    
 elif [ -z "$1" ]; then
     # No arguments provided, show usage
     echo -e "${YELLOW}Razen Language Interpreter${NC}"
     echo "Usage: razen <filename.rzn>"
+    echo "       razen run <filename.rzn>"
     echo "       razen new <filename>"
     echo "       razen help"
     echo "       razen version"
@@ -156,20 +182,33 @@ elif [ -z "$1" ]; then
     exit 1
 fi
 
-# Assume first argument is the filename to run
+# If we get here, assume first argument is the filename to run
 FILENAME="$1"
 shift # Remove filename from args, allowing potential future flags
 
+# Get absolute path of the file
+if [[ "$FILENAME" == /* ]]; then
+    # File already has an absolute path
+    ABSOLUTE_PATH="$FILENAME"
+else
+    # Convert to absolute path
+    ABSOLUTE_PATH="$(cd "$(dirname "$FILENAME")" 2>/dev/null && pwd)/$(basename "$FILENAME")"
+    
+    # If the directory doesn't exist, try current directory
+    if [ $? -ne 0 ]; then
+        ABSOLUTE_PATH="$(pwd)/$(basename "$FILENAME")"
+    fi
+fi
+
 # Check if the file exists
-if [ ! -f "$FILENAME" ]; then
+if [ ! -f "$ABSOLUTE_PATH" ]; then
     echo -e "${RED}Error: File '$FILENAME' not found${NC}"
     exit 1
 fi
 
 # Execute the main Python script in 'run' mode
-# Pass remaining arguments ($@) if any are needed in the future
 echo -e "${YELLOW}Running $FILENAME...${NC}"
-python3 "$MAIN_PY" --mode=run "$FILENAME" "$@"
+python3 "$MAIN_PY" --mode=run "$ABSOLUTE_PATH" "$@"
 
 # Capture the exit code from the Python script
 exit $?
