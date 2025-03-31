@@ -1,7 +1,9 @@
-# Razen Programming Language
+# Razen Programming Language (beta v0.1.1)
 
 ## Overview
 Razen is a modern, intuitive programming language designed for clarity, performance, and ease of use. With a clean syntax inspired by Python and strong type safety, Razen offers an excellent balance between development speed and runtime performance.
+
+Developed by Prathmesh Barot, Basai Corporation.
 
 ## Features
 - **Intuitive Syntax**: Python-like syntax that's easy to read and write
@@ -15,18 +17,7 @@ Razen is a modern, intuitive programming language designed for clarity, performa
 
 ## Installation
 
-### Option 1: Using the Install Script
-
-```bash
-# Clone the repository
-git clone https://github.com/BasaiCorp/Razen-lang.git
-cd razen-lang
-
-# Run the install script
-bash install.sh
-```
-
-### Option 2: One-Command Installation
+### One-Command Installation
 
 Using wget:
 ```bash
@@ -40,6 +31,15 @@ curl -s "https://raw.githubusercontent.com/BasaiCorp/razen-lang/main/install.sh"
 
 This will download and install Razen globally on your system, making the `razen` command available from anywhere.
 
+### Keeping Razen Updated
+
+To update Razen to the latest version:
+```bash
+razen update
+```
+
+This will automatically check for updates and install the newest version if available.
+
 ### Uninstalling Razen
 
 To uninstall Razen:
@@ -49,24 +49,41 @@ bash install.sh --uninstall
 
 ## Usage
 
-### Running a Razen Script
+### Command Reference
+
 ```bash
-razen path/to/script.rzn
+razen                      # Run a Razen script
+razen new myprogram.rzn    # Create a new Razen program
+razen update               # Update to the latest version
+razen version              # Display version information
+razen help                 # Show help information
 ```
 
-### Debugging a Razen Script
+### Running Scripts
+
 ```bash
-razen-debug path/to/script.rzn
+razen path/to/script.rzn       # Standard execution
+razen-debug path/to/script.rzn # Debug mode with detailed output
+razen-test path/to/script.rzn  # Test mode for testing scripts
+razen-run path/to/script.rzn   # Clean mode (only shows program output)
 ```
 
-### Testing a Razen Script
-```bash
-razen-test path/to/script.rzn
+### Creating Your First Razen Program
+
+Create a file named `hello.rzn`:
+```razen
+// My first Razen program
+let name = "World"
+show "Hello, ${name}!"
+
+// Ask for user input
+read user_input = "What's your name? "
+show "Nice to meet you, ${user_input}!"
 ```
 
-### Running in Clean Mode (Only Output)
+Run it with:
 ```bash
-razen-run path/to/script.rzn
+razen-run hello.rzn
 ```
 
 ## Example Code
@@ -102,6 +119,8 @@ let outer = "Outer with ${inner}"
 show "${outer}"
 ```
 
+Check the `examples` folder for more sample programs and tutorials.
+
 ## License
 Razen is licensed under a custom license. See the [LICENSE](./LICENSE) file for details.
 
@@ -115,10 +134,12 @@ Key points:
 When using Razen in your projects, please include the following attribution:
 
 ```
-Powered by Razen - © 2025 Prathmesh Barot
+Powered by Razen - © 2025 Prathmesh Barot, Basai Corporation
 ```
 
 ## Contact
 For questions, support, or feedback about Razen, please contact:
 - Email: prathmesh.barot@example.com
-- GitHub: [https://github.com/USERNAME/razen-lang](https://github.com/USERNAME/razen-lang) # Razen-Lang
+- GitHub: [https://github.com/BasaiCorp/razen-lang](https://github.com/BasaiCorp/razen-lang)
+
+**Official website coming soon!**
