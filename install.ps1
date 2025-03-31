@@ -1,6 +1,6 @@
 # Razen Language Installer for Windows
 # Copyright © 2025 Prathmesh Barot, Basai Corporation
-# Version: beta v0.1.36
+# Version: beta v0.1.4
 
 # Enable TLS 1.2 for all web requests
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
@@ -17,8 +17,8 @@ if (Test-Path "version") {
         Invoke-WebRequest -Uri "$RAZEN_REPO/version" -OutFile "version" -ErrorAction Stop
         $RAZEN_VERSION = Get-Content "version" -Raw
     } catch {
-        Write-Host "Failed to download version information. Using default version." -ForegroundColor Red
-        $RAZEN_VERSION = "beta v0.1.36"
+        Write-ColorOutput "Failed to download version information. Using default version." "Red"
+        $RAZEN_VERSION = "beta v0.1.4"
     }
 }
 
@@ -221,6 +221,21 @@ if (-not $isAdmin) {
     exit 1
 }
 
+# Create temporary directory
+$TMP_DIR = Join-Path $env:TEMP "razen-install-$(Get-Random)"
+if (-not (New-Item -ItemType Directory -Path $TMP_DIR -Force)) {
+    Write-ColorOutput "Failed to create temporary directory" "Red"
+    exit 1
+}
+Write-ColorOutput "  ✓ Created temporary directory" "Green"
+
+# Check for force update flag
+$FORCE_UPDATE = $false
+if ($args[0] -eq "--force-update") {
+    Write-ColorOutput "Force update mode activated. Will replace all existing files." "Yellow"
+    $FORCE_UPDATE = $true
+}
+
 # Check for uninstall flag
 if ($args[0] -eq "--uninstall") {
     Uninstall-Razen
@@ -240,6 +255,7 @@ if ($args[0] -eq "update" -or $args[0] -eq "--update" -or (Test-Path (Join-Path 
         if ($response -notmatch '^[Yy]$') {
             Write-ColorOutput "Update cancelled." "Blue"
             Write-ColorOutput "Tip: You can use 'razen-update' to update Razen later." "Green"
+            Remove-Item $TMP_DIR -Recurse -Force
             exit 0
         }
         
@@ -247,208 +263,235 @@ if ($args[0] -eq "update" -or $args[0] -eq "--update" -or (Test-Path (Join-Path 
         $updateResult = Perform-Update
         if ($updateResult -ne 0) {
             Write-ColorOutput "Update failed. Please try again later." "Red"
+            Remove-Item $TMP_DIR -Recurse -Force
             exit 1
         }
         exit 0
     } elseif ($updateStatus -eq 0) {
-        if ($args[0] -ne "update" -and $args[0] -ne "--update") {
-            # If already installed and not explicitly updating
-            Write-ColorOutput "Razen is already installed." "Yellow"
-            Write-ColorOutput "New Razen commands are available with this version." "Yellow"
-            Write-ColorOutput "Do you want to reinstall/update Razen? (y/n)" "Yellow"
-            $response = Read-Host
-            if ($response -notmatch '^[Yy]$') {
-                Write-ColorOutput "Installation cancelled." "Blue"
-                Write-ColorOutput "Tip: You can use 'razen-update' to update Razen later." "Green"
-                exit 0
-            }
-        } else {
-            Write-ColorOutput "Razen is already up to date." "Green"
-            exit 0
-        }
+        Write-ColorOutput "Razen is already up to date." "Green"
+        Remove-Item $TMP_DIR -Recurse -Force
+        exit 0
     } else {
         Write-ColorOutput "Failed to check for updates." "Red"
+        Remove-Item $TMP_DIR -Recurse -Force
         exit 1
     }
 }
 
-# Create temporary directory
-Write-ColorOutput "Creating installation directory..." "Yellow"
-try {
-    New-Item -ItemType Directory -Force -Path $installDir | Out-Null
-    Write-ColorOutput "  ✓ Created installation directory" "Green"
-} catch {
-    Write-ColorOutput "  ✗ Failed to create installation directory" "Red"
-    Write-ColorOutput "    Error: $_" "Red"
-    exit 1
-}
-
-# Create temporary directory
-$TMP_DIR = Join-Path $env:TEMP "razen-install"
-try {
-    if (Test-Path $TMP_DIR) {
-        Remove-Item -Path $TMP_DIR -Recurse -Force -ErrorAction SilentlyContinue
+# Check if installation directory exists
+if (Test-Path $installDir) {
+    if ($FORCE_UPDATE) {
+        Write-ColorOutput "Removing existing Razen installation..." "Yellow"
+        Remove-Item $installDir -Recurse -Force
+    } else {
+        Write-ColorOutput "Razen is already installed." "Yellow"
+        Write-ColorOutput "New Razen commands are available with this version." "Yellow"
+        Write-ColorOutput "Do you want to update Razen? (y/n)" "Yellow"
+        $response = Read-Host
+        if ($response -notmatch '^[Yy]$') {
+            Write-ColorOutput "Installation cancelled." "Blue"
+            Write-ColorOutput "Tip: You can use 'razen-update' to update Razen later." "Green"
+            Remove-Item $TMP_DIR -Recurse -Force
+            exit 0
+        }
+        Write-ColorOutput "Updating Razen..." "Yellow"
+        Remove-Item $installDir -Recurse -Force
     }
-    New-Item -ItemType Directory -Force -Path $TMP_DIR | Out-Null
-    Write-ColorOutput "  ✓ Created temporary directory" "Green"
-} catch {
-    Write-ColorOutput "  ✗ Failed to create temporary directory" "Red"
-    Write-ColorOutput "    Error: $_" "Red"
-    exit 1
 }
 
-# Download files
-Write-ColorOutput "`nDownloading Razen files..." "Yellow"
-
-# Download main files
-$files = @(
-    "main.py",
-    "parser/parser.py",
-    "parser/lexer.py",
-    "parser/ast.py",
-    "utils/utils.py",
-    "utils/error.py"
+# Create installation directory structure
+$dirs = @(
+    $installDir,
+    (Join-Path $installDir "src"),
+    (Join-Path $installDir "scripts"),
+    (Join-Path $installDir "properties")
 )
 
-foreach ($file in $files) {
-    $url = "$RAZEN_REPO/$file"
-    $directory = Split-Path -Parent $file
-    $filename = Split-Path -Leaf $file
-    $outPath = Join-Path $TMP_DIR $directory
-    
-    # Create directory structure if needed
-    if ($directory -and -not (Test-Path $outPath)) {
-        New-Item -ItemType Directory -Force -Path $outPath | Out-Null
+foreach ($dir in $dirs) {
+    if (-not (New-Item -ItemType Directory -Path $dir -Force)) {
+        Write-ColorOutput "Failed to create directory: $dir" "Red"
+        Remove-Item $TMP_DIR -Recurse -Force
+        exit 1
     }
-    
-    $outFile = Join-Path $TMP_DIR $file
+}
+Write-ColorOutput "  ✓ Created installation directory" "Green"
+
+# Download Razen files
+Write-ColorOutput "Downloading Razen files..." "Yellow"
+
+# Download main.py
+try {
+    Invoke-WebRequest -Uri "$RAZEN_REPO/main.py" -OutFile (Join-Path $TMP_DIR "main.py") -ErrorAction Stop
+    Write-ColorOutput "  ✓ Downloaded main.py" "Green"
+} catch {
+    Write-ColorOutput "Failed to download main.py" "Red"
+    Remove-Item $TMP_DIR -Recurse -Force
+    exit 1
+}
+
+# Download src files
+$srcFiles = @("lexer.py", "parser.py", "interpreter.py", "runtime.py")
+foreach ($file in $srcFiles) {
     try {
-        Invoke-WebRequest -Uri $url -OutFile $outFile -ErrorAction Stop
-        Write-ColorOutput "  ✓ Downloaded $file" "Green"
+        Invoke-WebRequest -Uri "$RAZEN_REPO/src/$file" -OutFile (Join-Path $TMP_DIR "src\$file") -ErrorAction Stop
+        Write-ColorOutput "  ✓ Downloaded src/$file" "Green"
     } catch {
-        Write-ColorOutput "  ✗ Failed to download $file" "Red"
-        Write-ColorOutput "    Error: $_" "Red"
-        Remove-Item -Path $TMP_DIR -Recurse -Force -ErrorAction SilentlyContinue
+        Write-ColorOutput "Failed to download src/$file" "Red"
+        Remove-Item $TMP_DIR -Recurse -Force
         exit 1
     }
 }
 
-# Download scripts
-$scripts = @(
-    "razen",
-    "razen-debug",
-    "razen-test",
-    "razen-run",
-    "razen-update",
-    "razen-help"
-)
-
-try {
-    New-Item -ItemType Directory -Force -Path (Join-Path $TMP_DIR "scripts") | Out-Null
-} catch {
-    Write-ColorOutput "  ✗ Failed to create scripts directory" "Red"
-    Write-ColorOutput "    Error: $_" "Red"
-    Remove-Item -Path $TMP_DIR -Recurse -Force -ErrorAction SilentlyContinue
-    exit 1
+# Download properties files
+$propFiles = @("variables.rzn", "keywords.rzn", "operators.rzn")
+foreach ($file in $propFiles) {
+    try {
+        Invoke-WebRequest -Uri "$RAZEN_REPO/properties/$file" -OutFile (Join-Path $TMP_DIR "properties\$file") -ErrorAction Stop
+        Write-ColorOutput "  ✓ Downloaded properties/$file" "Green"
+    } catch {
+        # Create empty file if download fails
+        New-Item -ItemType File -Path (Join-Path $TMP_DIR "properties\$file") -Force | Out-Null
+        Write-ColorOutput "  ⚠ Created empty properties/$file" "Yellow"
+    }
 }
 
+# Download script files
+$scripts = @("razen", "razen-debug", "razen-test", "razen-run", "razen-update", "razen-help")
 foreach ($script in $scripts) {
-    $url = "$RAZEN_REPO/scripts/$script"
-    $outFile = Join-Path $TMP_DIR "scripts\$script"
     try {
-        Invoke-WebRequest -Uri $url -OutFile $outFile -ErrorAction Stop
-        Write-ColorOutput "  ✓ Downloaded $script" "Green"
+        Invoke-WebRequest -Uri "$RAZEN_REPO/scripts/$script" -OutFile (Join-Path $TMP_DIR "scripts\$script") -ErrorAction Stop
+        Write-ColorOutput "  ✓ Downloaded scripts/$script" "Green"
     } catch {
-        Write-ColorOutput "  ✗ Failed to download $script" "Red"
-        Write-ColorOutput "    Error: $_" "Red"
-        Remove-Item -Path $TMP_DIR -Recurse -Force -ErrorAction SilentlyContinue
-        exit 1
+        # Create empty file if download fails
+        New-Item -ItemType File -Path (Join-Path $TMP_DIR "scripts\$script") -Force | Out-Null
+        Write-ColorOutput "  ⚠ Created empty scripts/$script" "Yellow"
     }
 }
 
 # Copy files to installation directory
-Write-ColorOutput "`nInstalling files..." "Yellow"
+Write-ColorOutput "Copying files to installation directory..." "Yellow"
+
+# Copy main.py
+Copy-Item (Join-Path $TMP_DIR "main.py") $installDir -Force
+
+# Copy src files
+Copy-Item (Join-Path $TMP_DIR "src\*.py") (Join-Path $installDir "src") -Force
+
+# Copy properties files
+Copy-Item (Join-Path $TMP_DIR "properties\*.rzn") (Join-Path $installDir "properties") -Force
+
+# Copy script files
+Copy-Item (Join-Path $TMP_DIR "scripts\*") (Join-Path $installDir "scripts") -Force
+
+# Download and save the latest installer script for future updates
 try {
-    # Create parser and utils directories in the installation directory
-    New-Item -ItemType Directory -Force -Path "$installDir\parser" | Out-Null
-    New-Item -ItemType Directory -Force -Path "$installDir\utils" | Out-Null
-    New-Item -ItemType Directory -Force -Path "$installDir\scripts" | Out-Null
-    
-    # Copy main.py
-    Copy-Item -Path "$TMP_DIR\main.py" -Destination "$installDir" -Force
-    
-    # Copy parser files
-    Copy-Item -Path "$TMP_DIR\parser\*.py" -Destination "$installDir\parser" -Force
-    
-    # Copy utils files
-    Copy-Item -Path "$TMP_DIR\utils\*.py" -Destination "$installDir\utils" -Force
-    
-    # Copy scripts
-    Copy-Item -Path "$TMP_DIR\scripts\*" -Destination "$installDir\scripts" -Force
-    
-    Write-ColorOutput "  ✓ Copied files to installation directory" "Green"
+    Invoke-WebRequest -Uri "$RAZEN_REPO/install.ps1" -OutFile (Join-Path $installDir "install.ps1") -ErrorAction Stop
+    Write-ColorOutput "  ✓ Saved latest installer script for future updates" "Green"
 } catch {
-    Write-ColorOutput "  ✗ Failed to copy files to installation directory" "Red"
-    Write-ColorOutput "    Error: $_" "Red"
-    Remove-Item -Path $TMP_DIR -Recurse -Force -ErrorAction SilentlyContinue
-    exit 1
+    Write-ColorOutput "Warning: Could not download latest installer script. Using current version instead." "Yellow"
+    if (Test-Path $PSCommandPath) {
+        Copy-Item $PSCommandPath (Join-Path $installDir "install.ps1") -Force
+    }
 }
 
 # Create version file
+$RAZEN_VERSION | Out-File (Join-Path $installDir "version") -Force
+
+# Create empty __init__.py files
+New-Item -ItemType File -Path (Join-Path $installDir "__init__.py") -Force | Out-Null
+New-Item -ItemType File -Path (Join-Path $installDir "src\__init__.py") -Force | Out-Null
+
+Write-ColorOutput "  ✓ Copied files to installation directory" "Green"
+
+# Install Python dependencies
+Write-ColorOutput "Installing Python dependencies..." "Yellow"
 try {
-    $RAZEN_VERSION | Out-File -FilePath "$installDir\version" -Encoding UTF8
-    Write-ColorOutput "  ✓ Created version file" "Green"
+    pip install --user -r requirements.txt
+    Write-ColorOutput "  ✓ Installed Python dependencies" "Green"
 } catch {
-    Write-ColorOutput "  ✗ Failed to create version file" "Red"
-    Write-ColorOutput "    Error: $_" "Red"
-    Remove-Item -Path $TMP_DIR -Recurse -Force -ErrorAction SilentlyContinue
+    Write-ColorOutput "Failed to install Python dependencies. Please install them manually:" "Red"
+    Write-ColorOutput "  pip install --user -r requirements.txt" "Red"
+    Remove-Item $TMP_DIR -Recurse -Force
     exit 1
+}
+
+# Generate parser tables
+Write-ColorOutput "Generating parser tables..." "Yellow"
+$env:PYTHONPATH = "$TMP_DIR\src;$env:PYTHONPATH"
+
+# Clean up old parser tables
+Remove-Item (Join-Path $TMP_DIR "src\parser_parsetab.py") -ErrorAction SilentlyContinue
+Remove-Item (Join-Path $TMP_DIR "src\parser.out") -ErrorAction SilentlyContinue
+Remove-Item (Join-Path $TMP_DIR "src\razen_parsetab.py") -ErrorAction SilentlyContinue
+
+# Generate parser tables using Python
+$pythonScript = @"
+import os
+import sys
+os.chdir('src')
+try:
+    import ply.yacc as yacc
+    from lexer import tokens
+    from parser import *
+    
+    # Force clean build
+    parser = yacc.yacc(
+        debug=True,
+        write_tables=True,
+        tabmodule='parser_parsetab',
+        outputdir='.',
+        optimize=False,
+        errorlog=yacc.PlyLogger(sys.stderr)  # Enable error logging
+    )
+    print('Parser tables generated successfully')
+except Exception as e:
+    print(f'Error: {str(e)}')
+    import traceback
+    traceback.print_exc()
+    sys.exit(1)
+"@
+
+$pythonScript | Out-File (Join-Path $TMP_DIR "generate_parser.py") -Encoding UTF8
+
+try {
+    python (Join-Path $TMP_DIR "generate_parser.py")
+    Write-ColorOutput "  ✓ Generated parser tables" "Green"
+} catch {
+    Write-ColorOutput "Failed to generate parser tables. Please check the parser implementation." "Red"
+    Remove-Item $TMP_DIR -Recurse -Force
+    exit 1
+}
+
+# Copy generated parser tables to installation directory
+if (Test-Path (Join-Path $TMP_DIR "src\parser_parsetab.py")) {
+    Copy-Item (Join-Path $TMP_DIR "src\parser_parsetab.py") (Join-Path $installDir "src") -Force
+    Write-ColorOutput "  ✓ Copied parser tables" "Green"
 }
 
 # Create symbolic links
-$symlinkResult = Create-Symlinks -InstallDir $installDir -Scripts $scripts
-if ($symlinkResult -ne 0) {
-    Write-ColorOutput "Failed to create some symbolic links. Please check the errors above." "Red"
-    Remove-Item -Path $TMP_DIR -Recurse -Force -ErrorAction SilentlyContinue
-    exit 1
-}
-
-# Add to PATH
-try {
-    $userPath = [Environment]::GetEnvironmentVariable("Path", "User")
-    if ($userPath -notlike "*$installDir*") {
-        [Environment]::SetEnvironmentVariable("Path", $userPath + ";$installDir", "User")
-        Write-ColorOutput "  ✓ Added Razen to PATH" "Green"
-    }
-} catch {
-    Write-ColorOutput "  ✗ Failed to add Razen to PATH" "Red"
-    Write-ColorOutput "    Error: $_" "Red"
-    Remove-Item -Path $TMP_DIR -Recurse -Force -ErrorAction SilentlyContinue
+$scripts = @("razen", "razen-debug", "razen-test", "razen-run", "razen-update", "razen-help")
+$result = Create-Symlinks -InstallDir $installDir -Scripts $scripts
+if ($result -ne 0) {
+    Write-ColorOutput "Failed to create symbolic links." "Red"
+    Remove-Item $TMP_DIR -Recurse -Force
     exit 1
 }
 
 # Clean up
-Write-ColorOutput "`nCleaning up..." "Yellow"
-try {
-    Remove-Item -Path $TMP_DIR -Recurse -Force
-    Write-ColorOutput "  ✓ Cleaned up temporary files" "Green"
-} catch {
-    Write-ColorOutput "  ✗ Failed to clean up temporary files" "Red"
-    Write-ColorOutput "    Error: $_" "Red"
-}
+Remove-Item $TMP_DIR -Recurse -Force
+Write-ColorOutput "  ✓ Cleaned up temporary files" "Green"
 
 # Success message
 Write-ColorOutput "`n✅ Razen has been successfully installed!" "Green"
 Write-ColorOutput "`nAvailable commands:" "Yellow"
 Write-ColorOutput "  razen - Run Razen programs" "Green"
-Write-ColorOutput "  razen-debug - Run programs in debug mode" "Green"
-Write-ColorOutput "  razen-test - Run programs in test mode" "Green"
-Write-ColorOutput "  razen-run - Run programs with clean output" "Green"
+Write-ColorOutput "  razen-debug - Run Razen programs in debug mode" "Green"
+Write-ColorOutput "  razen-test - Run Razen tests" "Green"
+Write-ColorOutput "  razen-run - Run Razen programs with additional options" "Green"
 Write-ColorOutput "  razen-update - Update Razen to the latest version" "Green"
 Write-ColorOutput "  razen-help - Show help information" "Green"
-Write-ColorOutput "  razen new myprogram - Create a new program" "Green"
-Write-ColorOutput "  razen version - Show version information" "Green"
-Write-ColorOutput "  razen uninstall - Remove Razen from your system" "Green"
+Write-ColorOutput "  razen new myprogram - Create a new Razen program" "Green"
+Write-ColorOutput "  razen version - Show Razen version" "Green"
 
 Write-ColorOutput "`nExample usage:" "Yellow"
 Write-ColorOutput "  razen run hello_world.rzn - Run a Razen program" "Green"
@@ -456,4 +499,8 @@ Write-ColorOutput "  razen new myprogram - Create a new program" "Green"
 Write-ColorOutput "  razen-update - Update Razen" "Green"
 Write-ColorOutput "  razen-help - Get help" "Green"
 
-Write-ColorOutput "`nNote: You may need to restart your terminal for the PATH changes to take effect." "Yellow" 
+Write-ColorOutput "`nTo uninstall Razen:" "Yellow"
+Write-ColorOutput "  razen uninstall" "Green"
+
+Write-ColorOutput "`nNote: Razen is installed in C:\Program Files\Razen for security." "Yellow"
+Write-ColorOutput "Official website and documentation will be available soon." "Yellow" 

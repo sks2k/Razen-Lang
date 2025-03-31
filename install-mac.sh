@@ -2,7 +2,7 @@
 
 # Razen Language Installer for macOS
 # Copyright © 2025 Prathmesh Barot, Basai Corporation
-# Version: beta v0.1.36
+# Version: beta v0.1.4
 
 # Repository URL
 RAZEN_REPO="https://raw.githubusercontent.com/BasaiCorp/razen-lang/main"
@@ -14,7 +14,7 @@ else
     # Download version file if not present
     if ! curl -s -o version "$RAZEN_REPO/version" &>/dev/null; then
         echo -e "${RED}Failed to download version information. Using default version.${NC}"
-        RAZEN_VERSION="beta v0.1.36"
+        RAZEN_VERSION="beta v0.1.4"
     else
         RAZEN_VERSION=$(cat version)
     fi
@@ -248,7 +248,7 @@ fi
 echo -e "${GREEN}  ✓ Created installation directory${NC}"
 
 # Check if installation directory exists
-if [ -d "$INSTALL_DIR" ] && [ -f "$INSTALL_DIR/version" ]; then
+if [ -d "$INSTALL_DIR" ]; then
     if [ "$FORCE_UPDATE" == "true" ]; then
         echo -e "${YELLOW}Removing existing Razen installation...${NC}"
         sudo rm -rf "$INSTALL_DIR"
@@ -263,102 +263,178 @@ if [ -d "$INSTALL_DIR" ] && [ -f "$INSTALL_DIR/version" ]; then
             rm -rf "$TMP_DIR"
             exit 0
         fi
+        echo -e "${YELLOW}Updating Razen...${NC}"
+        sudo rm -rf "$INSTALL_DIR"
     fi
 fi
 
-# Download files
-echo -e "\n${YELLOW}Downloading Razen files...${NC}"
+sudo mkdir -p "$INSTALL_DIR"
+sudo mkdir -p "$INSTALL_DIR/src"
+sudo mkdir -p "$INSTALL_DIR/scripts"
+sudo mkdir -p "$INSTALL_DIR/properties"
+echo -e "  ${GREEN}✓${NC} Created installation directory"
 
-# Download main files
-files=(
-    "main.py"
-    "parser/parser.py"
-    "parser/lexer.py"
-    "parser/ast.py"
-    "utils/utils.py"
-    "utils/error.py"
-)
+# Download Razen files
+echo -e "${YELLOW}Downloading Razen files...${NC}"
 
-for file in "${files[@]}"; do
-    url="$RAZEN_REPO/$file"
-    outfile="$TMP_DIR/$(basename "$file")"
-    if ! curl -s -o "$outfile" "$url"; then
-        cleanup_and_exit "Failed to download $file"
+# Download main.py
+if ! curl -s -o "$TMP_DIR/main.py" "$RAZEN_REPO/main.py" &>/dev/null; then
+    cleanup_and_exit "Failed to download main.py"
+fi
+echo -e "  ${GREEN}✓${NC} Downloaded main.py"
+
+# Download src files
+for file in lexer.py parser.py interpreter.py runtime.py; do
+    if ! curl -s -o "$TMP_DIR/src/$file" "$RAZEN_REPO/src/$file" &>/dev/null; then
+        cleanup_and_exit "Failed to download src/$file"
     fi
-    echo -e "${GREEN}  ✓ Downloaded $file${NC}"
+    echo -e "  ${GREEN}✓${NC} Downloaded src/$file"
 done
 
-# Download scripts
-scripts=(
-    "razen"
-    "razen-debug"
-    "razen-test"
-    "razen-run"
-    "razen-update"
-    "razen-help"
-)
-
-if ! mkdir -p "$TMP_DIR/scripts"; then
-    cleanup_and_exit "Failed to create scripts directory"
-fi
-
-for script in "${scripts[@]}"; do
-    url="$RAZEN_REPO/scripts/$script"
-    outfile="$TMP_DIR/scripts/$script"
-    if ! curl -s -o "$outfile" "$url"; then
-        cleanup_and_exit "Failed to download $script"
+# Download properties files
+for file in variables.rzn keywords.rzn operators.rzn; do
+    if ! curl -s -o "$TMP_DIR/properties/$file" "$RAZEN_REPO/properties/$file" &>/dev/null; then
+        # Create empty file if download fails
+        touch "$TMP_DIR/properties/$file"
+        echo -e "  ${YELLOW}⚠${NC} Created empty properties/$file"
+    else
+        echo -e "  ${GREEN}✓${NC} Downloaded properties/$file"
     fi
-    echo -e "${GREEN}  ✓ Downloaded $script${NC}"
+done
+
+# Download script files
+for script in razen razen-debug razen-test razen-run razen-update razen-help; do
+    if ! curl -s -o "$TMP_DIR/scripts/$script" "$RAZEN_REPO/scripts/$script" &>/dev/null; then
+        # Create empty file if download fails
+        touch "$TMP_DIR/scripts/$script"
+        echo -e "  ${YELLOW}⚠${NC} Created empty scripts/$script"
+    else
+        echo -e "  ${GREEN}✓${NC} Downloaded scripts/$script"
+    fi
 done
 
 # Make scripts executable
-if ! chmod +x "$TMP_DIR/scripts/"*; then
-    cleanup_and_exit "Failed to make scripts executable"
-fi
-echo -e "${GREEN}  ✓ Made scripts executable${NC}"
+chmod +x "$TMP_DIR/scripts/"*
+echo -e "  ${GREEN}✓${NC} Made scripts executable"
 
 # Copy files to installation directory
-echo -e "\n${YELLOW}Installing files...${NC}"
-if ! cp -r "$TMP_DIR"/* "$INSTALL_DIR/"; then
-    cleanup_and_exit "Failed to copy files to installation directory"
-fi
-echo -e "${GREEN}  ✓ Copied files to installation directory${NC}"
+sudo cp "$TMP_DIR/main.py" "$INSTALL_DIR/"
+sudo cp "$TMP_DIR/src/"*.py "$INSTALL_DIR/src/" 2>/dev/null || true
+sudo cp "$TMP_DIR/properties/"*.rzn "$INSTALL_DIR/properties/"
+sudo cp "$TMP_DIR/scripts/"* "$INSTALL_DIR/scripts/"
 
-# Create version file
-if ! echo "$RAZEN_VERSION" > "$INSTALL_DIR/version"; then
-    cleanup_and_exit "Failed to create version file"
+# Download and save the latest installer script for future updates
+if ! curl -s -o "$TMP_DIR/install-mac.sh" "$RAZEN_REPO/install-mac.sh" &>/dev/null; then
+    echo -e "${YELLOW}Warning: Could not download latest installer script. Using current version instead.${NC}"
+    # If we're running from a downloaded script, copy it
+    if [ -f "$0" ] && [[ "$0" != "/usr/local/bin/"* ]]; then
+        sudo cp "$0" "$INSTALL_DIR/install-mac.sh"
+    fi
+else
+    sudo cp "$TMP_DIR/install-mac.sh" "$INSTALL_DIR/install-mac.sh"
+    sudo chmod +x "$INSTALL_DIR/install-mac.sh"
+    echo -e "${GREEN}  ✓${NC} Saved latest installer script for future updates"
 fi
-echo -e "${GREEN}  ✓ Created version file${NC}"
+
+# Create version file with proper permissions
+echo "$RAZEN_VERSION" | sudo tee "$INSTALL_DIR/version" > /dev/null
+
+# Create an empty __init__.py file in each directory to make them proper Python packages
+sudo touch "$INSTALL_DIR/__init__.py"
+sudo touch "$INSTALL_DIR/src/__init__.py"
+
+# Set proper permissions
+sudo chmod -R 755 "$INSTALL_DIR"
+sudo chown -R root:wheel "$INSTALL_DIR"
+
+echo -e "  ${GREEN}✓${NC} Copied files to installation directory"
+
+# Install Python dependencies
+echo -e "${YELLOW}Installing Python dependencies...${NC}"
+if ! pip3 install --user -r requirements.txt; then
+    echo -e "${RED}Failed to install Python dependencies. Please install them manually:${NC}"
+    echo -e "  pip3 install --user -r requirements.txt"
+    rm -rf "$TMP_DIR"
+    exit 1
+fi
+echo -e "  ${GREEN}✓${NC} Installed Python dependencies"
+
+# Generate parser tables
+echo -e "${YELLOW}Generating parser tables...${NC}"
+cd "$TMP_DIR"
+export PYTHONPATH="$TMP_DIR/src:$PYTHONPATH"
+
+# Clean up old parser tables
+rm -f "$TMP_DIR/src/parser_parsetab.py" "$TMP_DIR/src/parser.out" "$TMP_DIR/src/razen_parsetab.py"
+
+if ! python3 -c "
+import os
+import sys
+os.chdir('src')
+try:
+    import ply.yacc as yacc
+    from lexer import tokens
+    from parser import *
+    
+    # Force clean build
+    parser = yacc.yacc(
+        debug=True,
+        write_tables=True,
+        tabmodule='parser_parsetab',
+        outputdir='.',
+        optimize=False,
+        errorlog=yacc.PlyLogger(sys.stderr)  # Enable error logging
+    )
+    print('Parser tables generated successfully')
+except Exception as e:
+    print(f'Error: {str(e)}')
+    import traceback
+    traceback.print_exc()
+    sys.exit(1)
+"; then
+    echo -e "${RED}Failed to generate parser tables. Please check the parser implementation.${NC}"
+    rm -rf "$TMP_DIR"
+    exit 1
+fi
+
+# Copy generated parser tables to installation directory
+if [ -f "$TMP_DIR/src/parser_parsetab.py" ]; then
+    sudo cp "$TMP_DIR/src/parser_parsetab.py" "$INSTALL_DIR/src/"
+    echo -e "  ${GREEN}✓${NC} Copied parser tables"
+fi
+
+cd - > /dev/null
+echo -e "  ${GREEN}✓${NC} Generated parser tables"
 
 # Create symbolic links
 create_symlinks "$INSTALL_DIR"
+if [ $? -ne 0 ]; then
+    echo -e "${RED}Failed to create symbolic links.${NC}"
+    rm -rf "$TMP_DIR"
+    exit 1
+fi
 
 # Clean up
-echo -e "\n${YELLOW}Cleaning up...${NC}"
-if ! rm -rf "$TMP_DIR"; then
-    echo -e "${RED}  ✗ Failed to clean up temporary files${NC}"
-    echo -e "${RED}    Error: $?${NC}"
-else
-    echo -e "${GREEN}  ✓ Cleaned up temporary files${NC}"
-fi
+rm -rf "$TMP_DIR"
+echo -e "  ${GREEN}✓${NC} Cleaned up temporary files"
 
 # Success message
 echo -e "\n${GREEN}✅ Razen has been successfully installed!${NC}"
 echo -e "\n${YELLOW}Available commands:${NC}"
 echo -e "  ${GREEN}razen${NC} - Run Razen programs"
-echo -e "  ${GREEN}razen-debug${NC} - Run programs in debug mode"
-echo -e "  ${GREEN}razen-test${NC} - Run programs in test mode"
-echo -e "  ${GREEN}razen-run${NC} - Run programs with clean output"
+echo -e "  ${GREEN}razen-debug${NC} - Run Razen programs in debug mode"
+echo -e "  ${GREEN}razen-test${NC} - Run Razen tests"
+echo -e "  ${GREEN}razen-run${NC} - Run Razen programs with additional options"
 echo -e "  ${GREEN}razen-update${NC} - Update Razen to the latest version"
 echo -e "  ${GREEN}razen-help${NC} - Show help information"
-echo -e "  ${GREEN}razen new myprogram${NC} - Create a new program"
-echo -e "  ${GREEN}razen version${NC} - Show version information"
-echo -e "  ${GREEN}razen uninstall${NC} - Remove Razen from your system"
-
+echo -e "  ${GREEN}razen new myprogram${NC} - Create a new Razen program"
+echo -e "  ${GREEN}razen version${NC} - Show Razen version"
 echo -e "\n${YELLOW}Example usage:${NC}"
 echo -e "  ${GREEN}razen run hello_world.rzn${NC} - Run a Razen program"
 echo -e "  ${GREEN}razen new myprogram${NC} - Create a new program"
 echo -e "  ${GREEN}razen-update${NC} - Update Razen"
 echo -e "  ${GREEN}razen-help${NC} - Get help"
-
-echo -e "\n${YELLOW}Note:${NC} You may need to restart your terminal for the changes to take effect." 
+echo -e "\n${YELLOW}To uninstall Razen:${NC}"
+echo -e "  ${GREEN}razen uninstall${NC}"
+echo -e "\n${YELLOW}Note:${NC} Razen is installed in ${GREEN}/usr/local/razen${NC} for security."
+echo -e "${YELLOW}Official website and documentation will be available soon.${NC}" 
