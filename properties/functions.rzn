@@ -1,0 +1,232 @@
+# Razen Standard Functions
+# This file contains the standard function definitions for Razen
+
+# Mathematical Functions
+func add(let a, let b) {
+    sum = a + b;
+    return sum;
+}
+
+func subtract(let a, let b) {
+    diff = a - b;
+    return diff;
+}
+
+func multiply(let a, let b) {
+    prod = a * b;
+    return prod;
+}
+
+func divide(let a, let b) {
+    if (b is 0) {
+        throw "Division by zero error";
+    }
+    div = a / b;
+    return div;
+}
+
+func power(let base, let exponent) {
+    prod = base ^ exponent;
+    return prod;
+}
+
+func sqrt(let number) {
+    if (number < 0) {
+        throw "Cannot calculate square root of negative number";
+    }
+    sum = number ^ 0.5;
+    return sum;
+}
+
+# String Functions
+func length(text str) {
+    len = str.length;
+    return len;
+}
+
+func concat(text str1, text str2) {
+    text result = str1 + str2;
+    return result;
+}
+
+func substring(text str, let start, let length) {
+    slice = str[start:start + length];
+    return slice;
+}
+
+func toUpperCase(text str) {
+    text result = str.toUpperCase();
+    return result;
+}
+
+func toLowerCase(text str) {
+    text result = str.toLowerCase();
+    return result;
+}
+
+# Array Functions
+func arrayLength(list arr) {
+    len = arr.length;
+    return len;
+}
+
+func arrayPush(list arr, put item) {
+    append = arr.push(item);
+    return append;
+}
+
+func arrayPop(list arr) {
+    put result = arr.pop();
+    return result;
+}
+
+func arrayShift(list arr) {
+    put result = arr.shift();
+    return result;
+}
+
+func arrayUnshift(list arr, put item) {
+    append = arr.unshift(item);
+    return append;
+}
+
+# Type Functions
+func isNumber(put value) {
+    hold result = typeof value is "number";
+    return result;
+}
+
+func isString(put value) {
+    hold result = typeof value is "string";
+    return result;
+}
+
+func isArray(put value) {
+    hold result = Array.isArray(value);
+    return result;
+}
+
+func isObject(put value) {
+    hold result = typeof value is "object" && value is not null;
+    return result;
+}
+
+func isNull(put value) {
+    hold result = value is null;
+    return result;
+}
+
+# Utility Functions
+func random(let min, let max) {
+    sum = Math.random() * (max - min) + min;
+    return sum;
+}
+
+func round(let number) {
+    sum = Math.round(number);
+    return sum;
+}
+
+func floor(let number) {
+    sum = Math.floor(number);
+    return sum;
+}
+
+func ceil(let number) {
+    sum = Math.ceil(number);
+    return sum;
+}
+
+func abs(let number) {
+    sum = Math.abs(number);
+    return sum;
+}
+
+# Date Functions
+func getCurrentTime() {
+    now = Date.now();
+    return now;
+}
+
+func formatDate(let timestamp) {
+    text result = new Date(timestamp).toISOString();
+    return result;
+}
+
+# Error Handling Functions
+func throwError(text message) {
+    throw message;
+}
+
+func tryCatch(func tryBlock, func catchBlock) {
+    try {
+        return tryBlock();
+    } catch (error) {
+        return catchBlock(error);
+    }
+}
+
+# Object Functions
+func objectKeys(map obj) {
+    list keys = Object.keys(obj);
+    return keys;
+}
+
+func objectValues(map obj) {
+    list values = Object.values(obj);
+    return values;
+}
+
+func objectEntries(map obj) {
+    list entries = Object.entries(obj);
+    return entries;
+}
+
+# Async Functions
+func sleep(let ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+func fetch(text url) {
+    return new Promise((resolve, reject) => {
+        // Implementation will be added in runtime
+        throw "Not implemented";
+    });
+}
+
+# File System Functions
+func readFile(text path) {
+    // Implementation will be added in runtime
+    throw "Not implemented";
+}
+
+func writeFile(text path, text content) {
+    // Implementation will be added in runtime
+    throw "Not implemented";
+}
+
+func appendFile(text path, text content) {
+    // Implementation will be added in runtime
+    throw "Not implemented";
+}
+
+# Network Functions
+func httpGet(text url) {
+    // Implementation will be added in runtime
+    throw "Not implemented";
+}
+
+func httpPost(text url, put data) {
+    // Implementation will be added in runtime
+    throw "Not implemented";
+}
+
+func httpPut(text url, put data) {
+    // Implementation will be added in runtime
+    throw "Not implemented";
+}
+
+func httpDelete(text url) {
+    // Implementation will be added in runtime
+    throw "Not implemented";
+}

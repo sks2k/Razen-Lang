@@ -247,7 +247,7 @@ for file in lexer.py parser.py interpreter.py runtime.py; do
 done
 
 # Download properties files
-for file in variables.rzn keywords.rzn operators.rzn; do
+for file in variables.rzn keywords.rzn operators.rzn functions.rzn; do
     if ! curl -s -o "$TMP_DIR/properties/$file" "$RAZEN_REPO/properties/$file" &>/dev/null; then
         # Create empty file if download fails
         touch "$TMP_DIR/properties/$file"

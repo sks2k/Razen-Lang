@@ -254,18 +254,14 @@ class Lexer:
         return t
 
     def t_ID(self, t):
-        r'[a-zA-Z_][a-zA-Z0-9_]*'
-        t.type = keywords.get(t.value, 'ID') # Check for keywords
-        if t.type == 'TRUE': t.value = True
-        elif t.type == 'FALSE': t.value = False
-        elif t.type == 'NULL': t.value = None
+        r'[a-zA-Z_][a-zA-Z_0-9]*'
+        t.type = keywords.get(t.value, 'ID')
         return t
 
     # Rule for starting a string literal
     def t_STRING_START(self, t):
         r'"'
-        t.lexer.push_state('interpolation') # Enter interpolation mode
-        self.interpolation_stack.append(t.lexer.lineno) # Store line for errors
+        self.interpolation_stack.append(0)
         return t
 
     def t_newline(self, t):
@@ -274,44 +270,30 @@ class Lexer:
 
     # Error handling in INITIAL state
     def t_error(self, t):
-        col = self._find_column(t.lexpos)
-        print(f"Lexer Error (INITIAL): Illegal character '{t.value[0]}' at line {t.lexer.lineno}, column {col}", file=sys.stderr)
+        print(f"Illegal character '{t.value[0]}' at line {t.lineno}, position {t.lexpos}")
         t.lexer.skip(1)
 
     # --- interpolation State Rules ---
 
     # Match the start of an interpolation expression ${
-    def t_interpolation_INTERPOL_START(self, t):
-        r'\${'
-        self.bracket_count = 1  # Initialize bracket counter
-        t.lexer.push_state('INITIAL') # Temporarily switch back to INITIAL to parse the expression
+    def t_INTERPOL_START(self, t):
+        r'\$\{'
+        if self.interpolation_stack:
+            self.interpolation_stack[-1] += 1
+            self.lexer.push_state('interpolation')
         return t
 
     # Match the literal text part inside the string
-    def t_interpolation_STRING_LITERAL(self, t):
-        r'([^"\\$]|\\["\\$nrt]|\\[^"${])+' # Match anything that isn't ", \, or $, or escapes
-        # Process escape sequences consistently
-        value = t.value
-        # Handle common escape sequences
-        value = value.replace('\\n', '\n')
-        value = value.replace('\\t', '\t')
-        value = value.replace('\\"', '"')
-        value = value.replace('\\\\', '\\')
-        value = value.replace('\\$', '$')
-        value = value.replace('\\{', '{')
-        t.value = value
+    def t_STRING_LITERAL(self, t):
+        r'"[^"]*"'
+        t.value = t.value[1:-1]  # Remove quotes
         return t
 
     # Match the end of the string "
-    def t_interpolation_STRING_END(self, t):
+    def t_STRING_END(self, t):
         r'"'
-        if not self.interpolation_stack:
-            # This shouldn't happen with correct state management, but safety check
-            print(f"Lexer Error: Unexpected string end '\"' at line {t.lexer.lineno}", file=sys.stderr)
-            t.lexer.skip(1)
-            return None
-        self.interpolation_stack.pop()
-        t.lexer.pop_state() # Go back to previous state (usually INITIAL)
+        if self.interpolation_stack:
+            self.interpolation_stack.pop()
         return t
 
     def t_interpolation_newline(self, t):
@@ -320,10 +302,7 @@ class Lexer:
 
     # Error handling in interpolation state
     def t_interpolation_error(self, t):
-        start_line = self.interpolation_stack[-1] if self.interpolation_stack else '?'
-        col = self._find_column(t.lexpos)
-        print(f"Lexer Error (in String starting line {start_line}): Unexpected character '{t.value[0]}' at line {t.lexer.lineno}, column {col}", file=sys.stderr)
-        # Attempt recovery: try skipping character and staying in interpolation state
+        print(f"Illegal character in interpolation '{t.value[0]}' at line {t.lineno}, position {t.lexpos}")
         t.lexer.skip(1)
 
     # --- INITIAL State (Resumed inside ${...}) ---

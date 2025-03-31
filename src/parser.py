@@ -95,13 +95,13 @@ def p_param(p):
 
 # --- Input/Output Statements ---
 def p_show_stmt(p):
-    'show_stmt : SHOW expression SEMICOLON'
+    '''show_stmt : SHOW expression SEMICOLON'''
     p[0] = ('show', p[2])
 
 def p_read_stmt(p):
-    '''read_stmt : READ ID opt_assign_expression
-                | READ ID'''
-    if len(p) == 4:
+    '''read_stmt : READ ID opt_assign_expression SEMICOLON
+                | READ ID SEMICOLON'''
+    if len(p) == 5:
         p[0] = ('read', p[2], p[3])
     else:
         p[0] = ('read', p[2], None)
@@ -294,28 +294,24 @@ def p_arg_list_single(p):
     p[0] = [p[1]]
 
 def p_interpolated_string(p):
-    '''interpolated_string : STRING_START string_contents STRING_END'''
+    '''interpolated_string : STRING_START interpolated_parts STRING_END'''
     p[0] = ('interpolated_string', p[2])
 
-def p_string_contents_list(p):
-    '''string_contents : string_contents string_part'''
-    p[0] = p[1] + [p[2]]
+def p_interpolated_parts(p):
+    '''interpolated_parts : interpolated_parts interpolated_part
+                         | interpolated_part'''
+    if len(p) == 3:
+        p[0] = p[1] + [p[2]]
+    else:
+        p[0] = [p[1]]
 
-def p_string_contents_single(p):
-    '''string_contents : string_part'''
-    p[0] = [p[1]]
-
-def p_string_contents_empty(p):
-    '''string_contents : empty'''
-    p[0] = []
-
-def p_string_part(p):
-    '''string_part : STRING_LITERAL
-                  | INTERPOL_START expression INTERPOL_END'''
+def p_interpolated_part(p):
+    '''interpolated_part : STRING_LITERAL
+                        | INTERPOL_START expression INTERPOL_END'''
     if len(p) == 2:
         p[0] = ('literal', p[1])
     else:
-        p[0] = p[2]
+        p[0] = ('interpolate', p[2])
 
 def p_expression_reference(p):
     '''expression : AMPERSAND ID %prec AMPERSAND'''
