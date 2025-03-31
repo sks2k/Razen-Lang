@@ -4,7 +4,13 @@
 import os
 import ply.yacc as yacc
 import sys
+
 from lexer import tokens, lexer as razel_lexer
+
+# Add the parent directory to the Python path
+current_dir = os.path.dirname(os.path.abspath(__file__))
+parent_dir = os.path.dirname(current_dir)
+sys.path.insert(0, parent_dir)
 
 # --- AST Node Definitions (Using tuples for simplicity) ---
 # Program: ('program', [statements])
@@ -19,78 +25,44 @@ def p_program(p):
     p[0] = ('program', p[1] if p[1] else [])
 
 def p_statements_list(p):
-    '''statements : statements statement
-                 | statements block_stmt'''
-    if p[2]:
-        p[0] = p[1] + [p[2]]
+    '''statements : statement statements
+                 | empty'''
+    if len(p) == 3:
+        p[0] = [p[1]] + p[2] if p[2] else [p[1]]
     else:
-        p[0] = p[1]
+        p[0] = []
 
-def p_statements_single(p):
-    '''statements : statement
-                 | block_stmt'''
-    p[0] = [p[1]] if p[1] else []
-
-def p_statements_empty(p):
-    '''statements : empty'''
-    p[0] = []
+def p_statement(p):
+    '''statement : variable_decl
+                | function_decl
+                | show_stmt
+                | if_stmt
+                | while_stmt
+                | return_stmt
+                | expression_stmt
+                | block_stmt
+                | empty_stmt'''
+    p[0] = p[1]
 
 def p_block_stmt(p):
     '''block_stmt : LBRACE statements RBRACE'''
     p[0] = ('block', p[2])
 
-# --- Statement Types ---
-def p_statement(p):
-    '''statement : variable_decl
-                 | reference_decl
-                 | function_decl
-                 | show_stmt
-                 | print_stmt
-                 | read_stmt
-                 | if_stmt
-                 | when_stmt
-                 | while_stmt
-                 | return_stmt
-                 | expression_stmt'''
-    p[0] = p[1]
+def p_empty_stmt(p):
+    '''empty_stmt : SEMICOLON'''
+    p[0] = None
+
+def p_empty(p):
+    'empty :'
+    p[0] = []
 
 # --- Variable Declaration ---
 def p_variable_decl(p):
-    '''variable_decl : LET ID ASSIGN expression
-                     | TAKE ID ASSIGN expression
-                     | HOLD ID ASSIGN expression
-                     | PUT ID ASSIGN expression
-                     | SUM ID ASSIGN expression
-                     | DIFF ID ASSIGN expression
-                     | PROD ID ASSIGN expression
-                     | DIV ID ASSIGN expression
-                     | MOD ID ASSIGN expression
-                     | TEXT ID ASSIGN expression
-                     | CONCAT ID ASSIGN expression
-                     | SLICE ID ASSIGN expression
-                     | LEN ID ASSIGN expression
-                     | LIST ID ASSIGN expression
-                     | ARR ID ASSIGN expression
-                     | APPEND ID ASSIGN expression
-                     | REMOVE ID ASSIGN expression
-                     | MAP ID ASSIGN expression
-                     | KEY ID ASSIGN expression
-                     | VALUE ID ASSIGN expression
-                     | CURRENT ID ASSIGN expression
-                     | NOW ID ASSIGN expression
-                     | YEAR ID ASSIGN expression
-                     | MONTH ID ASSIGN expression
-                     | DAY ID ASSIGN expression
-                     | HOUR ID ASSIGN expression
-                     | MINUTE ID ASSIGN expression
-                     | SECOND ID ASSIGN expression
-                     | STORE ID ASSIGN expression
-                     | BOX ID ASSIGN expression
-                     | REF ID ASSIGN ref_expression'''
-    if p[1] == 'ref' and len(p) == 5:
-        p[0] = ('var_decl', p[1], p[2], p[4])
-    else:
-        p[0] = ('var_decl', p[1], p[2], p[4])
+    '''variable_decl : LET ID ASSIGN expression SEMICOLON
+                    | TAKE ID ASSIGN expression SEMICOLON
+                    | HOLD ID ASSIGN expression SEMICOLON
+                    | PUT ID ASSIGN expression SEMICOLON'''
+    p[0] = ('var_decl', p[1], p[2], p[4])
 
 def p_ref_expression(p):
     '''ref_expression : AMPERSAND ID'''
@@ -120,20 +92,8 @@ def p_param(p):
 
 # --- Input/Output Statements ---
 def p_show_stmt(p):
-    '''show_stmt : SHOW expression opt_colon_expression
-                | SHOW expression'''
-    if len(p) == 4:  # Includes colon expression
-        p[0] = ('show', p[2], p[3])
-    else:
-        p[0] = ('show', p[2], None)
-
-def p_print_stmt(p):
-    '''print_stmt : PRINT expression opt_colon_expression
-                 | PRINT expression'''
-    if len(p) == 4:
-        p[0] = ('print', p[2], p[3])
-    else:
-        p[0] = ('print', p[2], None)
+    'show_stmt : SHOW expression SEMICOLON'
+    p[0] = ('show', p[2])
 
 def p_read_stmt(p):
     '''read_stmt : READ ID opt_assign_expression
@@ -175,20 +135,17 @@ def p_while_stmt(p):
     p[0] = ('while', p[2], p[3])
 
 def p_return_stmt(p):
-    '''return_stmt : RETURN expression
-                  | RETURN'''
-    if len(p) == 3:
+    '''return_stmt : RETURN expression SEMICOLON
+                  | RETURN SEMICOLON'''
+    if len(p) == 4:
         p[0] = ('return', p[2])
     else:
         p[0] = ('return', None)
 
 # --- Expression Statement ---
 def p_expression_stmt(p):
-    '''expression_stmt : expression'''
-    if isinstance(p[1], tuple) and p[1][0] in ('assign', 'call', 'member'):
-        p[0] = p[1]
-    else:
-        p[0] = ('expression_stmt', p[1])
+    '''expression_stmt : expression SEMICOLON'''
+    p[0] = ('expression_stmt', p[1])
 
 # --- Expressions ---
 precedence = (
@@ -247,8 +204,7 @@ def p_expression_terminals(p):
                  | list_expression
                  | map_expression
                  | member_expression
-                 | index_expression
-                 | slice_expression'''
+                 | index_expression'''
     p[0] = p[1]
 
 def p_member_expression(p):
@@ -304,14 +260,11 @@ def p_map_item(p):
 def p_literal(p):
     '''literal : INTEGER
                | FLOAT
+               | STRING_LITERAL
                | TRUE
                | FALSE
-               | NULL
-               | STRING_LITERAL'''
-    if isinstance(p[1], str) and p.slice[1].type == 'STRING_LITERAL':
-        p[0] = ('literal', p[1])
-    else:
-        p[0] = ('literal', p[1])
+               | NULL'''
+    p[0] = ('literal', p[1])
 
 def p_function_call(p):
     '''function_call : ID LPAREN args_opt RPAREN'''
@@ -354,10 +307,6 @@ def p_string_part(p):
     else:
         p[0] = p[2]
 
-def p_empty(p):
-    '''empty :'''
-    p[0] = None
-
 def p_expression_reference(p):
     '''expression : AMPERSAND ID %prec AMPERSAND'''
     p[0] = ('reference', p[2])
@@ -365,35 +314,25 @@ def p_expression_reference(p):
 # --- Error Rule ---
 def p_error(p):
     if p:
-        try:
-            line = p.lineno
-            col = razel_lexer._find_column(p.lexpos) if hasattr(razel_lexer, '_find_column') else '?'
-            print(f"Syntax error at line {line}, column {col}: Unexpected token '{p.type}' ('{p.value}')", file=sys.stderr)
-        except AttributeError:
-            print(f"Syntax error: Unexpected token '{getattr(p, 'type', 'UNKNOWN')}' ('{getattr(p, 'value', 'UNKNOWN')}')", file=sys.stderr)
+        print(f"Syntax error at line {p.lineno}, position {p.lexpos}: Unexpected token '{p.value}'")
     else:
-        print("Syntax error: Unexpected end of file (perhaps missing closing '}', ']', or '\"'?)", file=sys.stderr)
+        print("Syntax error: Unexpected end of file")
 
 # --- Build the parser ---
 try:
-    output_dir = os.path.dirname(__file__) or '.'
-    tabmodule_name = "razen_parsetab_interp"
+    output_dir = os.path.dirname(os.path.abspath(__file__))
+    tabmodule_name = "parser_parsetab"
     parser = yacc.yacc(
-        module=sys.modules[__name__],
-        outputdir=output_dir,
-        tabmodule=tabmodule_name,
-        debug=False,
-        errorlog=yacc.NullLogger(),
-        optimize=1,
+        debug=True,
         write_tables=True,
-        picklefile=tabmodule_name + ".pickle"
+        optimize=False,
+        errorlog=yacc.NullLogger(),
+        tabmodule=f'src.{tabmodule_name}',
+        outputdir=output_dir
     )
-    print("Parser built successfully.")
 except Exception as e:
-    print(f"CRITICAL ERROR: Failed to build parser: {e}", file=sys.stderr)
-    import traceback
-    traceback.print_exc()
-    raise SystemExit("Parser construction failed.")
+    print(f"Error initializing parser: {e}")
+    raise
 
 def parse(code_string, debug=False):
     """Parses a Razen code string."""
@@ -437,7 +376,7 @@ def parse(code_string, debug=False):
 
 # --- Example Usage ---
 if __name__ == '__main__':
-    from lexer import tokenize as razel_tokenize
+    from src.lexer import tokenize as razel_tokenize
 
     test_code = """
     // Example Razen code showcasing all variable types

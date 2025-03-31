@@ -61,13 +61,6 @@ store => for reusable values.
 box => for storing temporary data.  
 ref => for reference variables.  
 
-// 8️⃣ User-Defined Variables for custom variables:
-
-store => for reusable values.  
-box => for storing temporary data.  
-ref => for reference variables.  
-
 // 9️⃣ Input/Output Variables
 show => for printing output
-print => Alias for outputting values (consider removing if 'show' is primary)
 read => for reading input

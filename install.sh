@@ -229,7 +229,7 @@ fi
 echo -e "  ${GREEN}✓${NC} Downloaded main.py"
 
 # Download src files
-for file in lexer.py parser.py interpreter.py runtime.py razen_parsetab_interp.py parser_parsetab.py; do
+for file in lexer.py parser.py interpreter.py runtime.py razen_parsetab.py parser_parsetab.py parser.out; do
     if ! curl -s -o "$TMP_DIR/src/$file" "$RAZEN_REPO/src/$file" &>/dev/null; then
         echo -e "${RED}Failed to download src/$file${NC}"
         rm -rf "$TMP_DIR"
@@ -295,6 +295,7 @@ echo -e "  ${GREEN}✓${NC} Created installation directory"
 # Copy files to installation directory
 sudo cp "$TMP_DIR/main.py" "$INSTALL_DIR/"
 sudo cp "$TMP_DIR/src/"*.py "$INSTALL_DIR/src/"
+sudo cp "$TMP_DIR/src/parser.out" "$INSTALL_DIR/src/"
 sudo cp "$TMP_DIR/properties/"*.rzn "$INSTALL_DIR/properties/"
 sudo cp "$TMP_DIR/scripts/"* "$INSTALL_DIR/scripts/"
 
@@ -333,6 +334,53 @@ if ! pip3 install --user -r requirements.txt; then
     exit 1
 fi
 echo -e "  ${GREEN}✓${NC} Installed Python dependencies"
+
+# Generate parser tables
+echo -e "${YELLOW}Generating parser tables...${NC}"
+cd "$TMP_DIR"
+export PYTHONPATH="$TMP_DIR/src:$PYTHONPATH"
+
+# Clean up old parser tables
+rm -f "$TMP_DIR/src/parser_parsetab.py" "$TMP_DIR/src/parser.out" "$TMP_DIR/src/razen_parsetab.py"
+
+if ! python3 -c "
+import os
+import sys
+os.chdir('src')
+try:
+    import ply.yacc as yacc
+    from lexer import tokens
+    from parser import *
+    
+    # Force clean build
+    yacc.yacc(
+        debug=True,
+        write_tables=True,
+        tabmodule='parser_parsetab',
+        outputdir='.',
+        optimize=False,
+        errorlog=yacc.NullLogger()
+    )
+    print('Parser tables generated successfully')
+except Exception as e:
+    print(f'Error: {str(e)}')
+    import traceback
+    traceback.print_exc()
+    sys.exit(1)
+"; then
+    echo -e "${RED}Failed to generate parser tables. Please check the parser implementation.${NC}"
+    rm -rf "$TMP_DIR"
+    exit 1
+fi
+
+# Copy generated parser tables to installation directory
+if [ -f "$TMP_DIR/src/parser_parsetab.py" ]; then
+    sudo cp "$TMP_DIR/src/parser_parsetab.py" "$INSTALL_DIR/src/"
+    echo -e "  ${GREEN}✓${NC} Copied parser tables"
+fi
+
+cd - > /dev/null
+echo -e "  ${GREEN}✓${NC} Generated parser tables"
 
 # Create symbolic links
 create_symlinks "$INSTALL_DIR"

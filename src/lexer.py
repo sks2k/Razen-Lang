@@ -1,15 +1,31 @@
 # src/lexer.py
-# Razen Lexer using PLY (Revised for Interpolation and Complete Keywords Set)
+# Enhanced Lexer for RAZEN (Revised for Interpolation and Optional Semicolons)
 
 import ply.lex as lex
+import os
 import sys
 import re
-import os
 
 # --- Read Variable Definitions from properties/variables.rzn ---
 def read_variables_from_file():
-    variables_file = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'properties', 'variables.rzn')
     try:
+        # Try to find the variables.rzn file in multiple locations
+        possible_paths = [
+            os.path.join(os.path.dirname(os.path.dirname(__file__)), 'properties', 'variables.rzn'),
+            os.path.join('/usr/local/lib/razen', 'properties', 'variables.rzn'),
+            os.path.join(os.path.dirname(__file__), '..', 'properties', 'variables.rzn'),
+            os.path.join(os.getcwd(), 'properties', 'variables.rzn')
+        ]
+        
+        variables_file = None
+        for path in possible_paths:
+            if os.path.exists(path):
+                variables_file = path
+                break
+        
+        if not variables_file:
+            raise FileNotFoundError("Could not find variables.rzn in any of the expected locations")
+        
         with open(variables_file, 'r') as f:
             content = f.read()
         
@@ -59,7 +75,7 @@ def read_variables_from_file():
         if 'if' not in matches:
             matches.extend(['if', 'else', 'is', 'when', 'not'])
         if 'show' not in matches:
-            matches.extend(['show', 'print', 'read'])
+            matches.extend(['show', 'read'])
             
         for var in matches:
             token_name = var.strip().upper()
@@ -114,7 +130,7 @@ else:
         'STORE', 'BOX', 'REF',
         
         # 9️⃣ Input/Output Variables
-        'SHOW', 'PRINT', 'READ',
+        'SHOW', 'READ',
         
         # Additional keywords (from original implementation)
         'WHILE', 'FUN', 'RETURN',
@@ -169,7 +185,7 @@ else:
         'store': 'STORE', 'box': 'BOX', 'ref': 'REF',
         
         # 9️⃣ Input/Output Variables
-        'show': 'SHOW', 'print': 'PRINT', 'read': 'READ',
+        'show': 'SHOW', 'read': 'READ',
         
         # Additional keywords (from original implementation)
         'while': 'WHILE', 'fun': 'FUN', 'return': 'RETURN',
@@ -448,7 +464,6 @@ if __name__ == '__main__':
         
         # Input/Output variables
         'show "Output: ${value}"',
-        'print("Debug info:", debugValue)',
         'read userInput = prompt("Enter value:")',
         
         # Special test cases
