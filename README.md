@@ -22,7 +22,9 @@ Developed by Prathmesh Barot, Basai Corporation.
 ```bash
 # Using curl
 curl -o install.sh "https://raw.githubusercontent.com/BasaiCorp/razen-lang/main/install.sh" && chmod +x install.sh && sudo ./install.sh
+```
 
+```bash
 # Using wget
 wget -O install.sh "https://raw.githubusercontent.com/BasaiCorp/razen-lang/main/install.sh" && chmod +x install.sh && sudo ./install.sh
 ```
@@ -31,7 +33,9 @@ wget -O install.sh "https://raw.githubusercontent.com/BasaiCorp/razen-lang/main/
 ```bash
 # Using curl
 curl -o install-mac.sh "https://raw.githubusercontent.com/BasaiCorp/razen-lang/main/install-mac.sh" && chmod +x install-mac.sh && sudo ./install-mac.sh
+```
 
+```bash
 # Using Homebrew (coming soon)
 brew install razen
 ```
@@ -39,10 +43,20 @@ brew install razen
 ### Windows
 ```powershell
 # Using PowerShell (Run as Administrator)
+# First, create a temporary directory and change to it
+cd $env:USERPROFILE\Desktop
+# Download and run the installer
 Invoke-WebRequest -Uri "https://raw.githubusercontent.com/BasaiCorp/razen-lang/main/install.ps1" -OutFile "install.ps1"; .\install.ps1
+```
 
-# Using Command Prompt (coming soon)
-curl -o install.bat "https://raw.githubusercontent.com/BasaiCorp/razen-lang/main/install.bat" && install.bat
+```powershell
+# Alternative method (if the above doesn't work):
+# 1. Open PowerShell as Administrator
+# 2. Run these commands:
+cd $env:USERPROFILE\Desktop
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+Invoke-WebRequest -Uri "https://raw.githubusercontent.com/BasaiCorp/razen-lang/main/install.ps1" -OutFile "install.ps1"
+.\install.ps1
 ```
 
 This will download and install Razen globally on your system, making the `razen` command available from anywhere.

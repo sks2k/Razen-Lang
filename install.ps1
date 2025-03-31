@@ -2,6 +2,9 @@
 # Copyright © 2025 Prathmesh Barot, Basai Corporation
 # Version: beta v0.1.3
 
+# Enable TLS 1.2 for all web requests
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+
 # Repository URL
 $RAZEN_REPO = "https://raw.githubusercontent.com/BasaiCorp/razen-lang/main"
 $RAZEN_VERSION = "beta v0.1.3"
@@ -35,6 +38,7 @@ function Check-ForUpdates {
         }
     } catch {
         Write-ColorOutput "Failed to check for updates. Please check your internet connection." "Red"
+        Write-ColorOutput "Error: $_" "Red"
         return 1
     }
 }
@@ -53,6 +57,7 @@ function Perform-Update {
         return $LASTEXITCODE
     } catch {
         Write-ColorOutput "Failed to download the latest installer." "Red"
+        Write-ColorOutput "Error: $_" "Red"
         return 1
     }
 }
@@ -73,6 +78,10 @@ function Create-Symlinks {
         
         if (Test-Path $target) {
             try {
+                # Remove existing symlink if it exists
+                if (Test-Path $link) {
+                    Remove-Item $link -Force
+                }
                 New-Item -ItemType SymbolicLink -Path $link -Target $target -Force | Out-Null
                 Write-ColorOutput "  ✓ Created symbolic link for $script" "Green"
             } catch {
@@ -142,6 +151,11 @@ $isAdmin = ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIde
 if (-not $isAdmin) {
     Write-ColorOutput "This script requires administrator privileges." "Red"
     Write-ColorOutput "Please run PowerShell as administrator and try again." "Yellow"
+    Write-ColorOutput "`nTo run as administrator:" "Yellow"
+    Write-ColorOutput "1. Right-click on PowerShell" "Green"
+    Write-ColorOutput "2. Select 'Run as administrator'" "Green"
+    Write-ColorOutput "3. Navigate to your installation directory" "Green"
+    Write-ColorOutput "4. Run the installer again" "Green"
     exit 1
 }
 
@@ -181,13 +195,25 @@ if ($args[0] -eq "update" -or $args[0] -eq "--update" -or (Test-Path (Join-Path 
 
 # Create installation directory
 Write-ColorOutput "Creating installation directory..." "Yellow"
-New-Item -ItemType Directory -Force -Path $installDir | Out-Null
-Write-ColorOutput "  ✓ Created installation directory" "Green"
+try {
+    New-Item -ItemType Directory -Force -Path $installDir | Out-Null
+    Write-ColorOutput "  ✓ Created installation directory" "Green"
+} catch {
+    Write-ColorOutput "  ✗ Failed to create installation directory" "Red"
+    Write-ColorOutput "    Error: $_" "Red"
+    exit 1
+}
 
 # Create temporary directory
 $TMP_DIR = Join-Path $env:TEMP "razen-install"
-New-Item -ItemType Directory -Force -Path $TMP_DIR | Out-Null
-Write-ColorOutput "  ✓ Created temporary directory" "Green"
+try {
+    New-Item -ItemType Directory -Force -Path $TMP_DIR | Out-Null
+    Write-ColorOutput "  ✓ Created temporary directory" "Green"
+} catch {
+    Write-ColorOutput "  ✗ Failed to create temporary directory" "Red"
+    Write-ColorOutput "    Error: $_" "Red"
+    exit 1
+}
 
 # Download files
 Write-ColorOutput "`nDownloading Razen files..." "Yellow"
@@ -206,11 +232,12 @@ foreach ($file in $files) {
     $url = "$RAZEN_REPO/$file"
     $outFile = Join-Path $TMP_DIR (Split-Path $file -Leaf)
     try {
-        Invoke-WebRequest -Uri $url -OutFile $outFile
+        Invoke-WebRequest -Uri $url -OutFile $outFile -ErrorAction Stop
         Write-ColorOutput "  ✓ Downloaded $file" "Green"
     } catch {
         Write-ColorOutput "  ✗ Failed to download $file" "Red"
         Write-ColorOutput "    Error: $_" "Red"
+        Remove-Item -Path $TMP_DIR -Recurse -Force -ErrorAction SilentlyContinue
         exit 1
     }
 }
@@ -225,47 +252,83 @@ $scripts = @(
     "razen-help"
 )
 
+try {
+    New-Item -ItemType Directory -Force -Path (Join-Path $TMP_DIR "scripts") | Out-Null
+} catch {
+    Write-ColorOutput "  ✗ Failed to create scripts directory" "Red"
+    Write-ColorOutput "    Error: $_" "Red"
+    Remove-Item -Path $TMP_DIR -Recurse -Force -ErrorAction SilentlyContinue
+    exit 1
+}
+
 foreach ($script in $scripts) {
     $url = "$RAZEN_REPO/scripts/$script"
     $outFile = Join-Path $TMP_DIR "scripts\$script"
     try {
-        New-Item -ItemType Directory -Force -Path (Split-Path $outFile) | Out-Null
-        Invoke-WebRequest -Uri $url -OutFile $outFile
+        Invoke-WebRequest -Uri $url -OutFile $outFile -ErrorAction Stop
         Write-ColorOutput "  ✓ Downloaded $script" "Green"
     } catch {
         Write-ColorOutput "  ✗ Failed to download $script" "Red"
         Write-ColorOutput "    Error: $_" "Red"
+        Remove-Item -Path $TMP_DIR -Recurse -Force -ErrorAction SilentlyContinue
         exit 1
     }
 }
 
 # Copy files to installation directory
 Write-ColorOutput "`nInstalling files..." "Yellow"
-Copy-Item -Path "$TMP_DIR\*" -Destination $installDir -Recurse -Force
-Write-ColorOutput "  ✓ Copied files to installation directory" "Green"
+try {
+    Copy-Item -Path "$TMP_DIR\*" -Destination $installDir -Recurse -Force
+    Write-ColorOutput "  ✓ Copied files to installation directory" "Green"
+} catch {
+    Write-ColorOutput "  ✗ Failed to copy files to installation directory" "Red"
+    Write-ColorOutput "    Error: $_" "Red"
+    Remove-Item -Path $TMP_DIR -Recurse -Force -ErrorAction SilentlyContinue
+    exit 1
+}
 
 # Create version file
-$RAZEN_VERSION | Out-File -FilePath "$installDir\version" -Encoding UTF8
-Write-ColorOutput "  ✓ Created version file" "Green"
+try {
+    $RAZEN_VERSION | Out-File -FilePath "$installDir\version" -Encoding UTF8
+    Write-ColorOutput "  ✓ Created version file" "Green"
+} catch {
+    Write-ColorOutput "  ✗ Failed to create version file" "Red"
+    Write-ColorOutput "    Error: $_" "Red"
+    Remove-Item -Path $TMP_DIR -Recurse -Force -ErrorAction SilentlyContinue
+    exit 1
+}
 
 # Create symbolic links
 $symlinkResult = Create-Symlinks -InstallDir $installDir -Scripts $scripts
 if ($symlinkResult -ne 0) {
     Write-ColorOutput "Failed to create some symbolic links. Please check the errors above." "Red"
+    Remove-Item -Path $TMP_DIR -Recurse -Force -ErrorAction SilentlyContinue
     exit 1
 }
 
 # Add to PATH
-$userPath = [Environment]::GetEnvironmentVariable("Path", "User")
-if ($userPath -notlike "*$installDir*") {
-    [Environment]::SetEnvironmentVariable("Path", $userPath + ";$installDir", "User")
-    Write-ColorOutput "  ✓ Added Razen to PATH" "Green"
+try {
+    $userPath = [Environment]::GetEnvironmentVariable("Path", "User")
+    if ($userPath -notlike "*$installDir*") {
+        [Environment]::SetEnvironmentVariable("Path", $userPath + ";$installDir", "User")
+        Write-ColorOutput "  ✓ Added Razen to PATH" "Green"
+    }
+} catch {
+    Write-ColorOutput "  ✗ Failed to add Razen to PATH" "Red"
+    Write-ColorOutput "    Error: $_" "Red"
+    Remove-Item -Path $TMP_DIR -Recurse -Force -ErrorAction SilentlyContinue
+    exit 1
 }
 
 # Clean up
 Write-ColorOutput "`nCleaning up..." "Yellow"
-Remove-Item -Path $TMP_DIR -Recurse -Force
-Write-ColorOutput "  ✓ Cleaned up temporary files" "Green"
+try {
+    Remove-Item -Path $TMP_DIR -Recurse -Force
+    Write-ColorOutput "  ✓ Cleaned up temporary files" "Green"
+} catch {
+    Write-ColorOutput "  ✗ Failed to clean up temporary files" "Red"
+    Write-ColorOutput "    Error: $_" "Red"
+}
 
 # Success message
 Write-ColorOutput "`n✅ Razen has been successfully installed!" "Green"
