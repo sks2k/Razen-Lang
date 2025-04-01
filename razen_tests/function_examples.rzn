@@ -1,0 +1,256 @@
+# Razen Language Function Examples
+# This file demonstrates all types of possible functions in Razen
+
+#==============================================================================
+# 1. Basic Function Definition and Calling
+#==============================================================================
+
+# Simple function with no parameters
+fun greet() {
+    show "Hello, World!";
+}
+
+# Function with parameters
+fun greet_person(name) {
+    show "Hello, " + name + "!";
+}
+
+# Function with return value
+fun add(a, b) {
+    return a + b;
+}
+
+# Function with multiple return statements
+fun check_number(num) {
+    if (num > 0) {
+        return "Positive";
+    }
+    if (num < 0) {
+        return "Negative";
+    }
+    return "Zero";
+}
+
+#==============================================================================
+# 2. Math Functions
+#==============================================================================
+
+# Addition function
+fun sum(a, b) {
+    return a + b;
+}
+
+# Subtraction function
+fun difference(a, b) {
+    return a - b;
+}
+
+# Multiplication function
+fun product(a, b) {
+    return a * b;
+}
+
+# Division function with error handling
+fun divide(a, b) {
+    if (b == 0) {
+        show "Error: Division by zero";
+        return 0;
+    }
+    return a / b;
+}
+
+# Power function (exponentiation)
+fun power(base, exponent) {
+    let result = 1;
+    let i = 0;
+    while (i < exponent) {
+        result = result * base;
+        i = i + 1;
+    }
+    return result;
+}
+
+# Absolute value function
+fun absolute(num) {
+    if (num < 0) {
+        return -num;
+    }
+    return num;
+}
+
+# Maximum of two numbers
+fun maximum(a, b) {
+    if (a > b) {
+        return a;
+    }
+    return b;
+}
+
+# Minimum of two numbers
+fun minimum(a, b) {
+    if (a < b) {
+        return a;
+    }
+    return b;
+}
+
+#==============================================================================
+# 3. String Functions
+#==============================================================================
+
+# String concatenation
+fun concat_strings(str1, str2) {
+    return str1 + str2;
+}
+
+# Repeat a string n times
+fun repeat_string(str, times) {
+    let result = "";
+    let i = 0;
+    while (i < times) {
+        result = result + str;
+        i = i + 1;
+    }
+    return result;
+}
+
+#==============================================================================
+# 4. Recursive Functions
+#==============================================================================
+
+# Factorial function (recursive)
+fun factorial(n) {
+    if (n <= 1) {
+        return 1;
+    }
+    return n * factorial(n - 1);
+}
+
+# Fibonacci function (recursive)
+fun fibonacci(n) {
+    if (n <= 0) {
+        return 0;
+    }
+    if (n == 1) {
+        return 1;
+    }
+    return fibonacci(n - 1) + fibonacci(n - 2);
+}
+
+#==============================================================================
+# 5. Higher-Order Functions (Simulated)
+#==============================================================================
+
+# Apply a function twice
+fun apply_twice(x, func_name) {
+    if (func_name == "add1") {
+        return add1(add1(x));
+    }
+    if (func_name == "double") {
+        return double(double(x));
+    }
+    return x;
+}
+
+# Helper functions for apply_twice
+fun add1(x) {
+    return x + 1;
+}
+
+fun double(x) {
+    return x * 2;
+}
+
+#==============================================================================
+# 6. Function with Local Variables
+#==============================================================================
+
+fun calculate_area(length, width) {
+    let area = length * width;
+    let perimeter = 2 * (length + width);
+    show "Area: " + area;
+    show "Perimeter: " + perimeter;
+    return area;
+}
+
+#==============================================================================
+# 7. Functions with Default Values (Simulated)
+#==============================================================================
+
+fun greet_with_default(name) {
+    take guest_name = name;
+    if (guest_name == "") {
+        let guest_name = "Guest";
+    }
+    show "Hello, " + guest_name + "!";
+}
+
+#==============================================================================
+# 8. Function Tests
+#==============================================================================
+
+# Main function to test all the functions
+fun main() {
+    show "Testing Basic Functions:";
+    greet();
+    greet_person("John");
+    show "add(5, 3) = " + add(5, 3);
+    show "check_number(10) = " + check_number(10);
+    show "check_number(-5) = " + check_number(-5);
+    show "check_number(0) = " + check_number(0);
+    
+    show "\nTesting Math Functions:";
+    show "sum(10, 5) = " + sum(10, 5);
+    show "difference(10, 5) = " + difference(10, 5);
+    show "product(10, 5) = " + product(10, 5);
+    show "divide(10, 5) = " + divide(10, 5);
+    show "divide(10, 0) = " + divide(10, 0);
+    show "power(2, 3) = " + power(2, 3);
+    show "absolute(-5) = " + absolute(-5);
+    show "maximum(10, 5) = " + maximum(10, 5);
+    show "minimum(10, 5) = " + minimum(10, 5);
+    
+    show "\nTesting String Functions:";
+    show "concat_strings('Hello', 'World') = " + concat_strings("Hello", "World");
+    show "repeat_string('Ha', 3) = " + repeat_string("Ha", 3);
+    
+    show "\nTesting Recursive Functions:";
+    show "factorial(5) = " + factorial(5);
+    show "fibonacci(7) = " + fibonacci(7);
+    
+    show "\nTesting Higher-Order Functions:";
+    show "apply_twice(3, 'add1') = " + apply_twice(3, "add1");
+    show "apply_twice(3, 'double') = " + apply_twice(3, "double");
+    
+    show "\nTesting Functions with Local Variables:";
+    calculate_area(5, 3);
+    
+    show "\nTesting Functions with Default Values:";
+    greet_with_default("");
+    greet_with_default("Alice");
+}
+
+# Direct function calls to test basic functionality
+show "Starting function tests...";
+
+show "Basic function test:";
+greet();
+greet_person("John");
+show "5 + 3 = " + add(5, 3);
+
+show "Math function test:";
+show "10 + 5 = " + sum(10, 5);
+show "10 - 5 = " + difference(10, 5);
+show "10 * 5 = " + product(10, 5);
+show "10 / 5 = " + divide(10, 5);
+show "2^3 = " + power(2, 3);
+
+show "String function test:";
+show "'Hello' + 'World' = " + concat_strings("Hello", "World");
+show "'Ha' repeated 3 times = " + repeat_string("Ha", 3);
+
+show "Recursive function test:";
+show "factorial(5) = " + factorial(5);
+show "fibonacci(7) = " + fibonacci(7);
+
+show "All tests completed.";

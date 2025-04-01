@@ -1,0 +1,37 @@
+# Test file for math functions in Razen
+
+# Basic math functions
+fun add(a, b) {
+    return a + b;
+}
+
+fun subtract(a, b) {
+    return a - b;
+}
+
+fun multiply(a, b) {
+    return a * b;
+}
+
+fun divide(a, b) {
+    return a / b;
+}
+
+# Test the functions
+show "Testing math functions:";
+show "add(5, 3) = " + add(5, 3);
+show "subtract(10, 4) = " + subtract(10, 4);
+show "multiply(6, 7) = " + multiply(6, 7);
+show "divide(20, 5) = " + divide(20, 5);
+
+# Test nested function calls
+show "Nested calls: add(multiply(2, 3), subtract(10, 5)) = " + add(multiply(2, 3), subtract(10, 5));
+
+# Test with variables
+take a = 15;
+take b = 3;
+show "Using variables: a = " + a + ", b = " + b;
+show "add(a, b) = " + add(a, b);
+show "subtract(a, b) = " + subtract(a, b);
+show "multiply(a, b) = " + multiply(a, b);
+show "divide(a, b) = " + divide(a, b);

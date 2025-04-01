@@ -90,8 +90,8 @@ fun round(num) {
 #==============================================================================
 
 fun len(value) {
-    # Works for strings, arrays, and maps
-    return length(value);
+    # Works for strings, arrays, and maps - placeholder
+    return 0;
 }
 # Example: len("Hello") => 5
 # Example: len([1, 2, 3]) => 3
@@ -103,36 +103,36 @@ fun concat(str1, str2) {
 # Example: concat("Razen", "Lang") => "RazenLang"
 
 fun upper(str) {
-    # Implementation in Rust
-    return str.upper();
+    # Implementation in Rust - placeholder
+    return str;
 }
 # Example: upper("hello") => "HELLO"
 # Example: upper("razen") => "RAZEN"
 
 fun lower(str) {
-    # Implementation in Rust
-    return str.lower();
+    # Implementation in Rust - placeholder
+    return str;
 }
 # Example: lower("HELLO") => "hello"
 # Example: lower("RAZEN") => "razen"
 
 fun substring(str, start, end) {
-    # Implementation in Rust
-    return str.substring(start, end);
+    # Implementation in Rust - placeholder
+    return str;
 }
 # Example: substring("Hello", 1, 3) => "el"
 # Example: substring("Razen", 0, 3) => "Raz"
 
 fun replace(str, old, new) {
-    # Implementation in Rust
-    return str.replace(old, new);
+    # Implementation in Rust - placeholder
+    return str;
 }
 # Example: replace("Hello World", "World", "Razen") => "Hello Razen"
 # Example: replace("abc", "b", "d") => "adc"
 
 fun trim(str) {
-    # Implementation in Rust
-    return str.trim();
+    # Implementation in Rust - placeholder
+    return str;
 }
 # Example: trim("  Hello  ") => "Hello"
 # Example: trim("\tRazen\n") => "Razen"
@@ -142,44 +142,43 @@ fun trim(str) {
 #==============================================================================
 
 fun push(arr, item) {
-    # Implementation in Rust
-    arr.push(item);
+    # Implementation in Rust - placeholder
     return arr;
 }
 # Example: push([1, 2], 3) => [1, 2, 3]
 # Example: push(["a"], "b") => ["a", "b"]
 
 fun pop(arr) {
-    # Implementation in Rust
-    return arr.pop();
+    # Implementation in Rust - placeholder
+    return arr[0];
 }
 # Example: pop([1, 2, 3]) => 3 (and arr becomes [1, 2])
 # Example: pop(["a", "b"]) => "b" (and arr becomes ["a"])
 
 fun join_array(arr, separator) {
-    # Implementation in Rust
-    return arr.join(separator);
+    # Implementation in Rust - placeholder
+    return "";
 }
 # Example: join_array(["a", "b", "c"], "-") => "a-b-c"
 # Example: join_array([1, 2, 3], ",") => "1,2,3"
 
 fun sort(arr) {
-    # Implementation in Rust
-    return arr.sort();
+    # Implementation in Rust - placeholder
+    return arr;
 }
 # Example: sort([3, 1, 2]) => [1, 2, 3]
 # Example: sort(["c", "a", "b"]) => ["a", "b", "c"]
 
 fun reverse(arr) {
-    # Implementation in Rust
-    return arr.reverse();
+    # Implementation in Rust - placeholder
+    return arr;
 }
 # Example: reverse([1, 2, 3]) => [3, 2, 1]
 # Example: reverse(["a", "b", "c"]) => ["c", "b", "a"]
 
 fun slice(arr, start, end) {
-    # Implementation in Rust
-    return arr.slice(start, end);
+    # Implementation in Rust - placeholder
+    return arr;
 }
 # Example: slice([1, 2, 3, 4, 5], 1, 3) => [2, 3]
 # Example: slice(["a", "b", "c", "d"], 0, 2) => ["a", "b"]
@@ -189,29 +188,29 @@ fun slice(arr, start, end) {
 #==============================================================================
 
 fun int(value) {
-    # Implementation in Rust
-    return to_int(value);
+    # Implementation in Rust - placeholder
+    return 0;
 }
 # Example: int("123") => 123
 # Example: int(123.45) => 123
 
 fun float(value) {
-    # Implementation in Rust
-    return to_float(value);
+    # Implementation in Rust - placeholder
+    return 0.0;
 }
 # Example: float("123.45") => 123.45
 # Example: float(123) => 123.0
 
 fun string(value) {
-    # Implementation in Rust
-    return to_string(value);
+    # Implementation in Rust - placeholder
+    return "";
 }
 # Example: string(123) => "123"
 # Example: string(true) => "true"
 
 fun bool(value) {
-    # Implementation in Rust
-    return to_bool(value);
+    # Implementation in Rust - placeholder
+    return true;
 }
 # Example: bool(1) => true
 # Example: bool(0) => false

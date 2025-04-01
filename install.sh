@@ -40,7 +40,7 @@ create_symlinks() {
     echo -e "${YELLOW}Creating symbolic links...${NC}"
     
     # List of all scripts that need symlinks
-    SCRIPTS="razen razen-debug razen-test razen-run razen-update razen-help"
+    SCRIPTS="razen razen-debug razen-test razen-run razen-update razen-help razen-docs"
     
     # Create symlinks in /usr/local/bin
     for script in $SCRIPTS; do
@@ -303,7 +303,7 @@ if [ -d "$INSTALL_DIR" ]; then
         sudo rm -rf "$INSTALL_DIR"
     else
         echo -e "${YELLOW}Razen is already installed.${NC}"
-        echo -e "${YELLOW}New Razen commands are available with this version.${NC}"
+        echo -e "${YELLOW}New Razen commands, features, variables and functios are available with this version.${NC}"
         read -p "Do you want to update Razen? (y/n): " -n 1 -r
         echo
         if [[ ! $REPLY =~ ^[Yy]$ ]]; then

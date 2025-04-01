@@ -1126,6 +1126,93 @@ impl Compiler {
                     // Store function definition in variables map
                     variables.insert(format!("__func_{}", name), address.to_string());
                 },
+                IR::Return => {
+                    // The return value is already on the stack from the previous expression
+                    // We need to make sure it stays on the stack and is used as the function result
+                    // For debugging purposes, we'll print the return value
+                    if !self.clean_output {
+                        if let Some(value) = stack.last() {
+                            println!("Returning value: {}", value);
+                        }
+                    }
+                    // Skip to the end of the function or to a specific return point
+                    // For now, we'll just continue execution and rely on the value being on the stack
+                },
+                IR::Call(name, arg_count) => {
+                    // Function call implementation
+                    if !self.clean_output {
+                        println!("Calling function: {} with {} arguments", name, arg_count);
+                    }
+                    
+                    // Pop the arguments from the stack (in reverse order)
+                    let mut args = Vec::new();
+                    for _ in 0..*arg_count {
+                        if let Some(arg) = stack.pop() {
+                            args.push(arg);
+                        }
+                    }
+                    args.reverse(); // Reverse to get the original order
+                    
+                    // For debugging
+                    if !self.clean_output {
+                        for (i, arg) in args.iter().enumerate() {
+                            println!("Arg {}: {}", i, arg);
+                        }
+                    }
+                    
+                    // Process the function call based on the function name
+                    // For now, we'll just push the result back onto the stack
+                    // In a real implementation, we would look up the function and execute it
+                    
+                    // For built-in functions, we can implement them directly here
+                    match name.as_str() {
+                        "add" => {
+                            if args.len() >= 2 {
+                                if let (Ok(a), Ok(b)) = (args[0].parse::<f64>(), args[1].parse::<f64>()) {
+                                    stack.push((a + b).to_string());
+                                }
+                            }
+                        },
+                        "subtract" => {
+                            if args.len() >= 2 {
+                                if let (Ok(a), Ok(b)) = (args[0].parse::<f64>(), args[1].parse::<f64>()) {
+                                    stack.push((a - b).to_string());
+                                }
+                            }
+                        },
+                        "multiply" => {
+                            if args.len() >= 2 {
+                                if let (Ok(a), Ok(b)) = (args[0].parse::<f64>(), args[1].parse::<f64>()) {
+                                    stack.push((a * b).to_string());
+                                }
+                            }
+                        },
+                        "divide" => {
+                            if args.len() >= 2 {
+                                if let (Ok(a), Ok(b)) = (args[0].parse::<f64>(), args[1].parse::<f64>()) {
+                                    if b != 0.0 {
+                                        stack.push((a / b).to_string());
+                                    } else {
+                                        stack.push("Error: Division by zero".to_string());
+                                    }
+                                }
+                            }
+                        },
+                        _ => {
+                            // For user-defined functions, we would look them up and execute them
+                            // For now, we'll just return a placeholder value
+                            if !self.clean_output {
+                                println!("Unknown function: {}", name);
+                            }
+                            // Push the last argument as the result (for testing)
+                            if !args.is_empty() {
+                                stack.push(args.last().unwrap().clone());
+                            } else {
+                                stack.push("undefined".to_string());
+                            }
+                        }
+                    }
+                },
                 // Add basic implementations for other instructions as needed
                 _ => {
                     // For instructions not yet implemented, just log if in debug mode

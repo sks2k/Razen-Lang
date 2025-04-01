@@ -1,39 +1,7 @@
-# Example Razen Program
+take name = "John";
+let age = 30;
+take city = "New York";
 
-let greeting = "Hello";
+show name + " is " + age + " years old and living in the " + city;
 
-fun say_hello(name) {
-    show greeting + ", " + name + "!"; # String concatenation
-}
 
-fun calculate_sum(a, b) {
-    let result = a + b;
-    return result;
-}
-
-# Main execution part
-let person = "World";
-say_hello(person);
-
-let num1 = 10;
-let num2 = 5;
-let total = calculate_sum(num1, num2);
-
-# ... (previous code) ...
-show "The sum is: ";
-show total; # Show separately
-
-if (total > 10) {
-    show "Sum is greater than 10.";
-} else {
-    show "Sum is 10 or less.";
-}
-
-let count = 0;
-while (count < 3) {
-    show "Loop iteration: ";
-    show count;
-    let count = count + 1; # Increment
-}
-
-show "Done.";
