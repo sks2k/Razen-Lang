@@ -1060,6 +1060,72 @@ impl Compiler {
                         }
                     }
                 },
+                IR::Swap => {
+                    if let (Some(b), Some(a)) = (stack.pop(), stack.pop()) {
+                        stack.push(b);
+                        stack.push(a);
+                    }
+                },
+                IR::JumpIfTrue(target) => {
+                    if let Some(value) = stack.pop() {
+                        if value == "true" || value == "1" || value == "True" {
+                            pc = *target;
+                            continue;
+                        }
+                    }
+                },
+                IR::GetKey => {
+                    if let (Some(key), Some(map_str)) = (stack.pop(), stack.pop()) {
+                        // Simple implementation: assume map is stored as a string in format "key1:value1,key2:value2"
+                        let map_entries: Vec<&str> = map_str.split(',').collect();
+                        let mut found = false;
+                        
+                        for entry in map_entries {
+                            let kv: Vec<&str> = entry.split(':').collect();
+                            if kv.len() == 2 && kv[0] == key {
+                                stack.push(kv[1].to_string());
+                                found = true;
+                                break;
+                            }
+                        }
+                        
+                        if !found {
+                            stack.push("undefined".to_string());
+                        }
+                    }
+                },
+                IR::SetKey => {
+                    if let (Some(value), Some(key), Some(map_str)) = (stack.pop(), stack.pop(), stack.pop()) {
+                        // Simple implementation: assume map is stored as a string in format "key1:value1,key2:value2"
+                        let map_entries: Vec<&str> = map_str.split(',').collect();
+                        let mut new_map = Vec::new();
+                        let mut found = false;
+                        
+                        for entry in map_entries {
+                            if entry.is_empty() {
+                                continue;
+                            }
+                            
+                            let kv: Vec<&str> = entry.split(':').collect();
+                            if kv.len() == 2 && kv[0] == key {
+                                new_map.push(format!("{key}:{value}"));
+                                found = true;
+                            } else {
+                                new_map.push(entry.to_string());
+                            }
+                        }
+                        
+                        if !found {
+                            new_map.push(format!("{key}:{value}"));
+                        }
+                        
+                        stack.push(new_map.join(","));
+                    }
+                },
+                IR::DefineFunction(name, address) => {
+                    // Store function definition in variables map
+                    variables.insert(format!("__func_{}", name), address.to_string());
+                },
                 // Add basic implementations for other instructions as needed
                 _ => {
                     // For instructions not yet implemented, just log if in debug mode

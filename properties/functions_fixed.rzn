@@ -6,7 +6,7 @@
 # show result;
 
 #==============================================================================
-# 1️ Math Functions
+# 1. Math Functions
 #==============================================================================
 
 fun add(a, b) {
@@ -86,7 +86,7 @@ fun round(num) {
 # Example: round(3.7) => 4
 
 #==============================================================================
-# 2️ String Functions
+# 2. String Functions
 #==============================================================================
 
 fun len(value) {
@@ -138,7 +138,7 @@ fun trim(str) {
 # Example: trim("\tRazen\n") => "Razen"
 
 #==============================================================================
-# 3️ Array Functions
+# 3. Array Functions
 #==============================================================================
 
 fun push(arr, item) {
@@ -185,7 +185,7 @@ fun slice(arr, start, end) {
 # Example: slice(["a", "b", "c", "d"], 0, 2) => ["a", "b"]
 
 #==============================================================================
-# 4️ Type Conversion Functions
+# 4. Type Conversion Functions
 #==============================================================================
 
 fun int(value) {
@@ -202,12 +202,12 @@ fun float(value) {
 # Example: float("123.45") => 123.45
 # Example: float(123) => 123.0
 
-fun str(value) {
+fun string(value) {
     # Implementation in Rust
     return to_string(value);
 }
-# Example: str(123) => "123"
-# Example: str(true) => "true"
+# Example: string(123) => "123"
+# Example: string(true) => "true"
 
 fun bool(value) {
     # Implementation in Rust
@@ -218,179 +218,49 @@ fun bool(value) {
 # Example: bool("true") => true
 
 #==============================================================================
-# 5️ Type Checking Functions
+# 5. Testing Functions
 #==============================================================================
 
-fun is_number(value) {
-    # Implementation in Rust
-    return typeof(value) == "number";
+# Add a main function to test all the functions
+fun main() {
+    show "Testing math functions:";
+    show "add(5, 3) = " + add(5, 3);
+    show "subtract(10, 4) = " + subtract(10, 4);
+    show "multiply(6, 7) = " + multiply(6, 7);
+    show "divide(20, 5) = " + divide(20, 5);
+    show "power(2, 3) = " + power(2, 3);
+    show "abs(-5) = " + abs(-5);
+    show "max(5, 10) = " + max(5, 10);
+    show "min(5, 10) = " + min(5, 10);
+    
+    show "\nTesting string functions:";
+    show "concat('Hello', 'World') = " + concat("Hello", "World");
+    
+    show "\nTesting if-else with numeric comparison:";
+    let a = 10;
+    let b = 5;
+    if (a > b) {
+        show a + " is greater than " + b;
+    } else {
+        show a + " is not greater than " + b;
+    }
+    
+    show "\nTesting string comparison:";
+    take s1 = "test";
+    take s2 = "test";
+    take s3 = "different";
+    if (s1 == s2) {
+        show "s1 equals s2";
+    } else {
+        show "s1 does not equal s2";
+    }
+    
+    if (s1 == s3) {
+        show "s1 equals s3";
+    } else {
+        show "s1 does not equal s3";
+    }
 }
-# Example: is_number(123) => true
-# Example: is_number("123") => false
 
-fun is_string(value) {
-    # Implementation in Rust
-    return typeof(value) == "string";
-}
-# Example: is_string("hello") => true
-# Example: is_string(123) => false
-
-fun is_boolean(value) {
-    # Implementation in Rust
-    return typeof(value) == "boolean";
-}
-# Example: is_boolean(true) => true
-# Example: is_boolean(1) => false
-
-fun is_array(value) {
-    # Implementation in Rust
-    return typeof(value) == "array";
-}
-# Example: is_array([1, 2, 3]) => true
-# Example: is_array("[1, 2, 3]") => false
-
-fun is_map(value) {
-    # Implementation in Rust
-    return typeof(value) == "map";
-}
-# Example: is_map({"a": 1}) => true
-# Example: is_map([1, 2, 3]) => false
-
-fun is_null(value) {
-    # Implementation in Rust
-    return value == null;
-}
-# Example: is_null(null) => true
-# Example: is_null(0) => false
-
-func isArray(put value) {
-    hold = Array.isArray(value);
-    return hold;
-}
-# Example: isArray([1, 2, 3]) => true
-# Example: isArray("123") => false
-
-# 6 Input/Output
-func say(take message) {
-    show message;
-}
-# Example: say("Hello World") => prints "Hello World"
-# Example: say("Welcome to Razen") => prints "Welcome to Razen"
-
-func ask(take question) {
-    read result = question;
-    return result;
-}
-# Example: ask("What's your name?") => reads user input
-# Example: ask("Enter a number:") => reads user input
-
-# 7 Numbers
-func random(let max) {
-    sum = Math.random() * max;
-    return sum;
-}
-# Example: random(10) => random number between 0 and 10
-# Example: random(100) => random number between 0 and 100
-
-func round(let num) {
-    sum = Math.round(num);
-    return sum;
-}
-# Example: round(3.7) => 4
-# Example: round(3.2) => 3
-
-# 8 Time
-func time() {
-    current = Date.now();
-    return current;
-}
-# Example: time() => current timestamp (e.g., 1678901234567)
-
-func date() {
-    now = new Date().toISOString();
-    return now;
-}
-# Example: date() => current date string (e.g., "2023-03-15T12:34:56.789Z")
-
-# 9 Objects
-func keys(map obj) {
-    key = Object.keys(obj);
-    return key;
-}
-# Example: keys({name: "John", age: 30}) => ["name", "age"]
-# Example: keys({}) => []
-
-func values(map obj) {
-    value = Object.values(obj);
-    return value;
-}
-# Example: values({name: "John", age: 30}) => ["John", 30]
-# Example: values({}) => []
-
-# 10 Storage
-func save(put value) {
-    store = value;
-    return store;
-}
-# Example: save("Hello") => "Hello"
-# Example: save(123) => 123
-
-func load(store) {
-    return store;
-}
-# Example: load() => previously stored value
-# Example: load() => null (if nothing stored)
-
-# 11 Box
-func put(put value) {
-    box = value;
-    return box;
-}
-# Example: put("Hello") => "Hello"
-# Example: put(123) => 123
-
-func get(box) {
-    return box;
-}
-# Example: get() => previously boxed value
-# Example: get() => null (if nothing boxed)
-
-# 12 References
-func point(put value) {
-    ref = &value;
-    return ref;
-}
-# Example: point(123) => reference to 123
-# Example: point("Hello") => reference to "Hello"
-
-func read(ref ref) {
-    return *ref;
-}
-# Example: read(ref) => value pointed by ref
-# Example: read(ref) => null (if ref is null)
-
-# Binary Operations Support
-# These functions support binary operations:
-# plus: 5 + 3 => 8
-# minus: 10 - 3 => 7
-# times: 4 * 3 => 12
-# by: 10 / 2 => 5
-# join: "Hello" + "World" => "HelloWorld"
-
-# Type Conversion Support
-# These functions handle type conversion:
-# isNum: converts to number if possible
-# isText: converts to string if possible
-# isArray: checks if value is array
-
-# Error Handling
-# These functions include error handling:
-# by: checks for division by zero
-# take: checks for empty array
-# read: checks for null reference
-
-# Memory Management
-# These functions handle memory:
-# save/load: persistent storage
-# put/get: temporary storage
-# point/read: reference management
+# Run the main function
+main();
