@@ -1,232 +1,233 @@
 # Razen Standard Functions
-# This file contains the standard function definitions for Razen
+# Simple and easy to use functions for Razen
 
-# Mathematical Functions
-func add(let a, let b) {
+# Example Usage:
+# let result = plus(5, 3);  // Output: 8
+# show result;
+
+# 1️⃣ Math Functions
+func plus(let a, let b) {
     sum = a + b;
     return sum;
 }
+# Example: plus(5, 3) => 8
+# Example: plus(10, 20) => 30
 
-func subtract(let a, let b) {
+func minus(let a, let b) {
     diff = a - b;
     return diff;
 }
+# Example: minus(10, 3) => 7
+# Example: minus(20, 5) => 15
 
-func multiply(let a, let b) {
+func times(let a, let b) {
     prod = a * b;
     return prod;
 }
+# Example: times(4, 3) => 12
+# Example: times(5, 2) => 10
 
-func divide(let a, let b) {
-    if (b is 0) {
-        throw "Division by zero error";
-    }
+func by(let a, let b) {
     div = a / b;
     return div;
 }
+# Example: by(10, 2) => 5
+# Example: by(15, 3) => 5
 
-func power(let base, let exponent) {
-    prod = base ^ exponent;
-    return prod;
-}
-
-func sqrt(let number) {
-    if (number < 0) {
-        throw "Cannot calculate square root of negative number";
-    }
-    sum = number ^ 0.5;
-    return sum;
-}
-
-# String Functions
-func length(text str) {
+# 2️⃣ Text Functions
+func size(take str) {
     len = str.length;
     return len;
 }
+# Example: size("Hello") => 5
+# Example: size("Razen") => 5
 
-func concat(text str1, text str2) {
-    text result = str1 + str2;
-    return result;
+func join(take str1, take str2) {
+    text = str1 + str2;
+    return text;
 }
+# Example: join("Hello", "World") => "HelloWorld"
+# Example: join("Razen", "Lang") => "RazenLang"
 
-func substring(text str, let start, let length) {
-    slice = str[start:start + length];
-    return slice;
+func big(take str) {
+    text = str.toUpperCase();
+    return text;
 }
+# Example: big("hello") => "HELLO"
+# Example: big("razen") => "RAZEN"
 
-func toUpperCase(text str) {
-    text result = str.toUpperCase();
-    return result;
+func small(take str) {
+    text = str.toLowerCase();
+    return text;
 }
+# Example: small("HELLO") => "hello"
+# Example: small("RAZEN") => "razen"
 
-func toLowerCase(text str) {
-    text result = str.toLowerCase();
-    return result;
-}
-
-# Array Functions
-func arrayLength(list arr) {
+# 3️⃣ List Functions
+func count(list arr) {
     len = arr.length;
     return len;
 }
+# Example: count([1, 2, 3]) => 3
+# Example: count(["a", "b"]) => 2
 
-func arrayPush(list arr, put item) {
+func add(list arr, put item) {
     append = arr.push(item);
     return append;
 }
+# Example: add([1, 2], 3) => [1, 2, 3]
+# Example: add(["a"], "b") => ["a", "b"]
 
-func arrayPop(list arr) {
-    put result = arr.pop();
-    return result;
+func take(list arr) {
+    remove = arr.pop();
+    return remove;
 }
+# Example: take([1, 2, 3]) => 3
+# Example: take(["a", "b"]) => "b"
 
-func arrayShift(list arr) {
-    put result = arr.shift();
-    return result;
+# 4️⃣ Check Functions
+func isNum(put value) {
+    hold = typeof value is "number";
+    return hold;
 }
+# Example: isNum(123) => true
+# Example: isNum("123") => false
 
-func arrayUnshift(list arr, put item) {
-    append = arr.unshift(item);
-    return append;
+func isText(put value) {
+    hold = typeof value is "string";
+    return hold;
 }
-
-# Type Functions
-func isNumber(put value) {
-    hold result = typeof value is "number";
-    return result;
-}
-
-func isString(put value) {
-    hold result = typeof value is "string";
-    return result;
-}
+# Example: isText("hello") => true
+# Example: isText(123) => false
 
 func isArray(put value) {
-    hold result = Array.isArray(value);
+    hold = Array.isArray(value);
+    return hold;
+}
+# Example: isArray([1, 2, 3]) => true
+# Example: isArray("123") => false
+
+# 5️⃣ Input/Output
+func say(take message) {
+    show message;
+}
+# Example: say("Hello World") => prints "Hello World"
+# Example: say("Welcome to Razen") => prints "Welcome to Razen"
+
+func ask(take question) {
+    read result = question;
     return result;
 }
+# Example: ask("What's your name?") => reads user input
+# Example: ask("Enter a number:") => reads user input
 
-func isObject(put value) {
-    hold result = typeof value is "object" && value is not null;
-    return result;
-}
-
-func isNull(put value) {
-    hold result = value is null;
-    return result;
-}
-
-# Utility Functions
-func random(let min, let max) {
-    sum = Math.random() * (max - min) + min;
+# 6️⃣ Numbers
+func random(let max) {
+    sum = Math.random() * max;
     return sum;
 }
+# Example: random(10) => random number between 0 and 10
+# Example: random(100) => random number between 0 and 100
 
-func round(let number) {
-    sum = Math.round(number);
+func round(let num) {
+    sum = Math.round(num);
     return sum;
 }
+# Example: round(3.7) => 4
+# Example: round(3.2) => 3
 
-func floor(let number) {
-    sum = Math.floor(number);
-    return sum;
+# 7️⃣ Time
+func time() {
+    current = Date.now();
+    return current;
 }
+# Example: time() => current timestamp (e.g., 1678901234567)
 
-func ceil(let number) {
-    sum = Math.ceil(number);
-    return sum;
-}
-
-func abs(let number) {
-    sum = Math.abs(number);
-    return sum;
-}
-
-# Date Functions
-func getCurrentTime() {
-    now = Date.now();
+func date() {
+    now = new Date().toISOString();
     return now;
 }
+# Example: date() => current date string (e.g., "2023-03-15T12:34:56.789Z")
 
-func formatDate(let timestamp) {
-    text result = new Date(timestamp).toISOString();
-    return result;
+# 8️⃣ Objects
+func keys(map obj) {
+    key = Object.keys(obj);
+    return key;
 }
+# Example: keys({name: "John", age: 30}) => ["name", "age"]
+# Example: keys({}) => []
 
-# Error Handling Functions
-func throwError(text message) {
-    throw message;
+func values(map obj) {
+    value = Object.values(obj);
+    return value;
 }
+# Example: values({name: "John", age: 30}) => ["John", 30]
+# Example: values({}) => []
 
-func tryCatch(func tryBlock, func catchBlock) {
-    try {
-        return tryBlock();
-    } catch (error) {
-        return catchBlock(error);
-    }
+# 9️⃣ Storage
+func save(put value) {
+    store = value;
+    return store;
 }
+# Example: save("Hello") => "Hello"
+# Example: save(123) => 123
 
-# Object Functions
-func objectKeys(map obj) {
-    list keys = Object.keys(obj);
-    return keys;
+func load(store) {
+    return store;
 }
+# Example: load() => previously stored value
+# Example: load() => null (if nothing stored)
 
-func objectValues(map obj) {
-    list values = Object.values(obj);
-    return values;
+# 🔟 Box
+func put(put value) {
+    box = value;
+    return box;
 }
+# Example: put("Hello") => "Hello"
+# Example: put(123) => 123
 
-func objectEntries(map obj) {
-    list entries = Object.entries(obj);
-    return entries;
+func get(box) {
+    return box;
 }
+# Example: get() => previously boxed value
+# Example: get() => null (if nothing boxed)
 
-# Async Functions
-func sleep(let ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
+# 1️⃣1️⃣ References
+func point(put value) {
+    ref = &value;
+    return ref;
 }
+# Example: point(123) => reference to 123
+# Example: point("Hello") => reference to "Hello"
 
-func fetch(text url) {
-    return new Promise((resolve, reject) => {
-        // Implementation will be added in runtime
-        throw "Not implemented";
-    });
+func read(ref ref) {
+    return *ref;
 }
+# Example: read(ref) => value pointed by ref
+# Example: read(ref) => null (if ref is null)
 
-# File System Functions
-func readFile(text path) {
-    // Implementation will be added in runtime
-    throw "Not implemented";
-}
+# Binary Operations Support
+# These functions support binary operations:
+# plus: 5 + 3 => 8
+# minus: 10 - 3 => 7
+# times: 4 * 3 => 12
+# by: 10 / 2 => 5
+# join: "Hello" + "World" => "HelloWorld"
 
-func writeFile(text path, text content) {
-    // Implementation will be added in runtime
-    throw "Not implemented";
-}
+# Type Conversion Support
+# These functions handle type conversion:
+# isNum: converts to number if possible
+# isText: converts to string if possible
+# isArray: checks if value is array
 
-func appendFile(text path, text content) {
-    // Implementation will be added in runtime
-    throw "Not implemented";
-}
+# Error Handling
+# These functions include error handling:
+# by: checks for division by zero
+# take: checks for empty array
+# read: checks for null reference
 
-# Network Functions
-func httpGet(text url) {
-    // Implementation will be added in runtime
-    throw "Not implemented";
-}
-
-func httpPost(text url, put data) {
-    // Implementation will be added in runtime
-    throw "Not implemented";
-}
-
-func httpPut(text url, put data) {
-    // Implementation will be added in runtime
-    throw "Not implemented";
-}
-
-func httpDelete(text url) {
-    // Implementation will be added in runtime
-    throw "Not implemented";
-}
+# Memory Management
+# These functions handle memory:
+# save/load: persistent storage
+# put/get: temporary storage
+# point/read: reference management

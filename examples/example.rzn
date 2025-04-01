@@ -1,0 +1,50 @@
+# Define a greeting variable
+# NOTE: Global variables like this outside main execution are tricky.
+# Let's put definitions inside functions or the main flow for now.
+# let greeting = "Hello"; # Moved inside say_hello for simplicity now
+
+# Define function to say hello
+fun say_hello(name) {
+    let greeting = "Hello"; # Define locally for now
+    # String concatenation not yet supported, showing parts separately
+    show greeting;
+    show ", "; # Show literal string
+    show name;
+    show "!";
+}
+
+# Define function to calculate the sum of two numbers
+fun calculate_sum(a, b) {
+    let result = a + b;
+    return result;
+}
+
+# Main execution part (implicitly runs in the compiled 'main' function)
+let person = "World"; # String variable
+say_hello(person); # Call function
+
+let num1 = 10;
+let num2 = 5;
+let total = calculate_sum(num1, num2); # Call function, result in 'total'
+
+# Show the sum result
+show "The sum is: ";
+show total; # Show the integer result
+
+# Conditional check based on sum
+if (total > 10) {
+    show "Sum is greater than 10.";
+} else {
+    show "Sum is 10 or less.";
+}
+
+# Loop example
+let count = 0;
+while (count < 3) {
+    show "Loop iteration: ";
+    show count;
+    # Re-assign 'count' using let (shadowing) - direct assignment not implemented yet
+    let count = count + 1;
+}
+
+show "Done.";

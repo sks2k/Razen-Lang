@@ -5,19 +5,24 @@ SCRIPT_DIR=$(dirname "$0")
 
 # First try the development directory structure (script is in scripts/)
 PROJECT_ROOT=$(cd "$SCRIPT_DIR/.." && pwd)
-MAIN_PY="$PROJECT_ROOT/main.py"
+RAZEN_BIN="$PROJECT_ROOT/target/debug/razen_compiler"
 
-# If main.py doesn't exist there, check installation directories
-if [ ! -f "$MAIN_PY" ]; then
-  # Check installation in /usr/local/lib/razen
-  if [ -f "/usr/local/lib/razen/main.py" ]; then
-    MAIN_PY="/usr/local/lib/razen/main.py"
-  # Check installation in /usr/local/razen (macOS)
-  elif [ -f "/usr/local/razen/main.py" ]; then
-    MAIN_PY="/usr/local/razen/main.py"
+# If the binary doesn't exist in debug, try release
+if [ ! -f "$RAZEN_BIN" ]; then
+  RAZEN_BIN="$PROJECT_ROOT/target/release/razen_compiler"
+fi
+
+# If binary doesn't exist there, check installation directories
+if [ ! -f "$RAZEN_BIN" ]; then
+  # Check installation in /usr/local/bin
+  if [ -f "/usr/local/bin/razen_compiler" ]; then
+    RAZEN_BIN="/usr/local/bin/razen_compiler"
+  # Check installation in /usr/bin
+  elif [ -f "/usr/bin/razen_compiler" ]; then
+    RAZEN_BIN="/usr/bin/razen_compiler"
   # Check Windows paths if running in WSL
-  elif [ -f "/mnt/c/Program Files/Razen/main.py" ]; then
-    MAIN_PY="/mnt/c/Program Files/Razen/main.py"
+  elif [ -f "/mnt/c/Program Files/Razen/razen_compiler.exe" ]; then
+    RAZEN_BIN="/mnt/c/Program Files/Razen/razen_compiler.exe"
   fi
 fi
 
@@ -44,10 +49,10 @@ else
     fi
 fi
 
-# Check if main.py exists
-if [ ! -f "$MAIN_PY" ]; then
-  echo "Error: main.py not found at $MAIN_PY"
-  echo "Please ensure Razen is properly installed."
+# Check if Razen binary exists
+if [ ! -f "$RAZEN_BIN" ]; then
+  echo "Error: Razen compiler not found at $RAZEN_BIN"
+  echo "Please ensure Razen is properly installed or build it with 'cargo build'."
   exit 1
 fi
 
@@ -57,85 +62,10 @@ if [ ! -f "$ABSOLUTE_PATH" ]; then
     exit 1
 fi
 
-# Create a Python wrapper script that will directly run main.py
-TEMP_SCRIPT=$(mktemp)
-cat > "$TEMP_SCRIPT" <<'EOF'
-#!/usr/bin/env python3
-import sys
-import os
-import subprocess
-import re
-import time
+# Run the Razen compiler with the run command and clean output flag
+"$RAZEN_BIN" run --clean-output "$ABSOLUTE_PATH" "$@"
 
-# Get the script arguments
-filename = sys.argv[1]
-args = sys.argv[2:]
-
-# Get the path to main.py from environment variable
-main_py = os.environ.get('MAIN_PY')
-
-# Create environment with DEBUG=0
-env = os.environ.copy()
-env['PYTHONUNBUFFERED'] = '1'  # Force Python to be unbuffered
-
-# Create the command to run
-cmd = ['python3', main_py, '--mode=run', filename] + args
-
-# Run the command with real-time output processing
-process = subprocess.Popen(
-    cmd,
-    stdout=subprocess.PIPE,
-    stderr=subprocess.STDOUT,
-    universal_newlines=True,
-    bufsize=1,
-    env=env
-)
-
-# Patterns to skip
-debug_patterns = [
-    r"DEBUG:",
-    r"^Loaded \d+ keywords",
-    r"^Parser built",
-    r"^--- Running Razen",
-    r"^--- Output",
-    r"^--- Finished",
-    r"^Runtime Error",
-    r"^Warning:"
-]
-skip_re = re.compile('|'.join(debug_patterns))
-
-# Process the output line by line
-for line in iter(process.stdout.readline, ''):
-    line = line.rstrip()
-    if not line:
-        continue
-        
-    # Skip debug and system messages
-    if skip_re.search(line):
-        continue
-        
-    # Print clean output
-    print(line, flush=True)
-    
-# Wait for the process to finish
-process.stdout.close()
-exit_code = process.wait()
-sys.exit(exit_code)
-EOF
-
-# Make the script executable
-chmod +x "$TEMP_SCRIPT"
-
-# Set the MAIN_PY environment variable 
-export MAIN_PY="$MAIN_PY"
-
-# Run the wrapper script
-"$TEMP_SCRIPT" "$ABSOLUTE_PATH" "$@"
-
-# Save exit code
-EXIT_CODE=$?
-
-# Clean up
-rm "$TEMP_SCRIPT"
+# Save exit code (note: this will be the exit code of the last command in the pipe)
+EXIT_CODE=${PIPESTATUS[0]}
 
 exit $EXIT_CODE 

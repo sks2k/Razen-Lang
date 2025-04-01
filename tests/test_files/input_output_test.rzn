@@ -1,0 +1,10 @@
+// New Razen program created on Monday 31 March 2025 02:20:43 PM IST
+// Powered by Razen Language
+
+// Your code goes here
+let message = "Hello, World"
+show "${message}"
+
+// Read user input
+read user_input = "What's your name? "
+show "Nice to meet you, ${user_input}" 

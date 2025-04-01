@@ -1,0 +1,25 @@
+# Test file for simple parser
+
+# Basic variable declarations
+let x = 10
+let y = 20
+let z = x + y
+
+# String literals
+let name = "John"
+let message = "Hello, World!"
+
+# Boolean expressions
+let isTrue = true
+let isFalse = false
+let isEqual = x == y
+
+# Complex expressions
+let a = 5
+let b = 3
+let c = (a + b) * 2
+let d = c / 2
+
+# Multiple operations
+let result = x + y * z
+let sum = (x + y) * (z - 5) 

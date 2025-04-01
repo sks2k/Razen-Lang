@@ -1,0 +1,22 @@
+[package]
+name = "razen_compiler"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+# For machine code generation
+cranelift = "0.104"
+cranelift-module = "0.104"
+cranelift-jit = "0.104"      # For potentially running code directly (optional, good for testing)
+cranelift-object = "0.104" # For writing object files
+target-lexicon = "0.12"     # For defining target architecture
+
+# For linking object files (simplest way)
+cc = "1.0"
+
+# Error handling helper
+thiserror = "1.0"
+
+# Potentially for parsing syntax.rzn later (not used in this initial impl)
+# serde = { version = "1.0", features = ["derive"] }
+# toml = "0.8"

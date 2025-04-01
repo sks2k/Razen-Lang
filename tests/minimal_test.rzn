@@ -1,0 +1,3 @@
+// Minimal RAZEN Test Script
+let num = 42
+show "The answer is: " + num 

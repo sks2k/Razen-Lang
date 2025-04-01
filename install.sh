@@ -220,31 +220,52 @@ mkdir -p "$TMP_DIR/src"
 mkdir -p "$TMP_DIR/scripts"
 mkdir -p "$TMP_DIR/properties"
 
-# Download main.py
-if ! curl -s -o "$TMP_DIR/main.py" "$RAZEN_REPO/main.py" &>/dev/null; then
-    echo -e "${RED}Failed to download main.py${NC}"
-    rm -rf "$TMP_DIR"
-    exit 1
-fi
-echo -e "  ${GREEN}✓${NC} Downloaded main.py"
-
-# Download requirements.txt
-if ! curl -s -o "$TMP_DIR/requirements.txt" "$RAZEN_REPO/requirements.txt" &>/dev/null; then
-    echo -e "${RED}Failed to download requirements.txt${NC}"
-    rm -rf "$TMP_DIR"
-    exit 1
-fi
-echo -e "  ${GREEN}✓${NC} Downloaded requirements.txt"
-
-# Download src files
-for file in lexer.py parser.py interpreter.py runtime.py; do
-    if ! curl -s -o "$TMP_DIR/src/$file" "$RAZEN_REPO/src/$file" &>/dev/null; then
-        echo -e "${RED}Failed to download src/$file${NC}"
+# Download Rust binary
+echo -e "${YELLOW}Downloading Razen compiler binary...${NC}"
+if ! curl -s -o "$TMP_DIR/razen_compiler" "$RAZEN_REPO/target/release/razen_compiler" &>/dev/null; then
+    echo -e "${RED}Failed to download Razen compiler binary${NC}"
+    echo -e "${YELLOW}Attempting to build from source...${NC}"
+    
+    # Download Cargo.toml
+    if ! curl -s -o "$TMP_DIR/Cargo.toml" "$RAZEN_REPO/Cargo.toml" &>/dev/null; then
+        echo -e "${RED}Failed to download Cargo.toml${NC}"
         rm -rf "$TMP_DIR"
         exit 1
     fi
-    echo -e "  ${GREEN}✓${NC} Downloaded src/$file"
-done
+    echo -e "  ${GREEN}✓${NC} Downloaded Cargo.toml"
+    
+    # Create src directory
+    mkdir -p "$TMP_DIR/src"
+    
+    # Download Rust source files
+    for file in main.rs token.rs ast.rs lexer.rs parser.rs compiler.rs syntax.rs; do
+        if ! curl -s -o "$TMP_DIR/src/$file" "$RAZEN_REPO/src/$file" &>/dev/null; then
+            echo -e "${RED}Failed to download src/$file${NC}"
+            rm -rf "$TMP_DIR"
+            exit 1
+        fi
+        echo -e "  ${GREEN}✓${NC} Downloaded src/$file"
+    done
+    
+    # Build the Rust project
+    echo -e "${YELLOW}Building Razen compiler from source...${NC}"
+    cd "$TMP_DIR"
+    if ! cargo build --release; then
+        echo -e "${RED}Failed to build Razen compiler${NC}"
+        rm -rf "$TMP_DIR"
+        exit 1
+    fi
+    echo -e "  ${GREEN}✓${NC} Built Razen compiler from source"
+    cd - > /dev/null
+    
+    # Copy the built binary
+    cp "$TMP_DIR/target/release/razen_compiler" "$TMP_DIR/razen_compiler"
+else
+    echo -e "  ${GREEN}✓${NC} Downloaded Razen compiler binary"
+fi
+
+# Make the binary executable
+chmod +x "$TMP_DIR/razen_compiler"
 
 # Download properties files
 for file in variables.rzn keywords.rzn operators.rzn functions.rzn; do
@@ -303,9 +324,8 @@ sudo mkdir -p "$INSTALL_DIR/properties"
 echo -e "  ${GREEN}✓${NC} Created installation directory"
 
 # Copy files to installation directory
-sudo cp "$TMP_DIR/main.py" "$INSTALL_DIR/"
-sudo cp "$TMP_DIR/src/"*.py "$INSTALL_DIR/src/" 2>/dev/null || true
-sudo cp "$TMP_DIR/properties/"*.rzn "$INSTALL_DIR/properties/"
+sudo cp "$TMP_DIR/razen_compiler" "/usr/local/bin/"
+sudo cp "$TMP_DIR/properties/"*.rzn "$INSTALL_DIR/properties/" 2>/dev/null || true
 sudo cp "$TMP_DIR/scripts/"* "$INSTALL_DIR/scripts/"
 
 # Download and save the latest installer script for future updates
@@ -324,9 +344,8 @@ fi
 # Create version file with proper permissions
 echo "$RAZEN_VERSION" | sudo tee "$INSTALL_DIR/version" > /dev/null
 
-# Create an empty __init__.py file in each directory to make them proper Python packages
-sudo touch "$INSTALL_DIR/__init__.py"
-sudo touch "$INSTALL_DIR/src/__init__.py"
+# Create a version file for the Rust implementation
+sudo touch "$INSTALL_DIR/rust_version"
 
 # Set proper permissions
 sudo chmod -R 755 "$INSTALL_DIR"
@@ -334,62 +353,20 @@ sudo chown -R root:root "$INSTALL_DIR"
 
 echo -e "  ${GREEN}✓${NC} Copied files to installation directory"
 
-# Install Python dependencies
-echo -e "${YELLOW}Installing Python dependencies...${NC}"
-if ! pip3 install -r "$TMP_DIR/requirements.txt"; then
-    echo -e "${RED}Failed to install Python dependencies. Please install them manually:${NC}"
-    echo -e "  pip3 install -r $TMP_DIR/requirements.txt"
+# Check for Rust installation
+echo -e "${YELLOW}Checking for Rust installation...${NC}"
+if ! command -v rustc &> /dev/null; then
+    echo -e "${RED}Rust is not installed. Razen compiler requires Rust to run.${NC}"
+    echo -e "${YELLOW}Please install Rust using rustup:${NC}"
+    echo -e "  curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh"
     rm -rf "$TMP_DIR"
     exit 1
 fi
-echo -e "  ${GREEN}✓${NC} Installed Python dependencies"
+echo -e "  ${GREEN}✓${NC} Rust is installed"
 
-# Generate parser tables
-echo -e "${YELLOW}Generating parser tables...${NC}"
-cd "$TMP_DIR"
-export PYTHONPATH="$TMP_DIR/src:$PYTHONPATH"
-
-# Clean up old parser tables
-rm -f "$TMP_DIR/src/parser_parsetab.py" "$TMP_DIR/src/parser.out" "$TMP_DIR/src/razen_parsetab.py"
-
-if ! python3 -c "
-import os
-import sys
-os.chdir('src')
-try:
-    import ply.yacc as yacc
-    from lexer import tokens
-    from parser import *
-    
-    # Force clean build
-    parser = yacc.yacc(
-        debug=True,
-        write_tables=True,
-        tabmodule='parser_parsetab',
-        outputdir='.',
-        optimize=False,
-        errorlog=yacc.PlyLogger(sys.stderr)  # Enable error logging
-    )
-    print('Parser tables generated successfully')
-except Exception as e:
-    print(f'Error: {str(e)}')
-    import traceback
-    traceback.print_exc()
-    sys.exit(1)
-"; then
-    echo -e "${RED}Failed to generate parser tables. Please check the parser implementation.${NC}"
-    rm -rf "$TMP_DIR"
-    exit 1
-fi
-
-# Copy generated parser tables to installation directory
-if [ -f "$TMP_DIR/src/parser_parsetab.py" ]; then
-    sudo cp "$TMP_DIR/src/parser_parsetab.py" "$INSTALL_DIR/src/"
-    echo -e "  ${GREEN}✓${NC} Copied parser tables"
-fi
-
-cd - > /dev/null
-echo -e "  ${GREEN}✓${NC} Generated parser tables"
+# Check Rust version
+RUST_VERSION=$(rustc --version | cut -d' ' -f2)
+echo -e "  ${GREEN}✓${NC} Rust version: $RUST_VERSION"
 
 # Create symbolic links
 create_symlinks "$INSTALL_DIR"

@@ -1,66 +1,69 @@
+// Razen Language Variables Definition
+// This file defines all variables and their purposes in the Razen language
+// Format: variable_name => purpose and use case
+
 // 1️⃣ General Purpose Variables for basic data types:
-
-let => for numbers.  
-take => for strings.  
-hold => for boolean (true/false).  
-put => for mixed types.  
-
+let => for declaring numeric variables and calculations. Use for integers, floats, and mathematical operations.
+take => for declaring string variables and text manipulation. Use for text data, string operations, and string interpolation.
+hold => for declaring boolean variables and logical conditions. Use for true/false values and control flow.
+put => for declaring variables of any type. Use when type is unknown or mixed types are needed.
 
 // 2️⃣ Mathematical Variables for calculations & math operations:
-
-sum => for total.  
-diff => for difference.  
-prod => for multiplication.  
-div => for division.  
-mod => for modulus.  
-
+sum => for calculating total or sum of values. Use in addition operations and running totals.
+diff => for calculating difference between values. Use in subtraction operations and comparisons.
+prod => for calculating product of values. Use in multiplication operations and scaling.
+div => for calculating division of values. Use in division operations and ratios.
+mod => for calculating modulus/remainder. Use in cyclic operations and value wrapping.
 
 // 3️⃣ Logical Variables For conditions, booleans, and comparisons:
-
-if => for conditional blocks.
-else => for alternative blocks.
-is => for conditions.  
-when => for checks.  
-not => for negation.  
+if => for conditional execution blocks. Use to check conditions and execute code.
+else => for alternative execution blocks. Use with if for fallback behavior.
+is => for equality comparison. Use to check if values are equal.
+when => for pattern matching and case statements. Use for multiple condition checks.
+not => for logical negation. Use to invert boolean values.
 
 // 4️⃣ String Variables for text & strings:
-
-text => for string data.  
-concat => for joining strings.  
-slice => for cutting strings.  
-len => for string length.  
+text => for string data storage. Use for storing and manipulating text.
+concat => for joining strings together. Use for string concatenation and building messages.
+slice => for extracting parts of strings. Use for substring operations and text parsing.
+len => for getting string length. Use for string size checks and validation.
 
 // 5️⃣ List & Array Variables for collections:
-
-list => for simple arrays.  
-arr => for fixed-size arrays.  
-append => for adding elements.  
-remove => for deleting elements.    
-
+list => for dynamic arrays and lists. Use for storing multiple values of any type.
+arr => for fixed-size arrays. Use when array size is known and constant.
+append => for adding elements to lists. Use for list growth and element addition.
+remove => for removing elements from lists. Use for list cleanup and element deletion.
 
 // 6️⃣ Dictionary/Map Variables for key-value pairs:
-
-map => for dictionaries.  
-key => to access keys.  
-value => to access values.  
+map => for key-value storage. Use for storing related data with unique keys.
+key => for accessing dictionary keys. Use for key iteration and key-based operations.
+value => for accessing dictionary values. Use for value iteration and value-based operations.
 
 // 7️⃣ Date & Time Variables for timestamps & time:
-
-current => for current time.  
-now => for current timestamp.  
-year => for year.  
-month => for month.  
-day => for day.  
-hour => for hour.  
-minute => for minute.  
-second => for second.  
+current => for current date/time. Use for getting current timestamp.
+now => for current timestamp. Use for precise time measurements.
+year => for year component. Use for date-based calculations.
+month => for month component. Use for date-based calculations.
+day => for day component. Use for date-based calculations.
+hour => for hour component. Use for time-based calculations.
+minute => for minute component. Use for time-based calculations.
+second => for second component. Use for time-based calculations.
 
 // 8️⃣ User-Defined Variables for custom variables:
+store => for persistent storage. Use for saving and loading data.
+box => for temporary storage. Use for short-term data holding.
+ref => for reference variables. Use for aliasing and pointer-like behavior.
 
-store => for reusable values.  
-box => for storing temporary data.  
-ref => for reference variables.  
+// 9️⃣ Input/Output Variables:
+show => for printing output to console. Use for displaying results and messages.
+read => for reading input from user. Use for getting user input and data entry.
 
-// 9️⃣ Input/Output Variables
-show => for printing output
-read => for reading input
+// 10️⃣ Control Flow Variables:
+while => for loop control. Use for repeated execution based on condition.
+fun => for function declaration. Use for code organization and reuse.
+return => for function return values. Use for sending results back from functions.
+
+// 11️⃣ Special Variables:
+true => for boolean true value. Use in boolean expressions.
+false => for boolean false value. Use in boolean expressions.
+null => for null/undefined value. Use for optional or uninitialized data.

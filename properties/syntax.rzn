@@ -1,0 +1,222 @@
+# =================================
+# 🛠️ Variables  
+# =================================
+
+# 1️⃣ General Purpose Variables  
+VAR: let => Integer, Float, Number  
+VAR: take => String, Text  
+VAR: hold => Boolean  
+VAR: put => Any  
+
+# 2️⃣ Mathematical Variables  
+VAR: sum => Addition  
+VAR: diff => Subtraction  
+VAR: prod => Multiplication  
+VAR: div => Division  
+VAR: mod => Modulus  
+VAR: power => Exponentiation  
+
+# 3️⃣ Logical Variables  
+VAR: if => Conditional Statement  
+VAR: else => Alternative Execution  
+VAR: elif => Else If Execution  
+VAR: is => Equality Check  
+VAR: when => Pattern Matching  
+VAR: not => Logical Negation  
+VAR: and => Logical AND  
+VAR: or => Logical OR  
+VAR: true => Boolean True  
+VAR: false => Boolean False  
+VAR: null => Null/Undefined  
+
+# 4️⃣ String Variables  
+VAR: text => String Storage  
+VAR: concat => String Concatenation  
+VAR: slice => Substring Extraction  
+VAR: len => String Length  
+VAR: split => String Splitting  
+VAR: trim => String Trimming  
+VAR: replace => String Replacement  
+VAR: find => Substring Finding  
+
+# 5️⃣ List & Array Variables  
+VAR: list => Dynamic Arrays  
+VAR: arr => Fixed-Size Arrays  
+VAR: append => Add Element  
+VAR: remove => Remove Element  
+VAR: size => Array Length  
+VAR: clear => Empty Array  
+
+# 6️⃣ Dictionary/Map Variables  
+VAR: map => Key-Value Storage  
+VAR: key => Dictionary Key  
+VAR: value => Dictionary Value  
+VAR: get => Dictionary Get  
+VAR: set => Dictionary Set  
+VAR: contains => Check Key Presence  
+VAR: keys => Get All Keys  
+VAR: values => Get All Values  
+
+# 7️⃣ Date & Time Variables  
+VAR: current => Current DateTime  
+VAR: now => Current Timestamp  
+VAR: year => Year Component  
+VAR: month => Month Component  
+VAR: day => Day Component  
+VAR: hour => Hour Component  
+VAR: minute => Minute Component  
+VAR: second => Second Component  
+
+# 8️⃣ Input/Output Variables  
+VAR: show => Output Display  
+VAR: read => User Input  
+VAR: write => Write to File  
+VAR: read_file => Read from File  
+
+# 9️⃣ Control Flow Variables  
+VAR: while => Loop Control  
+VAR: for => Iterative Loop  
+VAR: break => Exit Loop  
+VAR: continue => Skip to Next Iteration  
+VAR: return => Function Return  
+VAR: fun => Function Declaration  
+
+# 1️⃣0️⃣ Error Handling  
+VAR: try => Exception Handling Block  
+VAR: catch => Error Capture  
+VAR: throw => Raise Exception  
+VAR: finally => Cleanup Execution  
+
+# =================================
+# 🔥 Functions  
+# =================================
+
+# 1️⃣ Math Functions  
+FUNC: plus(a, b) => a + b  
+FUNC: minus(a, b) => a - b  
+FUNC: times(a, b) => a * b  
+FUNC: by(a, b) => a / b  
+FUNC: mod(a, b) => a % b  
+FUNC: power(a, b) => a ** b  
+FUNC: round(num) => Math.round(num)  
+FUNC: sqrt(num) => Math.sqrt(num)  
+FUNC: abs(num) => Absolute Value  
+
+# 2️⃣ String Functions  
+FUNC: size(str) => str.length  
+FUNC: join(str1, str2) => str1 + str2  
+FUNC: big(str) => str.toUpperCase()  
+FUNC: small(str) => str.toLowerCase()  
+FUNC: split(str, delim) => str.split(delim)  
+FUNC: replace(str, old, new) => str.replace(old, new)  
+FUNC: trim(str) => str.trim()  
+FUNC: find(str, substr) => str.indexOf(substr)  
+
+# 3️⃣ List Functions  
+FUNC: count(arr) => arr.length  
+FUNC: add(arr, item) => arr.push(item)  
+FUNC: take(arr) => arr.pop()  
+FUNC: clear(arr) => arr = []  
+FUNC: sort(arr) => arr.sort()  
+FUNC: reverse(arr) => arr.reverse()  
+
+# 4️⃣ Dictionary Functions  
+FUNC: keys(obj) => Object.keys(obj)  
+FUNC: values(obj) => Object.values(obj)  
+FUNC: contains(obj, key) => key in obj  
+FUNC: remove(obj, key) => delete obj[key]  
+FUNC: get(obj, key) => obj[key]  
+
+# 5️⃣ Time Functions  
+FUNC: time() => Date.now()  
+FUNC: date() => new Date().toISOString()  
+FUNC: timestamp() => Date.getTime()  
+FUNC: sleep(ms) => Delay Execution  
+
+# 6️⃣ Input/Output Functions  
+FUNC: say(message) => show message  
+FUNC: ask(question) => read result = question  
+FUNC: write(file, data) => Write to File  
+FUNC: read_file(file) => Read from File  
+
+# =================================
+# ➕ Operations  
+# =================================
+
+OP: + => ADD  
+OP: - => SUB  
+OP: * => MUL  
+OP: / => DIV  
+OP: % => MOD  
+OP: ** => EXPONENT  
+OP: // => FLOOR_DIV  
+OP: == => EQ  
+OP: != => NE  
+OP: > => GT  
+OP: >= => GE  
+OP: < => LT  
+OP: <= => LE  
+OP: && => AND  
+OP: || => OR  
+OP: ! => NOT  
+OP: = => ASSIGN  
+OP: += => INCREMENT  
+OP: -= => DECREMENT  
+OP: *= => MULTIPLY_ASSIGN  
+OP: /= => DIVIDE_ASSIGN  
+OP: %= => MOD_ASSIGN  
+
+# =================================
+# 📜 Grammar Rules  
+# =================================
+
+# ✅ Variable Declaration  
+RULE: VAR_DECL => [VAR_TYPE] [ID] [ASSIGN] [EXPR]  
+RULE: VAR_TYPE => "LET" | "TAKE" | "HOLD" | "PUT"  
+
+# ✅ Function Declaration  
+RULE: FUNC_DECL => "FUN" [ID] "LEFT_PAREN" [PARAMS] "RIGHT_PAREN" "LBRACE" [BLOCK] "RBRACE"  
+RULE: PARAMS => [PARAM] | [PARAM] "COMMA" [PARAMS] | ""
+RULE: PARAM => [VAR_TYPE] [ID]  
+
+# ✅ Control Flow  
+RULE: IF_STMT => "IF" [EXPR] "LBRACE" [BLOCK] "RBRACE" ["ELSE" "LBRACE" [BLOCK] "RBRACE"]  
+RULE: ELIF_STMT => "ELIF" [EXPR] "LBRACE" [BLOCK] "RBRACE"  
+RULE: WHILE_STMT => "WHILE" [EXPR] "LBRACE" [BLOCK] "RBRACE"  
+RULE: FOR_STMT => "FOR" [ID] "IN" [RANGE] "LBRACE" [BLOCK] "RBRACE"  
+RULE: BREAK => "BREAK"  
+RULE: CONTINUE => "CONTINUE"  
+RULE: RETURN => "RETURN" [EXPR]  
+
+# ✅ Exception Handling  
+RULE: TRY => "TRY" "LBRACE" [BLOCK] "RBRACE"  
+RULE: CATCH => "CATCH" "LBRACE" [BLOCK] "RBRACE"  
+RULE: THROW => "THROW" [EXPR]  
+RULE: FINALLY => "FINALLY" "LBRACE" [BLOCK] "RBRACE"  
+
+# ✅ File Operations  
+RULE: OPEN_FILE => "OPEN" [FILE] "IN" [MODE]  
+RULE: READ_FILE => "READ_FILE" [FILE]  
+RULE: WRITE_FILE => "WRITE_FILE" [FILE] [DATA]  
+RULE: CLOSE_FILE => "CLOSE" [FILE]  
+
+# ✅ Expressions  
+RULE: EXPR => [TERM] [EXPR_TAIL]  
+RULE: EXPR_TAIL => [OP] [TERM] [EXPR_TAIL] | ""  
+RULE: TERM => [ID] | [LITERAL] | "LEFT_PAREN" [EXPR] "RIGHT_PAREN"  
+
+# ✅ Function Call  
+RULE: FUNC_CALL => [ID] "LEFT_PAREN" [ARGS] "RIGHT_PAREN"  
+RULE: ARGS => [EXPR] | ""  
+
+# ✅ Literals  
+RULE: LITERAL => [INTEGER] | [FLOAT] | [STRING_LITERAL] | [BOOLEAN] | [NULL]  
+RULE: INTEGER => [DIGIT]+  
+RULE: FLOAT => [DIGIT]+ "." [DIGIT]+  
+RULE: STRING_LITERAL => '"' [CHAR]* '"'  
+RULE: BOOLEAN => "TRUE" | "FALSE"  
+RULE: NULL => "NULL"
+
+# ✅ Blocks  
+RULE: BLOCK => [STMT]  
+RULE: STMT => [VAR_DECL] | [FUNC_DECL] | [IF_STMT] | [WHILE_STMT] | [FOR_STMT] | [TRY] | [CATCH] | [THROW] | [FINALLY] | [BREAK] | [CONTINUE] | [RETURN] | [EXPR]

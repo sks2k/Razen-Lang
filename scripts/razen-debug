@@ -5,19 +5,24 @@ SCRIPT_DIR=$(dirname "$0")
 
 # First try the development directory structure (script is in scripts/)
 PROJECT_ROOT=$(cd "$SCRIPT_DIR/.." && pwd)
-MAIN_PY="$PROJECT_ROOT/main.py"
+RAZEN_BIN="$PROJECT_ROOT/target/debug/razen_compiler"
 
-# If main.py doesn't exist there, check installation directories
-if [ ! -f "$MAIN_PY" ]; then
-  # Check installation in /usr/local/lib/razen
-  if [ -f "/usr/local/lib/razen/main.py" ]; then
-    MAIN_PY="/usr/local/lib/razen/main.py"
-  # Check installation in /usr/local/razen (macOS)
-  elif [ -f "/usr/local/razen/main.py" ]; then
-    MAIN_PY="/usr/local/razen/main.py"
+# If the binary doesn't exist in debug, try release
+if [ ! -f "$RAZEN_BIN" ]; then
+  RAZEN_BIN="$PROJECT_ROOT/target/release/razen_compiler"
+fi
+
+# If binary doesn't exist there, check installation directories
+if [ ! -f "$RAZEN_BIN" ]; then
+  # Check installation in /usr/local/bin
+  if [ -f "/usr/local/bin/razen_compiler" ]; then
+    RAZEN_BIN="/usr/local/bin/razen_compiler"
+  # Check installation in /usr/bin
+  elif [ -f "/usr/bin/razen_compiler" ]; then
+    RAZEN_BIN="/usr/bin/razen_compiler"
   # Check Windows paths if running in WSL
-  elif [ -f "/mnt/c/Program Files/Razen/main.py" ]; then
-    MAIN_PY="/mnt/c/Program Files/Razen/main.py"
+  elif [ -f "/mnt/c/Program Files/Razen/razen_compiler.exe" ]; then
+    RAZEN_BIN="/mnt/c/Program Files/Razen/razen_compiler.exe"
   fi
 fi
 
@@ -44,10 +49,10 @@ else
     fi
 fi
 
-# Check if main.py exists
-if [ ! -f "$MAIN_PY" ]; then
-  echo "Error: main.py not found at $MAIN_PY"
-  echo "Please ensure Razen is properly installed."
+# Check if Razen binary exists
+if [ ! -f "$RAZEN_BIN" ]; then
+  echo "Error: Razen compiler not found at $RAZEN_BIN"
+  echo "Please ensure Razen is properly installed or build it with 'cargo build'."
   exit 1
 fi
 
@@ -57,10 +62,7 @@ if [ ! -f "$ABSOLUTE_PATH" ]; then
     exit 1
 fi
 
-# Set the DEBUG environment variable to 1
-export DEBUG=1
-
-# Run main.py with the debug flag and any other arguments passed
-python3 "$MAIN_PY" --mode=debug "$ABSOLUTE_PATH" "$@"
+# Run the Rust compiler with debug flag
+"$RAZEN_BIN" run --debug "$ABSOLUTE_PATH" "$@"
 
 exit $?
