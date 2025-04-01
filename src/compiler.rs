@@ -1012,6 +1012,54 @@ impl Compiler {
                         }
                     }
                 },
+                IR::GreaterThan => {
+                    if let (Some(b), Some(a)) = (stack.pop(), stack.pop()) {
+                        // Try to compare as numbers first
+                        if let (Ok(a_num), Ok(b_num)) = (a.parse::<f64>(), b.parse::<f64>()) {
+                            stack.push((a_num > b_num).to_string());
+                        } else {
+                            // Otherwise compare as strings
+                            let result = a > b;
+                            stack.push(result.to_string());
+                        }
+                    }
+                },
+                IR::GreaterEqual => {
+                    if let (Some(b), Some(a)) = (stack.pop(), stack.pop()) {
+                        // Try to compare as numbers first
+                        if let (Ok(a_num), Ok(b_num)) = (a.parse::<f64>(), b.parse::<f64>()) {
+                            stack.push((a_num >= b_num).to_string());
+                        } else {
+                            // Otherwise compare as strings
+                            let result = a >= b;
+                            stack.push(result.to_string());
+                        }
+                    }
+                },
+                IR::LessThan => {
+                    if let (Some(b), Some(a)) = (stack.pop(), stack.pop()) {
+                        // Try to compare as numbers first
+                        if let (Ok(a_num), Ok(b_num)) = (a.parse::<f64>(), b.parse::<f64>()) {
+                            stack.push((a_num < b_num).to_string());
+                        } else {
+                            // Otherwise compare as strings
+                            let result = a < b;
+                            stack.push(result.to_string());
+                        }
+                    }
+                },
+                IR::LessEqual => {
+                    if let (Some(b), Some(a)) = (stack.pop(), stack.pop()) {
+                        // Try to compare as numbers first
+                        if let (Ok(a_num), Ok(b_num)) = (a.parse::<f64>(), b.parse::<f64>()) {
+                            stack.push((a_num <= b_num).to_string());
+                        } else {
+                            // Otherwise compare as strings
+                            let result = a <= b;
+                            stack.push(result.to_string());
+                        }
+                    }
+                },
                 // Add basic implementations for other instructions as needed
                 _ => {
                     // For instructions not yet implemented, just log if in debug mode
