@@ -2,7 +2,7 @@
 # Standard library functions for the Razen programming language
 
 # Example Usage:
-# take result = add(5, 3);  # Output: 8
+# let result = add(5, 3);  # Output: 8
 # show result;
 
 #==============================================================================
@@ -37,11 +37,11 @@ fun divide(a, b) {
 # Example: divide(15, 3) => 5
 
 fun power(base, exponent) {
-    take result = 1;
-    take i = 0;
+    let result = 1;
+    let i = 0;
     while (i < exponent) {
-        let result = result * base;
-        let i = i + 1;
+        result = result * base;
+        i = i + 1;
     }
     return result;
 }
@@ -76,7 +76,7 @@ fun min(a, b) {
 # Example: min(20, 15) => 15
 
 fun round(num) {
-    take integer = int(num);
+    let integer = int(num);
     if (num - integer >= 0.5) {
         return integer + 1;
     }

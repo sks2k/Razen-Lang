@@ -164,6 +164,8 @@ impl Parser {
             TokenType::Break => self.parse_break_statement(),
             TokenType::Continue => self.parse_continue_statement(),
             TokenType::Show => self.parse_show_statement(),
+            TokenType::Read => self.parse_read_statement(),
+            TokenType::Exit => self.parse_exit_statement(),
             TokenType::Try => self.parse_try_statement(),
             TokenType::Throw => self.parse_throw_statement(),
             TokenType::Comment => {
@@ -464,6 +466,28 @@ impl Parser {
         }
         
         Some(Statement::ThrowStatement { value })
+    }
+    
+    fn parse_read_statement(&mut self) -> Option<Statement> {
+        if !self.expect_peek(TokenType::Identifier) {
+            return None;
+        }
+        
+        let name = self.current_token.literal.clone();
+        
+        if self.peek_token_is(TokenType::Semicolon) {
+            self.next_token();
+        }
+        
+        Some(Statement::ReadStatement { name })
+    }
+    
+    fn parse_exit_statement(&mut self) -> Option<Statement> {
+        if self.peek_token_is(TokenType::Semicolon) {
+            self.next_token();
+        }
+        
+        Some(Statement::ExitStatement)
     }
     
     fn parse_expression(&mut self, precedence: Precedence) -> Option<Expression> {

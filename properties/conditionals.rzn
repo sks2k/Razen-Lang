@@ -10,7 +10,7 @@
 # Syntax: if (condition) { code_block }
 
 # Example: Basic if statement
-take temperature = 30;
+let temperature = 30;
 if (temperature > 25) {
     show "It's hot outside!";
 }
@@ -21,7 +21,7 @@ if (temperature > 25) {
 # Syntax: if (condition) { code_block } else { code_block }
 
 # Example: If-else statement
-take hour = 20;
+let hour = 20;
 if (hour < 12) {
     show "Good morning!";
 } else {
@@ -34,7 +34,7 @@ if (hour < 12) {
 # Syntax: if (condition1) { code_block } else if (condition2) { code_block } else { code_block }
 
 # Example: Multiple conditions
-take score = 85;
+let score = 85;
 if (score >= 90) {
     show "Grade: A";
 } else if (score >= 80) {
@@ -57,8 +57,8 @@ if (score >= 90) {
 # Syntax: condition1 && condition2
 
 # Example: Using AND operator
-take age = 25;
-take hasLicense = true;
+let age = 25;
+hold hasLicense = true;
 if (age >= 18 && hasLicense) {
     show "You can drive";
 } else {
@@ -71,8 +71,8 @@ if (age >= 18 && hasLicense) {
 # Syntax: condition1 || condition2
 
 # Example: Using OR operator
-take isWeekend = false;
-take isHoliday = true;
+hold isWeekend = false;
+hold isHoliday = true;
 if (isWeekend || isHoliday) {
     show "You can rest today";
 } else {
@@ -85,7 +85,7 @@ if (isWeekend || isHoliday) {
 # Syntax: !condition
 
 # Example: Using NOT operator
-take isRaining = false;
+hold isRaining = false;
 if (!isRaining) {
     show "You don't need an umbrella";
 } else {
@@ -102,8 +102,8 @@ if (!isRaining) {
 # Syntax: value1 == value2
 
 # Example: Equal comparison
-take a = 5;
-take b = 5;
+let a = 5;
+let b = 5;
 if (a == b) {
     show "a is equal to b";
 }
@@ -114,8 +114,8 @@ if (a == b) {
 # Syntax: value1 != value2
 
 # Example: Not equal comparison
-take x = 10;
-take y = 5;
+let x = 10;
+let y = 5;
 if (x != y) {
     show "x is not equal to y";
 }
@@ -126,8 +126,8 @@ if (x != y) {
 # Syntax: value1 > value2
 
 # Example: Greater than comparison
-take num1 = 15;
-take num2 = 10;
+let num1 = 15;
+let num2 = 10;
 if (num1 > num2) {
     show "num1 is greater than num2";
 }
@@ -138,8 +138,8 @@ if (num1 > num2) {
 # Syntax: value1 < value2
 
 # Example: Less than comparison
-take price = 50;
-take budget = 100;
+let price = 50;
+let budget = 100;
 if (price < budget) {
     show "You can afford this item";
 }
@@ -150,7 +150,7 @@ if (price < budget) {
 # Syntax: value1 >= value2
 
 # Example: Greater than or equal comparison
-take age = 18;
+let age = 18;
 if (age >= 18) {
     show "You are an adult";
 }
@@ -161,7 +161,7 @@ if (age >= 18) {
 # Syntax: value1 <= value2
 
 # Example: Less than or equal comparison
-take temperature = 0;
+let temperature = 0;
 if (temperature <= 0) {
     show "Water will freeze";
 }
@@ -175,8 +175,8 @@ if (temperature <= 0) {
 # Conditionals inside other conditionals
 # Example: Nested decision making
 
-take age = 25;
-take income = 50000;
+let age = 25;
+let income = 50000;
 
 if (age >= 18) {
     show "You are an adult";
@@ -200,8 +200,8 @@ if (age >= 18) {
 # Syntax: condition ? value_if_true : value_if_false
 
 # Example: Using the ternary operator
-take age = 20;
-take status = age >= 18 ? "adult" : "minor";
+let age = 20;
+text status = age >= 18 ? "adult" : "minor";
 show "You are a " + status;
 # Output: You are a adult
 
@@ -209,7 +209,7 @@ show "You are a " + status;
 # A pattern to handle multiple specific cases
 # Note: Razen doesn't have a native switch statement, but we can simulate it
 
-take day = "Monday";
+text day = "Monday";
 
 if (day == "Monday") {
     show "Start of work week";
@@ -237,7 +237,7 @@ if (day == "Monday") {
 # All other values are considered truthy
 
 # Example: Checking for truthy values
-take name = "";
+text name = "";
 if (name) {
     show "Name is provided";
 } else {
@@ -245,7 +245,7 @@ if (name) {
 }
 # Output: Name is not provided
 
-take count = 0;
+let count = 0;
 if (count) {
     show "Count has a non-zero value";
 } else {
@@ -253,15 +253,15 @@ if (count) {
 }
 # Output: Count is zero
 
-take data = null;
+put data = null;
 if (!data) {
     show "Data is not available";
 }
 # Output: Data is not available
 
-take list = [1, 2, 3];
-if (list) {
-    show "List has " + len(list) + " items";
+list items = [1, 2, 3];
+if (items) {
+    show "List has " + len(items) + " items";
 }
 # Output: List has 3 items
 
@@ -274,8 +274,8 @@ if (list) {
 # - For ||, if the first operand is true, the second is not evaluated
 
 # Example: Short-circuit with &&
-take x = 5;
-take y = 10;
+let x = 5;
+let y = 10;
 
 if (x > 10 && y++ > 5) {
     show "Both conditions are true";
@@ -288,8 +288,8 @@ show "y = " + y;  # y is still 10 because the second condition wasn't evaluated
 # y = 10
 
 # Example: Short-circuit with ||
-take a = 5;
-take b = 10;
+let a = 5;
+let b = 10;
 
 if (a < 10 || b++ > 15) {
     show "At least one condition is true";

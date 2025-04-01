@@ -61,6 +61,7 @@ pub enum TokenType {
     // I/O keywords
     Show,
     Read,
+    Exit,
     
     // Boolean literals
     True,
@@ -154,6 +155,7 @@ impl fmt::Display for TokenType {
             // I/O keywords
             TokenType::Show => write!(f, "SHOW"),
             TokenType::Read => write!(f, "READ"),
+            TokenType::Exit => write!(f, "EXIT"),
             
             // Boolean literals
             TokenType::True => write!(f, "TRUE"),
@@ -244,6 +246,7 @@ pub fn lookup_identifier(identifier: &str) -> TokenType {
         // I/O keywords
         "show" => TokenType::Show,
         "read" => TokenType::Read,
+        "exit" => TokenType::Exit,
         
         // Boolean literals
         "true" => TokenType::True,

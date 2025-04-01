@@ -54,6 +54,8 @@ enum IR {
     
     // I/O operations
     Print,
+    ReadInput,
+    Exit,
     
     // Array operations
     CreateArray(usize),
@@ -313,6 +315,12 @@ impl Compiler {
             },
             Statement::ThrowStatement { value } => {
                 self.compile_throw_statement(value);
+            },
+            Statement::ReadStatement { name } => {
+                self.compile_read_statement(name);
+            },
+            Statement::ExitStatement => {
+                self.compile_exit_statement();
             },
         }
     }
@@ -615,6 +623,20 @@ impl Compiler {
         self.emit(IR::Print);
     }
     
+    fn compile_read_statement(&mut self, name: String) {
+        // Define the variable in the symbol table
+        self.symbol_table.define(&name);
+        
+        // Add a custom IR operation for reading user input
+        self.emit(IR::ReadInput);
+        self.emit(IR::StoreVar(name));
+    }
+    
+    fn compile_exit_statement(&mut self) {
+        // Emit the exit instruction to terminate the program
+        self.emit(IR::Exit);
+    }
+    
     fn compile_expression(&mut self, expr: Expression) {
         match expr {
             Expression::Identifier(name) => {
@@ -835,6 +857,8 @@ impl Compiler {
                 IR::Call(_, _) => code.push(0x1E),
                 IR::Return => code.push(0x1F),
                 IR::Print => code.push(0x20),
+                IR::ReadInput => code.push(0x29),
+                IR::Exit => code.push(0x2A),
                 IR::CreateArray(_) => code.push(0x21),
                 IR::GetIndex => code.push(0x22),
                 IR::SetIndex => code.push(0x23),
@@ -882,7 +906,9 @@ impl Compiler {
         let mut variables: HashMap<String, String> = HashMap::new();
         
         // Execute each instruction
-        for ir in &self.ir {
+        let mut pc = 0; // Program counter
+        while pc < self.ir.len() {
+            let ir = &self.ir[pc];
             match ir {
                 IR::PushNumber(n) => stack.push(n.to_string()),
                 IR::PushString(s) => stack.push(s.clone()),
@@ -923,6 +949,20 @@ impl Compiler {
                         }
                     }
                 },
+                IR::Equal => {
+                    if let (Some(b), Some(a)) = (stack.pop(), stack.pop()) {
+                        // Compare as strings
+                        let result = a == b;
+                        stack.push(result.to_string());
+                    }
+                },
+                IR::NotEqual => {
+                    if let (Some(b), Some(a)) = (stack.pop(), stack.pop()) {
+                        // Compare as strings
+                        let result = a != b;
+                        stack.push(result.to_string());
+                    }
+                },
                 IR::StoreVar(name) => {
                     if let Some(value) = stack.pop() {
                         variables.insert(name.clone(), value);
@@ -940,6 +980,38 @@ impl Compiler {
                         println!("{}", value);
                     }
                 },
+                IR::ReadInput => {
+                    use std::io::{self, BufRead};
+                    let stdin = io::stdin();
+                    let mut line = String::new();
+                    stdin.lock().read_line(&mut line).expect("Failed to read line");
+                    // Remove trailing newline
+                    if line.ends_with('\n') {
+                        line.pop();
+                        if line.ends_with('\r') {
+                            line.pop();
+                        }
+                    }
+                    stack.push(line);
+                },
+                IR::Exit => {
+                    if !self.clean_output {
+                        println!("Program terminated with exit statement");
+                    }
+                    return Ok(());
+                },
+                IR::Jump(target) => {
+                    pc = *target;
+                    continue;
+                },
+                IR::JumpIfFalse(target) => {
+                    if let Some(value) = stack.pop() {
+                        if value == "false" || value == "0" || value.is_empty() || value == "False" {
+                            pc = *target;
+                            continue;
+                        }
+                    }
+                },
                 // Add basic implementations for other instructions as needed
                 _ => {
                     // For instructions not yet implemented, just log if in debug mode
@@ -948,6 +1020,7 @@ impl Compiler {
                     }
                 }
             }
+            pc += 1; // Move to next instruction
         }
         
         if !self.clean_output {

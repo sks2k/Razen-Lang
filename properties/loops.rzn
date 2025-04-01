@@ -10,7 +10,7 @@
 # Syntax: while (condition) { code_block }
 
 # Example: Basic while loop
-take count = 0;
+let count = 0;
 while (count < 5) {
     show "Count: " + count;
     let count = count + 1;
@@ -27,7 +27,7 @@ while (count < 5) {
 # Syntax: for (variable in array) { code_block }
 
 # Example: Iterating over an array
-take numbers = [10, 20, 30, 40, 50];
+let numbers = [10, 20, 30, 40, 50];
 for (num in numbers) {
     show "Number: " + num;
 }
@@ -43,7 +43,7 @@ for (num in numbers) {
 # Syntax: for (key in map) { code_block }
 
 # Example: Iterating over a map
-take person = {
+let person = {
     "name": "John",
     "age": 30,
     "city": "New York"
@@ -66,7 +66,7 @@ for (key in person) {
 # Syntax: break;
 
 # Example: Using break in a loop
-take i = 0;
+let i = 0;
 while (i < 10) {
     if (i == 5) {
         show "Breaking at i = " + i;
@@ -109,7 +109,7 @@ for (i in [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]) {
 # A loop inside another loop
 # Example: Multiplication table
 
-take size = 3;
+let size = 3;
 for (i in [1, 2, 3]) {
     for (j in [1, 2, 3]) {
         show i + " × " + j + " = " + (i * j);
@@ -135,8 +135,8 @@ for (i in [1, 2, 3]) {
 # Note: Range is implemented as a helper function
 
 fun range(start, end, step = 1) {
-    take result = [];
-    take current = start;
+    let result = [];
+    let current = start;
     
     if (step > 0) {
         while (current < end) {
@@ -168,9 +168,9 @@ for (num in range(0, 10, 2)) {
 # A loop that runs indefinitely until a break condition is met
 # Example: Finding a number
 
-take target = 42;
-take guess = 0;
-take found = false;
+let target = 42;
+let guess = 0;
+let found = false;
 
 while (true) {
     let guess = guess + 1;
@@ -194,7 +194,7 @@ while (true) {
 
 # Map operation (transform each element)
 fun map(arr, func) {
-    take result = [];
+    let result = [];
     for (item in arr) {
         push(result, func(item));
     }
@@ -202,14 +202,14 @@ fun map(arr, func) {
 }
 
 # Example: Using map to double each number
-take numbers = [1, 2, 3, 4, 5];
-take doubled = map(numbers, fun(x) { return x * 2; });
+let numbers = [1, 2, 3, 4, 5];
+let doubled = map(numbers, fun(x) { return x * 2; });
 show "Doubled: " + doubled;
 # Output: Doubled: [2, 4, 6, 8, 10]
 
 # Filter operation (keep elements that match a condition)
 fun filter(arr, func) {
-    take result = [];
+    let result = [];
     for (item in arr) {
         if (func(item)) {
             push(result, item);
@@ -219,14 +219,14 @@ fun filter(arr, func) {
 }
 
 # Example: Using filter to keep only even numbers
-take numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-take evens = filter(numbers, fun(x) { return x % 2 == 0; });
+let numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+let evens = filter(numbers, fun(x) { return x % 2 == 0; });
 show "Even numbers: " + evens;
 # Output: Even numbers: [2, 4, 6, 8, 10]
 
 # Reduce operation (accumulate values)
 fun reduce(arr, func, initial) {
-    take result = initial;
+    let result = initial;
     for (item in arr) {
         let result = func(result, item);
     }
@@ -234,7 +234,7 @@ fun reduce(arr, func, initial) {
 }
 
 # Example: Using reduce to sum an array
-take numbers = [1, 2, 3, 4, 5];
-take sum = reduce(numbers, fun(acc, x) { return acc + x; }, 0);
+let numbers = [1, 2, 3, 4, 5];
+let sum = reduce(numbers, fun(acc, x) { return acc + x; }, 0);
 show "Sum: " + sum;
 # Output: Sum: 15

@@ -71,6 +71,10 @@ pub enum Statement {
     ThrowStatement {
         value: Expression,
     },
+    ReadStatement {
+        name: String,
+    },
+    ExitStatement,
 }
 
 // Expression represents an expression in the program
@@ -233,6 +237,12 @@ impl fmt::Display for Node {
                     },
                     Statement::ThrowStatement { value } => {
                         write!(f, "throw {};", Node::Expression(value.clone()))
+                    },
+                    Statement::ReadStatement { name } => {
+                        write!(f, "read {};", name)
+                    },
+                    Statement::ExitStatement => {
+                        write!(f, "exit;")
                     },
                 }
             },

@@ -1,0 +1,21 @@
+let price = 1000;
+let money = 200;
+
+take name = "Yash";
+take product = "Laptop";
+
+if (money >= price) {
+    show name + " can buy " + product + " for " + price + " rupees.";
+    show " Want to buy " + product + "? (yes/no)";
+    read want_to_buy;
+    if (want_to_buy == "yes") {
+        show name + " bought " + product + " for " + price + " rupees.";
+        show "Final balance: " + (money - price);
+    } else {
+        show name + " cancelled the purchase.";
+        show "Final balance: " + money;
+    }
+} else {
+    show name + " doesn't have enough money.";
+    exit;
+}
