@@ -1,0 +1,240 @@
+# Razen Loops
+# Standard loop implementations for the Razen programming language
+
+#==============================================================================
+# 1️⃣ Basic Loops
+#==============================================================================
+
+# While Loop
+# Executes a block of code as long as a specified condition is true
+# Syntax: while (condition) { code_block }
+
+# Example: Basic while loop
+take count = 0;
+while (count < 5) {
+    show "Count: " + count;
+    let count = count + 1;
+}
+# Output:
+# Count: 0
+# Count: 1
+# Count: 2
+# Count: 3
+# Count: 4
+
+# For Loop with Arrays
+# Iterates over elements in an array
+# Syntax: for (variable in array) { code_block }
+
+# Example: Iterating over an array
+take numbers = [10, 20, 30, 40, 50];
+for (num in numbers) {
+    show "Number: " + num;
+}
+# Output:
+# Number: 10
+# Number: 20
+# Number: 30
+# Number: 40
+# Number: 50
+
+# For Loop with Maps
+# Iterates over key-value pairs in a map
+# Syntax: for (key in map) { code_block }
+
+# Example: Iterating over a map
+take person = {
+    "name": "John",
+    "age": 30,
+    "city": "New York"
+};
+
+for (key in person) {
+    show key + ": " + person[key];
+}
+# Output:
+# name: John
+# age: 30
+# city: New York
+
+#==============================================================================
+# 2️⃣ Loop Control
+#==============================================================================
+
+# Break Statement
+# Terminates the loop and transfers control to the statement following the loop
+# Syntax: break;
+
+# Example: Using break in a loop
+take i = 0;
+while (i < 10) {
+    if (i == 5) {
+        show "Breaking at i = " + i;
+        break;
+    }
+    show "i = " + i;
+    let i = i + 1;
+}
+# Output:
+# i = 0
+# i = 1
+# i = 2
+# i = 3
+# i = 4
+# Breaking at i = 5
+
+# Continue Statement
+# Skips the current iteration of a loop and continues with the next iteration
+# Syntax: continue;
+
+# Example: Using continue in a loop
+for (i in [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]) {
+    if (i % 2 == 0) {
+        continue;  # Skip even numbers
+    }
+    show "Odd number: " + i;
+}
+# Output:
+# Odd number: 1
+# Odd number: 3
+# Odd number: 5
+# Odd number: 7
+# Odd number: 9
+
+#==============================================================================
+# 3️⃣ Advanced Loop Patterns
+#==============================================================================
+
+# Nested Loops
+# A loop inside another loop
+# Example: Multiplication table
+
+take size = 3;
+for (i in [1, 2, 3]) {
+    for (j in [1, 2, 3]) {
+        show i + " × " + j + " = " + (i * j);
+    }
+    show "---";
+}
+# Output:
+# 1 × 1 = 1
+# 1 × 2 = 2
+# 1 × 3 = 3
+# ---
+# 2 × 1 = 2
+# 2 × 2 = 4
+# 2 × 3 = 6
+# ---
+# 3 × 1 = 3
+# 3 × 2 = 6
+# 3 × 3 = 9
+# ---
+
+# Loop with Range
+# Iterating over a range of numbers
+# Note: Range is implemented as a helper function
+
+fun range(start, end, step = 1) {
+    take result = [];
+    take current = start;
+    
+    if (step > 0) {
+        while (current < end) {
+            push(result, current);
+            let current = current + step;
+        }
+    } else if (step < 0) {
+        while (current > end) {
+            push(result, current);
+            let current = current + step;
+        }
+    }
+    
+    return result;
+}
+
+# Example: Using range to iterate
+for (num in range(0, 10, 2)) {
+    show "Even number: " + num;
+}
+# Output:
+# Even number: 0
+# Even number: 2
+# Even number: 4
+# Even number: 6
+# Even number: 8
+
+# Infinite Loop with Break
+# A loop that runs indefinitely until a break condition is met
+# Example: Finding a number
+
+take target = 42;
+take guess = 0;
+take found = false;
+
+while (true) {
+    let guess = guess + 1;
+    
+    if (guess == target) {
+        show "Found the target: " + target;
+        break;
+    }
+    
+    if (guess > 100) {
+        show "Giving up after 100 attempts";
+        break;
+    }
+}
+# Output (if target is 42):
+# Found the target: 42
+
+#==============================================================================
+# 4️⃣ Functional Loop Patterns
+#==============================================================================
+
+# Map operation (transform each element)
+fun map(arr, func) {
+    take result = [];
+    for (item in arr) {
+        push(result, func(item));
+    }
+    return result;
+}
+
+# Example: Using map to double each number
+take numbers = [1, 2, 3, 4, 5];
+take doubled = map(numbers, fun(x) { return x * 2; });
+show "Doubled: " + doubled;
+# Output: Doubled: [2, 4, 6, 8, 10]
+
+# Filter operation (keep elements that match a condition)
+fun filter(arr, func) {
+    take result = [];
+    for (item in arr) {
+        if (func(item)) {
+            push(result, item);
+        }
+    }
+    return result;
+}
+
+# Example: Using filter to keep only even numbers
+take numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+take evens = filter(numbers, fun(x) { return x % 2 == 0; });
+show "Even numbers: " + evens;
+# Output: Even numbers: [2, 4, 6, 8, 10]
+
+# Reduce operation (accumulate values)
+fun reduce(arr, func, initial) {
+    take result = initial;
+    for (item in arr) {
+        let result = func(result, item);
+    }
+    return result;
+}
+
+# Example: Using reduce to sum an array
+take numbers = [1, 2, 3, 4, 5];
+take sum = reduce(numbers, fun(acc, x) { return acc + x; }, 0);
+show "Sum: " + sum;
+# Output: Sum: 15

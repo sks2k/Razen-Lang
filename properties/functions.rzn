@@ -1,104 +1,267 @@
 # Razen Standard Functions
-# Simple and easy to use functions for Razen
+# Standard library functions for the Razen programming language
 
 # Example Usage:
-# let result = plus(5, 3);  // Output: 8
+# take result = add(5, 3);  # Output: 8
 # show result;
 
+#==============================================================================
 # 1️⃣ Math Functions
-func plus(let a, let b) {
-    sum = a + b;
-    return sum;
-}
-# Example: plus(5, 3) => 8
-# Example: plus(10, 20) => 30
+#==============================================================================
 
-func minus(let a, let b) {
-    diff = a - b;
-    return diff;
+fun add(a, b) {
+    return a + b;
 }
-# Example: minus(10, 3) => 7
-# Example: minus(20, 5) => 15
+# Example: add(5, 3) => 8
+# Example: add(10, 20) => 30
 
-func times(let a, let b) {
-    prod = a * b;
-    return prod;
+fun subtract(a, b) {
+    return a - b;
 }
-# Example: times(4, 3) => 12
-# Example: times(5, 2) => 10
+# Example: subtract(10, 3) => 7
+# Example: subtract(20, 5) => 15
 
-func by(let a, let b) {
-    div = a / b;
-    return div;
+fun multiply(a, b) {
+    return a * b;
 }
-# Example: by(10, 2) => 5
-# Example: by(15, 3) => 5
+# Example: multiply(4, 3) => 12
+# Example: multiply(5, 2) => 10
 
-# 2️⃣ Text Functions
-func size(take str) {
-    len = str.length;
-    return len;
+fun divide(a, b) {
+    if (b == 0) {
+        throw "Division by zero is not allowed";
+    }
+    return a / b;
 }
-# Example: size("Hello") => 5
-# Example: size("Razen") => 5
+# Example: divide(10, 2) => 5
+# Example: divide(15, 3) => 5
 
-func join(take str1, take str2) {
-    text = str1 + str2;
-    return text;
+fun power(base, exponent) {
+    take result = 1;
+    take i = 0;
+    while (i < exponent) {
+        let result = result * base;
+        let i = i + 1;
+    }
+    return result;
 }
-# Example: join("Hello", "World") => "HelloWorld"
-# Example: join("Razen", "Lang") => "RazenLang"
+# Example: power(2, 3) => 8
+# Example: power(5, 2) => 25
 
-func big(take str) {
-    text = str.toUpperCase();
-    return text;
+fun abs(num) {
+    if (num < 0) {
+        return -num;
+    }
+    return num;
 }
-# Example: big("hello") => "HELLO"
-# Example: big("razen") => "RAZEN"
+# Example: abs(-5) => 5
+# Example: abs(5) => 5
 
-func small(take str) {
-    text = str.toLowerCase();
-    return text;
+fun max(a, b) {
+    if (a > b) {
+        return a;
+    }
+    return b;
 }
-# Example: small("HELLO") => "hello"
-# Example: small("RAZEN") => "razen"
+# Example: max(5, 10) => 10
+# Example: max(20, 15) => 20
 
-# 3️⃣ List Functions
-func count(list arr) {
-    len = arr.length;
-    return len;
+fun min(a, b) {
+    if (a < b) {
+        return a;
+    }
+    return b;
 }
-# Example: count([1, 2, 3]) => 3
-# Example: count(["a", "b"]) => 2
+# Example: min(5, 10) => 5
+# Example: min(20, 15) => 15
 
-func add(list arr, put item) {
-    append = arr.push(item);
-    return append;
+fun round(num) {
+    take integer = int(num);
+    if (num - integer >= 0.5) {
+        return integer + 1;
+    }
+    return integer;
 }
-# Example: add([1, 2], 3) => [1, 2, 3]
-# Example: add(["a"], "b") => ["a", "b"]
+# Example: round(3.2) => 3
+# Example: round(3.7) => 4
 
-func take(list arr) {
-    remove = arr.pop();
-    return remove;
-}
-# Example: take([1, 2, 3]) => 3
-# Example: take(["a", "b"]) => "b"
+#==============================================================================
+# 2️⃣ String Functions
+#==============================================================================
 
-# 4️⃣ Check Functions
-func isNum(put value) {
-    hold = typeof value is "number";
-    return hold;
+fun len(value) {
+    # Works for strings, arrays, and maps
+    return length(value);
 }
-# Example: isNum(123) => true
-# Example: isNum("123") => false
+# Example: len("Hello") => 5
+# Example: len([1, 2, 3]) => 3
 
-func isText(put value) {
-    hold = typeof value is "string";
-    return hold;
+fun concat(str1, str2) {
+    return str1 + str2;
 }
-# Example: isText("hello") => true
-# Example: isText(123) => false
+# Example: concat("Hello", "World") => "HelloWorld"
+# Example: concat("Razen", "Lang") => "RazenLang"
+
+fun upper(str) {
+    # Implementation in Rust
+    return str.upper();
+}
+# Example: upper("hello") => "HELLO"
+# Example: upper("razen") => "RAZEN"
+
+fun lower(str) {
+    # Implementation in Rust
+    return str.lower();
+}
+# Example: lower("HELLO") => "hello"
+# Example: lower("RAZEN") => "razen"
+
+fun substring(str, start, end) {
+    # Implementation in Rust
+    return str.substring(start, end);
+}
+# Example: substring("Hello", 1, 3) => "el"
+# Example: substring("Razen", 0, 3) => "Raz"
+
+fun replace(str, old, new) {
+    # Implementation in Rust
+    return str.replace(old, new);
+}
+# Example: replace("Hello World", "World", "Razen") => "Hello Razen"
+# Example: replace("abc", "b", "d") => "adc"
+
+fun trim(str) {
+    # Implementation in Rust
+    return str.trim();
+}
+# Example: trim("  Hello  ") => "Hello"
+# Example: trim("\tRazen\n") => "Razen"
+
+#==============================================================================
+# 3️⃣ Array Functions
+#==============================================================================
+
+fun push(arr, item) {
+    # Implementation in Rust
+    arr.push(item);
+    return arr;
+}
+# Example: push([1, 2], 3) => [1, 2, 3]
+# Example: push(["a"], "b") => ["a", "b"]
+
+fun pop(arr) {
+    # Implementation in Rust
+    return arr.pop();
+}
+# Example: pop([1, 2, 3]) => 3 (and arr becomes [1, 2])
+# Example: pop(["a", "b"]) => "b" (and arr becomes ["a"])
+
+fun join_array(arr, separator) {
+    # Implementation in Rust
+    return arr.join(separator);
+}
+# Example: join_array(["a", "b", "c"], "-") => "a-b-c"
+# Example: join_array([1, 2, 3], ",") => "1,2,3"
+
+fun sort(arr) {
+    # Implementation in Rust
+    return arr.sort();
+}
+# Example: sort([3, 1, 2]) => [1, 2, 3]
+# Example: sort(["c", "a", "b"]) => ["a", "b", "c"]
+
+fun reverse(arr) {
+    # Implementation in Rust
+    return arr.reverse();
+}
+# Example: reverse([1, 2, 3]) => [3, 2, 1]
+# Example: reverse(["a", "b", "c"]) => ["c", "b", "a"]
+
+fun slice(arr, start, end) {
+    # Implementation in Rust
+    return arr.slice(start, end);
+}
+# Example: slice([1, 2, 3, 4, 5], 1, 3) => [2, 3]
+# Example: slice(["a", "b", "c", "d"], 0, 2) => ["a", "b"]
+
+#==============================================================================
+# 4️⃣ Type Conversion Functions
+#==============================================================================
+
+fun int(value) {
+    # Implementation in Rust
+    return to_int(value);
+}
+# Example: int("123") => 123
+# Example: int(123.45) => 123
+
+fun float(value) {
+    # Implementation in Rust
+    return to_float(value);
+}
+# Example: float("123.45") => 123.45
+# Example: float(123) => 123.0
+
+fun str(value) {
+    # Implementation in Rust
+    return to_string(value);
+}
+# Example: str(123) => "123"
+# Example: str(true) => "true"
+
+fun bool(value) {
+    # Implementation in Rust
+    return to_bool(value);
+}
+# Example: bool(1) => true
+# Example: bool(0) => false
+# Example: bool("true") => true
+
+#==============================================================================
+# 5️⃣ Type Checking Functions
+#==============================================================================
+
+fun is_number(value) {
+    # Implementation in Rust
+    return typeof(value) == "number";
+}
+# Example: is_number(123) => true
+# Example: is_number("123") => false
+
+fun is_string(value) {
+    # Implementation in Rust
+    return typeof(value) == "string";
+}
+# Example: is_string("hello") => true
+# Example: is_string(123) => false
+
+fun is_boolean(value) {
+    # Implementation in Rust
+    return typeof(value) == "boolean";
+}
+# Example: is_boolean(true) => true
+# Example: is_boolean(1) => false
+
+fun is_array(value) {
+    # Implementation in Rust
+    return typeof(value) == "array";
+}
+# Example: is_array([1, 2, 3]) => true
+# Example: is_array("[1, 2, 3]") => false
+
+fun is_map(value) {
+    # Implementation in Rust
+    return typeof(value) == "map";
+}
+# Example: is_map({"a": 1}) => true
+# Example: is_map([1, 2, 3]) => false
+
+fun is_null(value) {
+    # Implementation in Rust
+    return value == null;
+}
+# Example: is_null(null) => true
+# Example: is_null(0) => false
 
 func isArray(put value) {
     hold = Array.isArray(value);

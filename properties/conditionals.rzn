@@ -1,0 +1,302 @@
+# Razen Conditionals
+# Standard conditional implementations for the Razen programming language
+
+#==============================================================================
+# 1️⃣ Basic Conditionals
+#==============================================================================
+
+# If Statement
+# Executes a block of code if a specified condition is true
+# Syntax: if (condition) { code_block }
+
+# Example: Basic if statement
+take temperature = 30;
+if (temperature > 25) {
+    show "It's hot outside!";
+}
+# Output: It's hot outside!
+
+# If-Else Statement
+# Executes a block of code if a condition is true and another block if it's false
+# Syntax: if (condition) { code_block } else { code_block }
+
+# Example: If-else statement
+take hour = 20;
+if (hour < 12) {
+    show "Good morning!";
+} else {
+    show "Good day!";
+}
+# Output: Good day!
+
+# If-Else If-Else Statement
+# Executes different blocks of code for multiple conditions
+# Syntax: if (condition1) { code_block } else if (condition2) { code_block } else { code_block }
+
+# Example: Multiple conditions
+take score = 85;
+if (score >= 90) {
+    show "Grade: A";
+} else if (score >= 80) {
+    show "Grade: B";
+} else if (score >= 70) {
+    show "Grade: C";
+} else if (score >= 60) {
+    show "Grade: D";
+} else {
+    show "Grade: F";
+}
+# Output: Grade: B
+
+#==============================================================================
+# 2️⃣ Logical Operators
+#==============================================================================
+
+# AND Operator (&&)
+# Returns true if both operands are true
+# Syntax: condition1 && condition2
+
+# Example: Using AND operator
+take age = 25;
+take hasLicense = true;
+if (age >= 18 && hasLicense) {
+    show "You can drive";
+} else {
+    show "You cannot drive";
+}
+# Output: You can drive
+
+# OR Operator (||)
+# Returns true if at least one operand is true
+# Syntax: condition1 || condition2
+
+# Example: Using OR operator
+take isWeekend = false;
+take isHoliday = true;
+if (isWeekend || isHoliday) {
+    show "You can rest today";
+} else {
+    show "You need to work today";
+}
+# Output: You can rest today
+
+# NOT Operator (!)
+# Returns the opposite of the operand's boolean value
+# Syntax: !condition
+
+# Example: Using NOT operator
+take isRaining = false;
+if (!isRaining) {
+    show "You don't need an umbrella";
+} else {
+    show "Take an umbrella";
+}
+# Output: You don't need an umbrella
+
+#==============================================================================
+# 3️⃣ Comparison Operators
+#==============================================================================
+
+# Equal (==)
+# Checks if two values are equal
+# Syntax: value1 == value2
+
+# Example: Equal comparison
+take a = 5;
+take b = 5;
+if (a == b) {
+    show "a is equal to b";
+}
+# Output: a is equal to b
+
+# Not Equal (!=)
+# Checks if two values are not equal
+# Syntax: value1 != value2
+
+# Example: Not equal comparison
+take x = 10;
+take y = 5;
+if (x != y) {
+    show "x is not equal to y";
+}
+# Output: x is not equal to y
+
+# Greater Than (>)
+# Checks if the left value is greater than the right value
+# Syntax: value1 > value2
+
+# Example: Greater than comparison
+take num1 = 15;
+take num2 = 10;
+if (num1 > num2) {
+    show "num1 is greater than num2";
+}
+# Output: num1 is greater than num2
+
+# Less Than (<)
+# Checks if the left value is less than the right value
+# Syntax: value1 < value2
+
+# Example: Less than comparison
+take price = 50;
+take budget = 100;
+if (price < budget) {
+    show "You can afford this item";
+}
+# Output: You can afford this item
+
+# Greater Than or Equal (>=)
+# Checks if the left value is greater than or equal to the right value
+# Syntax: value1 >= value2
+
+# Example: Greater than or equal comparison
+take age = 18;
+if (age >= 18) {
+    show "You are an adult";
+}
+# Output: You are an adult
+
+# Less Than or Equal (<=)
+# Checks if the left value is less than or equal to the right value
+# Syntax: value1 <= value2
+
+# Example: Less than or equal comparison
+take temperature = 0;
+if (temperature <= 0) {
+    show "Water will freeze";
+}
+# Output: Water will freeze
+
+#==============================================================================
+# 4️⃣ Advanced Conditional Patterns
+#==============================================================================
+
+# Nested Conditionals
+# Conditionals inside other conditionals
+# Example: Nested decision making
+
+take age = 25;
+take income = 50000;
+
+if (age >= 18) {
+    show "You are an adult";
+    
+    if (income < 30000) {
+        show "You qualify for financial assistance";
+    } else if (income >= 30000 && income < 60000) {
+        show "You are in the middle-income bracket";
+    } else {
+        show "You are in the high-income bracket";
+    }
+} else {
+    show "You are a minor";
+}
+# Output:
+# You are an adult
+# You are in the middle-income bracket
+
+# Ternary Operator
+# A shorthand way to write simple if-else statements
+# Syntax: condition ? value_if_true : value_if_false
+
+# Example: Using the ternary operator
+take age = 20;
+take status = age >= 18 ? "adult" : "minor";
+show "You are a " + status;
+# Output: You are a adult
+
+# Switch-like Pattern with If-Else
+# A pattern to handle multiple specific cases
+# Note: Razen doesn't have a native switch statement, but we can simulate it
+
+take day = "Monday";
+
+if (day == "Monday") {
+    show "Start of work week";
+} else if (day == "Tuesday" || day == "Wednesday" || day == "Thursday") {
+    show "Mid-week";
+} else if (day == "Friday") {
+    show "End of work week";
+} else if (day == "Saturday" || day == "Sunday") {
+    show "Weekend";
+} else {
+    show "Invalid day";
+}
+# Output: Start of work week
+
+#==============================================================================
+# 5️⃣ Truthy and Falsy Values
+#==============================================================================
+
+# In Razen, the following values are considered falsy:
+# - false
+# - 0
+# - "" (empty string)
+# - null
+# - undefined
+# All other values are considered truthy
+
+# Example: Checking for truthy values
+take name = "";
+if (name) {
+    show "Name is provided";
+} else {
+    show "Name is not provided";
+}
+# Output: Name is not provided
+
+take count = 0;
+if (count) {
+    show "Count has a non-zero value";
+} else {
+    show "Count is zero";
+}
+# Output: Count is zero
+
+take data = null;
+if (!data) {
+    show "Data is not available";
+}
+# Output: Data is not available
+
+take list = [1, 2, 3];
+if (list) {
+    show "List has " + len(list) + " items";
+}
+# Output: List has 3 items
+
+#==============================================================================
+# 6️⃣ Short-Circuit Evaluation
+#==============================================================================
+
+# Logical operators use short-circuit evaluation
+# - For &&, if the first operand is false, the second is not evaluated
+# - For ||, if the first operand is true, the second is not evaluated
+
+# Example: Short-circuit with &&
+take x = 5;
+take y = 10;
+
+if (x > 10 && y++ > 5) {
+    show "Both conditions are true";
+} else {
+    show "At least one condition is false";
+}
+show "y = " + y;  # y is still 10 because the second condition wasn't evaluated
+# Output:
+# At least one condition is false
+# y = 10
+
+# Example: Short-circuit with ||
+take a = 5;
+take b = 10;
+
+if (a < 10 || b++ > 15) {
+    show "At least one condition is true";
+} else {
+    show "Both conditions are false";
+}
+show "b = " + b;  # b is still 10 because the second condition wasn't evaluated
+# Output:
+# At least one condition is true
+# b = 10

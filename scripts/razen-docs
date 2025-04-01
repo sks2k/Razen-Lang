@@ -15,26 +15,16 @@ BOLD="\033[1m"
 NC="\033[0m" # No Color
 
 # Find the Razen installation directory
-if [ -d "/usr/local/lib/razen" ]; then
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+RAZEN_DIR="$(dirname "$SCRIPT_DIR")"
+
+# Check if we're running from the repository or installed location
+if [ -d "/usr/local/lib/razen/docs" ]; then
     RAZEN_DIR="/usr/local/lib/razen"
-elif [ -d "/usr/lib/razen" ]; then
+elif [ -d "/usr/lib/razen/docs" ]; then
     RAZEN_DIR="/usr/lib/razen"
-else
-    # Try to find it in the current directory or parent directories
-    CURRENT_DIR="$(pwd)"
-    while [ "$CURRENT_DIR" != "/" ]; do
-        if [ -d "$CURRENT_DIR/razen-lang" ]; then
-            RAZEN_DIR="$CURRENT_DIR/razen-lang"
-            break
-        fi
-        CURRENT_DIR="$(dirname "$CURRENT_DIR")"
-    done
-    
-    # If still not found, use the directory of this script
-    if [ -z "$RAZEN_DIR" ]; then
-        SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-        RAZEN_DIR="$(dirname "$SCRIPT_DIR")"
-    fi
+elif [ ! -d "$RAZEN_DIR/docs" ] && [ -d "$RAZEN_DIR/razen-lang/docs" ]; then
+    RAZEN_DIR="$RAZEN_DIR/razen-lang"
 fi
 
 # Documentation directory
