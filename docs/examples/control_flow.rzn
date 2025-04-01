@@ -1,0 +1,62 @@
+# Control Flow in Razen
+# This example demonstrates conditionals and loops
+
+# If-Else statements
+take temperature = 25;
+
+show "Temperature check:";
+if (temperature > 30) {
+    show "It's hot outside!";
+} else if (temperature > 20) {
+    show "It's a nice day!";
+} else {
+    show "It's cold outside!";
+}
+
+# While loop
+show "\nWhile loop:";
+take count = 0;
+while (count < 5) {
+    show "Count: " + count;
+    let count = count + 1;
+}
+
+# For loop with arrays
+show "\nFor loop with array:";
+take numbers = [1, 2, 3, 4, 5];
+for (num in numbers) {
+    show "Number: " + num;
+}
+
+# For loop with maps
+show "\nFor loop with map:";
+take person = {
+    "name": "Alice",
+    "age": 30,
+    "city": "New York"
+};
+
+for (key in person) {
+    show key + ": " + person[key];
+}
+
+# Break statement
+show "\nBreak example:";
+take i = 0;
+while (i < 10) {
+    if (i == 5) {
+        show "Breaking at i = " + i;
+        break;
+    }
+    show "i = " + i;
+    let i = i + 1;
+}
+
+# Continue statement
+show "\nContinue example:";
+for (i in [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]) {
+    if (i % 2 == 0) {
+        continue;  # Skip even numbers
+    }
+    show "Odd number: " + i;
+}

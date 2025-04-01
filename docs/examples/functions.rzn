@@ -1,0 +1,83 @@
+# Functions in Razen
+# This example demonstrates function definition and usage
+
+# Basic function definition
+fun greet(name) {
+    return "Hello, " + name + "!";
+}
+
+# Calling a function
+take message = greet("Alice");
+show message;
+
+# Function with multiple parameters
+fun add(a, b) {
+    return a + b;
+}
+
+show "5 + 3 = " + add(5, 3);
+
+# Function with default parameter values
+fun power(base, exponent = 2) {
+    take result = 1;
+    take i = 0;
+    while (i < exponent) {
+        let result = result * base;
+        let i = i + 1;
+    }
+    return result;
+}
+
+show "2^3 = " + power(2, 3);  # Custom exponent
+show "5^2 = " + power(5);     # Default exponent
+
+# Function with multiple return values using arrays
+fun min_max(numbers) {
+    if (len(numbers) == 0) {
+        return [null, null];
+    }
+    
+    take min_val = numbers[0];
+    take max_val = numbers[0];
+    
+    for (num in numbers) {
+        if (num < min_val) {
+            let min_val = num;
+        }
+        if (num > max_val) {
+            let max_val = num;
+        }
+    }
+    
+    return [min_val, max_val];
+}
+
+take numbers = [5, 3, 8, 1, 9, 2];
+take [min, max] = min_max(numbers);
+show "Min: " + min + ", Max: " + max;
+
+# Recursive function
+fun factorial(n) {
+    if (n <= 1) {
+        return 1;
+    }
+    return n * factorial(n - 1);
+}
+
+show "Factorial of 5: " + factorial(5);
+
+# Function as a parameter
+fun apply(func, value) {
+    return func(value);
+}
+
+fun double(x) {
+    return x * 2;
+}
+
+fun square(x) {
+    return x * x;
+}
+
+show "Double of 5: " + apply(double, 5);
+show "Square of 5: " + apply(square, 5);
