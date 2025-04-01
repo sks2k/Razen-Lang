@@ -1,22 +1,22 @@
-// Test Case 40: Testing nested interpolation
+# Test Case 40: Testing nested interpolation
 let name = "World"
 let value = 42
 
-// Simple interpolation
+# Simple interpolation
 let simple = "Hello, ${name}!"
 show "Simple interpolation: ${simple}"
 
-// Nested interpolation using a variable inside another interpolation
+# Nested interpolation using a variable inside another interpolation
 let nested = "The answer is ${value}"
 show "Nested interpolation: ${nested}"
 
-// Double nested interpolation (three levels)
+# Double nested interpolation (three levels)
 let inner = "inner_value"
 let middle = "middle with ${inner}"
 let outer = "Outer with ${middle}"
 show "Triple nested: ${outer}"
 
-// Nested interpolation with expressions
+# Nested interpolation with expressions
 let a = 5
 let b = 10
 let expr = "Sum: ${a + b}"

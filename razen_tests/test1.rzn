@@ -3,7 +3,7 @@ let price = 145677
 take product = "iPhone"  
 take buyer = "Prathmesh"  
 
-// Check affordability  
+# Check affordability  
 let can_afford = money >= price  
 
 if can_afford {
@@ -14,8 +14,8 @@ if can_afford == false {
     show "${product} is not affordable for you ${buyer}."  
 }
 
-// Purchase process  
-read want_to_buy = "yes"  // Hardcoded response instead of using read
+# Purchase process  
+read want_to_buy = "yes"  # Hardcoded response instead of using read
 
 if want_to_buy == "yes" {
     if can_afford {

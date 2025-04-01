@@ -1,20 +1,20 @@
-// RAZEN Language Test Script
-// This script tests various language features
+# RAZEN Language Test Script
+# This script tests various language features
 
-// Variable declarations using different types
+# Variable declarations using different types
 let num = 42
 take greeting = "Hello, RAZEN!"
 hold isActive = true
 put data = null
 
-// Mathematical operations
+# Mathematical operations
 sum total = 10 + 20
 diff result = total - num
 prod product = 5 * 4
 div quotient = 100 / 5
 mod remainder = 17 % 5
 
-// Output
+# Output
 show "---- Test Results ----"
 show "Number: ${num}"
 show "Greeting: ${greeting}"
@@ -22,32 +22,32 @@ show "Is active: ${isActive}"
 show "Data: ${data}"
 show "Math: ${total}, ${result}, ${product}, ${quotient}, ${remainder}"
 
-// Using functions
+# Using functions
 show "Plus function: ${plus(5, 3)}"
 show "Minus function: ${minus(10, 4)}"
 show "Join function: ${join("Hello ", "World")}"
 show "Size function: ${size(greeting)}"
 
-// Control flow
+# Control flow
 if num > 40 {
     show "Number is greater than 40"
 } else {
     show "Number is not greater than 40"
 }
 
-// While loop
+# While loop
 let counter = 0
 while counter < 3 {
     show "Counter: ${counter}"
     sum counter = counter + 1
 }
 
-// Functions
+# Functions
 fun greet(take name) {
     take message = "Welcome, ${name}!"
     return message
 }
 
-// Call the function
+# Call the function
 take welcome = greet("User")
 show welcome 

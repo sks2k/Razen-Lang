@@ -19,9 +19,9 @@ let num1 = 10;
 let num2 = 5;
 let total = calculate_sum(num1, num2);
 
-// ... (previous code) ...
+# ... (previous code) ...
 show "The sum is: ";
-show total; // Show separately
+show total; # Show separately
 
 if (total > 10) {
     show "Sum is greater than 10.";
