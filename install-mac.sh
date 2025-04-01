@@ -44,8 +44,19 @@ create_symlinks() {
     local INSTALL_DIR="$1"
     echo -e "${YELLOW}Creating symbolic links...${NC}"
     
-    # List of all scripts that need symlinks
-    SCRIPTS="razen razen-debug razen-test razen-run razen-update razen-help"
+    # Dynamically find all scripts in the scripts directory
+    if [ -d "$INSTALL_DIR/scripts" ]; then
+        SCRIPTS=$(find "$INSTALL_DIR/scripts" -type f -executable -exec basename {} \;)
+        if [ -z "$SCRIPTS" ]; then
+            # Fallback to a predefined list if no executable files are found
+            SCRIPTS="razen razen-debug razen-test razen-run razen-update razen-help"
+            echo -e "${YELLOW}No executable scripts found, using default list.${NC}"
+        else
+            echo -e "${GREEN}Found $(echo "$SCRIPTS" | wc -w) scripts to link.${NC}"
+        fi
+    else
+        cleanup_and_exit "Scripts directory not found at $INSTALL_DIR/scripts"
+    fi
     
     # Create symlinks in /usr/local/bin
     for script in $SCRIPTS; do
@@ -349,59 +360,55 @@ sudo chown -R root:wheel "$INSTALL_DIR"
 
 echo -e "  ${GREEN}✓${NC} Copied files to installation directory"
 
-# Install Python dependencies
-echo -e "${YELLOW}Installing Python dependencies...${NC}"
-if ! pip3 install --user -r requirements.txt; then
-    echo -e "${RED}Failed to install Python dependencies. Please install them manually:${NC}"
-    echo -e "  pip3 install --user -r requirements.txt"
-    rm -rf "$TMP_DIR"
-    exit 1
-fi
-echo -e "  ${GREEN}✓${NC} Installed Python dependencies"
-
-# Generate parser tables
-echo -e "${YELLOW}Generating parser tables...${NC}"
-cd "$TMP_DIR"
-export PYTHONPATH="$TMP_DIR/src:$PYTHONPATH"
-
-# Clean up old parser tables
-rm -f "$TMP_DIR/src/parser_parsetab.py" "$TMP_DIR/src/parser.out" "$TMP_DIR/src/razen_parsetab.py"
-
-if ! python3 -c "
-import os
-import sys
-os.chdir('src')
-try:
-    import ply.yacc as yacc
-    from lexer import tokens
-    from parser import *
+# Check for Rust installation
+echo -e "${YELLOW}Checking for Rust installation...${NC}"
+if ! command -v rustc &> /dev/null; then
+    echo -e "${YELLOW}Rust is not installed. Razen compiler requires Rust to run.${NC}"
+    echo -e "${YELLOW}Installing Rust automatically...${NC}"
     
-    # Force clean build
-    parser = yacc.yacc(
-        debug=True,
-        write_tables=True,
-        tabmodule='parser_parsetab',
-        outputdir='.',
-        optimize=False,
-        errorlog=yacc.PlyLogger(sys.stderr)  # Enable error logging
-    )
-    print('Parser tables generated successfully')
-except Exception as e:
-    print(f'Error: {str(e)}')
-    import traceback
-    traceback.print_exc()
-    sys.exit(1)
-"; then
-    echo -e "${RED}Failed to generate parser tables. Please check the parser implementation.${NC}"
-    rm -rf "$TMP_DIR"
-    exit 1
+    # Ask for confirmation before installing Rust
+    read -p "Do you want to install Rust now? (y/n): " -n 1 -r
+    echo
+    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+        echo -e "${RED}Rust installation is required for Razen to function properly.${NC}"
+        echo -e "${YELLOW}You can install Rust manually using:${NC}"
+        echo -e "  curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh"
+        rm -rf "$TMP_DIR"
+        exit 1
+    fi
+    
+    # Install Rust using rustup
+    echo -e "${YELLOW}Downloading and installing Rust...${NC}"
+    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+    
+    # Check if installation was successful
+    if [ $? -ne 0 ]; then
+        echo -e "${RED}Failed to install Rust. Please install it manually.${NC}"
+        echo -e "${YELLOW}You can install Rust manually using:${NC}"
+        echo -e "  curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh"
+        rm -rf "$TMP_DIR"
+        exit 1
+    fi
+    
+    # Source the cargo environment
+    source "$HOME/.cargo/env"
+    
+    # Verify Rust installation
+    if ! command -v rustc &> /dev/null; then
+        echo -e "${RED}Rust installation completed but rustc command not found.${NC}"
+        echo -e "${YELLOW}Please restart your terminal and run the installer again.${NC}"
+        rm -rf "$TMP_DIR"
+        exit 1
+    fi
+    
+    echo -e "  ${GREEN}✓${NC} Rust has been successfully installed"
+else
+    echo -e "  ${GREEN}✓${NC} Rust is already installed"
 fi
 
-# Copy generated parser tables to installation directory
-if [ -f "$TMP_DIR/src/parser_parsetab.py" ]; then
-    sudo cp "$TMP_DIR/src/parser_parsetab.py" "$INSTALL_DIR/src/"
-    echo -e "  ${GREEN}✓${NC} Copied parser tables"
-fi
+# Check Rust version
+RUST_VERSION=$(rustc --version | cut -d' ' -f2)
+echo -e "  ${GREEN}✓${NC} Rust version: $RUST_VERSION"
 
 cd - > /dev/null
 echo -e "  ${GREEN}✓${NC} Generated parser tables"

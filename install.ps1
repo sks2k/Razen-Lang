@@ -84,12 +84,28 @@ function Perform-Update {
 # Function to create symbolic links
 function Create-Symlinks {
     param (
-        [string]$InstallDir,
-        [string[]]$Scripts
+        [string]$InstallDir
     )
     
     Write-ColorOutput "Creating symbolic links..." "Yellow"
     $scriptsDir = Join-Path $InstallDir "scripts"
+    
+    # Dynamically find all scripts in the scripts directory
+    if (Test-Path $scriptsDir) {
+        $scriptFiles = Get-ChildItem -Path $scriptsDir -File
+        
+        if ($scriptFiles.Count -eq 0) {
+            # Fallback to a predefined list if no files are found
+            $Scripts = @("razen", "razen-debug", "razen-test", "razen-run", "razen-update", "razen-help")
+            Write-ColorOutput "No script files found, using default list." "Yellow"
+        } else {
+            $Scripts = $scriptFiles | Select-Object -ExpandProperty Name
+            Write-ColorOutput "Found $($Scripts.Count) scripts to link." "Green"
+        }
+    } else {
+        Write-ColorOutput "Scripts directory not found at $scriptsDir" "Red"
+        return 1
+    }
     
     # Ensure Razen directory exists in Program Files
     if (-not (Test-Path "$env:ProgramFiles\Razen")) {
@@ -142,6 +158,20 @@ function Create-Symlinks {
                 Write-ColorOutput "    Error: $_" "Red"
                 return 1
             }
+        }
+    }
+    
+    # Add to PATH environment variable if not already there
+    $razenbinPath = "$env:ProgramFiles\Razen"
+    $userPath = [Environment]::GetEnvironmentVariable("Path", "User")
+    
+    if (-not ($userPath -like "*$razenbinPath*")) {
+        try {
+            [Environment]::SetEnvironmentVariable("Path", "$userPath;$razenbinPath", "User")
+            Write-ColorOutput "  ✓ Added Razen to PATH environment variable" "Green"
+        } catch {
+            Write-ColorOutput "  ✗ Failed to add Razen to PATH" "Yellow"
+            Write-ColorOutput "    You may need to manually add $razenbinPath to your PATH" "Yellow"
         }
     }
     
@@ -403,74 +433,90 @@ New-Item -ItemType File -Path (Join-Path $installDir "src\__init__.py") -Force |
 
 Write-ColorOutput "  ✓ Copied files to installation directory" "Green"
 
-# Install Python dependencies
-Write-ColorOutput "Installing Python dependencies..." "Yellow"
-try {
-    pip install --user -r requirements.txt
-    Write-ColorOutput "  ✓ Installed Python dependencies" "Green"
-} catch {
-    Write-ColorOutput "Failed to install Python dependencies. Please install them manually:" "Red"
-    Write-ColorOutput "  pip install --user -r requirements.txt" "Red"
-    Remove-Item $TMP_DIR -Recurse -Force
-    exit 1
+# Check for Rust installation
+Write-ColorOutput "Checking for Rust installation..." "Yellow"
+
+# Function to check if Rust is installed
+function Test-RustInstalled {
+    try {
+        $rustcVersion = (& rustc --version 2>$null)
+        return $rustcVersion -ne $null
+    } catch {
+        return $false
+    }
 }
 
-# Generate parser tables
-Write-ColorOutput "Generating parser tables..." "Yellow"
-$env:PYTHONPATH = "$TMP_DIR\src;$env:PYTHONPATH"
+# Function to install Rust
+function Install-Rust {
+    Write-ColorOutput "Downloading and installing Rust..." "Yellow"
+    try {
+        # Download rustup-init.exe
+        $rustupInit = Join-Path $env:TEMP "rustup-init.exe"
+        Invoke-WebRequest -Uri "https://win.rustup.rs/x86_64" -OutFile $rustupInit -ErrorAction Stop
+        
+        # Run rustup-init.exe with -y flag for automatic installation
+        Start-Process -FilePath $rustupInit -ArgumentList "-y" -Wait -NoNewWindow
+        
+        # Check if installation was successful
+        if (Test-RustInstalled) {
+            Write-ColorOutput "  ✓ Rust has been successfully installed" "Green"
+            return $true
+        } else {
+            Write-ColorOutput "Rust installation completed but rustc command not found." "Red"
+            Write-ColorOutput "Please restart your PowerShell session and run the installer again." "Yellow"
+            return $false
+        }
+    } catch {
+        Write-ColorOutput "Failed to install Rust: $_" "Red"
+        return $false
+    } finally {
+        # Clean up the installer
+        if (Test-Path $rustupInit) {
+            Remove-Item $rustupInit -Force
+        }
+    }
+}
 
-# Clean up old parser tables
-Remove-Item (Join-Path $TMP_DIR "src\parser_parsetab.py") -ErrorAction SilentlyContinue
-Remove-Item (Join-Path $TMP_DIR "src\parser.out") -ErrorAction SilentlyContinue
-Remove-Item (Join-Path $TMP_DIR "src\razen_parsetab.py") -ErrorAction SilentlyContinue
-
-# Generate parser tables using Python
-$pythonScript = @"
-import os
-import sys
-os.chdir('src')
-try:
-    import ply.yacc as yacc
-    from lexer import tokens
-    from parser import *
+# Check if Rust is installed, if not, ask to install it
+if (-not (Test-RustInstalled)) {
+    Write-ColorOutput "Rust is not installed. Razen compiler requires Rust to run." "Yellow"
+    Write-ColorOutput "Installing Rust automatically..." "Yellow"
     
-    # Force clean build
-    parser = yacc.yacc(
-        debug=True,
-        write_tables=True,
-        tabmodule='parser_parsetab',
-        outputdir='.',
-        optimize=False,
-        errorlog=yacc.PlyLogger(sys.stderr)  # Enable error logging
-    )
-    print('Parser tables generated successfully')
-except Exception as e:
-    print(f'Error: {str(e)}')
-    import traceback
-    traceback.print_exc()
-    sys.exit(1)
-"@
-
-$pythonScript | Out-File (Join-Path $TMP_DIR "generate_parser.py") -Encoding UTF8
-
-try {
-    python (Join-Path $TMP_DIR "generate_parser.py")
-    Write-ColorOutput "  ✓ Generated parser tables" "Green"
-} catch {
-    Write-ColorOutput "Failed to generate parser tables. Please check the parser implementation." "Red"
-    Remove-Item $TMP_DIR -Recurse -Force
-    exit 1
+    # Ask for confirmation
+    $confirmation = Read-Host "Do you want to install Rust now? (y/n)"
+    if ($confirmation -ne 'y') {
+        Write-ColorOutput "Rust installation is required for Razen to function properly." "Red"
+        Write-ColorOutput "You can install Rust manually by downloading the installer from:" "Yellow"
+        Write-ColorOutput "  https://rustup.rs" "Cyan"
+        Remove-Item $TMP_DIR -Recurse -Force -ErrorAction SilentlyContinue
+        exit 1
+    }
+    
+    # Install Rust
+    if (-not (Install-Rust)) {
+        Write-ColorOutput "Failed to install Rust. Please install it manually." "Red"
+        Write-ColorOutput "You can install Rust manually by downloading the installer from:" "Yellow"
+        Write-ColorOutput "  https://rustup.rs" "Cyan"
+        Remove-Item $TMP_DIR -Recurse -Force -ErrorAction SilentlyContinue
+        exit 1
+    }
+    
+    # Refresh environment variables to include Rust binaries
+    $env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User")
+} else {
+    Write-ColorOutput "  ✓ Rust is already installed" "Green"
 }
 
-# Copy generated parser tables to installation directory
-if (Test-Path (Join-Path $TMP_DIR "src\parser_parsetab.py")) {
-    Copy-Item (Join-Path $TMP_DIR "src\parser_parsetab.py") (Join-Path $installDir "src") -Force
-    Write-ColorOutput "  ✓ Copied parser tables" "Green"
+# Check Rust version
+try {
+    $rustVersion = (& rustc --version) -replace 'rustc\s+', ''
+    Write-ColorOutput "  ✓ Rust version: $rustVersion" "Green"
+} catch {
+    Write-ColorOutput "  ✗ Could not determine Rust version" "Yellow"
 }
 
 # Create symbolic links
-$scripts = @("razen", "razen-debug", "razen-test", "razen-run", "razen-update", "razen-help")
-$result = Create-Symlinks -InstallDir $installDir -Scripts $scripts
+$result = Create-Symlinks -InstallDir $installDir
 if ($result -ne 0) {
     Write-ColorOutput "Failed to create symbolic links." "Red"
     Remove-Item $TMP_DIR -Recurse -Force
