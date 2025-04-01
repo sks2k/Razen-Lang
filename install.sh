@@ -356,13 +356,48 @@ echo -e "  ${GREEN}✓${NC} Copied files to installation directory"
 # Check for Rust installation
 echo -e "${YELLOW}Checking for Rust installation...${NC}"
 if ! command -v rustc &> /dev/null; then
-    echo -e "${RED}Rust is not installed. Razen compiler requires Rust to run.${NC}"
-    echo -e "${YELLOW}Please install Rust using rustup:${NC}"
-    echo -e "  curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh"
-    rm -rf "$TMP_DIR"
-    exit 1
+    echo -e "${YELLOW}Rust is not installed. Razen compiler requires Rust to run.${NC}"
+    echo -e "${YELLOW}Installing Rust automatically...${NC}"
+    
+    # Ask for confirmation before installing Rust
+    read -p "Do you want to install Rust now? (y/n): " -n 1 -r
+    echo
+    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+        echo -e "${RED}Rust installation is required for Razen to function properly.${NC}"
+        echo -e "${YELLOW}You can install Rust manually using:${NC}"
+        echo -e "  curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh"
+        rm -rf "$TMP_DIR"
+        exit 1
+    fi
+    
+    # Install Rust using rustup
+    echo -e "${YELLOW}Downloading and installing Rust...${NC}"
+    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+    
+    # Check if installation was successful
+    if [ $? -ne 0 ]; then
+        echo -e "${RED}Failed to install Rust. Please install it manually.${NC}"
+        echo -e "${YELLOW}You can install Rust manually using:${NC}"
+        echo -e "  curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh"
+        rm -rf "$TMP_DIR"
+        exit 1
+    fi
+    
+    # Source the cargo environment
+    source "$HOME/.cargo/env"
+    
+    # Verify Rust installation
+    if ! command -v rustc &> /dev/null; then
+        echo -e "${RED}Rust installation completed but rustc command not found.${NC}"
+        echo -e "${YELLOW}Please restart your terminal and run the installer again.${NC}"
+        rm -rf "$TMP_DIR"
+        exit 1
+    fi
+    
+    echo -e "  ${GREEN}✓${NC} Rust has been successfully installed"
+else
+    echo -e "  ${GREEN}✓${NC} Rust is already installed"
 fi
-echo -e "  ${GREEN}✓${NC} Rust is installed"
 
 # Check Rust version
 RUST_VERSION=$(rustc --version | cut -d' ' -f2)
