@@ -1,0 +1,34 @@
+{
+  "name": "razen-language",
+  "displayName": "Razen Language",
+  "description": "Syntax highlighting and support for Razen programming language",
+  "version": "0.1.0",
+  "publisher": "razen-lang",
+  "engines": {
+    "vscode": "^1.60.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "contributes": {
+    "languages": [
+      {
+        "id": "razen",
+        "aliases": ["Razen", "razen"],
+        "extensions": [".rzn"],
+        "configuration": "./language-configuration/language-configuration.json",
+        "icon": {
+          "light": "./icons/razen-icon.png",
+          "dark": "./icons/razen-icon.png"
+        }
+      }
+    ],
+    "grammars": [
+      {
+        "language": "razen",
+        "scopeName": "source.razen",
+        "path": "./syntaxes/razen.tmLanguage.json"
+      }
+    ]
+  }
+}

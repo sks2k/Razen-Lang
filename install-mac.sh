@@ -49,7 +49,7 @@ create_symlinks() {
         SCRIPTS=$(find "$INSTALL_DIR/scripts" -type f -executable -exec basename {} \;)
         if [ -z "$SCRIPTS" ]; then
             # Fallback to a predefined list if no executable files are found
-            SCRIPTS="razen razen-debug razen-test razen-run razen-update razen-help"
+            SCRIPTS="razen razen-debug razen-test razen-run razen-update razen-help razen-extension"
             echo -e "${YELLOW}No executable scripts found, using default list.${NC}"
         else
             echo -e "${GREEN}Found $(echo "$SCRIPTS" | wc -w) scripts to link.${NC}"
@@ -152,7 +152,7 @@ uninstall_razen() {
     echo -e "${YELLOW}Uninstalling Razen...${NC}"
     
     # Remove all binary and script symlinks
-    for cmd in razen razen-debug razen-test razen-run razen-update razen-help; do
+    for cmd in razen razen-debug razen-test razen-run razen-update razen-help razen-extension; do
         if [ -f "/usr/local/bin/$cmd" ]; then
             sudo rm -f "/usr/local/bin/$cmd"
             echo -e "  ${GREEN}✓${NC} Removed /usr/local/bin/$cmd"
@@ -425,6 +425,89 @@ fi
 rm -rf "$TMP_DIR"
 echo -e "  ${GREEN}✓${NC} Cleaned up temporary files"
 
+# Ask about IDE extension installation
+echo -e "\n${YELLOW}Would you like to install IDE extensions for Razen?${NC}"
+echo -e "1. ${CYAN}VS Code Extension${NC} (works with VS Code and forks like VSCodium)"
+echo -e "2. ${CYAN}JetBrains Plugin${NC} (works with IntelliJ IDEA, PyCharm, WebStorm, etc.)"
+echo -e "3. ${CYAN}Skip${NC} (don't install IDE extensions)"
+
+read -p "Enter your choice (1-3): " ide_choice
+echo
+
+# Install IDE extensions based on user choice
+case $ide_choice in
+    1)
+        echo -e "${YELLOW}Installing VS Code Extension for Razen...${NC}"
+        
+        # Check if VS Code is installed
+        if command -v code &> /dev/null || command -v codium &> /dev/null; then
+            # Create VS Code extensions directory if it doesn't exist
+            VSCODE_EXT_DIR="$HOME/.vscode/extensions/razen-lang.razen-language"
+            mkdir -p "$VSCODE_EXT_DIR"
+            
+            # Copy VS Code extension files
+            cp -r "$INSTALL_DIR/razen-vscode-extension/"* "$VSCODE_EXT_DIR/"
+            
+            echo -e "  ${GREEN}✓${NC} VS Code Extension installed successfully"
+            echo -e "  ${YELLOW}Location:${NC} $VSCODE_EXT_DIR"
+            echo -e "  ${YELLOW}Restart VS Code to activate the extension${NC}"
+        else
+            echo -e "${YELLOW}VS Code not detected. Installing extension files only...${NC}"
+            
+            # Create a directory in the user's home for the extension
+            VSCODE_EXT_DIR="$HOME/.razen/vscode-extension"
+            mkdir -p "$VSCODE_EXT_DIR"
+            
+            # Copy VS Code extension files
+            cp -r "$INSTALL_DIR/razen-vscode-extension/"* "$VSCODE_EXT_DIR/"
+            
+            echo -e "  ${GREEN}✓${NC} VS Code Extension files installed to: $VSCODE_EXT_DIR"
+            echo -e "  ${YELLOW}To use with VS Code, copy these files to:${NC}"
+            echo -e "  ${CYAN}~/.vscode/extensions/razen-lang.razen-language/${NC}"
+        fi
+        ;;
+    2)
+        echo -e "${YELLOW}Installing JetBrains Plugin for Razen...${NC}"
+        
+        # Check if any JetBrains IDE is installed
+        JETBRAINS_FOUND=false
+        for ide_dir in "$HOME/Library/Application Support/JetBrains" "$HOME/.local/share/JetBrains"; do
+            if [ -d "$ide_dir" ]; then
+                JETBRAINS_FOUND=true
+                break
+            fi
+        done
+        
+        # Create a directory for the JetBrains plugin
+        JETBRAINS_PLUGIN_DIR="$HOME/.razen/jetbrains-plugin"
+        mkdir -p "$JETBRAINS_PLUGIN_DIR"
+        
+        # Copy JetBrains plugin files
+        cp -r "$INSTALL_DIR/razen-jetbrains-plugin/"* "$JETBRAINS_PLUGIN_DIR/"
+        
+        if [ "$JETBRAINS_FOUND" = true ]; then
+            echo -e "  ${GREEN}✓${NC} JetBrains Plugin files installed to: $JETBRAINS_PLUGIN_DIR"
+            echo -e "  ${YELLOW}To activate the plugin:${NC}"
+            echo -e "  1. Open your JetBrains IDE"
+            echo -e "  2. Go to Settings/Preferences > Plugins"
+            echo -e "  3. Click the gear icon and select 'Install Plugin from Disk...'"
+            echo -e "  4. Navigate to $JETBRAINS_PLUGIN_DIR and select the plugin JAR file"
+            echo -e "     (You may need to build it first using Gradle)"
+        else
+            echo -e "  ${GREEN}✓${NC} JetBrains Plugin files installed to: $JETBRAINS_PLUGIN_DIR"
+            echo -e "  ${YELLOW}No JetBrains IDE detected. To use the plugin:${NC}"
+            echo -e "  1. Build the plugin using Gradle: cd $JETBRAINS_PLUGIN_DIR && ./gradlew buildPlugin"
+            echo -e "  2. Install the plugin from: $JETBRAINS_PLUGIN_DIR/build/distributions/"
+        fi
+        ;;
+    *)
+        echo -e "${YELLOW}Skipping IDE extension installation.${NC}"
+        echo -e "${CYAN}You can install extensions later from:${NC}"
+        echo -e "  VS Code: $INSTALL_DIR/razen-vscode-extension/"
+        echo -e "  JetBrains: $INSTALL_DIR/razen-jetbrains-plugin/"
+        ;;
+esac
+
 # Success message
 echo -e "\n${GREEN}✅ Razen has been successfully installed!${NC}"
 echo -e "\n${YELLOW}Available commands:${NC}"
@@ -434,6 +517,7 @@ echo -e "  ${GREEN}razen-test${NC} - Run Razen tests"
 echo -e "  ${GREEN}razen-run${NC} - Run Razen programs with additional options"
 echo -e "  ${GREEN}razen-update${NC} - Update Razen to the latest version"
 echo -e "  ${GREEN}razen-help${NC} - Show help information"
+echo -e "  ${GREEN}razen-extension${NC} - Manage IDE extensions for Razen"
 echo -e "  ${GREEN}razen new myprogram${NC} - Create a new Razen program"
 echo -e "  ${GREEN}razen version${NC} - Show Razen version"
 echo -e "\n${YELLOW}Example usage:${NC}"

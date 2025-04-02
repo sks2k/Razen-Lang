@@ -182,7 +182,7 @@ function Create-Symlinks {
 function Uninstall-Razen {
     Write-ColorOutput "Uninstalling Razen..." "Yellow"
     
-    $scripts = @("razen", "razen-debug", "razen-test", "razen-run", "razen-update", "razen-help")
+    $scripts = @("razen", "razen-debug", "razen-test", "razen-run", "razen-update", "razen-help", "razen-extension")
     $installDir = "C:\Program Files\Razen"
     
     # Remove symbolic links from Razen directory
@@ -527,6 +527,94 @@ if ($result -ne 0) {
 Remove-Item $TMP_DIR -Recurse -Force
 Write-ColorOutput "  ✓ Cleaned up temporary files" "Green"
 
+# Ask about IDE extension installation
+Write-ColorOutput "`nWould you like to install IDE extensions for Razen?" "Yellow"
+Write-ColorOutput "1. VS Code Extension (works with VS Code and forks like VSCodium)" "Cyan"
+Write-ColorOutput "2. JetBrains Plugin (works with IntelliJ IDEA, PyCharm, WebStorm, etc.)" "Cyan"
+Write-ColorOutput "3. Skip (don't install IDE extensions)" "Cyan"
+
+$ide_choice = Read-Host "Enter your choice (1-3)"
+Write-Host ""
+
+# Install IDE extensions based on user choice
+switch ($ide_choice) {
+    "1" {
+        Write-ColorOutput "Installing VS Code Extension for Razen..." "Yellow"
+        
+        # Check if VS Code is installed
+        if ((Test-Path "$env:LOCALAPPDATA\Programs\Microsoft VS Code\Code.exe") -or 
+            (Test-Path "$env:ProgramFiles\Microsoft VS Code\Code.exe") -or 
+            (Test-Path "$env:LOCALAPPDATA\Programs\VSCodium\codium.exe")) {
+            
+            # Create VS Code extensions directory if it doesn't exist
+            $VSCODE_EXT_DIR = "$env:USERPROFILE\.vscode\extensions\razen-lang.razen-language"
+            New-Item -ItemType Directory -Path $VSCODE_EXT_DIR -Force | Out-Null
+            
+            # Copy VS Code extension files
+            Copy-Item -Path "$installDir\razen-vscode-extension\*" -Destination $VSCODE_EXT_DIR -Recurse -Force
+            
+            Write-ColorOutput "  ✓ VS Code Extension installed successfully" "Green"
+            Write-ColorOutput "  Location: $VSCODE_EXT_DIR" "Yellow"
+            Write-ColorOutput "  Restart VS Code to activate the extension" "Yellow"
+        } else {
+            Write-ColorOutput "VS Code not detected. Installing extension files only..." "Yellow"
+            
+            # Create a directory in the user's home for the extension
+            $VSCODE_EXT_DIR = "$env:USERPROFILE\.razen\vscode-extension"
+            New-Item -ItemType Directory -Path $VSCODE_EXT_DIR -Force | Out-Null
+            
+            # Copy VS Code extension files
+            Copy-Item -Path "$installDir\razen-vscode-extension\*" -Destination $VSCODE_EXT_DIR -Recurse -Force
+            
+            Write-ColorOutput "  ✓ VS Code Extension files installed to: $VSCODE_EXT_DIR" "Green"
+            Write-ColorOutput "  To use with VS Code, copy these files to:" "Yellow"
+            Write-ColorOutput "  %USERPROFILE%\.vscode\extensions\razen-lang.razen-language\" "Cyan"
+        }
+    }
+    "2" {
+        Write-ColorOutput "Installing JetBrains Plugin for Razen..." "Yellow"
+        
+        # Check if any JetBrains IDE is installed
+        $JETBRAINS_FOUND = $false
+        $ide_dirs = @("$env:USERPROFILE\.IntelliJIdea*", "$env:USERPROFILE\.PyCharm*", "$env:USERPROFILE\.WebStorm*")
+        
+        foreach ($dir_pattern in $ide_dirs) {
+            if (Test-Path $dir_pattern) {
+                $JETBRAINS_FOUND = $true
+                break
+            }
+        }
+        
+        # Create a directory for the JetBrains plugin
+        $JETBRAINS_PLUGIN_DIR = "$env:USERPROFILE\.razen\jetbrains-plugin"
+        New-Item -ItemType Directory -Path $JETBRAINS_PLUGIN_DIR -Force | Out-Null
+        
+        # Copy JetBrains plugin files
+        Copy-Item -Path "$installDir\razen-jetbrains-plugin\*" -Destination $JETBRAINS_PLUGIN_DIR -Recurse -Force
+        
+        if ($JETBRAINS_FOUND) {
+            Write-ColorOutput "  ✓ JetBrains Plugin files installed to: $JETBRAINS_PLUGIN_DIR" "Green"
+            Write-ColorOutput "  To activate the plugin:" "Yellow"
+            Write-ColorOutput "  1. Open your JetBrains IDE" "White"
+            Write-ColorOutput "  2. Go to Settings/Preferences > Plugins" "White"
+            Write-ColorOutput "  3. Click the gear icon and select 'Install Plugin from Disk...'" "White"
+            Write-ColorOutput "  4. Navigate to $JETBRAINS_PLUGIN_DIR and select the plugin JAR file" "White"
+            Write-ColorOutput "     (You may need to build it first using Gradle)" "White"
+        } else {
+            Write-ColorOutput "  ✓ JetBrains Plugin files installed to: $JETBRAINS_PLUGIN_DIR" "Green"
+            Write-ColorOutput "  No JetBrains IDE detected. To use the plugin:" "Yellow"
+            Write-ColorOutput "  1. Build the plugin using Gradle: cd $JETBRAINS_PLUGIN_DIR && gradlew buildPlugin" "White"
+            Write-ColorOutput "  2. Install the plugin from: $JETBRAINS_PLUGIN_DIR\build\distributions\" "White"
+        }
+    }
+    default {
+        Write-ColorOutput "Skipping IDE extension installation." "Yellow"
+        Write-ColorOutput "You can install extensions later from:" "Cyan"
+        Write-ColorOutput "  VS Code: $installDir\razen-vscode-extension\" "White"
+        Write-ColorOutput "  JetBrains: $installDir\razen-jetbrains-plugin\" "White"
+    }
+}
+
 # Success message
 Write-ColorOutput "`n✅ Razen has been successfully installed!" "Green"
 Write-ColorOutput "`nAvailable commands:" "Yellow"
@@ -536,6 +624,7 @@ Write-ColorOutput "  razen-test - Run Razen tests" "Green"
 Write-ColorOutput "  razen-run - Run Razen programs with additional options" "Green"
 Write-ColorOutput "  razen-update - Update Razen to the latest version" "Green"
 Write-ColorOutput "  razen-help - Show help information" "Green"
+Write-ColorOutput "  razen-extension - Manage IDE extensions for Razen" "Green"
 Write-ColorOutput "  razen new myprogram - Create a new Razen program" "Green"
 Write-ColorOutput "  razen version - Show Razen version" "Green"
 
