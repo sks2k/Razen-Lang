@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Razen Web Demo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .success {
+            color: green;
+        }
+        .error {
+            color: red;
+        }
+        .hidden {
+            display: none;
+        }
+        button {
+            padding: 8px 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        input, textarea {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+    </style>
+</head>
+<razen>
+    # Define variables using standard Razen syntax
+    let counter = 0;
+    take greeting = "Hello from Razen!";
+    hold is_form_valid = false;
+    
+    # Initialize when the page loads
+    on window load {
+        # Update the greeting text
+        get greeting_element {
+            text content = greeting;
+        }
+        
+        # Setup counter functionality
+        get increment_button {
+            on click {
+                let counter = counter + 1;
+                get counter_display {
+                    text content = counter;
+                }
+            }
+        }
+        
+        get reset_button {
+            on click {
+                let counter = 0;
+                get counter_display {
+                    text content = counter;
+                }
+            }
+        }
+        
+        # Setup form validation
+        form contact_form {
+            validate {
+                get name_input {
+                    if (value == "") {
+                        get name_error {
+                            text content = "Name is required";
+                            class remove = "hidden";
+                        }
+                        hold is_form_valid = false;
+                    } else {
+                        get name_error {
+                            class add = "hidden";
+                        }
+                        hold is_form_valid = true;
+                    }
+                }
+                
+                get email_input {
+                    if (value == "") {
+                        get email_error {
+                            text content = "Email is required";
+                            class remove = "hidden";
+                        }
+                        hold is_form_valid = false;
+                    } else {
+                        get email_error {
+                            class add = "hidden";
+                        }
+                    }
+                }
+                
+                return is_form_valid;
+            }
+            
+            submit {
+                if (validate()) {
+                    # Simulate form submission
+                    get form_result {
+                        class remove = "hidden";
+                        text content = "Form submitted successfully!";
+                    }
+                    
+                    # Reset form fields
+                    get name_input { value = ""; }
+                    get email_input { value = ""; }
+                    get message_input { value = ""; }
+                }
+            }
+        }
+        
+        # Setup theme toggle
+        get theme_toggle {
+            on click {
+                get document_body {
+                    if (class contains = "dark-theme") {
+                        class remove = "dark-theme";
+                        get theme_toggle {
+                            text content = "Switch to Dark Theme";
+                        }
+                    } else {
+                        class add = "dark-theme";
+                        get theme_toggle {
+                            text content = "Switch to Light Theme";
+                        }
+                    }
+                }
+            }
+        }
+        
+        # Setup data fetching
+        get fetch_data_button {
+            on click {
+                get data_container {
+                    text content = "Loading data...";
+                }
+                
+                # Simulate API fetch
+                wait 1000 {
+                    take sample_data = "This is sample data fetched from an API";
+                    get data_container {
+                        text content = sample_data;
+                    }
+                }
+            }
+        }
+    }
+</razen>
+<body id="document_body">
+    <div class="container">
+        <div class="card">
+            <h1 id="greeting_element"></h1>
+            <p>This is a demonstration of Razen's web development capabilities.</p>
+            <button id="theme_toggle">Switch to Dark Theme</button>
+        </div>
+        
+        <div class="card">
+            <h2>Counter Example</h2>
+            <p>Counter value: <span id="counter_display">0</span></p>
+            <button id="increment_button">Increment</button>
+            <button id="reset_button">Reset</button>
+        </div>
+        
+        <div class="card">
+            <h2>Form Validation Example</h2>
+            <form id="contact_form">
+                <div>
+                    <label for="name_input">Name:</label>
+                    <input type="text" id="name_input" placeholder="Enter your name">
+                    <p id="name_error" class="error hidden"></p>
+                </div>
+                
+                <div>
+                    <label for="email_input">Email:</label>
+                    <input type="email" id="email_input" placeholder="Enter your email">
+                    <p id="email_error" class="error hidden"></p>
+                </div>
+                
+                <div>
+                    <label for="message_input">Message:</label>
+                    <textarea id="message_input" rows="4" placeholder="Enter your message"></textarea>
+                </div>
+                
+                <button type="submit">Submit</button>
+            </form>
+            <p id="form_result" class="success hidden"></p>
+        </div>
+        
+        <div class="card">
+            <h2>Data Fetching Example</h2>
+            <button id="fetch_data_button">Fetch Data</button>
+            <div id="data_container"></div>
+        </div>
+    </div>
+</body>
+</html>

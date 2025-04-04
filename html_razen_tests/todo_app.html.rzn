@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Razen Todo App</title>
+    <style>
+        :root {
+            --primary-color: #4CAF50;
+            --secondary-color: #2196F3;
+            --text-color: #333;
+            --bg-color: #f9f9f9;
+            --card-bg: #fff;
+        }
+        
+        .dark-theme {
+            --primary-color: #45a049;
+            --secondary-color: #0b7dda;
+            --text-color: #f0f0f0;
+            --bg-color: #222;
+            --card-bg: #333;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            transition: all 0.3s ease;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .todo-input {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        input[type="text"] {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        
+        button {
+            padding: 10px 15px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            font-size: 16px;
+        }
+        
+        button:hover {
+            background-color: var(--secondary-color);
+        }
+        
+        .todo-list {
+            list-style-type: none;
+            padding: 0;
+        }
+        
+        .todo-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            margin-bottom: 10px;
+            background-color: var(--bg-color);
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+        
+        .todo-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .todo-text {
+            flex: 1;
+        }
+        
+        .completed {
+            text-decoration: line-through;
+            opacity: 0.7;
+        }
+        
+        .todo-actions {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .todo-actions button {
+            padding: 5px 10px;
+            font-size: 14px;
+        }
+        
+        .delete-btn {
+            background-color: #f44336;
+        }
+        
+        .complete-btn {
+            background-color: #4CAF50;
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+            font-size: 14px;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        @media (max-width: 600px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .todo-input {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<razen>
+    # Standard Razen variables
+    let total_tasks = 0;
+    let completed_tasks = 0;
+    take app_title = "Razen Todo App";
+    hold is_dark_mode = false;
+    
+    # Create a list to store todos
+    put todos = [];
+    
+    # Helper function to generate unique IDs
+    fun generate_id() {
+        return "todo-" + timestamp();
+    }
+    
+    # Helper function to update stats
+    fun update_stats() {
+        let total_tasks = todos.length;
+        let completed_count = 0;
+        
+        for todo in todos {
+            if (todo.completed) {
+                let completed_count = completed_count + 1;
+            }
+        }
+        
+        let completed_tasks = completed_count;
+        
+        get total_count {
+            text content = total_tasks;
+        }
+        
+        get completed_count {
+            text content = completed_tasks;
+        }
+        
+        get remaining_count {
+            text content = total_tasks - completed_tasks;
+        }
+    }
+    
+    # Helper function to render todos
+    fun render_todos() {
+        get todo_list {
+            html content = "";
+            
+            for todo in todos {
+                take completed_class = "";
+                if (todo.completed) {
+                    take completed_class = "completed";
+                }
+                
+                take todo_html = "
+                    <li class='todo-item' id='" + todo.id + "'>
+                        <span class='todo-text " + completed_class + "'>" + todo.text + "</span>
+                        <div class='todo-actions'>
+                            <button class='complete-btn' id='complete-" + todo.id + "'>
+                                " + (todo.completed ? "Undo" : "Complete") + "
+                            </button>
+                            <button class='delete-btn' id='delete-" + todo.id + "'>Delete</button>
+                        </div>
+                    </li>
+                ";
+                
+                html content = html content + todo_html;
+            }
+        }
+        
+        # Add event listeners to new buttons
+        for todo in todos {
+            get "complete-" + todo.id {
+                on click {
+                    todo.completed = !todo.completed;
+                    render_todos();
+                    update_stats();
+                    
+                    # Save to local storage
+                    store_local set "todos" = todos;
+                }
+            }
+            
+            get "delete-" + todo.id {
+                on click {
+                    # Filter out the deleted todo
+                    put new_todos = [];
+                    for t in todos {
+                        if (t.id != todo.id) {
+                            new_todos.append(t);
+                        }
+                    }
+                    put todos = new_todos;
+                    
+                    render_todos();
+                    update_stats();
+                    
+                    # Save to local storage
+                    store_local set "todos" = todos;
+                }
+            }
+        }
+    }
+    
+    # Initialize the app when the page loads
+    on window load {
+        # Set the app title
+        get app_title_element {
+            text content = app_title;
+        }
+        
+        # Check for saved todos in local storage
+        put stored_todos = store_local get "todos";
+        if (stored_todos) {
+            put todos = stored_todos;
+            render_todos();
+            update_stats();
+        }
+        
+        # Check for saved theme preference
+        hold stored_theme = store_local get "dark_mode";
+        if (stored_theme) {
+            hold is_dark_mode = stored_theme;
+            
+            if (is_dark_mode) {
+                get document_body {
+                    class add = "dark-theme";
+                }
+                
+                get theme_toggle {
+                    text content = "Switch to Light Mode";
+                }
+            }
+        }
+        
+        # Setup add todo functionality
+        get add_todo_form {
+            on submit {
+                # Prevent default form submission
+                event prevent_default();
+                
+                get new_todo_input {
+                    take todo_text = value;
+                    
+                    if (todo_text != "") {
+                        # Create new todo object
+                        put new_todo = {
+                            id: generate_id(),
+                            text: todo_text,
+                            completed: false
+                        };
+                        
+                        # Add to todos array
+                        todos.append(new_todo);
+                        
+                        # Clear input
+                        value = "";
+                        
+                        # Render updated list
+                        render_todos();
+                        update_stats();
+                        
+                        # Save to local storage
+                        store_local set "todos" = todos;
+                    }
+                }
+            }
+        }
+        
+        # Setup theme toggle
+        get theme_toggle {
+            on click {
+                hold is_dark_mode = !is_dark_mode;
+                
+                get document_body {
+                    if (is_dark_mode) {
+                        class add = "dark-theme";
+                    } else {
+                        class remove = "dark-theme";
+                    }
+                }
+                
+                text content = is_dark_mode ? "Switch to Light Mode" : "Switch to Dark Mode";
+                
+                # Save preference
+                store_local set "dark_mode" = is_dark_mode;
+            }
+        }
+        
+        # Setup clear completed functionality
+        get clear_completed {
+            on click {
+                put new_todos = [];
+                for todo in todos {
+                    if (!todo.completed) {
+                        new_todos.append(todo);
+                    }
+                }
+                put todos = new_todos;
+                
+                render_todos();
+                update_stats();
+                
+                # Save to local storage
+                store_local set "todos" = todos;
+            }
+        }
+        
+        # Setup clear all functionality
+        get clear_all {
+            on click {
+                put todos = [];
+                
+                render_todos();
+                update_stats();
+                
+                # Save to local storage
+                store_local set "todos" = todos;
+            }
+        }
+    }
+</razen>
+<body id="document_body">
+    <div class="container">
+        <div class="card">
+            <div class="header">
+                <h1 id="app_title_element"></h1>
+                <button id="theme_toggle">Switch to Dark Mode</button>
+            </div>
+            
+            <form id="add_todo_form">
+                <div class="todo-input">
+                    <input type="text" id="new_todo_input" placeholder="Add a new task...">
+                    <button type="submit">Add Task</button>
+                </div>
+            </form>
+            
+            <ul id="todo_list" class="todo-list">
+                <!-- Todo items will be rendered here by Razen -->
+            </ul>
+            
+            <div class="stats">
+                <span>Total: <span id="total_count">0</span></span>
+                <span>Completed: <span id="completed_count">0</span></span>
+                <span>Remaining: <span id="remaining_count">0</span></span>
+            </div>
+            
+            <div class="todo-actions" style="margin-top: 20px;">
+                <button id="clear_completed">Clear Completed</button>
+                <button id="clear_all">Clear All</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

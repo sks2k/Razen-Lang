@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<idea-plugin>
+    <id>com.razen.ide</id>
+    <name>Razen Language</name>
+    <vendor>Razen Language Team</vendor>
+    <description><![CDATA[
+        Support for Razen programming language (.rzn files).<br>
+        Features:<br>
+        <ul>
+            <li>Syntax highlighting for Razen files</li>
+            <li>Custom file icon for Razen files</li>
+        </ul>
+    ]]></description>
+
+    <depends>com.intellij.modules.platform</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <fileType name="Razen" implementationClass="com.razen.ide.RazenFileType" 
+                  fieldName="INSTANCE" language="Razen" extensions="rzn"/>
+        <lang.syntaxHighlighterFactory language="Razen" 
+                  implementationClass="com.razen.ide.RazenSyntaxHighlighterFactory"/>
+    </extensions>
+</idea-plugin>

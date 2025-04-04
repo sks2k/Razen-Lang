@@ -1,0 +1,34 @@
+take tool1 = "Cursor user info";
+take tool2 = "Reset Machine ID";
+take tool3 = "Register new Account";
+take tool4 = "Register via Google";
+take tool4 = "Register via GitHub";
+take tool5 = "Tottaly Reset Cursor";
+
+show tool1;
+show tool2;
+show tool3;
+show tool4;
+show tool5;
+show "Choose 1-5:";
+read choose;
+
+if (choose == "1") {
+    show "You choose " + tool1;
+} 
+
+if (choose == "2") {
+    show "You choose " + tool2;
+} 
+
+if (choose == "3") {
+    show "You choose " + tool3;
+} 
+
+if (choose == "4") {
+    show "You choose " + tool4;
+} 
+
+if (choose == "5") {
+    show "You choose " + tool5;
+} 

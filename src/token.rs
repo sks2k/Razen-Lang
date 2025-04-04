@@ -68,6 +68,50 @@ pub enum TokenType {
     False,
     Null,
     
+    // Web-specific tokens - Element Access
+    Get,        // get element by ID
+    Query,      // query element by selector
+    All,        // get all elements matching selector
+    
+    // Web-specific tokens - DOM Manipulation
+    Html,       // set/get innerHTML
+    Text,       // set/get textContent
+    Attr,       // set/get attribute
+    Style,      // set/get style
+    Class,      // class manipulation
+    Add,        // add class
+    Remove,     // remove class
+    Toggle,     // toggle class
+    Contains,   // check if element has class
+    
+    // Web-specific tokens - Event Handling
+    On,         // add event listener
+    Off,        // remove event listener
+    Trigger,    // trigger event
+    
+    // Web-specific tokens - Form Handling
+    Form,       // form selector
+    Validate,   // form validation
+    Submit,     // form submission
+    
+    // Web-specific tokens - AJAX and Fetch
+    Fetch,      // fetch request
+    Post,       // post request
+    GetData,    // get request
+    
+    // Web-specific tokens - Storage
+    StoreLocal,     // localStorage
+    StoreSession,   // sessionStorage
+    Cookie,         // cookie management
+    
+    // Web-specific tokens - Utility
+    Wait,       // setTimeout
+    Interval,   // setInterval
+    Clear,      // clear interval/timeout
+    Resize,     // window resize
+    Redirect,   // page navigation
+    Reload,     // page reload
+    
     // Delimiters
     LeftParen,      // (
     RightParen,     // )
@@ -162,6 +206,50 @@ impl fmt::Display for TokenType {
             TokenType::False => write!(f, "FALSE"),
             TokenType::Null => write!(f, "NULL"),
             
+            // Web-specific tokens - Element Access
+            TokenType::Get => write!(f, "GET"),
+            TokenType::Query => write!(f, "QUERY"),
+            TokenType::All => write!(f, "ALL"),
+            
+            // Web-specific tokens - DOM Manipulation
+            TokenType::Html => write!(f, "HTML"),
+            TokenType::Text => write!(f, "TEXT"),
+            TokenType::Attr => write!(f, "ATTR"),
+            TokenType::Style => write!(f, "STYLE"),
+            TokenType::Class => write!(f, "CLASS"),
+            TokenType::Add => write!(f, "ADD"),
+            TokenType::Remove => write!(f, "REMOVE"),
+            TokenType::Toggle => write!(f, "TOGGLE"),
+            TokenType::Contains => write!(f, "CONTAINS"),
+            
+            // Web-specific tokens - Event Handling
+            TokenType::On => write!(f, "ON"),
+            TokenType::Off => write!(f, "OFF"),
+            TokenType::Trigger => write!(f, "TRIGGER"),
+            
+            // Web-specific tokens - Form Handling
+            TokenType::Form => write!(f, "FORM"),
+            TokenType::Validate => write!(f, "VALIDATE"),
+            TokenType::Submit => write!(f, "SUBMIT"),
+            
+            // Web-specific tokens - AJAX and Fetch
+            TokenType::Fetch => write!(f, "FETCH"),
+            TokenType::Post => write!(f, "POST"),
+            TokenType::GetData => write!(f, "GET_DATA"),
+            
+            // Web-specific tokens - Storage
+            TokenType::StoreLocal => write!(f, "STORE_LOCAL"),
+            TokenType::StoreSession => write!(f, "STORE_SESSION"),
+            TokenType::Cookie => write!(f, "COOKIE"),
+            
+            // Web-specific tokens - Utility
+            TokenType::Wait => write!(f, "WAIT"),
+            TokenType::Interval => write!(f, "INTERVAL"),
+            TokenType::Clear => write!(f, "CLEAR"),
+            TokenType::Resize => write!(f, "RESIZE"),
+            TokenType::Redirect => write!(f, "REDIRECT"),
+            TokenType::Reload => write!(f, "RELOAD"),
+            
             // Delimiters
             TokenType::LeftParen => write!(f, "("),
             TokenType::RightParen => write!(f, ")"),
@@ -252,6 +340,50 @@ pub fn lookup_identifier(identifier: &str) -> TokenType {
         "true" => TokenType::True,
         "false" => TokenType::False,
         "null" => TokenType::Null,
+        
+        // Web-specific tokens - Element Access
+        "get" => TokenType::Get,
+        "query" => TokenType::Query,
+        "all" => TokenType::All,
+        
+        // Web-specific tokens - DOM Manipulation
+        "html" => TokenType::Html,
+        "text" => TokenType::Text,
+        "attr" => TokenType::Attr,
+        "style" => TokenType::Style,
+        "class" => TokenType::Class,
+        "add" => TokenType::Add,
+        "remove" => TokenType::Remove,
+        "toggle" => TokenType::Toggle,
+        "contains" => TokenType::Contains,
+        
+        // Web-specific tokens - Event Handling
+        "on" => TokenType::On,
+        "off" => TokenType::Off,
+        "trigger" => TokenType::Trigger,
+        
+        // Web-specific tokens - Form Handling
+        "form" => TokenType::Form,
+        "validate" => TokenType::Validate,
+        "submit" => TokenType::Submit,
+        
+        // Web-specific tokens - AJAX and Fetch
+        "fetch" => TokenType::Fetch,
+        "post" => TokenType::Post,
+        "get_data" => TokenType::GetData,
+        
+        // Web-specific tokens - Storage
+        "store_local" => TokenType::StoreLocal,
+        "store_session" => TokenType::StoreSession,
+        "cookie" => TokenType::Cookie,
+        
+        // Web-specific tokens - Utility
+        "wait" => TokenType::Wait,
+        "interval" => TokenType::Interval,
+        "clear" => TokenType::Clear,
+        "resize" => TokenType::Resize,
+        "redirect" => TokenType::Redirect,
+        "reload" => TokenType::Reload,
         
         // If not a keyword, it's an identifier
         _ => TokenType::Identifier,

@@ -152,6 +152,8 @@ pub struct Compiler {
     continue_stack: Vec<Vec<usize>>, // Stack of continue statement positions for nested loops
     label_counter: usize,            // Counter for generating unique labels
     clean_output: bool,              // Flag to only show program output
+    errors: Vec<String>,            // Compilation errors
+    variable_types: HashMap<String, String>, // Track variable types (name -> type)
 }
 
 impl Compiler {
@@ -165,12 +167,98 @@ impl Compiler {
             continue_stack: Vec::new(),
             label_counter: 0,
             clean_output: false,
+            errors: Vec::new(),
+            variable_types: HashMap::new(),
         }
     }
     
     // Set clean output mode
     pub fn set_clean_output(&mut self, clean: bool) {
         self.clean_output = clean;
+    }
+    
+    // Helper methods for type checking
+    fn is_number_expression(&self, expr: &Expression) -> bool {
+        match expr {
+            Expression::NumberLiteral(_) => true,
+            Expression::Identifier(name) => {
+                // Check if the identifier refers to a variable of type 'let'
+                self.variable_types.get(name).map_or(false, |var_type| var_type == "let")
+            },
+            Expression::PrefixExpression { right, .. } => self.is_number_expression(right),
+            Expression::InfixExpression { left, right, operator, .. } => {
+                // Most infix operations with numbers result in numbers
+                match operator.as_str() {
+                    "+" | "-" | "*" | "/" | "%" | "**" | "//" => {
+                        self.is_number_expression(left) && self.is_number_expression(right)
+                    },
+                    _ => false,
+                }
+            },
+            Expression::CallExpression { function, .. } => {
+                // Check if it's a function known to return numbers
+                if let Expression::Identifier(name) = &**function {
+                    matches!(name.as_str(), 
+                        "plus" | "minus" | "times" | "by" | "mod" | "power" | 
+                        "round" | "sqrt" | "abs" | "size" | "count")
+                } else {
+                    false
+                }
+            },
+            _ => false,
+        }
+    }
+    
+    fn is_string_expression(&self, expr: &Expression) -> bool {
+        match expr {
+            Expression::StringLiteral(_) => true,
+            Expression::Identifier(name) => {
+                // Check if the identifier refers to a variable of type 'take'
+                self.variable_types.get(name).map_or(false, |var_type| var_type == "take")
+            },
+            Expression::InfixExpression { left, right, operator, .. } => {
+                // String concatenation
+                operator == "+" && (self.is_string_expression(left) || self.is_string_expression(right))
+            },
+            Expression::CallExpression { function, .. } => {
+                // Check if it's a function known to return strings
+                if let Expression::Identifier(name) = &**function {
+                    matches!(name.as_str(), 
+                        "join" | "big" | "small" | "trim" | "replace" | 
+                        "date" | "read_file")
+                } else {
+                    false
+                }
+            },
+            _ => false,
+        }
+    }
+    
+    fn is_boolean_expression(&self, expr: &Expression) -> bool {
+        match expr {
+            Expression::BooleanLiteral(_) => true,
+            Expression::Identifier(name) => {
+                // Check if the identifier refers to a variable of type 'hold'
+                self.variable_types.get(name).map_or(false, |var_type| var_type == "hold")
+            },
+            Expression::PrefixExpression { operator, right } => {
+                operator == "!" && self.is_boolean_expression(right)
+            },
+            Expression::InfixExpression { operator, .. } => {
+                // Comparison and logical operators return booleans
+                matches!(operator.as_str(), 
+                    "==" | "!=" | ">" | ">=" | "<" | "<=" | "&&" | "||")
+            },
+            Expression::CallExpression { function, .. } => {
+                // Check if it's a function known to return booleans
+                if let Expression::Identifier(name) = &**function {
+                    matches!(name.as_str(), "contains")
+                } else {
+                    false
+                }
+            },
+            _ => false,
+        }
     }
     
     pub fn from_file<P: AsRef<Path>>(path: P) -> Result<Self, String> {
@@ -325,12 +413,43 @@ impl Compiler {
         }
     }
     
-    fn compile_variable_declaration(&mut self, _var_type: String, name: String, value: Option<Expression>) {
+    fn compile_variable_declaration(&mut self, var_type: String, name: String, value: Option<Expression>) {
         // Define the variable in the symbol table
         self.symbol_table.define(&name);
         
+        // Store the variable type for future type checking
+        self.variable_types.insert(name.clone(), var_type.clone());
+        
         // Compile the initializer expression if it exists
-        if let Some(expr) = value {
+        if let Some(expr) = value.clone() {
+            // Type checking based on variable type
+            match var_type.as_str() {
+                "let" => {
+                    // Check that the value is a number
+                    if !self.is_number_expression(&expr) {
+                        self.errors.push(format!("Type error: 'let' variables can only be used with numeric values, but '{}' was assigned a non-numeric value", name));
+                    }
+                },
+                "take" => {
+                    // Check that the value is a string
+                    if !self.is_string_expression(&expr) {
+                        self.errors.push(format!("Type error: 'take' variables can only be used with string values, but '{}' was assigned a non-string value", name));
+                    }
+                },
+                "hold" => {
+                    // Check that the value is a boolean
+                    if !self.is_boolean_expression(&expr) {
+                        self.errors.push(format!("Type error: 'hold' variables can only be used with boolean values, but '{}' was assigned a non-boolean value", name));
+                    }
+                },
+                "put" => {
+                    // 'put' can hold any type, so no type checking needed
+                },
+                _ => {
+                    self.errors.push(format!("Unknown variable type: {}", var_type));
+                }
+            }
+            
             self.compile_expression(expr);
         } else {
             // If no initializer, push null as the default value

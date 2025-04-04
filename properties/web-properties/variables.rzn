@@ -1,0 +1,85 @@
+# 1️⃣ HTML Element Access Variables
+get => for accessing HTML elements by ID. Use to interact with specific elements.
+query => for accessing HTML elements using CSS selectors. Use for flexible element selection.
+all => for accessing multiple HTML elements matching a selector. Use for batch operations.
+
+# 2️⃣ DOM Manipulation Variables
+html => for setting or getting innerHTML of an element. Use for HTML content manipulation.
+text => for setting or getting textContent of an element. Use for text-only content.
+attr => for setting or getting element attributes. Use for modifying element properties.
+style => for manipulating CSS styles. Use for dynamic styling.
+class => for adding, removing, or toggling CSS classes. Use for state-based styling.
+
+# 3️⃣ Event Handling Variables
+on => for attaching event listeners to elements. Use for interactive behavior.
+off => for removing event listeners. Use for cleanup and memory management.
+trigger => for programmatically firing events. Use for simulating user interactions.
+
+# 4️⃣ Form Handling Variables
+form => for accessing and manipulating form elements. Use for form operations.
+validate => for form validation. Use to check user input before submission.
+submit => for handling form submissions. Use to process form data.
+
+# 5️⃣ AJAX and Fetch Variables
+fetch => for making HTTP requests. Use for API interactions.
+post => for sending data to a server. Use for data submission.
+get_data => for retrieving data from a server. Use for data retrieval.
+
+# 6️⃣ Animation and Transition Variables
+animate => for creating animations. Use for visual effects.
+transition => for smooth state changes. Use for polished UI.
+
+# 7️⃣ Storage Variables
+store_local => for local storage operations. Use for persistent client-side storage.
+store_session => for session storage operations. Use for temporary client-side storage.
+cookie => for cookie management. Use for small data storage and tracking.
+
+# 8️⃣ Utility Variables
+wait => for creating delays and timeouts. Use for timed operations.
+interval => for recurring operations. Use for polling and animations.
+resize => for handling window resize events. Use for responsive behavior.
+
+# Usage Examples
+
+# Element access example
+get button_element {
+    on click {
+        # Handle click event
+        text content = "Clicked!";
+    }
+}
+
+# Form handling example
+form login_form {
+    validate {
+        if (username.value == "") {
+            show "Username is required";
+            return false;
+        }
+        return true;
+    }
+    
+    submit {
+        # Process form submission
+        post "/login" {
+            data: {
+                username: username.value,
+                password: password.value
+            },
+            success: {
+                redirect "/dashboard";
+            }
+        }
+    }
+}
+
+# AJAX example
+fetch "/api/data" {
+    success: {
+        take data = response;
+        # Process data
+    },
+    error: {
+        show "Failed to load data";
+    }
+}

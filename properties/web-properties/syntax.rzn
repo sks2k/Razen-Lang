@@ -1,0 +1,89 @@
+# =================================
+# 🌐 Web Syntax Rules  
+# =================================
+
+# 1️⃣ Element Selectors  
+RULE: GET_ELEMENT => "get" [ID] "LBRACE" [BLOCK] "RBRACE"  
+RULE: QUERY_SELECTOR => "query" [SELECTOR] "LBRACE" [BLOCK] "RBRACE"  
+RULE: QUERY_ALL => "all" [SELECTOR] "LBRACE" [BLOCK] "RBRACE"  
+
+# 2️⃣ DOM Manipulation  
+RULE: SET_HTML => "html" [CONTENT]  
+RULE: SET_TEXT => "text" [CONTENT]  
+RULE: SET_ATTR => "attr" [NAME] "=" [VALUE]  
+RULE: SET_STYLE => "style" [PROPERTY] "=" [VALUE]  
+RULE: ADD_CLASS => "class" "add" "=" [CLASS_NAME]  
+RULE: REMOVE_CLASS => "class" "remove" "=" [CLASS_NAME]  
+RULE: TOGGLE_CLASS => "class" "toggle" "=" [CLASS_NAME]  
+RULE: HAS_CLASS => "class" "contains" "=" [CLASS_NAME]  
+
+# 3️⃣ Event Handling  
+RULE: EVENT_LISTENER => "on" [EVENT_TYPE] "LBRACE" [BLOCK] "RBRACE"  
+RULE: REMOVE_EVENT => "off" [EVENT_TYPE]  
+RULE: TRIGGER_EVENT => "trigger" [EVENT_TYPE]  
+
+# 4️⃣ Form Handling  
+RULE: FORM_SELECTOR => "form" [ID] "LBRACE" [BLOCK] "RBRACE"  
+RULE: FORM_VALIDATE => "validate" "LBRACE" [BLOCK] "RBRACE"  
+RULE: FORM_SUBMIT => "submit" "LBRACE" [BLOCK] "RBRACE"  
+
+# 5️⃣ AJAX and Fetch  
+RULE: FETCH_REQUEST => "fetch" [URL] "LBRACE" [OPTIONS] "RBRACE"  
+RULE: POST_REQUEST => "post" [URL] "LBRACE" [OPTIONS] "RBRACE"  
+RULE: GET_REQUEST => "get_data" [URL] "LBRACE" [OPTIONS] "RBRACE"  
+
+# 6️⃣ Animation and Transition  
+RULE: ANIMATE => "animate" [PROPERTIES] "LBRACE" [OPTIONS] "RBRACE"  
+RULE: TRANSITION => "transition" [PROPERTIES] "LBRACE" [OPTIONS] "RBRACE"  
+
+# 7️⃣ Storage  
+RULE: LOCAL_STORAGE_SET => "store_local" "set" [KEY] "=" [VALUE]  
+RULE: LOCAL_STORAGE_GET => "store_local" "get" [KEY]  
+RULE: SESSION_STORAGE_SET => "store_session" "set" [KEY] "=" [VALUE]  
+RULE: SESSION_STORAGE_GET => "store_session" "get" [KEY]  
+RULE: COOKIE_SET => "cookie" "set" [NAME] "=" [VALUE] [OPTIONS]  
+RULE: COOKIE_GET => "cookie" "get" [NAME]  
+
+# 8️⃣ Utility  
+RULE: WAIT => "wait" [MILLISECONDS] "LBRACE" [BLOCK] "RBRACE"  
+RULE: SET_INTERVAL => "interval" [MILLISECONDS] "LBRACE" [BLOCK] "RBRACE"  
+RULE: CLEAR_INTERVAL => "interval" "clear" [ID]  
+RULE: RESIZE_HANDLER => "resize" "LBRACE" [BLOCK] "RBRACE"  
+
+# 9️⃣ Navigation  
+RULE: REDIRECT => "redirect" [URL]  
+RULE: RELOAD => "reload"  
+RULE: BACK => "back"  
+RULE: FORWARD => "forward"  
+
+# 🔟 Web Components  
+RULE: COMPONENT => "component" [NAME] "LBRACE" [BLOCK] "RBRACE"  
+RULE: USE_COMPONENT => "use" [COMPONENT_NAME] [PROPS]  
+
+# =================================
+# 🔄 Web Event Types  
+# =================================
+
+EVENT: click => Mouse click  
+EVENT: dblclick => Double click  
+EVENT: mousedown => Mouse button down  
+EVENT: mouseup => Mouse button up  
+EVENT: mousemove => Mouse movement  
+EVENT: mouseover => Mouse over element  
+EVENT: mouseout => Mouse leaves element  
+EVENT: keydown => Key pressed down  
+EVENT: keyup => Key released  
+EVENT: keypress => Key pressed  
+EVENT: submit => Form submission  
+EVENT: change => Form field change  
+EVENT: focus => Element gains focus  
+EVENT: blur => Element loses focus  
+EVENT: load => Resource loaded  
+EVENT: unload => Page unload  
+EVENT: resize => Window resize  
+EVENT: scroll => Element scrolled  
+EVENT: DOMContentLoaded => DOM fully loaded  
+EVENT: touchstart => Touch start  
+EVENT: touchend => Touch end  
+EVENT: touchmove => Touch move  
+EVENT: input => Input value changed  

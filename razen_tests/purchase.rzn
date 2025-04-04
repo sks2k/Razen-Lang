@@ -1,21 +1,108 @@
-let price = 1000;
-let money = 200;
+take product = "iPhone";
+take product2 = "Laptop";
+take product3 = "Watch";
 
-take name = "Yash";
-take product = "Laptop";
+let balance = 5;
 
-if (money >= price) {
-    show name + " can buy " + product + " for " + price + " rupees.";
-    show " Want to buy " + product + "? (yes/no)";
-    read want_to_buy;
-    if (want_to_buy == "yes") {
-        show name + " bought " + product + " for " + price + " rupees.";
-        show "Final balance: " + (money - price);
+let price = 100000;
+let price2 = 65000;
+let price3 = 23000;
+
+if (balance >= price) {
+    show " You can buy " + product;
+} else {
+    show " You don't have enough Balance for buy " + product;
+}
+
+if (balance >= price2) {
+    show " You can buy " + product2;
+} else {
+    show " You don't have enough Balance for buy " + product2;
+}
+
+if (balance >= price3) {
+    show " You can buy " + product3;
+} else {
+    show " You don't have enough Balance for buy " + product3;
+}
+
+if (balance <= price3) {
+    exit;
+}
+
+if (balance >= price3) {
+    show " What would you like to buy " + product + " / " + product2 + " / " + product3 + " / All ";
+}
+
+read want_to_buy;
+
+if (want_to_buy == "iPhone") {
+    show " are you sure you want to buy " + product;
+    read confirm;
+    if (confirm == "yes") {
+        show " Success fully bought " + product;
+        diff new_balance = balance - price;
+        show " New Balance is " + new_balance;
     } else {
-        show name + " cancelled the purchase.";
-        show "Final balance: " + money;
+        show " Cancelled by buyer. "
+    }
+}
+
+if (want_to_buy == "laptop") {
+    show " are you sure you want to buy " + product2;
+    read confirm;
+    if (confirm == "yes") {
+        show " Success fully bought " + product2;
+        diff new_balance = balance - price2;
+        show " New Balance is " + new_balance;
+    } else {
+        show " Cancelled by buyer. "
+    }
+}
+
+if (want_to_buy == "Watch") {
+    show " are you sure you want to buy " + product3;
+    read confirm;
+    if (confirm == "yes") {
+        show " Success fully bought " + product3;
+        diff new_balance = balance - price3;
+        show " New Balance is " + new_balance;
+    } else {
+        show " Cancelled by buyer. "
+    }
+}
+
+if (want_to_buy == "All") {
+    if (balance >= price) {
+        show " Loading ";
+        show " Loading. ";
+        show " Loading.. ";
+        show " Loading... ";
+        show " Successfully bought " + product;
+        diff new_balance = balance - price;
+    } else {
+        show " Failed Purchase of " + product + " it may be due to internet error or insufiseent balance. "
+    }
+    if (balance >= price2) {
+        show " Loading ";
+        show " Loading. ";
+        show " Loading.. ";
+        show " Loading... ";
+        show " Successfully bought " + product2;
+        diff new_balance = balance - price2;
+    } else {
+        show " Failed Purchase of " + product2 + " it may be due to internet error or insufiseent balance. "
+    }
+    if (balance >= price3) {
+        show " Loading ";
+        show " Loading. ";
+        show " Loading.. ";
+        show " Loading... ";
+        show " Successfully bought " + product3;
+        diff new_balance = balance - price3;
+    } else {
+        show " Failed Purchase of " + product3 + " it may be due to internet error or insufiseent balance. "
     }
 } else {
-    show name + " doesn't have enough money.";
-    exit;
+    show " all purchase failed. "
 }
