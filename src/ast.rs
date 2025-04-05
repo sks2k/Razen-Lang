@@ -75,6 +75,9 @@ pub enum Statement {
         name: String,
     },
     ExitStatement,
+    DocumentTypeDeclaration {
+        doc_type: String,  // web, script, cli
+    },
 }
 
 // Expression represents an expression in the program
@@ -243,6 +246,9 @@ impl fmt::Display for Node {
                     },
                     Statement::ExitStatement => {
                         write!(f, "exit;")
+                    },
+                    Statement::DocumentTypeDeclaration { doc_type } => {
+                        write!(f, "type {};", doc_type)
                     },
                 }
             },

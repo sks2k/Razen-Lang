@@ -1,4 +1,4 @@
-# Razen Programming Language (beta v0.1.4)
+# Razen Programming Language (beta v0.1.5)
 
 ## Overview
 Razen is a modern, intuitive programming language designed for clarity, performance, and ease of use. With a clean syntax inspired by Python and strong type safety, Razen offers an excellent balance between development speed and runtime performance.
@@ -10,7 +10,8 @@ Developed by Prathmesh Barot, Basai Corporation.
 - **Fast Performance**: Built for efficiency with optimized runtime execution
 - **Built-in Debugging**: Comprehensive debugging tools including step-by-step execution
 - **String Interpolation**: Powerful nested string interpolation with `${...}` syntax
-- **Type Flexibility**: Combines dynamic typing with optional type annotations
+- **Type Safety**: Strong type checking for variables with different variable types
+- **Web Development**: First-class support for building web applications with HTML integration
 - **Expressive Conditionals**: Clean if/else syntax with support for nested conditions
 - **Interactive Mode**: Built-in REPL for testing code snippets
 - **Lightweight**: Small footprint with minimal dependencies
@@ -139,19 +140,21 @@ razen-run hello.rzn
 
 ## Example Code
 
+### Basic Razen Program
+
 ```razen
-// Variables
-let name = "World"
-let price = 9.99
-let quantity = 5
-let is_available = true
+// Variables with type enforcement
+let number = 42          // Numeric values only
+take message = "Hello"   // String values only
+hold is_active = true    // Boolean values only
+put anything = "flexible" // Any type allowed
 
 // String interpolation
-show "Hello, ${name}!"
+show "Hello, ${message}!"
 
 // Calculations
-let total = price * quantity
-show "Total cost: ${total}"
+let total = number * 2.5
+show "Total: ${total}"
 
 // Conditionals
 if total > 50 {
@@ -165,9 +168,49 @@ read user_input = "Enter your name: "
 show "Hello, ${user_input}!"
 
 // Nested interpolation
-let inner = "value"
-let outer = "Outer with ${inner}"
+take inner = "value"
+take outer = "Outer with ${inner}"
 show "${outer}"
+```
+
+### Web Development with Razen
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Razen Web App</title>
+</head>
+<razen>
+    // Define variables using standard Razen syntax
+    let counter = 0;
+    take greeting = "Hello from Razen!";
+    
+    // Initialize when the page loads
+    on window load {
+        // Update the greeting text
+        get greeting_element {
+            text content = greeting;
+        }
+        
+        // Setup counter functionality
+        get increment_button {
+            on click {
+                let counter = counter + 1;
+                get counter_display {
+                    text content = counter;
+                }
+            }
+        }
+    }
+</razen>
+<body>
+    <h1 id="greeting_element"></h1>
+    <p>Counter: <span id="counter_display">0</span></p>
+    <button id="increment_button">Increment</button>
+</body>
+</html>
 ```
 
 Check the `examples` folder for more sample programs and tutorials.
@@ -183,6 +226,20 @@ A colorful, well-formatted help command that displays comprehensive information 
 ### razen new
 Creates a new Razen program with a template to help you get started quickly. Automatically adds the `.rzn` extension if not provided.
 
+### razen-web
+Creates a new Razen web application with HTML integration. This command sets up the basic structure for a web project using Razen for interactivity.
+
+```bash
+razen-web my-web-app
+```
+
+### razen-run-web
+Runs a Razen web application and serves it on a local development server.
+
+```bash
+razen-run-web my-app.html.rzn
+```
+
 ### razen uninstall
 Safely removes all Razen files and symbolic links from your system. Provides confirmation before proceeding.
 
@@ -191,6 +248,72 @@ Safely removes all Razen files and symbolic links from your system. Provides con
 - **Core files**: `/usr/local/lib/razen`
 - **Examples**: `/usr/local/lib/razen/examples`
 - **Scripts**: `/usr/local/lib/razen/scripts`
+- **Web Properties**: `/usr/local/lib/razen/properties/web-properties`
+
+## Variable Types
+
+Razen supports different variable types with type enforcement:
+
+- **let**: For numeric values (integers and floats)
+  ```razen
+  let count = 42
+  let price = 9.99
+  ```
+
+- **take**: For string values
+  ```razen
+  take name = "John"
+  take message = "Hello, World!"
+  ```
+
+- **hold**: For boolean values
+  ```razen
+  hold is_active = true
+  hold has_permission = false
+  ```
+
+- **put**: For any type (no type restrictions)
+  ```razen
+  put anything = 42
+  put anything = "Now I'm a string"
+  put anything = true
+  ```
+
+## Web Development
+
+Razen provides powerful web development capabilities through its web properties. These properties allow you to create interactive web applications using the familiar Razen syntax while seamlessly integrating with HTML.
+
+### Integration with HTML
+
+Razen web code can be embedded in HTML files using the `<razen>` tag:
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Razen Web App</title>
+</head>
+<razen>
+    # Your Razen code here
+</razen>
+<body>
+    <!-- HTML content -->
+</body>
+</html>
+```
+
+### Web Variables
+
+Razen includes specialized variables for web development:
+
+- **Element Access**: `get`, `query`, `all`
+- **DOM Manipulation**: `html`, `text`, `attr`, `style`, `class`
+- **Event Handling**: `on`, `off`, `trigger`
+- **Form Handling**: `form`, `validate`, `submit`
+- **AJAX and Fetch**: `fetch`, `post`, `get_data`
+- **Storage**: `store_local`, `store_session`, `cookie`
+
+See the examples directory for complete web application examples.
 
 ## License
 Razen is licensed under a custom license. See the [LICENSE](./LICENSE) file for details.

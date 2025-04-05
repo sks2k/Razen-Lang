@@ -2,63 +2,68 @@
 # 🌐 Web Syntax Rules  
 # =================================
 
-# 1️⃣ Element Selectors  
-RULE: GET_ELEMENT => "get" [ID] "LBRACE" [BLOCK] "RBRACE"  
-RULE: QUERY_SELECTOR => "query" [SELECTOR] "LBRACE" [BLOCK] "RBRACE"  
-RULE: QUERY_ALL => "all" [SELECTOR] "LBRACE" [BLOCK] "RBRACE"  
+# 1️⃣ Document Structure
+RULE: WEBPAGE => "webpage" "LBRACE" [BLOCK] "RBRACE"
+RULE: TOP => "top" "LBRACE" [BLOCK] "RBRACE"
+RULE: BOTTOM => "bottom" "LBRACE" [BLOCK] "RBRACE"
 
-# 2️⃣ DOM Manipulation  
-RULE: SET_HTML => "html" [CONTENT]  
-RULE: SET_TEXT => "text" [CONTENT]  
-RULE: SET_ATTR => "attr" [NAME] "=" [VALUE]  
-RULE: SET_STYLE => "style" [PROPERTY] "=" [VALUE]  
-RULE: ADD_CLASS => "class" "add" "=" [CLASS_NAME]  
-RULE: REMOVE_CLASS => "class" "remove" "=" [CLASS_NAME]  
-RULE: TOGGLE_CLASS => "class" "toggle" "=" [CLASS_NAME]  
-RULE: HAS_CLASS => "class" "contains" "=" [CLASS_NAME]  
+# 2️⃣ Element Selectors  
+RULE: FIND_ELEMENT => "find" [ID] "LBRACE" [BLOCK] "RBRACE"  
+RULE: SEARCH_SELECTOR => "search" [SELECTOR] "LBRACE" [BLOCK] "RBRACE"  
+RULE: FIND_ALL => "findall" [SELECTOR] "LBRACE" [BLOCK] "RBRACE"  
 
-# 3️⃣ Event Handling  
-RULE: EVENT_LISTENER => "on" [EVENT_TYPE] "LBRACE" [BLOCK] "RBRACE"  
-RULE: REMOVE_EVENT => "off" [EVENT_TYPE]  
-RULE: TRIGGER_EVENT => "trigger" [EVENT_TYPE]  
+# 3️⃣ Content Manipulation  
+RULE: INSERT_HTML => "insert" [CONTENT]  
+RULE: WRITE_TEXT => "write" [CONTENT]  
+RULE: SET_PROPERTY => "property" [NAME] "=" [VALUE]  
+RULE: SET_LOOK => "look" [PROPERTY] "=" [VALUE]  
+RULE: ADD_TYPE => "type" "add" "=" [TYPE_NAME]  
+RULE: REMOVE_TYPE => "type" "remove" "=" [TYPE_NAME]  
+RULE: TOGGLE_TYPE => "type" "toggle" "=" [TYPE_NAME]  
+RULE: HAS_TYPE => "type" "contains" "=" [TYPE_NAME]  
 
-# 4️⃣ Form Handling  
-RULE: FORM_SELECTOR => "form" [ID] "LBRACE" [BLOCK] "RBRACE"  
-RULE: FORM_VALIDATE => "validate" "LBRACE" [BLOCK] "RBRACE"  
-RULE: FORM_SUBMIT => "submit" "LBRACE" [BLOCK] "RBRACE"  
+# 4️⃣ Interaction Handling  
+RULE: WHEN_EVENT => "when" [EVENT_TYPE] "LBRACE" [BLOCK] "RBRACE"  
+RULE: STOP_EVENT => "stop" [EVENT_TYPE]  
+RULE: SIMULATE_EVENT => "simulate" [EVENT_TYPE]  
 
-# 5️⃣ AJAX and Fetch  
-RULE: FETCH_REQUEST => "fetch" [URL] "LBRACE" [OPTIONS] "RBRACE"  
-RULE: POST_REQUEST => "post" [URL] "LBRACE" [OPTIONS] "RBRACE"  
-RULE: GET_REQUEST => "get_data" [URL] "LBRACE" [OPTIONS] "RBRACE"  
+# 5️⃣ Form Processing  
+RULE: FORM_SELECTOR => "entryform" [ID] "LBRACE" [BLOCK] "RBRACE"  
+RULE: FORM_CHECK => "check" "LBRACE" [BLOCK] "RBRACE"  
+RULE: FORM_SEND => "send" "LBRACE" [BLOCK] "RBRACE"  
 
-# 6️⃣ Animation and Transition  
-RULE: ANIMATE => "animate" [PROPERTIES] "LBRACE" [OPTIONS] "RBRACE"  
-RULE: TRANSITION => "transition" [PROPERTIES] "LBRACE" [OPTIONS] "RBRACE"  
+# 6️⃣ Data Communication  
+RULE: REQUEST => "request" [URL] "LBRACE" [OPTIONS] "RBRACE"  
+RULE: SEND_DATA => "senddata" [URL] "LBRACE" [OPTIONS] "RBRACE"  
+RULE: GET_DATA => "getdata" [URL] "LBRACE" [OPTIONS] "RBRACE"  
 
-# 7️⃣ Storage  
-RULE: LOCAL_STORAGE_SET => "store_local" "set" [KEY] "=" [VALUE]  
-RULE: LOCAL_STORAGE_GET => "store_local" "get" [KEY]  
-RULE: SESSION_STORAGE_SET => "store_session" "set" [KEY] "=" [VALUE]  
-RULE: SESSION_STORAGE_GET => "store_session" "get" [KEY]  
-RULE: COOKIE_SET => "cookie" "set" [NAME] "=" [VALUE] [OPTIONS]  
-RULE: COOKIE_GET => "cookie" "get" [NAME]  
+# 7️⃣ Visual Effects  
+RULE: MOVE => "move" [PROPERTIES] "LBRACE" [OPTIONS] "RBRACE"  
+RULE: CHANGE => "change" [PROPERTIES] "LBRACE" [OPTIONS] "RBRACE"  
 
-# 8️⃣ Utility  
-RULE: WAIT => "wait" [MILLISECONDS] "LBRACE" [BLOCK] "RBRACE"  
-RULE: SET_INTERVAL => "interval" [MILLISECONDS] "LBRACE" [BLOCK] "RBRACE"  
-RULE: CLEAR_INTERVAL => "interval" "clear" [ID]  
-RULE: RESIZE_HANDLER => "resize" "LBRACE" [BLOCK] "RBRACE"  
+# 8️⃣ Data Storage  
+RULE: SAVE_SET => "save" "set" [KEY] "=" [VALUE]  
+RULE: SAVE_GET => "save" "get" [KEY]  
+RULE: KEEP_SET => "keep" "set" [KEY] "=" [VALUE]  
+RULE: KEEP_GET => "keep" "get" [KEY]  
+RULE: REMEMBER_SET => "remember" "set" [NAME] "=" [VALUE] [OPTIONS]  
+RULE: REMEMBER_GET => "remember" "get" [NAME]  
 
-# 9️⃣ Navigation  
-RULE: REDIRECT => "redirect" [URL]  
-RULE: RELOAD => "reload"  
-RULE: BACK => "back"  
-RULE: FORWARD => "forward"  
+# 9️⃣ Utility Functions  
+RULE: PAUSE => "pause" [MILLISECONDS] "LBRACE" [BLOCK] "RBRACE"  
+RULE: REPEAT => "repeat" [MILLISECONDS] "LBRACE" [BLOCK] "RBRACE"  
+RULE: STOP_REPEAT => "repeat" "stop" [ID]  
+RULE: ADJUST_HANDLER => "adjust" "LBRACE" [BLOCK] "RBRACE"  
 
-# 🔟 Web Components  
-RULE: COMPONENT => "component" [NAME] "LBRACE" [BLOCK] "RBRACE"  
-RULE: USE_COMPONENT => "use" [COMPONENT_NAME] [PROPS]  
+# 🔟 Navigation  
+RULE: GOTO => "goto" [URL]  
+RULE: REFRESH => "refresh"  
+RULE: PREVIOUS => "previous"  
+RULE: NEXT => "next"  
+
+# 💭 Components  
+RULE: MODULE => "module" [NAME] "LBRACE" [BLOCK] "RBRACE"  
+RULE: IMPORT => "import" [MODULE_NAME] [PROPS]  
 
 # =================================
 # 🔄 Web Event Types  

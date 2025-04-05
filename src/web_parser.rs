@@ -10,19 +10,55 @@ pub struct WebParser {
 /// Web-specific expression types
 #[derive(Debug, Clone)]
 pub enum WebExpression {
-    ElementSelector(String),               // get, query, all
-    DomManipulation(String, Expression),   // html, text, attr, style
-    ClassManipulation(String, String),     // add, remove, toggle, contains
-    EventListener(String, Vec<Statement>), // on event { ... }
-    FormSelector(String, Vec<Statement>),  // form id { ... }
-    FetchRequest(String, Vec<Statement>),  // fetch url { ... }
-    StorageOperation(String, String, Expression), // store_local, store_session
-    TimerOperation(i64, Vec<Statement>),   // wait, interval
+    WebpageStructure(Vec<Statement>),      // webpage { ... }
+    TopSection(Vec<Statement>),            // top { ... }
+    BottomSection(Vec<Statement>),         // bottom { ... }
+    ElementSelector(String),               // find, search, findall
+    ContentManipulation(String, Expression), // insert, write, property, look
+    TypeManipulation(String, String),      // type add, remove, toggle, contains
+    EventHandler(String, Vec<Statement>),  // when event { ... }
+    FormProcessor(String, Vec<Statement>), // entryform id { ... }
+    DataRequest(String, Vec<Statement>),   // request, senddata, getdata url { ... }
+    DataStorage(String, String, Expression), // save, keep, remember
+    UtilityFunction(i64, Vec<Statement>),  // pause, repeat
 }
 
 impl WebParser {
     pub fn new(parser: Parser) -> Self {
         WebParser { parser }
+    }
+    
+    /// Parse webpage structure (webpage { ... })
+    fn parse_webpage_structure(&mut self) -> Result<WebExpression, Error> {
+        // Consume the 'webpage' token
+        self.parser.next_token();
+        
+        // Expect a block of statements
+        let block = self.parser.parse_block_statement()?;
+        
+        Ok(WebExpression::WebpageStructure(block))
+    }
+    
+    /// Parse top section (top { ... })
+    fn parse_top_section(&mut self) -> Result<WebExpression, Error> {
+        // Consume the 'top' token
+        self.parser.next_token();
+        
+        // Expect a block of statements
+        let block = self.parser.parse_block_statement()?;
+        
+        Ok(WebExpression::TopSection(block))
+    }
+    
+    /// Parse bottom section (bottom { ... })
+    fn parse_bottom_section(&mut self) -> Result<WebExpression, Error> {
+        // Consume the 'bottom' token
+        self.parser.next_token();
+        
+        // Expect a block of statements
+        let block = self.parser.parse_block_statement()?;
+        
+        Ok(WebExpression::BottomSection(block))
     }
 
     /// Parse a web-specific expression
@@ -30,47 +66,53 @@ impl WebParser {
         let token = self.parser.peek_token();
         
         match token.token_type {
+            // Document Structure
+            TokenType::Webpage => self.parse_webpage_structure(),
+            TokenType::Top => self.parse_top_section(),
+            TokenType::Bottom => self.parse_bottom_section(),
+            
             // Element selectors
-            TokenType::Get => self.parse_element_selector("get"),
-            TokenType::Query => self.parse_element_selector("query"),
-            TokenType::All => self.parse_element_selector("all"),
+            TokenType::Find => self.parse_element_selector("find"),
+            TokenType::Search => self.parse_element_selector("search"),
+            TokenType::FindAll => self.parse_element_selector("findall"),
             
-            // DOM manipulation
-            TokenType::Html => self.parse_dom_manipulation("html"),
-            TokenType::Text => self.parse_dom_manipulation("text"),
-            TokenType::Attr => self.parse_dom_manipulation("attr"),
-            TokenType::Style => self.parse_dom_manipulation("style"),
+            // Content manipulation
+            TokenType::Insert => self.parse_content_manipulation("insert"),
+            TokenType::Write => self.parse_content_manipulation("write"),
+            TokenType::Property => self.parse_content_manipulation("property"),
+            TokenType::Look => self.parse_content_manipulation("look"),
             
-            // Class manipulation
-            TokenType::Class => self.parse_class_manipulation(),
+            // Type manipulation
+            TokenType::Type => self.parse_type_manipulation(),
             
             // Event handling
-            TokenType::On => self.parse_event_listener(),
-            TokenType::Off => self.parse_event_removal(),
+            TokenType::When => self.parse_event_handler(),
+            TokenType::Stop => self.parse_event_removal(),
             
             // Form handling
-            TokenType::Form => self.parse_form_selector(),
+            TokenType::EntryForm => self.parse_form_processor(),
             
-            // AJAX and Fetch
-            TokenType::Fetch => self.parse_fetch_request("fetch"),
-            TokenType::Post => self.parse_fetch_request("post"),
-            TokenType::GetData => self.parse_fetch_request("get_data"),
+            // Data Communication
+            TokenType::Request => self.parse_data_request("request"),
+            TokenType::SendData => self.parse_data_request("senddata"),
+            TokenType::GetData => self.parse_data_request("getdata"),
             
-            // Storage
-            TokenType::StoreLocal => self.parse_storage_operation("local"),
-            TokenType::StoreSession => self.parse_storage_operation("session"),
+            // Data Storage
+            TokenType::Save => self.parse_data_storage("save"),
+            TokenType::Keep => self.parse_data_storage("keep"),
+            TokenType::Remember => self.parse_data_storage("remember"),
             
-            // Timers
-            TokenType::Wait => self.parse_timer_operation("wait"),
-            TokenType::Interval => self.parse_timer_operation("interval"),
+            // Utility Functions
+            TokenType::Pause => self.parse_utility_function("pause"),
+            TokenType::Repeat => self.parse_utility_function("repeat"),
             
             _ => Err(Error::new(format!("Unexpected token in web expression: {:?}", token))),
         }
     }
 
-    /// Parse element selector expressions (get, query, all)
+    /// Parse element selector expressions (find, search, findall)
     fn parse_element_selector(&mut self, selector_type: &str) -> Result<WebExpression, Error> {
-        // Consume the selector token (get, query, all)
+        // Consume the selector token (find, search, findall)
         self.parser.next_token();
         
         // Get the element ID or selector
@@ -82,20 +124,20 @@ impl WebParser {
         Ok(WebExpression::ElementSelector(identifier))
     }
 
-    /// Parse DOM manipulation expressions (html, text, attr, style)
-    fn parse_dom_manipulation(&mut self, manipulation_type: &str) -> Result<WebExpression, Error> {
+    /// Parse content manipulation expressions (insert, write, property, look)
+    fn parse_content_manipulation(&mut self, manipulation_type: &str) -> Result<WebExpression, Error> {
         // Consume the manipulation token
         self.parser.next_token();
         
         // Expect content or property name
         let content = self.parser.parse_expression(0)?;
         
-        Ok(WebExpression::DomManipulation(manipulation_type.to_string(), content))
+        Ok(WebExpression::ContentManipulation(manipulation_type.to_string(), content))
     }
 
-    /// Parse class manipulation (add, remove, toggle, contains)
-    fn parse_class_manipulation(&mut self) -> Result<WebExpression, Error> {
-        // Consume the 'class' token
+    /// Parse type manipulation (add, remove, toggle, contains)
+    fn parse_type_manipulation(&mut self) -> Result<WebExpression, Error> {
+        // Consume the 'type' token
         self.parser.next_token();
         
         // Get the operation (add, remove, toggle, contains)
@@ -104,15 +146,15 @@ impl WebParser {
         // Expect equals sign
         self.parser.expect_token(TokenType::Equal)?;
         
-        // Get the class name
-        let class_name = self.parser.parse_string()?;
+        // Get the type name
+        let type_name = self.parser.parse_string()?;
         
-        Ok(WebExpression::ClassManipulation(operation, class_name))
+        Ok(WebExpression::TypeManipulation(operation, type_name))
     }
 
-    /// Parse event listener (on click { ... })
-    fn parse_event_listener(&mut self) -> Result<WebExpression, Error> {
-        // Consume the 'on' token
+    /// Parse event handler (when click { ... })
+    fn parse_event_handler(&mut self) -> Result<WebExpression, Error> {
+        // Consume the 'when' token
         self.parser.next_token();
         
         // Get the event type
@@ -121,19 +163,19 @@ impl WebParser {
         // Expect a block of statements
         let block = self.parser.parse_block_statement()?;
         
-        Ok(WebExpression::EventListener(event_type, block))
+        Ok(WebExpression::EventHandler(event_type, block))
     }
 
-    /// Parse event removal (off click)
+    /// Parse event removal (stop click)
     fn parse_event_removal(&mut self) -> Result<WebExpression, Error> {
-        // Consume the 'off' token
+        // Consume the 'stop' token
         self.parser.next_token();
         
         // Get the event type
         let event_type = self.parser.parse_identifier()?;
         
         // This is just a placeholder as event removal doesn't have a block
-        Ok(WebExpression::EventListener(event_type, vec![]))
+        Ok(WebExpression::EventHandler(event_type, vec![]))
     }
 
     /// Parse form selector (form login_form { ... })

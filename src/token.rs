@@ -68,49 +68,57 @@ pub enum TokenType {
     False,
     Null,
     
+    // Document Type Declaration
+    DocumentType,  // type declaration (web, script, cli)
+    
+    // Document Structure
+    Webpage,    // root element for web documents
+    Top,        // container for metadata
+    Bottom,     // container for visible content
+    
     // Web-specific tokens - Element Access
-    Get,        // get element by ID
-    Query,      // query element by selector
-    All,        // get all elements matching selector
+    Find,       // find element by ID
+    Search,     // search element by selector
+    FindAll,    // find all elements matching selector
     
-    // Web-specific tokens - DOM Manipulation
-    Html,       // set/get innerHTML
-    Text,       // set/get textContent
-    Attr,       // set/get attribute
-    Style,      // set/get style
-    Class,      // class manipulation
-    Add,        // add class
-    Remove,     // remove class
-    Toggle,     // toggle class
-    Contains,   // check if element has class
+    // Web-specific tokens - Content Manipulation
+    Insert,     // set/get inner content with markup
+    Write,      // set/get text-only content
+    Property,   // set/get attribute
+    Look,       // set/get style
+    Type,       // type manipulation (replaces class)
+    Add,        // add type
+    Remove,     // remove type
+    Toggle,     // toggle type
+    Contains,   // check if element has type
     
-    // Web-specific tokens - Event Handling
-    On,         // add event listener
-    Off,        // remove event listener
-    Trigger,    // trigger event
+    // Web-specific tokens - Interaction Handling
+    When,       // add event listener
+    Stop,       // remove event listener
+    Simulate,   // trigger event
     
-    // Web-specific tokens - Form Handling
-    Form,       // form selector
-    Validate,   // form validation
-    Submit,     // form submission
+    // Web-specific tokens - Form Processing
+    EntryForm,  // form selector
+    Check,      // form validation
+    Send,       // form submission
     
-    // Web-specific tokens - AJAX and Fetch
-    Fetch,      // fetch request
-    Post,       // post request
+    // Web-specific tokens - Data Communication
+    Request,    // fetch request
+    SendData,   // post request
     GetData,    // get request
     
-    // Web-specific tokens - Storage
-    StoreLocal,     // localStorage
-    StoreSession,   // sessionStorage
-    Cookie,         // cookie management
+    // Web-specific tokens - Data Storage
+    Save,       // localStorage
+    Keep,       // sessionStorage
+    Remember,   // cookie management
     
-    // Web-specific tokens - Utility
-    Wait,       // setTimeout
-    Interval,   // setInterval
-    Clear,      // clear interval/timeout
-    Resize,     // window resize
-    Redirect,   // page navigation
-    Reload,     // page reload
+    // Web-specific tokens - Utility Functions
+    Pause,      // setTimeout
+    Repeat,     // setInterval
+    Stop,       // clear interval/timeout
+    Adjust,     // window resize
+    Goto,       // page navigation
+    Refresh,    // page reload
     
     // Delimiters
     LeftParen,      // (
@@ -341,49 +349,56 @@ pub fn lookup_identifier(identifier: &str) -> TokenType {
         "false" => TokenType::False,
         "null" => TokenType::Null,
         
-        // Web-specific tokens - Element Access
-        "get" => TokenType::Get,
-        "query" => TokenType::Query,
-        "all" => TokenType::All,
+        // Document Type Declaration
+        "type" => TokenType::DocumentType,
         
-        // Web-specific tokens - DOM Manipulation
-        "html" => TokenType::Html,
-        "text" => TokenType::Text,
-        "attr" => TokenType::Attr,
-        "style" => TokenType::Style,
-        "class" => TokenType::Class,
+        // Document Structure
+        "webpage" => TokenType::Webpage,
+        "top" => TokenType::Top,
+        "bottom" => TokenType::Bottom,
+        
+        // Web-specific tokens - Element Access
+        "find" => TokenType::Find,
+        "search" => TokenType::Search,
+        "findall" => TokenType::FindAll,
+        
+        // Web-specific tokens - Content Manipulation
+        "insert" => TokenType::Insert,
+        "write" => TokenType::Write,
+        "property" => TokenType::Property,
+        "look" => TokenType::Look,
+        "elemtype" => TokenType::Type,  // renamed from 'type' to avoid conflict
         "add" => TokenType::Add,
         "remove" => TokenType::Remove,
         "toggle" => TokenType::Toggle,
         "contains" => TokenType::Contains,
         
-        // Web-specific tokens - Event Handling
-        "on" => TokenType::On,
-        "off" => TokenType::Off,
-        "trigger" => TokenType::Trigger,
+        // Web-specific tokens - Interaction Handling
+        "when" => TokenType::When,
+        "stop" => TokenType::Stop,
+        "simulate" => TokenType::Simulate,
         
-        // Web-specific tokens - Form Handling
-        "form" => TokenType::Form,
-        "validate" => TokenType::Validate,
-        "submit" => TokenType::Submit,
+        // Web-specific tokens - Form Processing
+        "entryform" => TokenType::EntryForm,
+        "check" => TokenType::Check,
+        "send" => TokenType::Send,
         
-        // Web-specific tokens - AJAX and Fetch
-        "fetch" => TokenType::Fetch,
-        "post" => TokenType::Post,
-        "get_data" => TokenType::GetData,
+        // Web-specific tokens - Data Communication
+        "request" => TokenType::Request,
+        "senddata" => TokenType::SendData,
+        "getdata" => TokenType::GetData,
         
-        // Web-specific tokens - Storage
-        "store_local" => TokenType::StoreLocal,
-        "store_session" => TokenType::StoreSession,
-        "cookie" => TokenType::Cookie,
+        // Web-specific tokens - Data Storage
+        "save" => TokenType::Save,
+        "keep" => TokenType::Keep,
+        "remember" => TokenType::Remember,
         
-        // Web-specific tokens - Utility
-        "wait" => TokenType::Wait,
-        "interval" => TokenType::Interval,
-        "clear" => TokenType::Clear,
-        "resize" => TokenType::Resize,
-        "redirect" => TokenType::Redirect,
-        "reload" => TokenType::Reload,
+        // Web-specific tokens - Utility Functions
+        "pause" => TokenType::Pause,
+        "repeat" => TokenType::Repeat,
+        "adjust" => TokenType::Adjust,
+        "goto" => TokenType::Goto,
+        "refresh" => TokenType::Refresh,
         
         // If not a keyword, it's an identifier
         _ => TokenType::Identifier,

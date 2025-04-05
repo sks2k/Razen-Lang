@@ -168,6 +168,7 @@ impl Parser {
             TokenType::Exit => self.parse_exit_statement(),
             TokenType::Try => self.parse_try_statement(),
             TokenType::Throw => self.parse_throw_statement(),
+            TokenType::DocumentType => self.parse_document_type_declaration(),
             TokenType::Comment => {
                 // Skip comments and return None to continue parsing
                 None
@@ -488,6 +489,28 @@ impl Parser {
         }
         
         Some(Statement::ExitStatement)
+    }
+    
+    /// Parse document type declaration (type web; type script; type cli;)
+    fn parse_document_type_declaration(&mut self) -> Option<Statement> {
+        // Consume the 'type' token
+        self.next_token();
+        
+        // Get the document type (web, script, cli)
+        let doc_type = if self.peek_token_is(TokenType::Identifier) {
+            self.next_token();
+            self.current_token.literal.clone()
+        } else {
+            self.errors.push(format!("Expected document type after 'type', got {:?}", self.peek_token.token_type));
+            return None;
+        };
+        
+        // Expect semicolon
+        if self.peek_token_is(TokenType::Semicolon) {
+            self.next_token();
+        }
+        
+        Some(Statement::DocumentTypeDeclaration { doc_type })
     }
     
     fn parse_expression(&mut self, precedence: Precedence) -> Option<Expression> {

@@ -2,6 +2,12 @@
 # This file defines all variables and their purposes in the Razen language
 # Format: variable_name => purpose and use case
 
+# 0️⃣ Document Structure Variables
+# Use these variables to define the type of document you are working with
+# Available options: web, script, cli
+# Example: type web; or type script; or type cli;
+type => for declaring document structure. Use for defining document types and structure. [options: web, script, cli]
+
 # 1️⃣ General Purpose Variables for basic data types:
 let => for declaring numeric variables and calculations. Use for integers, floats, and mathematical operations.
 take => for declaring string variables and text manipulation. Use for text data, string operations, and string interpolation.
