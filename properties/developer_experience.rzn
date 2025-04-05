@@ -1,0 +1,191 @@
+# =================================
+# 🛠️ Developer Experience  
+# =================================
+
+# Razen provides powerful tools and features to enhance the developer experience,
+# making it easier to write, debug, and maintain code.
+
+# 1️⃣ Better Error Messages
+# ----------------------
+# Razen provides detailed and helpful error messages with suggestions for fixes.
+
+# Example error message:
+# "TypeError: Cannot perform addition on 'number' and 'string' at line 5, column 10
+#  Did you mean to convert the string to a number first? Try using the int() or float() function."
+
+# Common error suggestions:
+# - Variable not defined: Suggest similar variable names that are in scope
+# - Type mismatch: Suggest type conversion functions
+# - Missing semicolon: Show where the semicolon should be placed
+# - Unclosed brackets/parentheses: Show the matching opening/closing position
+# - Undefined function: Suggest similar function names or required imports
+
+# 2️⃣ Interactive REPL
+# -----------------
+# The Razen REPL (Read-Eval-Print Loop) provides an interactive environment for
+# testing code snippets and exploring language features.
+
+# REPL Features:
+# - Command history (up/down arrows to navigate)
+# - Tab completion for variables, functions, and keywords
+# - Multi-line input support
+# - Special commands:
+#   .help - Display help information
+#   .clear - Clear the screen
+#   .exit - Exit the REPL
+#   .load <file> - Load and execute a file
+#   .save <file> - Save the current session to a file
+#   .vars - List all defined variables
+#   .funcs - List all defined functions
+#   .type <expr> - Show the type of an expression
+
+# Example REPL session:
+# > let x = 10
+# 10
+# > let y = 20
+# 20
+# > x + y
+# 30
+# > .vars
+# x: number (10)
+# y: number (20)
+# > .exit
+
+# 3️⃣ Debugging Tools
+# ----------------
+# Razen provides powerful debugging capabilities to help identify and fix issues.
+
+# Debug Block:
+# The 'debug' block automatically inspects variables and expressions:
+
+# debug {
+#     let x = 10;
+#     let y = 20;
+#     let z = x + y;  # Variables x, y, and z will be automatically inspected
+# }
+
+# Output:
+# DEBUG [line 2]: x = 10 (number)
+# DEBUG [line 3]: y = 20 (number)
+# DEBUG [line 4]: z = 30 (number)
+
+# Assertions:
+# Use assertions to verify conditions during development:
+
+# assert(condition, message);
+
+# Example:
+# fun divide(a, b) {
+#     assert(b != 0, "Division by zero");
+#     return a / b;
+# }
+
+# Tracing:
+# Add trace points to track execution flow:
+
+# trace(message);
+
+# Example:
+# fun calculate_total(items) {
+#     trace("Starting calculation");
+#     let total = 0;
+#     for (let item in items) {
+#         trace("Processing item: " + item.name);
+#         total += item.price;
+#     }
+#     trace("Calculation complete, total: " + total);
+#     return total;
+# }
+
+# Breakpoints:
+# Pause execution for inspection:
+
+# breakpoint();
+
+# Example:
+# fun process_data(data) {
+#     if (len(data) == 0) {
+#         return null;
+#     }
+#     
+#     let result = [];
+#     for (let item in data) {
+#         if (item.value < 0) {
+#             breakpoint();  # Execution will pause here if a debugger is attached
+#         }
+#         result.push(item.value * 2);
+#     }
+#     
+#     return result;
+# }
+
+# 4️⃣ Performance Profiling
+# ----------------------
+# Measure and optimize code performance:
+
+# profile {
+#     // Code to profile
+# }
+
+# Example:
+# profile {
+#     let result = 0;
+#     for (let i = 0; i < 1000000; i++) {
+#         result += i;
+#     }
+# }
+
+# Output:
+# PROFILE: Execution time: 15.3ms
+# PROFILE: Memory usage: 2.4MB
+# PROFILE: CPU usage: 12%
+
+# 5️⃣ Code Formatting
+# ----------------
+# Razen provides a built-in code formatter to ensure consistent style:
+
+# Command line usage:
+# razen format file.rzn
+
+# Format options:
+# - Indentation (spaces or tabs)
+# - Line length
+# - Brace style
+# - Semicolon placement
+# - Space around operators
+
+# 6️⃣ Documentation Generation
+# -------------------------
+# Generate documentation from code comments:
+
+# Example:
+# /**
+#  * Calculates the area of a circle
+#  * @param radius The radius of the circle
+#  * @returns The area of the circle
+#  */
+# fun circle_area(radius) {
+#     return MATH_PI * radius * radius;
+# }
+
+# Command line usage:
+# razen docs file.rzn -o docs/
+
+# 7️⃣ Testing Framework
+# ------------------
+# Built-in testing capabilities:
+
+# Example test file:
+# test "Addition works correctly" {
+#     let result = add(2, 3);
+#     assert_equal(result, 5);
+# }
+# 
+# test "Division by zero throws error" {
+#     assert_throws(fun() {
+#         divide(10, 0);
+#     });
+# }
+
+# Command line usage:
+# razen test tests/

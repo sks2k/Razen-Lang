@@ -1,0 +1,165 @@
+# =================================
+# 📚 Enhanced Standard Library  
+# =================================
+
+# The Razen Standard Library provides a comprehensive set of built-in functions
+# and utilities to simplify common programming tasks.
+
+# 1️⃣ Math Module
+# -------------
+# Advanced mathematical functions and constants
+
+# Constants
+CONST: MATH_PI => 3.14159265359
+CONST: MATH_E => 2.71828182846
+CONST: MATH_TAU => 6.28318530718
+CONST: MATH_INF => Infinity
+CONST: MATH_NAN => Not-a-Number
+
+# Functions
+FUNC: math_sin(x) => Sine of x (in radians)
+FUNC: math_cos(x) => Cosine of x (in radians)
+FUNC: math_tan(x) => Tangent of x (in radians)
+FUNC: math_log(x, base) => Logarithm of x with specified base
+FUNC: math_exp(x) => e raised to the power of x
+FUNC: math_floor(x) => Largest integer less than or equal to x
+FUNC: math_ceil(x) => Smallest integer greater than or equal to x
+FUNC: math_random() => Random number between 0 and 1
+FUNC: math_random_int(min, max) => Random integer between min and max
+
+# Example:
+# let area = MATH_PI * radius * radius;
+# let random_number = math_random_int(1, 100);
+
+# 2️⃣ String Module
+# --------------
+# Advanced string manipulation functions
+
+FUNC: string_format(template, ...args) => Format a string with placeholders
+FUNC: string_pad_left(str, length, char) => Pad a string on the left
+FUNC: string_pad_right(str, length, char) => Pad a string on the right
+FUNC: string_starts_with(str, prefix) => Check if string starts with prefix
+FUNC: string_ends_with(str, suffix) => Check if string ends with suffix
+FUNC: string_contains(str, substring) => Check if string contains substring
+FUNC: string_repeat(str, count) => Repeat a string multiple times
+FUNC: string_split_lines(str) => Split a string into lines
+FUNC: string_to_chars(str) => Convert string to array of characters
+
+# Example:
+# let greeting = string_format("Hello, {}!", name);
+# let padded = string_pad_left("42", 5, "0");  # "00042"
+
+# 3️⃣ Array Module
+# -------------
+# Advanced array manipulation functions
+
+FUNC: array_map(arr, func) => Apply function to each element
+FUNC: array_filter(arr, predicate) => Filter elements by predicate
+FUNC: array_reduce(arr, func, initial) => Reduce array to single value
+FUNC: array_find(arr, predicate) => Find first element matching predicate
+FUNC: array_some(arr, predicate) => Check if any element matches predicate
+FUNC: array_every(arr, predicate) => Check if all elements match predicate
+FUNC: array_flat(arr) => Flatten nested arrays
+FUNC: array_unique(arr) => Remove duplicate elements
+FUNC: array_zip(...arrays) => Combine multiple arrays
+
+# Example:
+# let doubled = array_map([1, 2, 3], fun(x) { return x * 2; });
+# let sum = array_reduce([1, 2, 3, 4], fun(acc, x) { return acc + x; }, 0);
+
+# 4️⃣ IO Module
+# ----------
+# Input/output operations
+
+FUNC: io_read_file(path) => Read file contents as string
+FUNC: io_write_file(path, content) => Write string to file
+FUNC: io_append_file(path, content) => Append string to file
+FUNC: io_file_exists(path) => Check if file exists
+FUNC: io_delete_file(path) => Delete a file
+FUNC: io_create_dir(path) => Create a directory
+FUNC: io_list_dir(path) => List directory contents
+FUNC: io_read_lines(path) => Read file as array of lines
+FUNC: io_prompt(message) => Display prompt and read user input
+
+# Example:
+# let content = io_read_file("data.txt");
+# io_write_file("output.txt", "Hello, World!");
+
+# 5️⃣ JSON Module
+# ------------
+# JSON data manipulation
+
+FUNC: json_parse(str) => Parse JSON string to object
+FUNC: json_stringify(obj) => Convert object to JSON string
+FUNC: json_read_file(path) => Read and parse JSON file
+FUNC: json_write_file(path, obj) => Write object as JSON to file
+
+# Example:
+# let data = json_parse('{"name":"John","age":30}');
+# let json = json_stringify({name: "John", age: 30});
+
+# 6️⃣ Time Module
+# ------------
+# Date and time utilities
+
+FUNC: time_now() => Current timestamp in milliseconds
+FUNC: time_format(timestamp, format) => Format timestamp as string
+FUNC: time_parse(str, format) => Parse string to timestamp
+FUNC: time_year(timestamp) => Get year from timestamp
+FUNC: time_month(timestamp) => Get month from timestamp
+FUNC: time_day(timestamp) => Get day from timestamp
+FUNC: time_hour(timestamp) => Get hour from timestamp
+FUNC: time_minute(timestamp) => Get minute from timestamp
+FUNC: time_second(timestamp) => Get second from timestamp
+FUNC: time_add(timestamp, amount, unit) => Add time to timestamp
+
+# Example:
+# let now = time_now();
+# let formatted = time_format(now, "YYYY-MM-DD");
+
+# 7️⃣ System Module
+# -------------
+# System-level operations
+
+FUNC: system_env(name) => Get environment variable
+FUNC: system_set_env(name, value) => Set environment variable
+FUNC: system_args() => Get command line arguments
+FUNC: system_exec(command) => Execute shell command
+FUNC: system_exit(code) => Exit program with code
+FUNC: system_platform() => Get operating system platform
+FUNC: system_cpu_count() => Get number of CPU cores
+FUNC: system_memory_usage() => Get memory usage information
+
+# Example:
+# let home = system_env("HOME");
+# let result = system_exec("ls -la");
+
+# 8️⃣ Crypto Module
+# -------------
+# Cryptography and hashing functions
+
+FUNC: crypto_hash(data, algorithm) => Hash data with algorithm
+FUNC: crypto_hmac(data, key, algorithm) => Create HMAC
+FUNC: crypto_encrypt(data, key) => Encrypt data
+FUNC: crypto_decrypt(data, key) => Decrypt data
+FUNC: crypto_random_bytes(length) => Generate random bytes
+FUNC: crypto_uuid() => Generate UUID
+
+# Example:
+# let hash = crypto_hash("password123", "sha256");
+# let uuid = crypto_uuid();
+
+# 9️⃣ Network Module
+# --------------
+# Network operations
+
+FUNC: net_fetch(url) => Fetch data from URL
+FUNC: net_post(url, data) => POST data to URL
+FUNC: net_download(url, path) => Download file from URL
+FUNC: net_ip_address() => Get local IP address
+FUNC: net_hostname() => Get local hostname
+FUNC: net_parse_url(url) => Parse URL into components
+
+# Example:
+# let response = net_fetch("https://api.example.com/data");
+# net_download("https://example.com/file.txt", "file.txt");

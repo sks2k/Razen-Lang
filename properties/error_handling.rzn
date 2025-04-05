@@ -1,0 +1,94 @@
+# =================================
+# 🛑 Enhanced Error Handling  
+# =================================
+
+# Razen provides comprehensive error handling mechanisms to help developers
+# identify and fix issues in their code.
+
+# 1️⃣ Error Types
+# --------------
+# Razen provides several built-in error types:
+#
+# - SyntaxError: Invalid syntax in the code
+# - TypeError: Operation performed on incompatible types
+# - ReferenceError: Accessing undefined variables or functions
+# - RangeError: Value outside of allowed range
+# - ImportError: Failed to import a module
+# - IOError: Input/output operation failed
+# - DivisionByZeroError: Attempted division by zero
+# - CustomError: User-defined error types
+
+# 2️⃣ Try-Catch-Finally Blocks
+# ---------------------------
+# Use try-catch-finally blocks to handle exceptions:
+
+# Example:
+# try {
+#     let result = divide(10, 0);
+#     show result;
+# } catch {
+#     show "An error occurred: Division by zero";
+# } finally {
+#     show "This code always executes";
+# }
+
+# 3️⃣ Throwing Custom Errors
+# ------------------------
+# You can throw custom errors with the 'throw' keyword:
+
+# Example:
+# fun divide(a, b) {
+#     if (b == 0) {
+#         throw "DivisionByZeroError: Cannot divide by zero";
+#     }
+#     return a / b;
+# }
+
+# 4️⃣ Error Object Properties
+# -------------------------
+# Error objects have the following properties:
+#
+# - message: Description of the error
+# - type: Type of the error
+# - line: Line number where the error occurred
+# - column: Column number where the error occurred
+# - file: File where the error occurred
+# - stack: Stack trace of the error
+
+# 5️⃣ Error Suggestions
+# -------------------
+# Razen provides helpful suggestions for common errors:
+#
+# Example error message:
+# "TypeError: Cannot perform addition on 'number' and 'string' at line 5, column 10
+#  Did you mean to convert the string to a number first? Try using the int() or float() function."
+
+# 6️⃣ Error Handling Best Practices
+# -------------------------------
+# - Use specific catch blocks for different error types
+# - Always include finally blocks for cleanup operations
+# - Provide descriptive error messages
+# - Log errors for debugging
+# - Handle errors at the appropriate level
+
+# 7️⃣ Debugging Tools
+# ----------------
+# Razen provides several debugging tools:
+#
+# - debug block: Automatically inspect variables
+# - assert: Verify conditions during development
+# - trace: Print the execution path
+# - breakpoint: Pause execution for inspection
+
+# Example:
+# debug {
+#     let x = 10;
+#     let y = 20;
+#     let z = x + y;  # Variables x, y, and z will be automatically inspected
+# }
+
+# assert(x > 0, "x must be positive");  # Throws an error if the condition is false
+
+# trace("Calculating result");  # Prints a trace message with line number
+
+# breakpoint();  # Pauses execution if a debugger is attached

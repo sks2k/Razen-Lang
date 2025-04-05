@@ -1,0 +1,165 @@
+# =================================
+# 📜 Scripting Enhancements  
+# =================================
+
+# Razen provides powerful scripting capabilities for automation, 
+# system interaction, and more complex programming tasks.
+
+# 1️⃣ Command Line Arguments
+# -----------------------
+# Access command line arguments using the args() function:
+
+# Example:
+# fun main() {
+#     let arguments = args();
+#     if (len(arguments) > 1) {
+#         show "First argument: " + arguments[1];
+#     } else {
+#         show "No arguments provided";
+#     }
+# }
+
+# 2️⃣ Shell Command Execution
+# -------------------------
+# Execute shell commands and capture their output:
+
+# Example:
+# let result = exec("ls -la");
+# show result;
+#
+# // With error handling
+# try {
+#     let output = exec("some_command --with-args");
+#     show output;
+# } catch {
+#     show "Command execution failed";
+# }
+
+# 3️⃣ File System Operations
+# -----------------------
+# Comprehensive file system operations for scripts:
+
+FUNC: fs_read(path) => Read file contents
+FUNC: fs_write(path, content) => Write to file
+FUNC: fs_append(path, content) => Append to file
+FUNC: fs_exists(path) => Check if file exists
+FUNC: fs_delete(path) => Delete file
+FUNC: fs_rename(old_path, new_path) => Rename file
+FUNC: fs_copy(source, destination) => Copy file
+FUNC: fs_mkdir(path) => Create directory
+FUNC: fs_rmdir(path) => Remove directory
+FUNC: fs_list(path) => List directory contents
+FUNC: fs_is_file(path) => Check if path is a file
+FUNC: fs_is_dir(path) => Check if path is a directory
+FUNC: fs_size(path) => Get file size
+FUNC: fs_modified(path) => Get last modified time
+
+# 4️⃣ Process Management
+# -------------------
+# Create and manage child processes:
+
+FUNC: process_spawn(command) => Start new process
+FUNC: process_kill(pid) => Kill process by ID
+FUNC: process_list() => List running processes
+FUNC: process_current() => Get current process info
+FUNC: process_wait(pid) => Wait for process to complete
+FUNC: process_exit(code) => Exit current process
+
+# 5️⃣ Environment Variables
+# ----------------------
+# Access and modify environment variables:
+
+FUNC: env_get(name) => Get environment variable
+FUNC: env_set(name, value) => Set environment variable
+FUNC: env_list() => List all environment variables
+FUNC: env_has(name) => Check if environment variable exists
+FUNC: env_delete(name) => Delete environment variable
+
+# 6️⃣ Path Manipulation
+# ------------------
+# Utilities for working with file paths:
+
+FUNC: path_join(...parts) => Join path components
+FUNC: path_dirname(path) => Get directory name
+FUNC: path_basename(path) => Get base name
+FUNC: path_extension(path) => Get file extension
+FUNC: path_absolute(path) => Get absolute path
+FUNC: path_normalize(path) => Normalize path
+FUNC: path_relative(from, to) => Get relative path
+
+# 7️⃣ Script Scheduling
+# ------------------
+# Schedule script execution:
+
+FUNC: schedule_once(delay, callback) => Run once after delay
+FUNC: schedule_interval(interval, callback) => Run repeatedly
+FUNC: schedule_cancel(id) => Cancel scheduled task
+FUNC: schedule_sleep(ms) => Pause execution
+
+# 8️⃣ Stream Processing
+# ------------------
+# Process data streams efficiently:
+
+FUNC: stream_read(source) => Read from stream
+FUNC: stream_write(target, data) => Write to stream
+FUNC: stream_pipe(source, target) => Pipe data between streams
+FUNC: stream_close(stream) => Close stream
+FUNC: stream_from_file(path) => Create stream from file
+FUNC: stream_from_string(text) => Create stream from string
+
+# 9️⃣ Scripting Examples
+# -------------------
+
+# Example 1: Process CSV file
+# --------------------------
+# fun process_csv(file_path) {
+#     let content = fs_read(file_path);
+#     let lines = split(content, "\n");
+#     let header = split(lines[0], ",");
+#     
+#     let data = [];
+#     for (let i = 1; i < len(lines); i++) {
+#         if (lines[i] != "") {
+#             let values = split(lines[i], ",");
+#             let row = {};
+#             
+#             for (let j = 0; j < len(header); j++) {
+#                 row[header[j]] = values[j];
+#             }
+#             
+#             data.push(row);
+#         }
+#     }
+#     
+#     return data;
+# }
+# 
+# let users = process_csv("users.csv");
+# for (let user in users) {
+#     show user.name + ": " + user.email;
+# }
+
+# Example 2: Backup script
+# ----------------------
+# fun backup_directory(source, destination) {
+#     let timestamp = time_format(time_now(), "YYYY-MM-DD_HH-mm-ss");
+#     let backup_path = path_join(destination, "backup_" + timestamp);
+#     
+#     fs_mkdir(backup_path);
+#     
+#     let files = fs_list(source);
+#     for (let file in files) {
+#         let source_path = path_join(source, file);
+#         let dest_path = path_join(backup_path, file);
+#         
+#         if (fs_is_file(source_path)) {
+#             fs_copy(source_path, dest_path);
+#             show "Backed up: " + file;
+#         }
+#     }
+#     
+#     show "Backup completed to: " + backup_path;
+#     return backup_path;
+# }
+# 
+# backup_directory("/home/user/documents", "/home/user/backups");

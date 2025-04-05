@@ -1,0 +1,89 @@
+# =================================
+# 📦 Module System  
+# =================================
+
+# The Razen Module System allows you to organize code into reusable components
+# and import functionality from other files.
+
+# Example Usage:
+# import math from "math.rzn";
+# import { add, subtract } from "calculator.rzn";
+# import * as utils from "utils.rzn";
+
+# 1️⃣ Module Import Syntax  
+# ------------------------
+# Full module import:
+# import moduleName from "path/to/module.rzn";
+#
+# Selective import:
+# import { function1, function2 } from "path/to/module.rzn";
+#
+# Namespace import:
+# import * as namespace from "path/to/module.rzn";
+
+# 2️⃣ Module Export Syntax  
+# ------------------------
+# To make functions, variables, or classes available for import in other files,
+# use the 'export' keyword:
+#
+# export fun add(a, b) {
+#     return a + b;
+# }
+#
+# export let PI = 3.14159;
+
+# 3️⃣ Module Structure  
+# -------------------
+# Modules are simply Razen files (.rzn) that can be imported by other files.
+# Each module has its own scope, and only exported items are accessible from outside.
+
+# 4️⃣ Standard Library Modules  
+# --------------------------
+# Razen includes several built-in modules:
+# - math: Mathematical functions and constants
+# - string: String manipulation utilities
+# - io: Input/output operations
+# - system: System-level operations
+# - time: Date and time utilities
+
+# 5️⃣ Module Resolution  
+# -------------------
+# Modules are resolved in the following order:
+# 1. Relative to the importing file (./module.rzn or ../module.rzn)
+# 2. From the standard library
+# 3. From the project's module directory
+
+# 6️⃣ Module Examples  
+# -----------------
+
+# Example 1: Creating a math utility module (math_utils.rzn)
+# ---------------------------------------------------------
+# export fun square(x) {
+#     return x * x;
+# }
+#
+# export fun cube(x) {
+#     return x * x * x;
+# }
+#
+# export let PI = 3.14159;
+
+# Example 2: Importing and using the module
+# -----------------------------------------
+# import { square, PI } from "math_utils.rzn";
+#
+# fun calculate_circle_area(radius) {
+#     return PI * square(radius);
+# }
+#
+# show calculate_circle_area(5);  # Output: 78.53975
+
+# Example 3: Namespace import
+# --------------------------
+# import * as math from "math_utils.rzn";
+#
+# fun calculate_circle_area(radius) {
+#     return math.PI * math.square(radius);
+# }
+#
+# show calculate_circle_area(5);  # Output: 78.53975
