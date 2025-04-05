@@ -69,56 +69,7 @@ pub enum TokenType {
     Null,
     
     // Document Type Declaration
-    DocumentType,  // type declaration (web, script, cli)
-    
-    // Document Structure
-    Webpage,    // root element for web documents
-    Top,        // container for metadata
-    Bottom,     // container for visible content
-    
-    // Web-specific tokens - Element Access
-    Find,       // find element by ID
-    Search,     // search element by selector
-    FindAll,    // find all elements matching selector
-    
-    // Web-specific tokens - Content Manipulation
-    Insert,     // set/get inner content with markup
-    Write,      // set/get text-only content
-    Property,   // set/get attribute
-    Look,       // set/get style
-    Type,       // type manipulation (replaces class)
-    Add,        // add type
-    Remove,     // remove type
-    Toggle,     // toggle type
-    Contains,   // check if element has type
-    
-    // Web-specific tokens - Interaction Handling
-    When,       // add event listener
-    Stop,       // remove event listener
-    Simulate,   // trigger event
-    
-    // Web-specific tokens - Form Processing
-    EntryForm,  // form selector
-    Check,      // form validation
-    Send,       // form submission
-    
-    // Web-specific tokens - Data Communication
-    Request,    // fetch request
-    SendData,   // post request
-    GetData,    // get request
-    
-    // Web-specific tokens - Data Storage
-    Save,       // localStorage
-    Keep,       // sessionStorage
-    Remember,   // cookie management
-    
-    // Web-specific tokens - Utility Functions
-    Pause,      // setTimeout
-    Repeat,     // setInterval
-    Stop,       // clear interval/timeout
-    Adjust,     // window resize
-    Goto,       // page navigation
-    Refresh,    // page reload
+    DocumentType,  // type declaration (script, cli)
     
     // Delimiters
     LeftParen,      // (
@@ -214,49 +165,8 @@ impl fmt::Display for TokenType {
             TokenType::False => write!(f, "FALSE"),
             TokenType::Null => write!(f, "NULL"),
             
-            // Web-specific tokens - Element Access
-            TokenType::Get => write!(f, "GET"),
-            TokenType::Query => write!(f, "QUERY"),
-            TokenType::All => write!(f, "ALL"),
-            
-            // Web-specific tokens - DOM Manipulation
-            TokenType::Html => write!(f, "HTML"),
-            TokenType::Text => write!(f, "TEXT"),
-            TokenType::Attr => write!(f, "ATTR"),
-            TokenType::Style => write!(f, "STYLE"),
-            TokenType::Class => write!(f, "CLASS"),
-            TokenType::Add => write!(f, "ADD"),
-            TokenType::Remove => write!(f, "REMOVE"),
-            TokenType::Toggle => write!(f, "TOGGLE"),
-            TokenType::Contains => write!(f, "CONTAINS"),
-            
-            // Web-specific tokens - Event Handling
-            TokenType::On => write!(f, "ON"),
-            TokenType::Off => write!(f, "OFF"),
-            TokenType::Trigger => write!(f, "TRIGGER"),
-            
-            // Web-specific tokens - Form Handling
-            TokenType::Form => write!(f, "FORM"),
-            TokenType::Validate => write!(f, "VALIDATE"),
-            TokenType::Submit => write!(f, "SUBMIT"),
-            
-            // Web-specific tokens - AJAX and Fetch
-            TokenType::Fetch => write!(f, "FETCH"),
-            TokenType::Post => write!(f, "POST"),
-            TokenType::GetData => write!(f, "GET_DATA"),
-            
-            // Web-specific tokens - Storage
-            TokenType::StoreLocal => write!(f, "STORE_LOCAL"),
-            TokenType::StoreSession => write!(f, "STORE_SESSION"),
-            TokenType::Cookie => write!(f, "COOKIE"),
-            
-            // Web-specific tokens - Utility
-            TokenType::Wait => write!(f, "WAIT"),
-            TokenType::Interval => write!(f, "INTERVAL"),
-            TokenType::Clear => write!(f, "CLEAR"),
-            TokenType::Resize => write!(f, "RESIZE"),
-            TokenType::Redirect => write!(f, "REDIRECT"),
-            TokenType::Reload => write!(f, "RELOAD"),
+            // Document Type Declaration
+            TokenType::DocumentType => write!(f, "TYPE"),
             
             // Delimiters
             TokenType::LeftParen => write!(f, "("),
@@ -351,54 +261,6 @@ pub fn lookup_identifier(identifier: &str) -> TokenType {
         
         // Document Type Declaration
         "type" => TokenType::DocumentType,
-        
-        // Document Structure
-        "webpage" => TokenType::Webpage,
-        "top" => TokenType::Top,
-        "bottom" => TokenType::Bottom,
-        
-        // Web-specific tokens - Element Access
-        "find" => TokenType::Find,
-        "search" => TokenType::Search,
-        "findall" => TokenType::FindAll,
-        
-        // Web-specific tokens - Content Manipulation
-        "insert" => TokenType::Insert,
-        "write" => TokenType::Write,
-        "property" => TokenType::Property,
-        "look" => TokenType::Look,
-        "elemtype" => TokenType::Type,  // renamed from 'type' to avoid conflict
-        "add" => TokenType::Add,
-        "remove" => TokenType::Remove,
-        "toggle" => TokenType::Toggle,
-        "contains" => TokenType::Contains,
-        
-        // Web-specific tokens - Interaction Handling
-        "when" => TokenType::When,
-        "stop" => TokenType::Stop,
-        "simulate" => TokenType::Simulate,
-        
-        // Web-specific tokens - Form Processing
-        "entryform" => TokenType::EntryForm,
-        "check" => TokenType::Check,
-        "send" => TokenType::Send,
-        
-        // Web-specific tokens - Data Communication
-        "request" => TokenType::Request,
-        "senddata" => TokenType::SendData,
-        "getdata" => TokenType::GetData,
-        
-        // Web-specific tokens - Data Storage
-        "save" => TokenType::Save,
-        "keep" => TokenType::Keep,
-        "remember" => TokenType::Remember,
-        
-        // Web-specific tokens - Utility Functions
-        "pause" => TokenType::Pause,
-        "repeat" => TokenType::Repeat,
-        "adjust" => TokenType::Adjust,
-        "goto" => TokenType::Goto,
-        "refresh" => TokenType::Refresh,
         
         // If not a keyword, it's an identifier
         _ => TokenType::Identifier,

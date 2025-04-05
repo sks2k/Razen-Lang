@@ -410,6 +410,9 @@ impl Compiler {
             Statement::ExitStatement => {
                 self.compile_exit_statement();
             },
+            Statement::DocumentTypeDeclaration { doc_type } => {
+                self.compile_document_type_declaration(doc_type);
+            },
         }
     }
     
@@ -754,6 +757,14 @@ impl Compiler {
     fn compile_exit_statement(&mut self) {
         // Emit the exit instruction to terminate the program
         self.emit(IR::Exit);
+    }
+    
+    fn compile_document_type_declaration(&mut self, doc_type: String) {
+        // Store the document type in the compiler state
+        // This doesn't generate any runtime code as it's a compile-time directive
+        if !self.clean_output {
+            println!("Document type set to: {}", doc_type);
+        }
     }
     
     fn compile_expression(&mut self, expr: Expression) {
