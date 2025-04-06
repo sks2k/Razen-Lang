@@ -1,0 +1,22 @@
+# ====================================================================
+# Module System Test
+# This file tests the basic module import functionality
+# ====================================================================
+
+# Import specific functions from our module
+use square, PI from "math_utils";
+
+# Display imported values
+show "Module import test:";
+show "PI value from math_utils: " + PI;
+show "Square of 5: " + square(5);
+
+# Simple function using imported values
+fun test_function() {
+    let radius = 4;
+    let area = PI * square(radius);
+    show "Circle area with radius " + radius + ": " + area;
+}
+
+# Run the test function
+test_function();

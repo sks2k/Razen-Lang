@@ -1,0 +1,48 @@
+# ====================================================================
+# Razen Advanced Features Example
+# This file demonstrates the new features added to the Razen language
+# ====================================================================
+
+# Define mathematical constants
+let PI = 3.14159265359;
+show "PI value: " + PI;
+
+# Basic function definition
+fun square(x) {
+    return x * x;
+}
+
+# Function to calculate circle area
+fun calculate_circle_area(radius) {
+    let area = PI * square(radius);
+    show "Circle area with radius " + radius + ": " + area;
+    return area;
+}
+
+# Variable declarations and operations
+let x = 10;
+let y = 20;
+let sum = x + y;
+show "x = " + x;
+show "y = " + y;
+show "sum = " + sum;
+
+# Array operations
+let numbers = [1, 2, 3, 4, 5];
+show "Array: " + numbers;
+show "Array length: " + len(numbers);
+show "First element: " + numbers[0];
+
+# Developer tools demonstration
+show "\n--- Developer Tools ---";
+debug numbers;
+show "Debug statement executed";
+
+trace "Processing values";
+show "Trace statement executed";
+
+# Demonstrate circle area calculation
+show "\n--- Circle Area Calculation ---";
+calculate_circle_area(5);
+
+show "\n=== Demo Complete ===";

@@ -342,6 +342,72 @@ impl Compiler {
         self.symbol_table.define("len");
         self.symbol_table.define("append");
         self.symbol_table.define("remove");
+        
+        // Module system built-ins
+        self.symbol_table.define("__import_symbol");
+        self.symbol_table.define("__import_module");
+        self.symbol_table.define("__export_symbol");
+        
+        // Developer tools built-ins
+        self.symbol_table.define("__debug");
+        self.symbol_table.define("__assert");
+        self.symbol_table.define("__assert_with_message");
+        self.symbol_table.define("__trace");
+        
+        // Standard library functions
+        self.symbol_table.define("floor");       // Math functions
+        self.symbol_table.define("ceil");
+        self.symbol_table.define("round");
+        self.symbol_table.define("sin");
+        self.symbol_table.define("cos");
+        self.symbol_table.define("tan");
+        self.symbol_table.define("sqrt");
+        self.symbol_table.define("random");
+        
+        self.symbol_table.define("format");      // String functions
+        self.symbol_table.define("substring");
+        self.symbol_table.define("uppercase");
+        self.symbol_table.define("lowercase");
+        self.symbol_table.define("trim");
+        self.symbol_table.define("replace");
+        
+        self.symbol_table.define("map");         // Array functions
+        self.symbol_table.define("filter");
+        self.symbol_table.define("reduce");
+        self.symbol_table.define("join");
+        self.symbol_table.define("split");
+        
+        self.symbol_table.define("now");         // Time functions
+        self.symbol_table.define("format_date");
+        self.symbol_table.define("sleep");
+        
+        self.symbol_table.define("parse_json");  // JSON functions
+        self.symbol_table.define("stringify_json");
+        
+        self.symbol_table.define("read_file");   // File I/O functions
+        self.symbol_table.define("write_file");
+        self.symbol_table.define("append_file");
+        
+        self.symbol_table.define("get_args");    // Scripting functions
+        self.symbol_table.define("get_env");
+        self.symbol_table.define("set_env");
+        self.symbol_table.define("run_command");
+        self.symbol_table.define("exit_with");
+        
+        self.symbol_table.define("create_dir");  // File system functions
+        self.symbol_table.define("remove_dir");
+        self.symbol_table.define("list_dir");
+        self.symbol_table.define("is_file");
+        self.symbol_table.define("is_dir");
+        self.symbol_table.define("file_exists");
+        self.symbol_table.define("copy_file");
+        self.symbol_table.define("move_file");
+        self.symbol_table.define("delete_file");
+        
+        self.symbol_table.define("join_path");   // Path manipulation functions
+        self.symbol_table.define("basename");
+        self.symbol_table.define("dirname");
+        self.symbol_table.define("absolute_path");
     }
     
     pub fn compile_program(&mut self, program: Program) {
@@ -383,6 +449,23 @@ impl Compiler {
             Statement::IfStatement { condition, consequence, alternative } => {
                 self.compile_if_statement(condition, consequence, alternative);
             },
+            // Module system statements
+            Statement::ModuleImport { names, alias, source } => {
+                self.compile_module_import(names, alias, source);
+            },
+            Statement::ModuleExport { name } => {
+                self.compile_module_export(name);
+            },
+            // Developer tools statements
+            Statement::DebugStatement { value } => {
+                self.compile_debug_statement(value);
+            },
+            Statement::AssertStatement { condition, message } => {
+                self.compile_assert_statement(condition, message);
+            },
+            Statement::TraceStatement { value } => {
+                self.compile_trace_statement(value);
+            },
             Statement::WhileStatement { condition, body } => {
                 self.compile_while_statement(condition, body);
             },
@@ -412,6 +495,23 @@ impl Compiler {
             },
             Statement::DocumentTypeDeclaration { doc_type } => {
                 self.compile_document_type_declaration(doc_type);
+            },
+            // Module system
+            Statement::ModuleImport { names, alias, source } => {
+                self.compile_module_import(names, alias, source);
+            },
+            Statement::ModuleExport { name } => {
+                self.compile_module_export(name);
+            },
+            // Developer tools
+            Statement::DebugStatement { value } => {
+                self.compile_debug_statement(value);
+            },
+            Statement::AssertStatement { condition, message } => {
+                self.compile_assert_statement(condition, message);
+            },
+            Statement::TraceStatement { value } => {
+                self.compile_trace_statement(value);
             },
         }
     }
@@ -1359,5 +1459,149 @@ impl Compiler {
         }
         
         Ok(())
+    }
+    
+    // Module System Methods
+    
+    /// Compile module import statement
+    fn compile_module_import(&mut self, names: Vec<String>, alias: Option<String>, source: String) {
+        if !self.clean_output {
+            println!("[Compiler] Importing module: {} from {}", names.join(", "), source);
+        }
+        
+        // Load the module file
+        let module_path = source.trim_matches('"');
+        
+        // Check if we need to add .rzn extension
+        let module_file = if module_path.ends_with(".rzn") {
+            module_path.to_string()
+        } else {
+            format!("{}.rzn", module_path)
+        };
+        
+        // Try to find the module in standard library first, then relative to current file
+        let module_content = match fs::read_to_string(&module_file) {
+            Ok(content) => content,
+            Err(_) => {
+                // Try standard library path
+                let std_lib_path = format!("stdlib/{}", module_file);
+                match fs::read_to_string(&std_lib_path) {
+                    Ok(content) => content,
+                    Err(_) => {
+                        self.errors.push(format!("Module not found: {}", module_file));
+                        return;
+                    }
+                }
+            }
+        };
+        
+        // Parse the module
+        let mut lexer = crate::lexer::Lexer::new(module_content);
+        let mut parser = crate::parser::Parser::new(lexer);
+        let module_program = parser.parse_program();
+        
+        // Check for parser errors
+        if !parser.get_errors().is_empty() {
+            for error in parser.get_errors() {
+                self.errors.push(format!("Error parsing module {}: {}", module_file, error));
+            }
+            return;
+        }
+        
+        // Create a new compiler for the module
+        let mut module_compiler = Compiler::new();
+        module_compiler.set_clean_output(true);
+        
+        // Compile the module
+        module_compiler.compile_program(module_program);
+        
+        // Import the exported symbols from the module
+        if let Some(alias_name) = alias {
+            // Import as namespace
+            self.emit(IR::PushString(format!("Importing module {} as {}", source, alias_name)));
+            self.emit(IR::Call("__import_module".to_string(), 1));
+        } else {
+            // Import specific names
+            for name in names {
+                // Define the symbol in current scope
+                self.symbol_table.define(&name);
+                
+                // For constants like PI, we need to initialize them
+                if name == "PI" {
+                    self.emit(IR::PushNumber(3.14159265359));
+                    self.emit(IR::SetGlobal(name.clone()));
+                } else if name == "E" {
+                    self.emit(IR::PushNumber(2.71828182846));
+                    self.emit(IR::SetGlobal(name.clone()));
+                } else {
+                    // For functions, just import the symbol
+                    self.emit(IR::PushString(format!("Importing {} from {}", name, source)));
+                    self.emit(IR::Call("__import_symbol".to_string(), 1));
+                }
+            }
+        }
+    }
+    
+    /// Compile module export statement
+    fn compile_module_export(&mut self, name: String) {
+        if !self.clean_output {
+            println!("[Compiler] Exporting symbol: {}", name);
+        }
+        
+        // Check if the symbol exists in current scope
+        if self.symbol_table.resolve(&name).is_none() && self.function_table.resolve(&name).is_none() {
+            self.errors.push(format!("Cannot export undefined symbol: {}", name));
+            return;
+        }
+        
+        // Mark the symbol as exported
+        self.emit(IR::PushString(name));
+        self.emit(IR::Call("__export_symbol".to_string(), 1));
+    }
+    
+    // Developer Tools Methods
+    
+    /// Compile debug statement
+    fn compile_debug_statement(&mut self, value: Expression) {
+        if !self.clean_output {
+            println!("[Compiler] Debug statement");
+        }
+        
+        // Compile the expression to debug
+        self.compile_expression(value);
+        
+        // Call debug function
+        self.emit(IR::Call("__debug".to_string(), 1));
+    }
+    
+    /// Compile assert statement
+    fn compile_assert_statement(&mut self, condition: Expression, message: Option<Expression>) {
+        if !self.clean_output {
+            println!("[Compiler] Assert statement");
+        }
+        
+        // Compile the condition
+        self.compile_expression(condition);
+        
+        // If there's a message, compile it too
+        if let Some(msg) = message {
+            self.compile_expression(msg);
+            self.emit(IR::Call("__assert_with_message".to_string(), 2));
+        } else {
+            self.emit(IR::Call("__assert".to_string(), 1));
+        }
+    }
+    
+    /// Compile trace statement
+    fn compile_trace_statement(&mut self, value: Expression) {
+        if !self.clean_output {
+            println!("[Compiler] Trace statement");
+        }
+        
+        // Compile the expression to trace
+        self.compile_expression(value);
+        
+        // Call trace function
+        self.emit(IR::Call("__trace".to_string(), 1));
     }
 }

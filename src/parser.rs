@@ -169,6 +169,13 @@ impl Parser {
             TokenType::Try => self.parse_try_statement(),
             TokenType::Throw => self.parse_throw_statement(),
             TokenType::DocumentType => self.parse_document_type_declaration(),
+            // Module system
+            TokenType::Use => self.parse_module_import(),
+            TokenType::Export => self.parse_module_export(),
+            // Developer tools
+            TokenType::Debug => self.parse_debug_statement(),
+            TokenType::Assert => self.parse_assert_statement(),
+            TokenType::Trace => self.parse_trace_statement(),
             TokenType::Comment => {
                 // Skip comments and return None to continue parsing
                 None
@@ -511,6 +518,181 @@ impl Parser {
         }
         
         Some(Statement::DocumentTypeDeclaration { doc_type })
+    }
+    
+    /// Parse module import statement (use name from "module"; or use name1, name2 from "module"; or use module as alias from "module";)
+    fn parse_module_import(&mut self) -> Option<Statement> {
+        // Skip 'use' token
+        self.next_token();
+        
+        // Parse import names
+        let mut names = Vec::new();
+        let mut alias = None;
+        
+        // First name must be an identifier
+        if !self.current_token_is(TokenType::Identifier) {
+            self.errors.push(format!("Expected identifier after 'use', got {:?}", self.current_token.token_type));
+            return None;
+        }
+        
+        names.push(self.current_token.literal.clone());
+        self.next_token();
+        
+        // Check for 'as' keyword for namespace alias
+        if self.current_token_is(TokenType::As) {
+            self.next_token(); // Skip 'as'
+            
+            if !self.current_token_is(TokenType::Identifier) {
+                self.errors.push(format!("Expected identifier after 'as', got {:?}", self.current_token.token_type));
+                return None;
+            }
+            
+            alias = Some(self.current_token.literal.clone());
+            self.next_token();
+        } else {
+            // Parse additional names if there's a comma
+            while self.current_token_is(TokenType::Comma) {
+                self.next_token(); // Skip comma
+                
+                if !self.current_token_is(TokenType::Identifier) {
+                    self.errors.push(format!("Expected identifier after comma, got {:?}", self.current_token.token_type));
+                    return None;
+                }
+                
+                names.push(self.current_token.literal.clone());
+                self.next_token();
+            }
+        }
+        
+        // Expect 'from' keyword
+        if !self.current_token_is(TokenType::From) {
+            self.errors.push(format!("Expected 'from' after import names, got {:?}", self.current_token.token_type));
+            return None;
+        }
+        
+        // Skip 'from'
+        self.next_token();
+        
+        // Expect string literal for module path
+        if !self.current_token_is(TokenType::StringLiteral) {
+            self.errors.push(format!("Expected string literal for module path, got {:?}", self.current_token.token_type));
+            return None;
+        }
+        
+        let source = self.current_token.literal.clone();
+        
+        // Skip string literal
+        self.next_token();
+        
+        // Expect semicolon
+        if self.current_token_is(TokenType::Semicolon) {
+            self.next_token();
+        }
+        
+        Some(Statement::ModuleImport { names, alias, source })
+    }
+    
+    /// Parse module export statement (export name;)
+    fn parse_module_export(&mut self) -> Option<Statement> {
+        // Skip 'export' token
+        self.next_token();
+        
+        if !self.current_token_is(TokenType::Identifier) {
+            self.errors.push(format!("Expected identifier after 'export', got {:?}", self.current_token.token_type));
+            return None;
+        }
+        
+        let name = self.current_token.literal.clone();
+        
+        // Skip identifier
+        self.next_token();
+        
+        // Expect semicolon
+        if self.current_token_is(TokenType::Semicolon) {
+            self.next_token();
+        }
+        
+        Some(Statement::ModuleExport { name })
+    }
+    
+    /// Parse debug statement (debug expression;)
+    fn parse_debug_statement(&mut self) -> Option<Statement> {
+        // Skip 'debug' token
+        self.next_token();
+        
+        let value = match self.parse_expression(Precedence::Lowest) {
+            Some(expr) => expr,
+            None => return None,
+        };
+        
+        // Expect semicolon
+        if self.current_token_is(TokenType::Semicolon) {
+            self.next_token();
+        }
+        
+        Some(Statement::DebugStatement { value })
+    }
+    
+    /// Parse assert statement (assert(condition, message?);)
+    fn parse_assert_statement(&mut self) -> Option<Statement> {
+        // Skip 'assert' token
+        self.next_token();
+        
+        // Expect left parenthesis
+        if !self.expect_peek(TokenType::LeftParen) {
+            return None;
+        }
+        
+        // Skip left parenthesis and move to condition
+        self.next_token();
+        
+        let condition = match self.parse_expression(Precedence::Lowest) {
+            Some(expr) => expr,
+            None => return None,
+        };
+        
+        let mut message = None;
+        
+        // Check for comma (optional message)
+        if self.peek_token_is(TokenType::Comma) {
+            self.next_token(); // Move to comma
+            self.next_token(); // Move past comma to message expression
+            
+            message = match self.parse_expression(Precedence::Lowest) {
+                Some(expr) => Some(expr),
+                None => return None,
+            };
+        }
+        
+        // Expect right parenthesis
+        if !self.expect_peek(TokenType::RightParen) {
+            return None;
+        }
+        
+        // Expect semicolon
+        if self.peek_token_is(TokenType::Semicolon) {
+            self.next_token();
+        }
+        
+        Some(Statement::AssertStatement { condition, message })
+    }
+    
+    /// Parse trace statement (trace expression;)
+    fn parse_trace_statement(&mut self) -> Option<Statement> {
+        // Skip 'trace' token
+        self.next_token();
+        
+        let value = match self.parse_expression(Precedence::Lowest) {
+            Some(expr) => expr,
+            None => return None,
+        };
+        
+        // Expect semicolon
+        if self.current_token_is(TokenType::Semicolon) {
+            self.next_token();
+        }
+        
+        Some(Statement::TraceStatement { value })
     }
     
     fn parse_expression(&mut self, precedence: Precedence) -> Option<Expression> {

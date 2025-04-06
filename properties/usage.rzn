@@ -1,0 +1,381 @@
+# Razen Language Usage Examples
+# This file demonstrates usage of all new Razen language features
+
+#==============================================================================
+# 1. Module System
+#==============================================================================
+
+# File: math_module.rzn
+# -------------------
+# Example of creating a module with exportable functions and variables
+
+# Define exportable function
+fun square(let x) {
+    return x * x;
+}
+
+# Mark function as exportable
+export square;
+
+# Define another exportable function
+fun cube(let x) {
+    return x * x * x;
+}
+
+# Mark function as exportable
+export cube;
+
+# Define and export a constant
+let PI = 3.14159;
+export PI;
+
+# File: main.rzn
+# ------------
+# Example of importing and using modules
+
+# Import specific items from a module
+use square from "math_module.rzn";
+use PI from "math_module.rzn";
+
+fun calculate_circle_area(let radius) {
+    return PI * square(radius);
+}
+
+show calculate_circle_area(5);  # Output: 78.53975
+
+# Import entire module with namespace
+use math_module as math from "math_module.rzn";
+
+fun calculate_sphere_volume(let radius) {
+    return (4/3) * math.PI * math.cube(radius);
+}
+
+show calculate_sphere_volume(3);  # Output: 113.097
+
+# Standard library module imports
+use sin, cos, tan from "math_lib";
+use format, upper from "string_lib";
+use read_file, write_file from "io_lib";
+
+#==============================================================================
+# 2. Enhanced Error Handling
+#==============================================================================
+
+# Basic try-catch block
+try {
+    let result = 10 / 0;  # This will cause a division by zero error
+    show result;
+} catch {
+    show "An error occurred during calculation";
+}
+
+# Try-catch with error variable
+try {
+    let file_content = read_file("nonexistent_file.txt");
+    show file_content;
+} catch {
+    # Access error information through the built-in error variable
+    show "Error message: " + error;
+    show "Error occurred on line: " + error_line;
+}
+
+# Try-catch-finally
+try {
+    let file = open_file("data.txt", "r");
+    let content = read_file_content(file);
+    show content;
+} catch {
+    show "Error reading file";
+} finally {
+    # This code always executes, regardless of whether an error occurred
+    close_file(file);
+    show "File operation completed";
+}
+
+# Throwing custom errors
+fun divide(let a, let b) {
+    if (b == 0) {
+        throw "DivisionByZeroError: Cannot divide by zero";
+    }
+    return a / b;
+}
+
+try {
+    let result = divide(10, 0);
+    show result;
+} catch {
+    show "Caught error: " + error;
+}
+
+#==============================================================================
+# 3. Standard Library Functions
+#==============================================================================
+
+# Math functions
+let PI = 3.14159;
+let sin_value = sin(PI / 2);  # 1.0
+let cos_value = cos(0);  # 1.0
+let random_num = random();  # Random number between 0 and 1
+let random_int = random_int(1, 100);  # Random integer between 1 and 100
+let floor_value = floor(3.7);  # 3
+let ceil_value = ceil(3.2);  # 4
+let exp_value = exp(1);  # 2.71828...
+let log_value = log(100, 10);  # 2
+
+# String functions
+let formatted = format("Hello, {}!", "World");  # "Hello, World!"
+let padded_left = pad_left("42", 5, "0");  # "00042"
+let padded_right = pad_right("42", 5, "0");  # "42000"
+let starts = starts_with("Hello World", "Hello");  # true
+let ends = ends_with("Hello World", "World");  # true
+let contains = contains("Hello World", "lo Wo");  # true
+let repeated = repeat("abc", 3);  # "abcabcabc"
+let lines = split_lines("Line 1\nLine 2\nLine 3");  # ["Line 1", "Line 2", "Line 3"]
+let chars = to_chars("Hello");  # ["H", "e", "l", "l", "o"]
+
+# Array functions
+let numbers = [1, 2, 3, 4, 5];
+let doubled = map(numbers, fun(let x) { return x * 2; });  # [2, 4, 6, 8, 10]
+let evens = filter(numbers, fun(let x) { return x % 2 == 0; });  # [2, 4]
+let sum = reduce(numbers, fun(let acc, let x) { return acc + x; }, 0);  # 15
+let found = find(numbers, fun(let x) { return x > 3; });  # 4
+let has_even = some(numbers, fun(let x) { return x % 2 == 0; });  # true
+let all_positive = every(numbers, fun(let x) { return x > 0; });  # true
+let flattened = flat([[1, 2], [3, 4], [5]]);  # [1, 2, 3, 4, 5]
+let unique = unique([1, 2, 2, 3, 3, 3]);  # [1, 2, 3]
+let zipped = zip([1, 2, 3], ["a", "b", "c"]);  # [[1, "a"], [2, "b"], [3, "c"]]
+
+# IO functions
+let file_content = read_file("data.txt");
+write_file("output.txt", "Hello, World!");
+append_file("log.txt", "New log entry\n");
+let exists = file_exists("config.json");  # true or false
+if (!exists) {
+    write_file("config.json", "{}");
+}
+let file_lines = read_lines("data.txt");  # Array of lines
+let user_input = prompt("Enter your name: ");
+show "Hello, " + user_input + "!";
+
+# JSON functions
+let person = parse_json('{"name":"John","age":30}');
+show person.name;  # "John"
+show person.age;  # 30
+
+let json_string = stringify_json({name: "Alice", age: 25});
+show json_string;  # '{"name":"Alice","age":25}'
+
+let config = read_json_file("config.json");
+write_json_file("user.json", {name: "Bob", email: "bob@example.com"});
+
+# Time functions
+let now = now();  # Current timestamp in milliseconds
+let formatted_date = format_date(now, "YYYY-MM-DD");  # e.g., "2025-04-06"
+let year = get_year(now);  # e.g., 2025
+let month = get_month(now);  # 1-12
+let day = get_day(now);  # 1-31
+let tomorrow = add_time(now, 1, "day");
+
+#==============================================================================
+# 4. Scripting Enhancements
+#==============================================================================
+
+# Command line arguments
+let arguments = get_args();
+if (len(arguments) > 1) {
+    show "First argument: " + arguments[1];
+} else {
+    show "No arguments provided";
+}
+
+# Shell command execution
+let ls_result = execute("ls -la");
+show ls_result;
+
+# File system operations
+let file_exists = file_exists("data.txt");
+if (file_exists) {
+    let content = read_file("data.txt");
+    show content;
+} else {
+    write_file("data.txt", "Hello, Razen!");
+    show "Created new file";
+}
+
+create_dir("output");
+copy_file("data.txt", "output/data_backup.txt");
+let files = list_dir(".");
+for (let file in files) {
+    if (is_file(file)) {
+        show file + ": " + get_file_size(file) + " bytes";
+    }
+}
+
+# Environment variables
+let home = get_env("HOME");
+show "Home directory: " + home;
+
+set_env("RAZEN_DEBUG", "true");
+let debug_mode = get_env("RAZEN_DEBUG");
+
+# Path manipulation
+let full_path = join_path(home, "documents", "razen");
+let dir_name = get_dirname(full_path);  # /home/user/documents
+let base_name = get_basename(full_path);  # razen
+let abs_path = get_absolute_path("../data.txt");
+
+#==============================================================================
+# 5. Developer Experience Features
+#==============================================================================
+
+# Debug mode for automatic variable inspection
+show_debug(true);  # Enable debug mode
+
+let x = 10;
+let y = 20;
+let z = x + y;  # Variables will be automatically inspected in debug mode
+
+show_debug(false);  # Disable debug mode
+
+# Assertions for development-time checks
+fun calculate_discount(let price, let percentage) {
+    if (percentage < 0 || percentage > 100) {
+        throw "Percentage must be between 0 and 100";
+    }
+    return price * (percentage / 100);
+}
+
+let discount = calculate_discount(100, 20);  # 20
+# This would throw an error: let invalid_discount = calculate_discount(100, 120);
+
+# Tracing for execution flow tracking
+show_trace("Starting calculation");
+let result = 0;
+for (let i = 1; i <= 10; i++) {
+    show_trace("Processing iteration " + i);
+    result += i;
+}
+show_trace("Calculation complete, result: " + result);
+
+# Performance measurement
+let start_time = now();
+
+let sum = 0;
+for (let i = 0; i < 1000000; i++) {
+    sum += i;
+}
+
+let end_time = now();
+let execution_time = end_time - start_time;
+show "Sum: " + sum;
+show "Execution time: " + execution_time + " ms";
+
+#==============================================================================
+# 6. Combined Examples
+#==============================================================================
+
+# Example: Data processing with error handling and modules
+use parse_json, stringify_json from "json_lib";
+use read_file, write_file from "io_lib";
+
+fun process_user_data(let file_path) {
+    try {
+        let content = read_file(file_path);
+        let users = parse_json(content);
+        
+        # Process each user
+        let processed_users = map(users, fun(let user) {
+            # Add calculated fields
+            user.full_name = user.first_name + " " + user.last_name;
+            user.is_adult = user.age >= 18;
+            return user;
+        });
+        
+        # Filter adult users
+        let adult_users = filter(processed_users, fun(let user) {
+            return user.is_adult;
+        });
+        
+        # Save results
+        write_file("processed_users.json", stringify_json(processed_users));
+        write_file("adult_users.json", stringify_json(adult_users));
+        
+        return {
+            total: len(processed_users),
+            adults: len(adult_users)
+        };
+    } catch {
+        show "Error processing user data: " + error;
+        return null;
+    }
+}
+
+# Example: Interactive command-line tool with modules
+use prompt from "io_lib";
+use math_lib as math from "math_lib";
+
+fun calculator() {
+    show "Razen Calculator";
+    show "----------------";
+    
+    while (true) {
+        let input = prompt("Enter expression (or 'exit' to quit): ");
+        
+        if (input == "exit") {
+            break;
+        }
+        
+        try {
+            # Evaluate the expression
+            let result = evaluate(input);
+            show "Result: " + result;
+        } catch {
+            show "Invalid expression. Please try again.";
+        }
+    }
+    
+    show "Thank you for using Razen Calculator!";
+}
+
+# Example: File backup utility with progress reporting
+fun backup_directory(let source, let destination) {
+    show_trace("Starting backup from " + source + " to " + destination);
+    
+    # Create timestamp for backup folder
+    let timestamp = format_date(now(), "YYYY-MM-DD_HH-mm-ss");
+    let backup_path = join_path(destination, "backup_" + timestamp);
+    
+    # Create backup directory
+    create_dir(backup_path);
+    
+    # Get list of files
+    let files = list_dir(source);
+    let total_files = len(files);
+    let copied_files = 0;
+    
+    show "Found " + total_files + " files to backup";
+    
+    # Copy each file
+    for (let file in files) {
+        let source_path = join_path(source, file);
+        let dest_path = join_path(backup_path, file);
+        
+        if (is_file(source_path)) {
+            try {
+                copy_file(source_path, dest_path);
+                copied_files += 1;
+                
+                # Show progress
+                let progress = (copied_files / total_files) * 100;
+                show "Progress: " + floor(progress) + "% (" + copied_files + "/" + total_files + ")";
+            } catch {
+                show "Error copying " + file + ": " + error;
+            }
+        }
+    }
+    
+    show "Backup completed to: " + backup_path;
+    show "Successfully copied " + copied_files + " out of " + total_files + " files";
+    
+    return backup_path;
+}

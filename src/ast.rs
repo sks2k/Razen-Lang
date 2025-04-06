@@ -78,6 +78,26 @@ pub enum Statement {
     DocumentTypeDeclaration {
         doc_type: String,  // web, script, cli
     },
+    // Module system
+    ModuleImport {
+        names: Vec<String>,         // Names to import
+        alias: Option<String>,      // Optional namespace alias
+        source: String,             // Module source path
+    },
+    ModuleExport {
+        name: String,               // Name to export
+    },
+    // Debug and developer tools
+    DebugStatement {
+        value: Expression,
+    },
+    AssertStatement {
+        condition: Expression,
+        message: Option<Expression>,
+    },
+    TraceStatement {
+        value: Expression,
+    },
 }
 
 // Expression represents an expression in the program
@@ -249,6 +269,30 @@ impl fmt::Display for Node {
                     },
                     Statement::DocumentTypeDeclaration { doc_type } => {
                         write!(f, "type {};", doc_type)
+                    },
+                    Statement::ModuleImport { names, alias, source } => {
+                        let names_str = names.join(", ");
+                        if let Some(alias_name) = alias {
+                            write!(f, "use {} as {} from \"{}\";", names_str, alias_name, source)
+                        } else {
+                            write!(f, "use {} from \"{}\";", names_str, source)
+                        }
+                    },
+                    Statement::ModuleExport { name } => {
+                        write!(f, "export {};", name)
+                    },
+                    Statement::DebugStatement { value } => {
+                        write!(f, "debug {};", Node::Expression(value.clone()))
+                    },
+                    Statement::AssertStatement { condition, message } => {
+                        if let Some(msg) = message {
+                            write!(f, "assert({}, {});", Node::Expression(condition.clone()), Node::Expression(msg.clone()))
+                        } else {
+                            write!(f, "assert({});", Node::Expression(condition.clone()))
+                        }
+                    },
+                    Statement::TraceStatement { value } => {
+                        write!(f, "trace {};", Node::Expression(value.clone()))
                     },
                 }
             },

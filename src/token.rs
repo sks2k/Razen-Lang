@@ -71,6 +71,17 @@ pub enum TokenType {
     // Document Type Declaration
     DocumentType,  // type declaration (script, cli)
     
+    // Module system
+    Use,           // use module imports
+    Export,        // export module items
+    As,            // namespace alias
+    From,          // module source
+    
+    // Debug and developer tools
+    Debug,         // debug mode
+    Assert,        // assertions
+    Trace,         // execution tracing
+    
     // Delimiters
     LeftParen,      // (
     RightParen,     // )
@@ -168,6 +179,17 @@ impl fmt::Display for TokenType {
             // Document Type Declaration
             TokenType::DocumentType => write!(f, "TYPE"),
             
+            // Module system
+            TokenType::Use => write!(f, "USE"),
+            TokenType::Export => write!(f, "EXPORT"),
+            TokenType::As => write!(f, "AS"),
+            TokenType::From => write!(f, "FROM"),
+            
+            // Debug and developer tools
+            TokenType::Debug => write!(f, "DEBUG"),
+            TokenType::Assert => write!(f, "ASSERT"),
+            TokenType::Trace => write!(f, "TRACE"),
+            
             // Delimiters
             TokenType::LeftParen => write!(f, "("),
             TokenType::RightParen => write!(f, ")"),
@@ -261,6 +283,17 @@ pub fn lookup_identifier(identifier: &str) -> TokenType {
         
         // Document Type Declaration
         "type" => TokenType::DocumentType,
+        
+        // Module system
+        "use" => TokenType::Use,
+        "export" => TokenType::Export,
+        "as" => TokenType::As,
+        "from" => TokenType::From,
+        
+        // Debug and developer tools
+        "debug" => TokenType::Debug,
+        "assert" => TokenType::Assert,
+        "trace" => TokenType::Trace,
         
         // If not a keyword, it's an identifier
         _ => TokenType::Identifier,

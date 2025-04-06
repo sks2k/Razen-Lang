@@ -6,20 +6,20 @@
 # and import functionality from other files.
 
 # Example Usage:
-# import math from "math.rzn";
-# import { add, subtract } from "calculator.rzn";
-# import * as utils from "utils.rzn";
+# use math from "math.rzn";
+# use add, subtract from "calculator.rzn";
+# use calculator as calc from "calculator.rzn";
 
 # 1️⃣ Module Import Syntax  
 # ------------------------
 # Full module import:
-# import moduleName from "path/to/module.rzn";
+# use moduleName from "path/to/module.rzn";
 #
 # Selective import:
-# import { function1, function2 } from "path/to/module.rzn";
+# use function1, function2 from "path/to/module.rzn";
 #
 # Namespace import:
-# import * as namespace from "path/to/module.rzn";
+# use moduleName as namespace from "path/to/module.rzn";
 
 # 2️⃣ Module Export Syntax  
 # ------------------------
@@ -70,9 +70,9 @@
 
 # Example 2: Importing and using the module
 # -----------------------------------------
-# import { square, PI } from "math_utils.rzn";
+# use square, PI from "math_utils.rzn";
 #
-# fun calculate_circle_area(radius) {
+# fun calculate_circle_area(let radius) {
 #     return PI * square(radius);
 # }
 #
@@ -80,9 +80,9 @@
 
 # Example 3: Namespace import
 # --------------------------
-# import * as math from "math_utils.rzn";
+# use math_utils as math from "math_utils.rzn";
 #
-# fun calculate_circle_area(radius) {
+# fun calculate_circle_area(let radius) {
 #     return math.PI * math.square(radius);
 # }
 #
