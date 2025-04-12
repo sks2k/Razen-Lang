@@ -2,7 +2,7 @@
   "name": "razen-language",
   "displayName": "Razen Language",
   "description": "Syntax highlighting and support for Razen programming language",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "publisher": "razen-lang",
   "engines": {
     "vscode": "^1.60.0"
@@ -30,5 +30,15 @@
         "path": "./syntaxes/razen.tmLanguage.json"
       }
     ]
+  },
+  "keywords": [
+    "razen",
+    "programming language",
+    "syntax highlighting",
+    "rzn"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/BasaiCorp/Razen-Lang"
   }
 }
