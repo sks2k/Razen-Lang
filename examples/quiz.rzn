@@ -1,3 +1,5 @@
+type freestyle;
+
 take q1 = "Who is the First Indian Prime Minister?";
 take o1 = "A. Narendra Modi, B. Mahatma Gandhi, C. Javaharlal Naheru, D. Lal bahadur Sastri";
 take a1 = "C";
@@ -27,10 +29,9 @@ if (a == a2) {
     let point2 = 1;
 } else {
     show "Wrong awnser"
-    let point = 0;
+    let point2 = 0;
 }
 
 sum total = point + point2;
 
 show "Your total score is " + total;
-

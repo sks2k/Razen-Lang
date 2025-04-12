@@ -503,21 +503,28 @@ impl Parser {
         // Consume the 'type' token
         self.next_token();
         
-        // Get the document type (web, script, cli)
-        let doc_type = if self.peek_token_is(TokenType::Identifier) {
-            self.next_token();
-            self.current_token.literal.clone()
-        } else {
-            self.errors.push(format!("Expected document type after 'type', got {:?}", self.peek_token.token_type));
-            return None;
-        };
-        
-        // Expect semicolon
-        if self.peek_token_is(TokenType::Semicolon) {
-            self.next_token();
+        // Check if there's an equals sign
+        let has_equals = self.current_token_is(TokenType::Assign);
+        if has_equals {
+            self.next_token(); // Consume the equals sign
         }
         
-        Some(Statement::DocumentTypeDeclaration { doc_type })
+        // Get the document type (web, script, cli, freestyle)
+        if self.current_token_is(TokenType::Identifier) {
+            let doc_type = self.current_token.literal.clone();
+            
+            // Expect semicolon
+            if self.peek_token_is(TokenType::Semicolon) {
+                self.next_token();
+            }
+            
+            Some(Statement::DocumentTypeDeclaration { doc_type })
+        } else {
+            self.errors.push(format!("Expected document type after 'type{}', got {:?}", 
+                                    if has_equals { " =" } else { "" }, 
+                                    self.current_token.token_type));
+            None
+        }
     }
     
     /// Parse module import statement (use name from "module"; or use name1, name2 from "module"; or use module as alias from "module";)
