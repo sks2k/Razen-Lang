@@ -1,5 +1,5 @@
 # Razen Language Installer for Windows
-# Copyright © 2025 Prathmesh Barot, Basai Corporation
+# Copyright 2025 Prathmesh Barot, Basai Corporation
 # Version: beta v0.1.4
 
 # Enable TLS 1.2 for all web requests
@@ -8,22 +8,105 @@
 # Repository URL
 $RAZEN_REPO = "https://raw.githubusercontent.com/BasaiCorp/razen-lang/main"
 
-# Get version from the version file
-if (Test-Path "version") {
-    $RAZEN_VERSION = Get-Content "version" -Raw
-} else {
-    # Download version file if not present
-    try {
-        Invoke-WebRequest -Uri "$RAZEN_REPO/version" -OutFile "version" -ErrorAction Stop
-        $RAZEN_VERSION = Get-Content "version" -Raw
-    } catch {
-        Write-ColorOutput "Failed to download version information. Using default version." "Red"
-        $RAZEN_VERSION = "beta v0.1.4"
+# Error handling and cleanup function
+function Handle-Error {
+    param (
+        [string]$ErrorMessage,
+        [string]$RecoveryHint = "",
+        [int]$ExitCode = 1
+    )
+    
+    Write-ColorOutput "Error: $ErrorMessage" "Red"
+    
+    if ($RecoveryHint) {
+        Write-ColorOutput "Hint: $RecoveryHint" "Yellow"
     }
+    
+    # Clean up temporary files if they exist
+    if (Test-Path $TMP_DIR -ErrorAction SilentlyContinue) {
+        Write-ColorOutput "Cleaning up temporary files..." "Yellow"
+        Remove-Item -Path $TMP_DIR -Recurse -Force -ErrorAction SilentlyContinue
+    }
+    
+    exit $ExitCode
 }
 
-# Remove any trailing whitespace or newlines
-$RAZEN_VERSION = $RAZEN_VERSION.Trim()
+# Function to check internet connectivity
+function Test-InternetConnectivity {
+    Write-ColorOutput "Checking internet connectivity..." "Yellow"
+    
+    $testUrls = @(
+        "https://github.com",
+        "https://raw.githubusercontent.com",
+        "https://www.google.com"
+    )
+    
+    foreach ($url in $testUrls) {
+        try {
+            $response = Invoke-WebRequest -Uri $url -UseBasicParsing -TimeoutSec 5 -ErrorAction Stop
+            if ($response.StatusCode -eq 200) {
+                Write-ColorOutput "  ✓ Internet connection verified" "Green"
+                return $true
+            }
+        } catch {
+            # Continue to next URL
+        }
+    }
+    
+    Write-ColorOutput "  ✗ No internet connection detected" "Red"
+    Write-ColorOutput "    Please check your network connection and try again" "Yellow"
+    return $false
+}
+
+# Function to check if running as administrator
+function Test-Administrator {
+    $currentUser = New-Object Security.Principal.WindowsPrincipal([Security.Principal.WindowsIdentity]::GetCurrent())
+    $isAdmin = $currentUser.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+    
+    if (-not $isAdmin) {
+        Write-ColorOutput "  ✗ This script requires administrator privileges" "Red"
+        Write-ColorOutput "    Please run PowerShell as Administrator and try again" "Yellow"
+        return $false
+    }
+    
+    Write-ColorOutput "  ✓ Running with administrator privileges" "Green"
+    return $true
+}
+
+# Function to download a file with retry logic
+function Download-File {
+    param (
+        [string]$Uri,
+        [string]$OutFilePath,
+        [string]$Description,
+        [int]$MaxRetries = 3
+    )
+    
+    $retryCount = 0
+    $success = $false
+    
+    while (-not $success -and $retryCount -lt $MaxRetries) {
+        try {
+            Write-ColorOutput "    Downloading $Description..." "Yellow"
+            Invoke-WebRequest -Uri $Uri -OutFile $OutFilePath -ErrorAction Stop
+            Write-ColorOutput "      ✓ Downloaded $Description" "Green"
+            $success = $true
+            return $true
+        } catch {
+            $retryCount++
+            if ($retryCount -lt $MaxRetries) {
+                Write-ColorOutput "      ✗ Download attempt $retryCount failed. Retrying in 2 seconds..." "Yellow"
+                Start-Sleep -Seconds 2
+            } else {
+                Write-ColorOutput "      ✗ Failed to download $Description after $MaxRetries attempts" "Red"
+                Write-ColorOutput "        Error: $($_.Exception.Message)" "Red"
+                return $false
+            }
+        }
+    }
+    
+    return $false
+}
 
 # Function to print colored text
 function Write-ColorOutput {
@@ -63,7 +146,7 @@ function Check-ForUpdates {
         }
     } catch {
         Write-ColorOutput "Failed to check for updates. Please check your internet connection." "Red"
-        Write-ColorOutput "Error: $($_.Exception.Message)" "Red" # More specific error
+        Write-ColorOutput "Error: $($_.Exception.Message)" "Red"
         return 1
     } finally {
          # Clean up temporary version file
@@ -87,7 +170,7 @@ function Perform-Update {
         return $LASTEXITCODE
     } catch {
         Write-ColorOutput "Failed to download the latest installer." "Red"
-        Write-ColorOutput "Error: $($_.Exception.Message)" "Red" # More specific error
+        Write-ColorOutput "Error: $($_.Exception.Message)" "Red"
         return 1
     } finally {
         # Clean up temporary installer file
@@ -109,11 +192,11 @@ function Create-Symlinks {
 
     # Dynamically find all scripts in the scripts directory
     if (Test-Path $scriptsDir) {
-        $scriptFiles = Get-ChildItem -Path $scriptsDir -File
+         $scriptFiles = Get-ChildItem -Path $scriptsDir -File
         
         if ($scriptFiles.Count -eq 0) {
             # Fallback to a predefined list if no files are found (or keep empty if that's intended)
-            $Scripts = @("razen", "razen-debug", "razen-test", "razen-run", "razen-update", "razen-help") # Assuming fallback needed
+            $Scripts = @("razen", "razen-debug", "razen-test", "razen-run", "razen-update", "razen-help", "razen-extension", "razen") # Assuming fallback needed
             Write-ColorOutput "No script files found, using default list." "Yellow"
         } else {
             $Scripts = $scriptFiles | Select-Object -ExpandProperty Name
@@ -310,10 +393,357 @@ function Uninstall-Razen {
     exit 0
 }
 
+# Function to install VS Code extension
+function Install-VSCodeExtension {
+    param (
+        [string]$InstallDir
+    )
+    
+    Write-ColorOutput "Installing VS Code extension..." "Yellow"
+    
+    # Check if VS Code is installed
+    $vscodeInstalled = $false
+    $vscodeExePath = $null
+    
+    # Check common VS Code installation paths
+    $possiblePaths = @(
+        "${env:ProgramFiles}\Microsoft VS Code\bin\code.cmd",
+        "${env:ProgramFiles(x86)}\Microsoft VS Code\bin\code.cmd",
+        "${env:LOCALAPPDATA}\Programs\Microsoft VS Code\bin\code.cmd"
+    )
+    
+    foreach ($path in $possiblePaths) {
+        if (Test-Path $path) {
+            $vscodeExePath = $path
+            $vscodeInstalled = $true
+            break
+        }
+    }
+    
+    # If VS Code is installed, try to install extension using VS Code CLI
+    if ($vscodeInstalled) {
+        Write-ColorOutput "  ✓ VS Code detected at: $vscodeExePath" "Green"
+        
+        # Create extension directory
+        $extensionSourceDir = Join-Path $InstallDir "razen-vscode-extension"
+        $extensionTargetDir = Join-Path $env:USERPROFILE ".vscode\extensions\razen-lang.razen"
+        
+        try {
+            # Create extension directory if it doesn't exist
+            if (-not (Test-Path $extensionTargetDir)) {
+                New-Item -ItemType Directory -Path $extensionTargetDir -Force | Out-Null
+            }
+            
+            # Check if extension source exists
+            if (Test-Path $extensionSourceDir) {
+                # Copy extension files
+                Copy-Item -Path (Join-Path $extensionSourceDir "*") -Destination $extensionTargetDir -Recurse -Force
+                Write-ColorOutput "  ✓ VS Code extension installed to: $extensionTargetDir" "Green"
+                Write-ColorOutput "    Restart VS Code to activate the extension" "Yellow"
+            } else {
+                # Create basic extension structure if source doesn't exist
+                Write-ColorOutput "  ⚠ Extension source not found, creating basic extension..." "Yellow"
+                
+                # Create package.json
+                $packageJson = @{
+                    "name" = "razen-lang"
+                    "displayName" = "Razen Language Support"
+                    "description" = "Syntax highlighting and tools for Razen programming language"
+                    "version" = "0.1.0"
+                    "publisher" = "razen-lang"
+                    "engines" = @{
+                        "vscode" = "^1.60.0"
+                    }
+                    "categories" = @("Programming Languages")
+                    "contributes" = @{
+                        "languages" = @(
+                            @{
+                                "id" = "razen"
+                                "aliases" = @("Razen", "razen")
+                                "extensions" = @(".rzn")
+                                "configuration" = "./language-configuration.json"
+                            }
+                        )
+                        "grammars" = @(
+                            @{
+                                "language" = "razen"
+                                "scopeName" = "source.razen"
+                                "path" = "./syntaxes/razen.tmLanguage.json"
+                            }
+                        )
+                    }
+                } | ConvertTo-Json -Depth 10
+                
+                # Create language configuration
+                $languageConfig = @{
+                    "comments" = @{
+                        "lineComment" = "#"
+                        "blockComment" = @("/*", "*/")
+                    }
+                    "brackets" = @(
+                        @("[", "]")
+                        @("(", ")")
+                        @("{", "}")
+                    )
+                    "autoClosingPairs" = @(
+                        @{
+                            "open" = "{"
+                            "close" = "}"
+                        }
+                        @{
+                            "open" = "["
+                            "close" = "]"
+                        }
+                        @{
+                            "open" = "("
+                            "close" = ")"
+                        }
+                        @{
+                            "open" = "`""
+                            "close" = "`""
+                        }
+                        @{
+                            "open" = "'"
+                            "close" = "'"
+                        }
+                    )
+                } | ConvertTo-Json -Depth 10
+                
+                # Create basic syntax highlighting
+                $syntaxHighlighting = @{
+                    "$schema" = "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json"
+                    "name" = "Razen"
+                    "patterns" = @(
+                        @{
+                            "include" = "#keywords"
+                        }
+                        @{
+                            "include" = "#strings"
+                        }
+                        @{
+                            "include" = "#comments"
+                        }
+                    )
+                    "repository" = @{
+                        "keywords" = @{
+                            "patterns" = @(
+                                @{
+                                    "name" = "keyword.control.razen"
+                                    "match" = "\b(if|else|while|for|return|function|var|const|let|print|input)\b"
+                                }
+                            )
+                        }
+                        "strings" = @{
+                            "name" = "string.quoted.double.razen"
+                            "begin" = "`""
+                            "end" = "`""
+                            "patterns" = @(
+                                @{
+                                    "name" = "constant.character.escape.razen"
+                                    "match" = "\\."
+                                }
+                            )
+                        }
+                        "comments" = @{
+                            "patterns" = @(
+                                @{
+                                    "name" = "comment.line.number-sign.razen"
+                                    "match" = "#.*$"
+                                }
+                                @{
+                                    "name" = "comment.block.razen"
+                                    "begin" = "/\*"
+                                    "end" = "\*/"
+                                }
+                            )
+                        }
+                    }
+                    "scopeName" = "source.razen"
+                } | ConvertTo-Json -Depth 10
+                
+                # Create directories
+                New-Item -ItemType Directory -Path (Join-Path $extensionTargetDir "syntaxes") -Force | Out-Null
+                
+                # Write files
+                Set-Content -Path (Join-Path $extensionTargetDir "package.json") -Value $packageJson
+                Set-Content -Path (Join-Path $extensionTargetDir "language-configuration.json") -Value $languageConfig
+                Set-Content -Path (Join-Path $extensionTargetDir "syntaxes\razen.tmLanguage.json") -Value $syntaxHighlighting
+                
+                Write-ColorOutput "  ✓ Basic VS Code extension created at: $extensionTargetDir" "Green"
+                Write-ColorOutput "    Restart VS Code to activate the extension" "Yellow"
+            }
+            
+            return $true
+        } catch {
+            Write-ColorOutput "  ✗ Failed to install VS Code extension" "Red"
+            Write-ColorOutput "    Error: $($_.Exception.Message)" "Red"
+            return $false
+        }
+    } else {
+        Write-ColorOutput "  ⚠ VS Code not detected" "Yellow"
+        Write-ColorOutput "    To install the extension manually after installing VS Code:" "Yellow"
+        Write-ColorOutput "    1. Copy files from $InstallDir\razen-vscode-extension to %USERPROFILE%\.vscode\extensions\razen-lang.razen" "White"
+        Write-ColorOutput "    2. Restart VS Code" "White"
+        return $false
+    }
+}
+
+# Function to install JetBrains plugin
+function Install-JetBrainsPlugin {
+    param (
+        [string]$InstallDir
+    )
+    
+    Write-ColorOutput "Installing JetBrains plugin..." "Yellow"
+    
+    # Check if any JetBrains IDEs are installed
+    $jetBrainsInstalled = $false
+    $jetBrainsConfigDirs = @(
+        (Join-Path $env:APPDATA "JetBrains"),
+        (Join-Path $env:LOCALAPPDATA "JetBrains")
+    )
+    
+    foreach ($dir in $jetBrainsConfigDirs) {
+        if (Test-Path $dir) {
+            $jetBrainsInstalled = $true
+            Write-ColorOutput "  ✓ JetBrains IDE configuration detected at: $dir" "Green"
+            break
+        }
+    }
+    
+    # Create plugin directory
+    $pluginSourceDir = Join-Path $InstallDir "razen-jetbrains-plugin"
+    $pluginTargetDir = Join-Path $env:USERPROFILE ".razen\jetbrains-plugin"
+    
+    try {
+        # Create plugin directory if it doesn't exist
+        if (-not (Test-Path $pluginTargetDir)) {
+            New-Item -ItemType Directory -Path $pluginTargetDir -Force | Out-Null
+        }
+        
+        # Check if plugin source exists
+        if (Test-Path $pluginSourceDir) {
+            # Copy plugin files
+            Copy-Item -Path (Join-Path $pluginSourceDir "*") -Destination $pluginTargetDir -Recurse -Force
+            Write-ColorOutput "  ✓ JetBrains plugin files copied to: $pluginTargetDir" "Green"
+        } else {
+            # Create placeholder files
+            Write-ColorOutput "  ⚠ Plugin source not found, creating placeholder..." "Yellow"
+            
+            # Create README file
+            $readmeContent = @"
+# Razen Language Plugin for JetBrains IDEs
+
+This is a placeholder for the Razen language plugin for JetBrains IDEs.
+The actual plugin will be available soon.
+
+## Installation Instructions
+
+1. Open your JetBrains IDE (IntelliJ IDEA, PyCharm, etc.)
+2. Go to Settings/Preferences > Plugins
+3. Click the gear icon and select "Install Plugin from Disk..."
+4. Navigate to the plugin JAR file location
+5. Restart the IDE
+
+## Features
+
+- Syntax highlighting for Razen (.rzn) files
+- Code completion
+- Error highlighting
+- Navigation
+- Refactoring tools
+
+## Support
+
+For support, please visit the Razen language website or GitHub repository.
+"@
+            
+            Set-Content -Path (Join-Path $pluginTargetDir "README.md") -Value $readmeContent
+            
+            Write-ColorOutput "  ✓ JetBrains plugin placeholder created at: $pluginTargetDir" "Green"
+        }
+        
+        if ($jetBrainsInstalled) {
+            Write-ColorOutput "  ℹ To install the plugin in your JetBrains IDE:" "Yellow"
+            Write-ColorOutput "    1. Open your JetBrains IDE (IntelliJ IDEA, PyCharm, etc.)" "White"
+            Write-ColorOutput "    2. Go to Settings/Preferences > Plugins" "White"
+            Write-ColorOutput "    3. Click the gear icon and select 'Install Plugin from Disk...'" "White"
+            Write-ColorOutput "    4. Navigate to $pluginTargetDir and select the plugin JAR file" "White"
+            Write-ColorOutput "    5. Restart the IDE" "White"
+        } else {
+            Write-ColorOutput "  ⚠ No JetBrains IDE detected" "Yellow"
+            Write-ColorOutput "    Plugin files have been saved to: $pluginTargetDir" "Yellow"
+            Write-ColorOutput "    Install the plugin manually after installing a JetBrains IDE" "Yellow"
+        }
+        
+        return $true
+    } catch {
+        Write-ColorOutput "  ✗ Failed to install JetBrains plugin" "Red"
+        Write-ColorOutput "    Error: $($_.Exception.Message)" "Red"
+        return $false
+    }
+}
+
+# Function to display installation summary
+function Show-InstallationSummary {
+    param (
+        [string]$InstallDir,
+        [string]$Version,
+        [bool]$PathUpdated,
+        [bool]$VSCodeExtensionInstalled,
+        [bool]$JetBrainsPluginInstalled
+    )
+    
+    Write-ColorOutput "`n✅ Razen $Version has been successfully installed!" "Green"
+    
+    # Installation details
+    Write-ColorOutput "`nInstallation Details:" "Yellow"
+    Write-ColorOutput "  • Installation Directory: $InstallDir" "White"
+    Write-ColorOutput "  • Version: $Version" "White"
+    Write-ColorOutput "  • PATH Environment Variable: $(if ($PathUpdated) { "Updated" } else { "Not Updated" })" "White"
+    Write-ColorOutput "  • VS Code Extension: $(if ($VSCodeExtensionInstalled) { "Installed" } else { "Not Installed" })" "White"
+    Write-ColorOutput "  • JetBrains Plugin: $(if ($JetBrainsPluginInstalled) { "Installed" } else { "Not Installed" })" "White"
+    
+    # Available commands
+    Write-ColorOutput "`nAvailable Commands:" "Yellow"
+    Write-ColorOutput "  • razen <file.rzn> - Run a Razen program" "White"
+    Write-ColorOutput "  • razen-debug <file.rzn> - Run a Razen program in debug mode" "White"
+    Write-ColorOutput "  • razen-test <file.rzn> - Run tests for a Razen program" "White"
+    Write-ColorOutput "  • razen-run <file.rzn> - Run a Razen program with additional options" "White"
+    Write-ColorOutput "  • razen-update - Update Razen to the latest version" "White"
+    Write-ColorOutput "  • razen-help - Show help information" "White"
+    Write-ColorOutput "  • razen-extension - Manage Razen extensions" "White"
+    
+    # Example usage
+    Write-ColorOutput "`nExample Usage:" "Yellow"
+    Write-ColorOutput "  razen hello.rzn" "White"
+    Write-ColorOutput "  razen-debug app.rzn" "White"
+    Write-ColorOutput "  razen-update" "White"
+    
+    # Next steps
+    Write-ColorOutput "`nNext Steps:" "Yellow"
+    Write-ColorOutput "  1. Create a new Razen program: razen new myprogram.rzn" "White"
+    Write-ColorOutput "  2. Run the example programs: razen examples/hello.rzn" "White"
+    Write-ColorOutput "  3. Check for updates: razen-update" "White"
+    
+    # Important notes
+    Write-ColorOutput "`nImportant Notes:" "Yellow"
+    Write-ColorOutput "  • You may need to restart your terminal for the PATH changes to take effect" "White"
+    Write-ColorOutput "  • To uninstall Razen, run: powershell -ExecutionPolicy Bypass -File $InstallDir\install.ps1 --uninstall" "White"
+    Write-ColorOutput "  • For help and documentation, run: razen-help" "White"
+    
+    # Support information
+    Write-ColorOutput "`nSupport:" "Yellow"
+    Write-ColorOutput "  • GitHub: https://github.com/BasaiCorp/razen-lang" "White"
+    Write-ColorOutput "  • Documentation: Coming soon" "White"
+    Write-ColorOutput "  • Report Issues: https://github.com/BasaiCorp/razen-lang/issues" "White"
+    
+    Write-ColorOutput "`nThank you for installing Razen! Happy coding!" "Cyan"
+}
+
 # --- Main Script Logic ---
 
 # Print banner
-# FIX: Enclose here-string in parentheses when passing as an argument alongside other arguments
 Write-ColorOutput (@"
 ██████╗  █████╗ ███████╗███████╗███╗   ██╗
 ██╔══██╗██╔══██╗╚══███╔╝██╔════╝████╗  ██║
@@ -321,21 +751,18 @@ Write-ColorOutput (@"
 ██╔══██╗██╔══██║ ███╔╝  ██╔══╝  ██║╚██╗██║
 ██║  ██║██║  ██║███████╗███████╗██║ ╚████║
 ╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝╚══════╝╚═╝  ╚═══╝
-"@) "Blue" # Corrected syntax
+"@) "Blue"
 
 Write-ColorOutput "Programming Language $RAZEN_VERSION" "Yellow"
 Write-ColorOutput "By Prathmesh Barot, Basai Corporation" "Cyan"
-Write-ColorOutput "Copyright © 2025 Prathmesh Barot`n" "Yellow"
+Write-ColorOutput "Copyright 2025 Prathmesh Barot`n" "Yellow"
 
 # Small delay to make the banner more readable
 Start-Sleep -Seconds 1
 
 # Check if running as administrator
-$isAdmin = ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
-if (-not $isAdmin) {
-    Write-ColorOutput "This script requires administrator privileges." "Red"
-    Write-ColorOutput "Please right-click the PowerShell window or shortcut and select 'Run as administrator'." "Yellow"
-    exit 1
+if (-not (Test-Administrator)) {
+    Handle-Error -ErrorMessage "This script requires administrator privileges" -RecoveryHint "Run PowerShell as Administrator and try again"
 }
 
 # Create temporary directory
@@ -345,9 +772,7 @@ try {
     New-Item -ItemType Directory -Path $TMP_DIR -Force -ErrorAction Stop | Out-Null
     Write-ColorOutput "  ✓ Created temporary directory: $TMP_DIR" "Green"
 } catch {
-    Write-ColorOutput "Failed to create temporary directory: $TMP_DIR" "Red"
-    Write-ColorOutput "Error: $($_.Exception.Message)" "Red"
-    exit 1
+    Handle-Error -ErrorMessage "Failed to create temporary directory: $TMP_DIR" -RecoveryHint "Check permissions and try again"
 }
 
 # Define cleanup trap for temporary directory
@@ -479,87 +904,80 @@ foreach ($dir in $dirsToCreate) {
              Write-ColorOutput "  ✓ Directory already exists: $dir" "Cyan"
         }
     } catch {
-        Write-ColorOutput "Failed to create directory: $dir" "Red"
-        Write-ColorOutput "Error: $($_.Exception.Message)" "Red"
-        # No cleanup here, rely on trap
-        exit 1
+        Handle-Error -ErrorMessage "Failed to create directory: $dir" -RecoveryHint "Check permissions and try again"
     }
 }
 Write-ColorOutput "  ✓ Installation directory structure prepared." "Green"
 
 
 # Helper function for downloads
-function Download-File {
-    param(
-        [string]$Uri,
-        [string]$OutFilePath,
-        [string]$Description
-    )
-    Write-ColorOutput "  Downloading $Description..." "Cyan"
+$maxRetries = 3
+$retryCount = 0
+$downloadSuccess = $false
+
+while (-not $downloadSuccess -and $retryCount -lt $maxRetries) {
     try {
-        Invoke-WebRequest -Uri $Uri -OutFile $OutFilePath -UseBasicParsing -ErrorAction Stop
-        Write-ColorOutput "    ✓ Downloaded $Description" "Green"
-        return $true
+        # Download main.py
+        if (-not (Download-File -Uri "$RAZEN_REPO/main.py" -OutFilePath (Join-Path $TMP_DIR "main.py") -Description "main.py")) { $downloadSuccess = $false }
+        
+        # Download src files
+        $srcFiles = @("lexer.py", "parser.py", "interpreter.py", "runtime.py", "__init__.py") # Add __init__.py here
+        New-Item -ItemType Directory -Path (Join-Path $TMP_DIR "src") -Force | Out-Null # Ensure temp src dir exists
+        foreach ($file in $srcFiles) {
+            if (-not (Download-File -Uri "$RAZEN_REPO/src/$file" -OutFilePath (Join-Path $TMP_DIR "src\$file") -Description "src/$file")) { $downloadSuccess = $false }
+        }
+        
+        # Download properties files
+        $propFiles = @("variables.rzn", "keywords.rzn", "operators.rzn")
+        New-Item -ItemType Directory -Path (Join-Path $TMP_DIR "properties") -Force | Out-Null # Ensure temp props dir exists
+        foreach ($file in $propFiles) {
+            if (-not (Download-File -Uri "$RAZEN_REPO/properties/$file" -OutFilePath (Join-Path $TMP_DIR "properties\$file") -Description "properties/$file")) {
+                Write-ColorOutput "    ⚠ Creating empty properties/$file as fallback." "Yellow"
+                New-Item -ItemType File -Path (Join-Path $TMP_DIR "properties\$file") -Force | Out-Null
+                # Continue even if download fails, with empty file
+            }
+        }
+        
+        # Download script files
+        $scriptsToDownload = @("razen", "razen-debug", "razen-test", "razen-run", "razen-update", "razen-help", "razen-extension", "razen.cmd") # Add razen.cmd if it exists in repo
+        New-Item -ItemType Directory -Path (Join-Path $TMP_DIR "scripts") -Force | Out-Null # Ensure temp scripts dir exists
+        foreach ($script in $scriptsToDownload) {
+             if (-not (Download-File -Uri "$RAZEN_REPO/scripts/$script" -OutFilePath (Join-Path $TMP_DIR "scripts\$script") -Description "scripts/$script")) {
+                Write-ColorOutput "    ⚠ Creating empty scripts/$script as fallback." "Yellow"
+                New-Item -ItemType File -Path (Join-Path $TMP_DIR "scripts\$script") -Force | Out-Null
+                # Continue, maybe crucial scripts missing? Decide if $downloadSuccess should be $false here.
+             }
+        }
+        
+        # Download extension files (assuming they are directories in the repo)
+        # This part needs adjustment based on how extensions are stored in the repo.
+        # Option 1: Download zip files
+        # Option 2: Download individual files recursively (complex)
+        # Option 3: Assume they are pre-packaged and download core files only for now
+        # Let's assume we only download placeholders or need manual steps for now.
+        # We created the target dirs earlier. Let's download a placeholder README or core file if available.
+        Write-ColorOutput "Downloading IDE extension placeholders (if available)..." "Yellow"
+        Download-File -Uri "$RAZEN_REPO/razen-vscode-extension/README.md" -OutFilePath (Join-Path $TMP_DIR "razen-vscode-extension\README.md") -Description "VS Code Extension README" # Example
+        Download-File -Uri "$RAZEN_REPO/razen-jetbrains-plugin/README.md" -OutFilePath (Join-Path $TMP_DIR "razen-jetbrains-plugin\README.md") -Description "JetBrains Plugin README" # Example
+        
+        $downloadSuccess = $true
     } catch {
-        Write-ColorOutput "    ✗ Failed to download $Description from $Uri" "Red"
-        Write-ColorOutput "      Error: $($_.Exception.Message)" "Red"
-        return $false
+        $retryCount++
+        if ($retryCount -lt $maxRetries) {
+            Write-ColorOutput "  ✗ Download attempt $retryCount failed. Retrying in 2 seconds..." "Yellow"
+            Start-Sleep -Seconds 2
+        } else {
+            Write-ColorOutput "  ✗ Failed to download Razen core files after $maxRetries attempts" "Red"
+            Write-ColorOutput "    Error: $($_.Exception.Message)" "Red"
+            Write-ColorOutput "    Please check your internet connection and try again." "Yellow"
+            Remove-Item $TMP_DIR -Recurse -Force -ErrorAction SilentlyContinue
+            exit 1
+        }
     }
 }
 
-# Download Razen core files to temporary directory
-Write-ColorOutput "Downloading Razen core files..." "Yellow"
-$downloadSuccess = $true
-
-# Download main.py
-if (-not (Download-File -Uri "$RAZEN_REPO/main.py" -OutFilePath (Join-Path $TMP_DIR "main.py") -Description "main.py")) { $downloadSuccess = $false }
-
-# Download src files
-$srcFiles = @("lexer.py", "parser.py", "interpreter.py", "runtime.py", "__init__.py") # Add __init__.py here
-New-Item -ItemType Directory -Path (Join-Path $TMP_DIR "src") -Force | Out-Null # Ensure temp src dir exists
-foreach ($file in $srcFiles) {
-    if (-not (Download-File -Uri "$RAZEN_REPO/src/$file" -OutFilePath (Join-Path $TMP_DIR "src\$file") -Description "src/$file")) { $downloadSuccess = $false }
-}
-
-# Download properties files
-$propFiles = @("variables.rzn", "keywords.rzn", "operators.rzn")
-New-Item -ItemType Directory -Path (Join-Path $TMP_DIR "properties") -Force | Out-Null # Ensure temp props dir exists
-foreach ($file in $propFiles) {
-    if (-not (Download-File -Uri "$RAZEN_REPO/properties/$file" -OutFilePath (Join-Path $TMP_DIR "properties\$file") -Description "properties/$file")) {
-        Write-ColorOutput "    ⚠ Creating empty properties/$file as fallback." "Yellow"
-        New-Item -ItemType File -Path (Join-Path $TMP_DIR "properties\$file") -Force | Out-Null
-        # Continue even if download fails, with empty file
-    }
-}
-
-# Download script files
-$scriptsToDownload = @("razen", "razen-debug", "razen-test", "razen-run", "razen-update", "razen-help", "razen-extension", "razen.cmd") # Add razen.cmd if it exists in repo
-New-Item -ItemType Directory -Path (Join-Path $TMP_DIR "scripts") -Force | Out-Null # Ensure temp scripts dir exists
-foreach ($script in $scriptsToDownload) {
-     if (-not (Download-File -Uri "$RAZEN_REPO/scripts/$script" -OutFilePath (Join-Path $TMP_DIR "scripts\$script") -Description "scripts/$script")) {
-        Write-ColorOutput "    ⚠ Creating empty scripts/$script as fallback." "Yellow"
-        New-Item -ItemType File -Path (Join-Path $TMP_DIR "scripts\$script") -Force | Out-Null
-        # Continue, maybe crucial scripts missing? Decide if $downloadSuccess should be $false here.
-     }
-}
-
-# Download extension files (assuming they are directories in the repo)
-# This part needs adjustment based on how extensions are stored in the repo.
-# Option 1: Download zip files
-# Option 2: Download individual files recursively (complex)
-# Option 3: Assume they are pre-packaged and download core files only for now
-# Let's assume we only download placeholders or need manual steps for now.
-# We created the target dirs earlier. Let's download a placeholder README or core file if available.
-Write-ColorOutput "Downloading IDE extension placeholders (if available)..." "Yellow"
-Download-File -Uri "$RAZEN_REPO/razen-vscode-extension/README.md" -OutFilePath (Join-Path $TMP_DIR "razen-vscode-extension\README.md") -Description "VS Code Extension README" # Example
-Download-File -Uri "$RAZEN_REPO/razen-jetbrains-plugin/README.md" -OutFilePath (Join-Path $TMP_DIR "razen-jetbrains-plugin\README.md") -Description "JetBrains Plugin README" # Example
-
-
-# Check if all essential downloads were successful
 if (-not $downloadSuccess) {
-    Write-ColorOutput "One or more essential files failed to download. Installation cannot continue." "Red"
-    # Cleanup handled by trap
-    exit 1
+    Handle-Error -ErrorMessage "Failed to download Razen core files" -RecoveryHint "Check your internet connection and try again"
 }
 Write-ColorOutput "  ✓ All downloads completed." "Green"
 
@@ -581,13 +999,10 @@ try {
 
     Write-ColorOutput "  ✓ Copied files to $installDir" "Green"
 } catch {
-     Write-ColorOutput "Failed to copy downloaded files to installation directory." "Red"
-     Write-ColorOutput "Error: $($_.Exception.Message)" "Red"
-     # Cleanup handled by trap
-     exit 1
+     Handle-Error -ErrorMessage "Failed to copy downloaded files to installation directory" -RecoveryHint "Check permissions and try again"
 }
 
-# Download and save the latest installer script (this script) for future updates
+# Download and save the latest installer script for future updates
 Write-ColorOutput "Saving current installer script for future updates..." "Yellow"
 try {
     # Prefer downloading the latest version from the repo
@@ -615,10 +1030,7 @@ try {
     Set-Content -Path (Join-Path $installDir "version") -Value $RAZEN_VERSION -Force -ErrorAction Stop
     Write-ColorOutput "  ✓ Created version file." "Green"
 } catch {
-     Write-ColorOutput "Failed to create version file in $installDir." "Red"
-     Write-ColorOutput "Error: $($_.Exception.Message)" "Red"
-     # Cleanup handled by trap
-     exit 1
+     Handle-Error -ErrorMessage "Failed to create version file in $installDir" -RecoveryHint "Check permissions and try again"
 }
 
 
@@ -635,68 +1047,6 @@ Write-ColorOutput "  ✓ Core file installation complete." "Green"
 # Check for Rust installation
 Write-ColorOutput "`nChecking for Rust installation (required for compiler)..." "Yellow"
 
-# Function to check if Rust is installed
-function Test-RustInstalled {
-    $rustcPath = Get-Command rustc -ErrorAction SilentlyContinue
-    return ($rustcPath -ne $null)
-}
-
-# Function to install Rust using rustup
-function Install-Rust {
-    Write-ColorOutput "Attempting to install Rust via rustup..." "Yellow"
-    $rustupInit = "" # Scope fix
-    try {
-        # Download rustup-init.exe to temp dir
-        $rustupInit = Join-Path $env:TEMP "rustup-init-$($PID).exe"
-        Write-ColorOutput "  Downloading rustup installer..." "Cyan"
-        Invoke-WebRequest -Uri "https://win.rustup.rs/x86_64" -OutFile $rustupInit -UseBasicParsing -ErrorAction Stop
-
-        # Run rustup-init.exe with -y flag for non-interactive default installation
-        Write-ColorOutput "  Running rustup installer (non-interactive)..." "Cyan"
-        Write-ColorOutput "  This may take a few minutes. Please wait." "Cyan"
-        # Use Start-Process with -Wait to ensure it finishes
-        $process = Start-Process -FilePath $rustupInit -ArgumentList "-y --no-modify-path" -Wait -PassThru -NoNewWindow #-ErrorAction Stop # Add --no-modify-path? Let rustup handle it?
-
-        if ($process.ExitCode -ne 0) {
-            Write-ColorOutput "Rustup installer exited with code $($process.ExitCode)." "Red"
-            Write-ColorOutput "Please check for errors above or try installing manually from https://rustup.rs" "Yellow"
-            return $false
-        }
-
-        # Add Rust's cargo bin directory to the current session's PATH
-        # This is crucial for the *current* script execution if rustc wasn't found before.
-        $cargoBinPath = Join-Path $env:USERPROFILE ".cargo\bin"
-        if (Test-Path $cargoBinPath) {
-            Write-ColorOutput "  Adding '$cargoBinPath' to PATH for current session..." "Cyan"
-            $env:Path = "$($env:Path);$cargoBinPath"
-        } else {
-            Write-ColorOutput "  Could not find '$cargoBinPath' after installation." "Yellow"
-        }
-
-        # Re-check if rustc is now available
-        if (Test-RustInstalled) {
-            Write-ColorOutput "  ✓ Rust seems to be installed successfully." "Green"
-            Write-ColorOutput "    Note: A system restart or new PowerShell session might be needed for Rust to be available everywhere." "Yellow"
-            return $true
-        } else {
-            Write-ColorOutput "Rust installation finished, but 'rustc' command is still not found in this session." "Red"
-            Write-ColorOutput "Please restart PowerShell/CMD or your system, then try installing Razen again." "Yellow"
-            Write-ColorOutput "If the problem persists, install Rust manually from https://rustup.rs" "Yellow"
-            return $false
-        }
-    } catch {
-        Write-ColorOutput "Failed during Rust installation process." "Red"
-        Write-ColorOutput "Error: $($_.Exception.Message)" "Red"
-        Write-ColorOutput "Please install Rust manually from https://rustup.rs" "Yellow"
-        return $false
-    } finally {
-        # Clean up the rustup installer
-        if (($rustupInit) -and (Test-Path $rustupInit)) {
-            Remove-Item $rustupInit -Force -ErrorAction SilentlyContinue
-        }
-    }
-}
-
 # Check if Rust is installed, if not, prompt to install it
 if (-not (Test-RustInstalled)) {
     Write-ColorOutput "Rust (rustc command) not found in PATH. Razen compiler requires Rust." "Yellow"
@@ -705,19 +1055,11 @@ if (-not (Test-RustInstalled)) {
 
     if ($confirmation -match '^[Yy]$') {
         if (-not (Install-Rust)) {
-            Write-ColorOutput "Automatic Rust installation failed or was incomplete." "Red"
-            Write-ColorOutput "Razen installation cannot proceed without Rust." "Red"
-            Write-ColorOutput "Please install Rust manually from https://rustup.rs and run this installer again." "Yellow"
-            # Cleanup handled by trap
-            exit 1
+            Handle-Error -ErrorMessage "Automatic Rust installation failed or was incomplete" -RecoveryHint "Install Rust manually from https://rustup.rs and run this installer again"
         }
         # If Install-Rust succeeded, Rust *should* be available now in the session PATH
     } else {
-        Write-ColorOutput "Rust installation skipped." "Blue"
-        Write-ColorOutput "Razen installation cannot proceed without Rust." "Red"
-        Write-ColorOutput "Please install Rust manually from https://rustup.rs and run this installer again." "Yellow"
-        # Cleanup handled by trap
-        exit 1
+        Handle-Error -ErrorMessage "Rust installation skipped" -RecoveryHint "Install Rust manually from https://rustup.rs and run this installer again"
     }
 } else {
     Write-ColorOutput "  ✓ Rust is already installed and found in PATH." "Green"
@@ -742,11 +1084,7 @@ try {
 Write-ColorOutput "`nConfiguring system integration (Symlinks, PATH)..." "Yellow"
 $symlinkResult = Create-Symlinks -InstallDir $installDir
 if ($symlinkResult -ne 0) {
-    Write-ColorOutput "Failed to create symbolic links or update PATH correctly." "Red"
-    Write-ColorOutput "Razen might not be accessible from the command line." "Yellow"
-    Write-ColorOutput "Check previous error messages for details." "Yellow"
-    # Decide whether to exit or continue
-    # exit 1 # Exit if symlinks are critical
+    Handle-Error -ErrorMessage "Failed to create symbolic links or update PATH correctly" -RecoveryHint "Check previous error messages for details"
 } else {
      Write-ColorOutput "  ✓ System integration completed." "Green"
 }
@@ -770,104 +1108,27 @@ $ide_choice = Read-Host "Enter your choice (1-3)"
 Write-Host "" # Newline
 
 # Install IDE extensions based on user choice
+$vsCodeExtensionInstalled = $false
+$jetBrainsPluginInstalled = $false
+
 switch ($ide_choice) {
     "1" {
-        Write-ColorOutput "Installing VS Code Extension files..." "Yellow"
-        $vscodeExtSourceDir = Join-Path $installDir "razen-vscode-extension"
-        $vscodeUserExtDir = Join-Path $env:USERPROFILE ".vscode\extensions"
-        $razenVscodeExtTargetDir = Join-Path $vscodeUserExtDir "basai-corp.razen-language" # Use publisher.name format
-
-        if (-not (Test-Path $vscodeExtSourceDir)) {
-             Write-ColorOutput "  ✗ Source directory not found: $vscodeExtSourceDir" "Red"
-             Write-ColorOutput "    Skipping VS Code extension installation." "Yellow"
-             break # Exit this case
-        }
-
-        # Check if VS Code extensions directory exists
-        if (Test-Path $vscodeUserExtDir) {
-             Write-ColorOutput "  Found VS Code extensions directory: $vscodeUserExtDir" "Cyan"
-             try {
-                 # Create the specific extension directory
-                 if (-not(Test-Path $razenVscodeExtTargetDir)) {
-                     New-Item -ItemType Directory -Path $razenVscodeExtTargetDir -Force -ErrorAction Stop | Out-Null
-                 }
-                 # Copy files from install dir to VS Code extensions dir
-                 Copy-Item -Path (Join-Path $vscodeExtSourceDir "*") -Destination $razenVscodeExtTargetDir -Recurse -Force -ErrorAction Stop
-                 Write-ColorOutput "  ✓ VS Code Extension files copied successfully to:" "Green"
-                 Write-ColorOutput "    $razenVscodeExtTargetDir" "Green"
-                 Write-ColorOutput "    Restart VS Code to activate the extension." "Yellow"
-             } catch {
-                  Write-ColorOutput "  ✗ Failed to copy VS Code extension files." "Red"
-                  Write-ColorOutput "    Error: $($_.Exception.Message)" "Red"
-                  Write-ColorOutput "    You can manually copy files from '$vscodeExtSourceDir'." "Yellow"
-             }
-        } else {
-            Write-ColorOutput "  VS Code user extensions directory not found at '$vscodeUserExtDir'." "Yellow"
-            Write-ColorOutput "  Razen VS Code extension files are available in:" "Cyan"
-            Write-ColorOutput "  $vscodeExtSourceDir" "Cyan"
-            Write-ColorOutput "  You can install manually if you have VS Code." "Yellow"
-        }
+        $vsCodeExtensionInstalled = Install-VSCodeExtension -InstallDir $installDir
     }
     "2" {
-        Write-ColorOutput "Installing JetBrains Plugin files..." "Yellow"
-        $jetbrainsPluginSourceDir = Join-Path $installDir "razen-jetbrains-plugin"
-        $jetbrainsUserPluginDir = Join-Path $env:APPDATA "JetBrains" # Common base for plugins, might vary
-        $razenJetbrainsPluginTargetDir = Join-Path $env:USERPROFILE ".razen\jetbrains-plugin" # Fallback location
-
-        if (-not (Test-Path $jetbrainsPluginSourceDir)) {
-             Write-ColorOutput "  ✗ Source directory not found: $jetbrainsPluginSourceDir" "Red"
-             Write-ColorOutput "    Skipping JetBrains plugin installation." "Yellow"
-             break # Exit this case
-        }
-
-        # Just copy files to a known location and provide instructions, as auto-install is complex.
-        try {
-             New-Item -ItemType Directory -Path $razenJetbrainsPluginTargetDir -Force -ErrorAction Stop | Out-Null
-             Copy-Item -Path (Join-Path $jetbrainsPluginSourceDir "*") -Destination $razenJetbrainsPluginTargetDir -Recurse -Force -ErrorAction Stop
-             Write-ColorOutput "  ✓ JetBrains Plugin files copied to:" "Green"
-             Write-ColorOutput "    $razenJetbrainsPluginTargetDir" "Green"
-             Write-ColorOutput "  To install in your JetBrains IDE (IntelliJ, PyCharm, etc.):" "Yellow"
-             Write-ColorOutput "  1. Build the plugin if necessary (e.g., using Gradle/Maven inside the plugin dir)." "White"
-             Write-ColorOutput "  2. Open IDE > Settings/Preferences > Plugins." "White"
-             Write-ColorOutput "  3. Click the Gear icon > 'Install Plugin from Disk...'." "White"
-             Write-ColorOutput "  4. Select the built plugin JAR/ZIP file from '$razenJetbrainsPluginTargetDir' (or its build output)." "White"
-        } catch {
-            Write-ColorOutput "  ✗ Failed to copy JetBrains plugin files." "Red"
-            Write-ColorOutput "    Error: $($_.Exception.Message)" "Red"
-            Write-ColorOutput "    Plugin source is available at '$jetbrainsPluginSourceDir'." "Yellow"
-        }
+        $jetBrainsPluginInstalled = Install-JetBrainsPlugin -InstallDir $installDir
+    }
+    "3" {
+        $vsCodeExtensionInstalled = Install-VSCodeExtension -InstallDir $installDir
+        $jetBrainsPluginInstalled = Install-JetBrainsPlugin -InstallDir $installDir
     }
     default {
         Write-ColorOutput "Skipping IDE extension installation." "Yellow"
-        Write-ColorOutput "Extension files are available in '$installDir'." "Cyan"
     }
-} # End switch
-
-# --- Final Success Message ---
-Write-ColorOutput "`n✅ Razen Language $RAZEN_VERSION has been successfully installed!" "Green"
-Write-ColorOutput "`nInstallation Directory: $installDir" "Cyan"
-
-Write-ColorOutput "`nAvailable commands (try in a new terminal):" "Yellow"
-# List commands based on the $Scripts variable populated during symlink creation
-$availableScripts = Get-ChildItem (Join-Path $installDir "scripts") -File | Select-Object -ExpandProperty Name
-if ($availableScripts) {
-    foreach($cmd in $availableScripts) {
-         Write-ColorOutput "  $cmd" "Green"
-    }
-} else {
-     Write-ColorOutput "  (Could not list commands, check $installDir\scripts)" "Yellow"
 }
-Write-ColorOutput "  (And potentially others like 'razen new', 'razen version')" "Green"
 
-Write-ColorOutput "`nExample usage:" "Yellow"
-Write-ColorOutput "  razen run your_program.rzn" "Green"
-Write-ColorOutput "  razen new my_project" "Green"
-Write-ColorOutput "  razen-update" "Green"
-Write-ColorOutput "  razen --uninstall (Run this script with --uninstall argument)" "Green"
-
-Write-ColorOutput "`nImportant: You may need to RESTART your PowerShell/CMD terminal for the PATH changes and new commands to take effect." "Yellow"
-
-Write-ColorOutput "`nOfficial website and documentation will be available soon." "Yellow"
+# Display installation summary
+Show-InstallationSummary -InstallDir $installDir -Version $RAZEN_VERSION -PathUpdated ($symlinkResult -eq 0) -VSCodeExtensionInstalled $vsCodeExtensionInstalled -JetBrainsPluginInstalled $jetBrainsPluginInstalled
 
 # Remove the trap handler cleanly before exiting
 trap -Remove [Exception]

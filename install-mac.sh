@@ -1,24 +1,11 @@
 #!/bin/bash
 
 # Razen Language Installer for macOS
-# Copyright © 2025 Prathmesh Barot, Basai Corporation
+# Copyright 2025 Prathmesh Barot, Basai Corporation
 # Version: beta v0.1.4
 
 # Repository URL
 RAZEN_REPO="https://raw.githubusercontent.com/BasaiCorp/razen-lang/main"
-
-# Get version from the version file
-if [ -f "version" ]; then
-    RAZEN_VERSION=$(cat version)
-else
-    # Download version file if not present
-    if ! curl -s -o version "$RAZEN_REPO/version" &>/dev/null; then
-        echo -e "${RED}Failed to download version information. Using default version.${NC}"
-        RAZEN_VERSION="beta v0.1.4"
-    else
-        RAZEN_VERSION=$(cat version)
-    fi
-fi
 
 # Colors for output
 BLUE='\033[0;34m'
@@ -32,11 +19,93 @@ NC='\033[0m' # No Color
 # Function to print error and cleanup
 cleanup_and_exit() {
     local error_msg="$1"
+    local recovery_hint="$2"
+    local exit_code="${3:-1}"
+    
     echo -e "${RED}Error: $error_msg${NC}"
+    
+    if [ -n "$recovery_hint" ]; then
+        echo -e "${YELLOW}Hint: $recovery_hint${NC}"
+    fi
+    
     if [ -d "$TMP_DIR" ]; then
+        echo -e "${YELLOW}Cleaning up temporary files...${NC}"
         rm -rf "$TMP_DIR"
     fi
-    exit 1
+    
+    exit $exit_code
+}
+
+# Function to check internet connectivity
+check_internet_connectivity() {
+    echo -e "${YELLOW}Checking internet connectivity...${NC}"
+    
+    # Test sites to check connectivity
+    local test_sites=("github.com" "raw.githubusercontent.com" "google.com")
+    local connected=false
+    
+    for site in "${test_sites[@]}"; do
+        if ping -c 1 -W 2 "$site" &>/dev/null; then
+            connected=true
+            break
+        fi
+    done
+    
+    if [ "$connected" = false ]; then
+        echo -e "${RED}No internet connection detected.${NC}"
+        echo -e "${YELLOW}Please check your network connection and try again.${NC}"
+        return 1
+    fi
+    
+    echo -e "  ${GREEN}✓${NC} Internet connection detected"
+    return 0
+}
+
+# Function to check if running as root or with sudo
+check_sudo_privileges() {
+    echo -e "${YELLOW}Checking for administrator privileges...${NC}"
+    
+    if [ "$(id -u)" -ne 0 ]; then
+        echo -e "${RED}This script requires administrator privileges.${NC}"
+        echo -e "${YELLOW}Please run with sudo:${NC}"
+        echo -e "  ${CYAN}sudo ./install-mac.sh${NC}"
+        return 1
+    fi
+    
+    echo -e "  ${GREEN}✓${NC} Administrator privileges confirmed"
+    return 0
+}
+
+# Function to download a file with retry logic
+download_with_retry() {
+    local url="$1"
+    local output_file="$2"
+    local description="$3"
+    local max_retries=3
+    local retry_count=0
+    local success=false
+    
+    echo -e "  ${CYAN}Downloading $description...${NC}"
+    
+    while [ "$success" = false ] && [ $retry_count -lt $max_retries ]; do
+        if curl -s -o "$output_file" "$url" &>/dev/null; then
+            echo -e "    ${GREEN}✓${NC} Downloaded $description"
+            success=true
+            return 0
+        else
+            retry_count=$((retry_count + 1))
+            if [ $retry_count -lt $max_retries ]; then
+                echo -e "    ${YELLOW}✗${NC} Download attempt $retry_count failed. Retrying in 2 seconds..."
+                sleep 2
+            else
+                echo -e "    ${RED}✗${NC} Failed to download $description after $max_retries attempts"
+                echo -e "      ${RED}Error: $(curl -s -w "%{http_code}" "$url")${NC}"
+                return 1
+            fi
+        fi
+    done
+    
+    return 1
 }
 
 # Function to create symbolic links
@@ -55,7 +124,15 @@ create_symlinks() {
             echo -e "${GREEN}Found $(echo "$SCRIPTS" | wc -w) scripts to link.${NC}"
         fi
     else
-        cleanup_and_exit "Scripts directory not found at $INSTALL_DIR/scripts"
+        cleanup_and_exit "Scripts directory not found at $INSTALL_DIR/scripts" "Make sure the installation directory structure is correct"
+    fi
+    
+    # Create /usr/local/bin if it doesn't exist
+    if [ ! -d "/usr/local/bin" ]; then
+        echo -e "${YELLOW}Creating /usr/local/bin directory...${NC}"
+        if ! sudo mkdir -p "/usr/local/bin"; then
+            cleanup_and_exit "Failed to create /usr/local/bin directory" "Check your permissions and try again"
+        fi
     fi
     
     # Create symlinks in /usr/local/bin
@@ -68,35 +145,24 @@ create_symlinks() {
             sudo ln -sf "$INSTALL_DIR/scripts/$script" "/usr/local/bin/$script"
             echo -e "  ${GREEN}✓${NC} Created /usr/local/bin/$script"
         else
-            cleanup_and_exit "Failed to create /usr/local/bin/$script (file not found)"
+            echo -e "  ${RED}✗${NC} Failed to create /usr/local/bin/$script (file not found)"
+            continue
         fi
     done
     
-    # Create symlinks in /usr/bin
-    for script in $SCRIPTS; do
-        if [ -f "/usr/local/bin/$script" ]; then
-            # Remove existing symlink if it exists
-            if [ -L "/usr/bin/$script" ]; then
-                sudo rm "/usr/bin/$script"
-            fi
-            sudo ln -sf "/usr/local/bin/$script" "/usr/bin/$script"
-            echo -e "  ${GREEN}✓${NC} Created /usr/bin/$script"
-        else
-            cleanup_and_exit "Failed to create /usr/bin/$script (file not found)"
-        fi
-    done
-    
-    # Verify all symlinks are created
+    # Verify all symlinks are created in /usr/local/bin
     local missing_links=0
     for script in $SCRIPTS; do
-        if [ ! -f "/usr/local/bin/$script" ] || [ ! -L "/usr/bin/$script" ]; then
-            echo -e "  ${RED}✗${NC} Missing symlink for $script"
+        if [ ! -L "/usr/local/bin/$script" ]; then
+            echo -e "  ${RED}✗${NC} Missing symlink for $script in /usr/local/bin"
             missing_links=$((missing_links + 1))
         fi
     done
     
     if [ $missing_links -gt 0 ]; then
-        cleanup_and_exit "Failed to create some symbolic links. Please check the errors above."
+        echo -e "${YELLOW}Warning: Failed to create $missing_links symbolic links in /usr/local/bin.${NC}"
+        echo -e "${YELLOW}You may need to manually add the Razen directory to your PATH.${NC}"
+        return 1
     fi
     
     echo -e "${GREEN}✓${NC} All symbolic links created successfully"
@@ -108,21 +174,26 @@ check_for_updates() {
     echo -e "${YELLOW}Checking for updates...${NC}"
     
     # Download version check file
-    if ! curl -s -o "$TMP_DIR/version.txt" "$RAZEN_REPO/version" &>/dev/null; then
+    if ! download_with_retry "$RAZEN_REPO/version" "$TMP_DIR/version.txt" "version information"; then
         echo -e "${RED}Failed to check for updates. Please check your internet connection.${NC}"
-        echo -e "${RED}Error: $(curl -s -w "%{http_code}" "$RAZEN_REPO/version")${NC}"
         return 1
     fi
     
     # Read latest version
     LATEST_VERSION=$(cat "$TMP_DIR/version.txt" 2>/dev/null || echo "unknown")
+    LATEST_VERSION=$(echo "$LATEST_VERSION" | tr -d '[:space:]')
+    
+    echo -e "  ${GREEN}✓${NC} Current version: $RAZEN_VERSION"
+    echo -e "  ${GREEN}✓${NC} Latest version: $LATEST_VERSION"
     
     if [ "$LATEST_VERSION" == "$RAZEN_VERSION" ]; then
-        echo -e "${GREEN}Razen is already up to date ($RAZEN_VERSION).${NC}"
+        echo -e "${GREEN}Razen is already up to date.${NC}"
         return 0
+    elif [ "$LATEST_VERSION" == "unknown" ]; then
+        echo -e "${RED}Failed to determine the latest version.${NC}"
+        return 1
     else
-        echo -e "${YELLOW}New version available: $LATEST_VERSION${NC}"
-        echo -e "${YELLOW}Current version: $RAZEN_VERSION${NC}"
+        echo -e "${YELLOW}A new version of Razen is available: $LATEST_VERSION${NC}"
         return 2
     fi
 }
@@ -132,46 +203,570 @@ perform_update() {
     echo -e "${YELLOW}Updating Razen...${NC}"
     
     # Download the latest installer
-    if ! curl -s -o "$TMP_DIR/install-mac.sh" "$RAZEN_REPO/install-mac.sh" &>/dev/null; then
-        echo -e "${RED}Failed to download the latest installer.${NC}"
-        echo -e "${RED}Error: $(curl -s -w "%{http_code}" "$RAZEN_REPO/install-mac.sh")${NC}"
-        return 1
+    if ! download_with_retry "$RAZEN_REPO/install-mac.sh" "$TMP_DIR/install-mac.sh" "latest installer"; then
+        cleanup_and_exit "Failed to download the latest installer" "Check your internet connection and try again"
     fi
     
-    # Make it executable
+    # Make the downloaded installer executable
     chmod +x "$TMP_DIR/install-mac.sh"
     
-    # Run the installer with the latest version
-    sudo "$TMP_DIR/install-mac.sh"
+    # Copy the installer to a temporary location
+    TEMP_INSTALLER="/tmp/razen-installer-$$.sh"
+    cp "$TMP_DIR/install-mac.sh" "$TEMP_INSTALLER"
+    chmod +x "$TEMP_INSTALLER"
     
-    return $?
+    echo -e "${GREEN}✓${NC} Downloaded the latest installer"
+    echo -e "${YELLOW}Running the latest installer...${NC}"
+    
+    # Clean up the temporary directory
+    rm -rf "$TMP_DIR"
+    
+    # Run the new installer with the same arguments
+    exec sudo "$TEMP_INSTALLER" "$@"
+    
+    # This point should not be reached
+    exit 0
 }
 
 # Function to uninstall Razen
 uninstall_razen() {
     echo -e "${YELLOW}Uninstalling Razen...${NC}"
     
-    # Remove all binary and script symlinks
-    for cmd in razen razen-debug razen-test razen-run razen-update razen-help razen-extension; do
-        if [ -f "/usr/local/bin/$cmd" ]; then
-            sudo rm -f "/usr/local/bin/$cmd"
-            echo -e "  ${GREEN}✓${NC} Removed /usr/local/bin/$cmd"
-        fi
-        if [ -L "/usr/bin/$cmd" ]; then
-            sudo rm -f "/usr/bin/$cmd"
-            echo -e "  ${GREEN}✓${NC} Removed /usr/bin/$cmd"
+    # Remove symlinks
+    for script in razen razen-debug razen-test razen-run razen-update razen-help razen-extension; do
+        if [ -L "/usr/local/bin/$script" ]; then
+            sudo rm "/usr/local/bin/$script"
+            echo -e "  ${GREEN}✓${NC} Removed /usr/local/bin/$script"
         fi
     done
     
     # Remove installation directory
     if [ -d "/usr/local/razen" ]; then
-        sudo rm -rf /usr/local/razen
-        echo -e "  ${GREEN}✓${NC} Removed /usr/local/razen directory"
+        sudo rm -rf "/usr/local/razen"
+        echo -e "  ${GREEN}✓${NC} Removed /usr/local/razen"
     fi
     
-    echo -e "\n${GREEN}✅ Razen has been successfully uninstalled!${NC}"
+    # Remove version file
+    if [ -f "version" ]; then
+        rm "version"
+        echo -e "  ${GREEN}✓${NC} Removed version file"
+    fi
+    
+    echo -e "${GREEN}✓${NC} Razen has been successfully uninstalled"
     exit 0
 }
+
+# Function to install VS Code extension
+install_vscode_extension() {
+    echo -e "${YELLOW}Installing VS Code Extension for Razen...${NC}"
+    
+    # Check if VS Code is installed
+    local vscode_installed=false
+    local vscode_path=""
+    
+    if command -v code &>/dev/null; then
+        vscode_installed=true
+        vscode_path=$(command -v code)
+        echo -e "  ${GREEN}✓${NC} VS Code detected at: $vscode_path"
+    elif command -v codium &>/dev/null; then
+        vscode_installed=true
+        vscode_path=$(command -v codium)
+        echo -e "  ${GREEN}✓${NC} VSCodium detected at: $vscode_path"
+    fi
+    
+    # Create extension directory
+    local vscode_ext_source_dir="$INSTALL_DIR/razen-vscode-extension"
+    local vscode_ext_target_dir="$HOME/.vscode/extensions/razen-lang.razen"
+    
+    mkdir -p "$vscode_ext_target_dir"
+    
+    # Check if extension source exists
+    if [ -d "$vscode_ext_source_dir" ] && [ "$(ls -A "$vscode_ext_source_dir" 2>/dev/null)" ]; then
+        # Copy extension files
+        cp -r "$vscode_ext_source_dir/"* "$vscode_ext_target_dir/"
+        echo -e "  ${GREEN}✓${NC} VS Code extension installed to: $vscode_ext_target_dir"
+    else
+        # Create basic extension structure if source doesn't exist
+        echo -e "  ${YELLOW}⚠${NC} Extension source not found, creating basic extension..."
+        
+        # Create directories
+        mkdir -p "$vscode_ext_target_dir/syntaxes"
+        
+        # Create package.json
+        cat > "$vscode_ext_target_dir/package.json" << EOL
+{
+    "name": "razen-lang",
+    "displayName": "Razen Language Support",
+    "description": "Syntax highlighting and tools for Razen programming language",
+    "version": "0.1.0",
+    "publisher": "razen-lang",
+    "engines": {
+        "vscode": "^1.60.0"
+    },
+    "categories": ["Programming Languages"],
+    "contributes": {
+        "languages": [{
+            "id": "razen",
+            "aliases": ["Razen", "razen"],
+            "extensions": [".rzn"],
+            "configuration": "./language-configuration.json"
+        }],
+        "grammars": [{
+            "language": "razen",
+            "scopeName": "source.razen",
+            "path": "./syntaxes/razen.tmLanguage.json"
+        }]
+    }
+}
+EOL
+        
+        # Create language configuration
+        cat > "$vscode_ext_target_dir/language-configuration.json" << EOL
+{
+    "comments": {
+        "lineComment": "#",
+        "blockComment": ["/*", "*/"]
+    },
+    "brackets": [
+        ["[", "]"],
+        ["(", ")"],
+        ["{", "}"]
+    ],
+    "autoClosingPairs": [
+        { "open": "{", "close": "}" },
+        { "open": "[", "close": "]" },
+        { "open": "(", "close": ")" },
+        { "open": "\"", "close": "\"" },
+        { "open": "'", "close": "'" }
+    ]
+}
+EOL
+        
+        # Create basic syntax highlighting
+        cat > "$vscode_ext_target_dir/syntaxes/razen.tmLanguage.json" << EOL
+{
+    "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+    "name": "Razen",
+    "patterns": [
+        { "include": "#keywords" },
+        { "include": "#strings" },
+        { "include": "#comments" }
+    ],
+    "repository": {
+        "keywords": {
+            "patterns": [{
+                "name": "keyword.control.razen",
+                "match": "\\b(if|else|while|for|return|function|var|const|let|print|input)\\b"
+            }]
+        },
+        "strings": {
+            "name": "string.quoted.double.razen",
+            "begin": "\"",
+            "end": "\"",
+            "patterns": [
+                {
+                    "name": "constant.character.escape.razen",
+                    "match": "\\\\."
+                }
+            ]
+        },
+        "comments": {
+            "patterns": [
+                {
+                    "name": "comment.line.number-sign.razen",
+                    "match": "#.*$"
+                },
+                {
+                    "name": "comment.block.razen",
+                    "begin": "/\\*",
+                    "end": "\\*/"
+                }
+            ]
+        }
+    },
+    "scopeName": "source.razen"
+}
+EOL
+        
+        echo -e "  ${GREEN}✓${NC} Basic VS Code extension created at: $vscode_ext_target_dir"
+    fi
+    
+    if [ "$vscode_installed" = true ]; then
+        echo -e "  ${GREEN}✓${NC} VS Code extension installed successfully"
+        echo -e "  ${YELLOW}Restart VS Code to activate the extension${NC}"
+        return 0
+    else
+        echo -e "  ${YELLOW}VS Code not detected. Extension files installed to:${NC}"
+        echo -e "  ${CYAN}$vscode_ext_target_dir${NC}"
+        echo -e "  ${YELLOW}Install VS Code from https://code.visualstudio.com/ to use the extension${NC}"
+        return 1
+    fi
+}
+
+# Function to install JetBrains plugin
+install_jetbrains_plugin() {
+    echo -e "${YELLOW}Installing JetBrains Plugin for Razen...${NC}"
+    
+    # Check if any JetBrains IDE is installed
+    local jetbrains_found=false
+    local jetbrains_dirs=("$HOME/Library/Application Support/JetBrains" "$HOME/.local/share/JetBrains")
+    
+    for dir in "${jetbrains_dirs[@]}"; do
+        if [ -d "$dir" ]; then
+            jetbrains_found=true
+            echo -e "  ${GREEN}✓${NC} JetBrains IDE detected at: $dir"
+            break
+        fi
+    done
+    
+    # Create plugin directory
+    local jetbrains_plugin_source_dir="$INSTALL_DIR/razen-jetbrains-plugin"
+    local jetbrains_plugin_target_dir="$HOME/.razen/jetbrains-plugin"
+    
+    mkdir -p "$jetbrains_plugin_target_dir"
+    
+    # Check if plugin source exists
+    if [ -d "$jetbrains_plugin_source_dir" ] && [ "$(ls -A "$jetbrains_plugin_source_dir" 2>/dev/null)" ]; then
+        # Copy plugin files
+        cp -r "$jetbrains_plugin_source_dir/"* "$jetbrains_plugin_target_dir/"
+        echo -e "  ${GREEN}✓${NC} JetBrains plugin files copied to: $jetbrains_plugin_target_dir"
+    else
+        # Create placeholder files
+        echo -e "  ${YELLOW}⚠${NC} Plugin source not found, creating placeholder..."
+        
+        # Create README file
+        cat > "$jetbrains_plugin_target_dir/README.md" << EOL
+# Razen Language Plugin for JetBrains IDEs
+
+This is a placeholder for the Razen language plugin for JetBrains IDEs.
+The actual plugin will be available soon.
+
+## Installation Instructions
+
+1. Open your JetBrains IDE (IntelliJ IDEA, PyCharm, etc.)
+2. Go to Settings/Preferences > Plugins
+3. Click the gear icon and select "Install Plugin from Disk..."
+4. Navigate to the plugin JAR file location
+5. Restart the IDE
+
+## Features
+
+- Syntax highlighting for Razen (.rzn) files
+- Code completion
+- Error highlighting
+- Navigation
+- Refactoring tools
+
+## Support
+
+For support, please visit the Razen language website or GitHub repository.
+EOL
+        
+        echo -e "  ${GREEN}✓${NC} JetBrains plugin placeholder created at: $jetbrains_plugin_target_dir"
+    fi
+    
+    if [ "$jetbrains_found" = true ]; then
+        echo -e "  ${YELLOW}To install the plugin in your JetBrains IDE:${NC}"
+        echo -e "  1. Open your JetBrains IDE (IntelliJ IDEA, PyCharm, etc.)"
+        echo -e "  2. Go to Settings/Preferences > Plugins"
+        echo -e "  3. Click the gear icon and select 'Install Plugin from Disk...'"
+        echo -e "  4. Navigate to $jetbrains_plugin_target_dir and select the plugin JAR file"
+        echo -e "  5. Restart the IDE"
+        return 0
+    else
+        echo -e "  ${YELLOW}No JetBrains IDE detected. Plugin files have been saved to:${NC}"
+        echo -e "  ${CYAN}$jetbrains_plugin_target_dir${NC}"
+        echo -e "  ${YELLOW}Install a JetBrains IDE to use the plugin${NC}"
+        return 1
+    fi
+}
+
+# Function to display installation summary
+show_installation_summary() {
+    local install_dir="$1"
+    local version="$2"
+    local symlinks_created="$3"
+    local vscode_ext_installed="$4"
+    local jetbrains_plugin_installed="$5"
+    
+    echo -e "\n${GREEN}✅ Razen $version has been successfully installed!${NC}"
+    
+    # Installation details
+    echo -e "\n${YELLOW}Installation Details:${NC}"
+    echo -e "  • Installation Directory: ${CYAN}$install_dir${NC}"
+    echo -e "  • Version: ${CYAN}$version${NC}"
+    echo -e "  • Symbolic Links: ${CYAN}$([ "$symlinks_created" = "0" ] && echo "Created" || echo "Some Issues")${NC}"
+    echo -e "  • VS Code Extension: ${CYAN}$([ "$vscode_ext_installed" = "0" ] && echo "Installed" || echo "Not Installed")${NC}"
+    echo -e "  • JetBrains Plugin: ${CYAN}$([ "$jetbrains_plugin_installed" = "0" ] && echo "Installed" || echo "Not Installed")${NC}"
+    
+    # Available commands
+    echo -e "\n${YELLOW}Available Commands:${NC}"
+    echo -e "  • ${GREEN}razen${NC} <file.rzn> - Run a Razen program"
+    echo -e "  • ${GREEN}razen-debug${NC} <file.rzn> - Run a Razen program in debug mode"
+    echo -e "  • ${GREEN}razen-test${NC} <file.rzn> - Run tests for a Razen program"
+    echo -e "  • ${GREEN}razen-run${NC} <file.rzn> - Run a Razen program with additional options"
+    echo -e "  • ${GREEN}razen-update${NC} - Update Razen to the latest version"
+    echo -e "  • ${GREEN}razen-help${NC} - Show help information"
+    echo -e "  • ${GREEN}razen-extension${NC} - Manage Razen extensions"
+    
+    # Example usage
+    echo -e "\n${YELLOW}Example Usage:${NC}"
+    echo -e "  ${CYAN}razen hello.rzn${NC}"
+    echo -e "  ${CYAN}razen-debug app.rzn${NC}"
+    echo -e "  ${CYAN}razen-update${NC}"
+    
+    # Next steps
+    echo -e "\n${YELLOW}Next Steps:${NC}"
+    echo -e "  1. Create a new Razen program: ${CYAN}razen new myprogram.rzn${NC}"
+    echo -e "  2. Run the example programs: ${CYAN}razen examples/hello.rzn${NC}"
+    echo -e "  3. Check for updates: ${CYAN}razen-update${NC}"
+    
+    # Important notes
+    echo -e "\n${YELLOW}Important Notes:${NC}"
+    echo -e "  • You may need to restart your terminal for the PATH changes to take effect"
+    echo -e "  • To uninstall Razen, run: ${CYAN}sudo ./install-mac.sh --uninstall${NC}"
+    echo -e "  • For help and documentation, run: ${CYAN}razen-help${NC}"
+    
+    # Support information
+    echo -e "\n${YELLOW}Support:${NC}"
+    echo -e "  • GitHub: ${CYAN}https://github.com/BasaiCorp/razen-lang${NC}"
+    echo -e "  • Documentation: Coming soon"
+    echo -e "  • Report Issues: ${CYAN}https://github.com/BasaiCorp/razen-lang/issues${NC}"
+    
+    echo -e "\n${CYAN}Thank you for installing Razen! Happy coding!${NC}"
+}
+
+# Function to create installation directories
+create_installation_directories() {
+    echo -e "${YELLOW}Creating installation directories...${NC}"
+    
+    # Create installation directory
+    if ! sudo mkdir -p "$INSTALL_DIR"; then
+        cleanup_and_exit "Failed to create installation directory" "Check your permissions and try again"
+    fi
+    echo -e "  ${GREEN}✓${NC} Created main installation directory"
+    
+    # Create subdirectories
+    local subdirs=("src" "properties" "scripts" "examples" "razen-vscode-extension" "razen-jetbrains-plugin")
+    for dir in "${subdirs[@]}"; do
+        if ! sudo mkdir -p "$INSTALL_DIR/$dir"; then
+            cleanup_and_exit "Failed to create $INSTALL_DIR/$dir" "Check your permissions and try again"
+        fi
+        echo -e "  ${GREEN}✓${NC} Created $dir directory"
+    done
+    
+    return 0
+}
+
+# Function to download Razen files with retry
+download_razen_files() {
+    echo -e "${YELLOW}Downloading Razen files...${NC}"
+    local download_success=true
+    
+    # Download main.py
+    if ! download_with_retry "$RAZEN_REPO/main.py" "$TMP_DIR/main.py" "main.py"; then
+        echo -e "  ${RED}✗${NC} Failed to download main.py"
+        download_success=false
+    fi
+    
+    # Download src files
+    local src_files=("lexer.py" "parser.py" "interpreter.py" "runtime.py" "__init__.py")
+    for file in "${src_files[@]}"; do
+        if ! download_with_retry "$RAZEN_REPO/src/$file" "$TMP_DIR/src/$file" "src/$file"; then
+            echo -e "  ${RED}✗${NC} Failed to download src/$file"
+            # Create empty file as fallback
+            touch "$TMP_DIR/src/$file"
+            echo -e "  ${YELLOW}⚠${NC} Created empty src/$file as fallback"
+        fi
+    done
+    
+    # Download properties files
+    local prop_files=("variables.rzn" "keywords.rzn" "operators.rzn" "functions.rzn" "loops.rzn")
+    for file in "${prop_files[@]}"; do
+        if ! download_with_retry "$RAZEN_REPO/properties/$file" "$TMP_DIR/properties/$file" "properties/$file"; then
+            echo -e "  ${YELLOW}⚠${NC} Failed to download properties/$file"
+            # Create empty file as fallback
+            touch "$TMP_DIR/properties/$file"
+            echo -e "  ${YELLOW}⚠${NC} Created empty properties/$file as fallback"
+        fi
+    done
+    
+    # Download script files
+    local script_files=("razen" "razen-debug" "razen-test" "razen-run" "razen-update" "razen-help" "razen-extension" "razen-docs")
+    for script in "${script_files[@]}"; do
+        if ! download_with_retry "$RAZEN_REPO/scripts/$script" "$TMP_DIR/scripts/$script" "scripts/$script"; then
+            echo -e "  ${YELLOW}⚠${NC} Failed to download scripts/$script"
+            # Create empty file as fallback
+            touch "$TMP_DIR/scripts/$script"
+            echo -e "  ${YELLOW}⚠${NC} Created empty scripts/$script as fallback"
+        fi
+    done
+    
+    # Make scripts executable
+    chmod +x "$TMP_DIR/scripts/"*
+    echo -e "  ${GREEN}✓${NC} Made scripts executable"
+    
+    # Download example files
+    mkdir -p "$TMP_DIR/examples"
+    local example_files=("hello.rzn" "calculator.rzn" "quiz.rzn")
+    for file in "${example_files[@]}"; do
+        if ! download_with_retry "$RAZEN_REPO/examples/$file" "$TMP_DIR/examples/$file" "examples/$file"; then
+            echo -e "  ${YELLOW}⚠${NC} Failed to download examples/$file"
+            # Continue without example files
+        fi
+    done
+    
+    # Try to download VS Code extension files
+    mkdir -p "$TMP_DIR/razen-vscode-extension"
+    if ! download_with_retry "$RAZEN_REPO/razen-vscode-extension/package.json" "$TMP_DIR/razen-vscode-extension/package.json" "VS Code extension files"; then
+        echo -e "  ${YELLOW}⚠${NC} VS Code extension files not found or couldn't be downloaded"
+    fi
+    
+    # Try to download JetBrains plugin files
+    mkdir -p "$TMP_DIR/razen-jetbrains-plugin"
+    if ! download_with_retry "$RAZEN_REPO/razen-jetbrains-plugin/README.md" "$TMP_DIR/razen-jetbrains-plugin/README.md" "JetBrains plugin files"; then
+        echo -e "  ${YELLOW}⚠${NC} JetBrains plugin files not found or couldn't be downloaded"
+    fi
+    
+    if [ "$download_success" = false ]; then
+        echo -e "${YELLOW}Warning: Some essential files failed to download. Installation may be incomplete.${NC}"
+        echo -e "${YELLOW}You may want to run the installer again with better internet connectivity.${NC}"
+    else
+        echo -e "  ${GREEN}✓${NC} All essential downloads completed successfully"
+    fi
+    
+    return 0
+}
+
+# Function to copy files to installation directory
+copy_files_to_install_dir() {
+    echo -e "${YELLOW}Copying files to installation directory...${NC}"
+    
+    # Copy main.py
+    if ! sudo cp "$TMP_DIR/main.py" "$INSTALL_DIR/"; then
+        cleanup_and_exit "Failed to copy main.py to installation directory" "Check your permissions and try again"
+    fi
+    
+    # Copy src files
+    if ! sudo cp -r "$TMP_DIR/src/"* "$INSTALL_DIR/src/" 2>/dev/null; then
+        echo -e "  ${YELLOW}⚠${NC} Some src files may not have been copied"
+    fi
+    
+    # Copy properties files
+    if ! sudo cp -r "$TMP_DIR/properties/"* "$INSTALL_DIR/properties/" 2>/dev/null; then
+        echo -e "  ${YELLOW}⚠${NC} Some properties files may not have been copied"
+    fi
+    
+    # Copy scripts
+    if ! sudo cp -r "$TMP_DIR/scripts/"* "$INSTALL_DIR/scripts/" 2>/dev/null; then
+        cleanup_and_exit "Failed to copy scripts to installation directory" "Check your permissions and try again"
+    fi
+    
+    # Copy examples
+    if [ -d "$TMP_DIR/examples" ] && [ "$(ls -A "$TMP_DIR/examples" 2>/dev/null)" ]; then
+        sudo cp -r "$TMP_DIR/examples/"* "$INSTALL_DIR/examples/" 2>/dev/null
+        echo -e "  ${GREEN}✓${NC} Copied example files"
+    fi
+    
+    # Copy VS Code extension files
+    if [ -d "$TMP_DIR/razen-vscode-extension" ] && [ "$(ls -A "$TMP_DIR/razen-vscode-extension" 2>/dev/null)" ]; then
+        sudo cp -r "$TMP_DIR/razen-vscode-extension/"* "$INSTALL_DIR/razen-vscode-extension/" 2>/dev/null
+        echo -e "  ${GREEN}✓${NC} Copied VS Code extension files"
+    fi
+    
+    # Copy JetBrains plugin files
+    if [ -d "$TMP_DIR/razen-jetbrains-plugin" ] && [ "$(ls -A "$TMP_DIR/razen-jetbrains-plugin" 2>/dev/null)" ]; then
+        sudo cp -r "$TMP_DIR/razen-jetbrains-plugin/"* "$INSTALL_DIR/razen-jetbrains-plugin/" 2>/dev/null
+        echo -e "  ${GREEN}✓${NC} Copied JetBrains plugin files"
+    fi
+    
+    # Download and save the latest installer script for future updates
+    if ! download_with_retry "$RAZEN_REPO/install-mac.sh" "$TMP_DIR/install-mac.sh" "latest installer script"; then
+        echo -e "${YELLOW}Warning: Could not download latest installer script. Using current version instead.${NC}"
+        # If we're running from a downloaded script, copy it
+        if [ -f "$0" ] && [[ "$0" != "/usr/local/bin/"* ]]; then
+            sudo cp "$0" "$INSTALL_DIR/install-mac.sh"
+        fi
+    else
+        sudo cp "$TMP_DIR/install-mac.sh" "$INSTALL_DIR/install-mac.sh"
+    fi
+    
+    # Set proper permissions
+    sudo chmod -R 755 "$INSTALL_DIR"
+    sudo chown -R root:wheel "$INSTALL_DIR"
+    
+    echo -e "  ${GREEN}✓${NC} Copied files to installation directory"
+    
+    # Create version file in installation directory
+    echo "$RAZEN_VERSION" | sudo tee "$INSTALL_DIR/version" > /dev/null
+    echo -e "  ${GREEN}✓${NC} Created version file"
+    
+    return 0
+}
+
+# Function to check for Rust installation and install if needed
+check_and_install_rust() {
+    echo -e "${YELLOW}Checking for Rust installation...${NC}"
+    
+    if ! command -v rustc &> /dev/null; then
+        echo -e "${YELLOW}Rust is not installed. Razen compiler requires Rust to run.${NC}"
+        echo -e "${YELLOW}Would you like to install Rust now? (y/n)${NC}"
+        read -p "Enter your choice: " rust_choice
+        
+        if [[ "$rust_choice" =~ ^[Yy]$ ]]; then
+            echo -e "${YELLOW}Installing Rust...${NC}"
+            
+            # Download and run the Rust installer
+            if ! curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y; then
+                echo -e "${RED}Failed to install Rust.${NC}"
+                echo -e "${YELLOW}Please install Rust manually:${NC}"
+                echo -e "  curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh"
+                return 1
+            fi
+            
+            # Source the cargo environment
+            source "$HOME/.cargo/env"
+            
+            # Verify Rust installation
+            if ! command -v rustc &> /dev/null; then
+                echo -e "${RED}Rust installation completed but rustc command not found.${NC}"
+                echo -e "${YELLOW}Please restart your terminal and run the installer again.${NC}"
+                return 1
+            fi
+            
+            echo -e "  ${GREEN}✓${NC} Rust has been successfully installed"
+        else
+            echo -e "${YELLOW}Rust installation skipped. Razen requires Rust to run.${NC}"
+            echo -e "${YELLOW}Please install Rust manually:${NC}"
+            echo -e "  curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh"
+            return 1
+        fi
+    else
+        RUST_VERSION=$(rustc --version | cut -d' ' -f2)
+        echo -e "  ${GREEN}✓${NC} Rust is already installed (version $RUST_VERSION)"
+    fi
+    
+    return 0
+}
+
+# Get version from the version file
+echo -e "${YELLOW}Checking Razen version...${NC}"
+if [ -f "version" ]; then
+    RAZEN_VERSION=$(cat version)
+    echo -e "  ${GREEN}✓${NC} Found local version file: $RAZEN_VERSION"
+else
+    # Download version file if not present
+    if ! download_with_retry "$RAZEN_REPO/version" "version" "version information"; then
+        echo -e "${YELLOW}Using default version due to download failure.${NC}"
+        RAZEN_VERSION="beta v0.1.4"
+    else
+        RAZEN_VERSION=$(cat version)
+        echo -e "  ${GREEN}✓${NC} Downloaded version information: $RAZEN_VERSION"
+    fi
+fi
+
+# Remove any trailing whitespace or newlines
+RAZEN_VERSION=$(echo "$RAZEN_VERSION" | tr -d '[:space:]')
 
 # Print banner
 echo -e "${BLUE}"
@@ -186,244 +781,47 @@ EOF
 
 echo -e "${YELLOW}Programming Language ${PURPLE}$RAZEN_VERSION${NC}"
 echo -e "${CYAN}By Prathmesh Barot, Basai Corporation${NC}"
-echo -e "${YELLOW}Copyright © 2025 Prathmesh Barot${NC}\n"
+echo -e "${YELLOW}Copyright 2025 Prathmesh Barot${NC}\n"
 sleep 1  # Add a small delay to make the banner more readable
 
 # Check if running as root
-if [ "$EUID" -ne 0 ]; then
-    echo -e "${RED}This script requires root privileges.${NC}"
-    echo -e "${YELLOW}Please run with sudo and try again.${NC}"
-    echo -e "\nTo run with sudo:" "Yellow"
-    echo -e "1. Open Terminal" "Green"
-    echo -e "2. Run: sudo ./install-mac.sh" "Green"
+if ! check_sudo_privileges; then
     exit 1
 fi
 
 # Create temporary directory
 TMP_DIR=$(mktemp -d)
 if [ $? -ne 0 ]; then
-    cleanup_and_exit "Failed to create temporary directory"
+    cleanup_and_exit "Failed to create temporary directory" "Check your permissions and try again"
 fi
 echo -e "${GREEN}  ✓ Created temporary directory${NC}"
 
-# Check for force update flag
-if [ "$1" == "--force-update" ]; then
-    echo -e "${YELLOW}Force update mode activated. Will replace all existing files.${NC}"
-    FORCE_UPDATE=true
-else
-    FORCE_UPDATE=false
-fi
-
-# Check for uninstall flag
-if [ "$1" == "--uninstall" ]; then
-    uninstall_razen
-fi
-
-# Check for update flag or if already installed
-if [ "$1" == "update" ] || [ "$1" == "--update" ] || [ -f "/usr/local/bin/razen" ] && [ "$FORCE_UPDATE" != "true" ]; then
-    # Check for updates
-    check_for_updates
-    UPDATE_STATUS=$?
-    
-    if [ $UPDATE_STATUS -eq 2 ]; then
-        read -p "Do you want to update Razen? (y/n): " -n 1 -r
-        echo
-        if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-            echo -e "${BLUE}Update cancelled.${NC}"
-            echo -e "${GREEN}Tip:${NC} You can use 'razen-update' to update Razen later."
-            rm -rf "$TMP_DIR"
-            exit 0
-        fi
-        
-        # Perform the update
-        perform_update
-        if [ $? -ne 0 ]; then
-            cleanup_and_exit "Update failed. Please try again later."
-        fi
-        exit 0
-    elif [ $UPDATE_STATUS -eq 0 ]; then
-        echo -e "${GREEN}Razen is already up to date.${NC}"
-        rm -rf "$TMP_DIR"
-        exit 0
-    else
-        cleanup_and_exit "Failed to check for updates."
-    fi
-fi
+# Create necessary directories in temp folder
+mkdir -p "$TMP_DIR/src"
+mkdir -p "$TMP_DIR/properties"
+mkdir -p "$TMP_DIR/scripts"
+mkdir -p "$TMP_DIR/examples"
+mkdir -p "$TMP_DIR/razen-vscode-extension"
+mkdir -p "$TMP_DIR/razen-jetbrains-plugin"
 
 # Create installation directory
 INSTALL_DIR="/usr/local/razen"
-echo -e "${YELLOW}Creating installation directory...${NC}"
-if ! mkdir -p "$INSTALL_DIR"; then
-    cleanup_and_exit "Failed to create installation directory"
-fi
-echo -e "${GREEN}  ✓ Created installation directory${NC}"
-
-# Check if installation directory exists
-if [ -d "$INSTALL_DIR" ]; then
-    if [ "$FORCE_UPDATE" == "true" ]; then
-        echo -e "${YELLOW}Removing existing Razen installation...${NC}"
-        sudo rm -rf "$INSTALL_DIR"
-    else
-        echo -e "${YELLOW}Razen is already installed.${NC}"
-        echo -e "${YELLOW}New Razen commands are available with this version.${NC}"
-        read -p "Do you want to update Razen? (y/n): " -n 1 -r
-        echo
-        if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-            echo -e "${BLUE}Installation cancelled.${NC}"
-            echo -e "${GREEN}Tip:${NC} You can use 'razen-update' to update Razen later."
-            rm -rf "$TMP_DIR"
-            exit 0
-        fi
-        echo -e "${YELLOW}Updating Razen...${NC}"
-        sudo rm -rf "$INSTALL_DIR"
-    fi
-fi
-
-sudo mkdir -p "$INSTALL_DIR"
-sudo mkdir -p "$INSTALL_DIR/src"
-sudo mkdir -p "$INSTALL_DIR/scripts"
-sudo mkdir -p "$INSTALL_DIR/properties"
-echo -e "  ${GREEN}✓${NC} Created installation directory"
+create_installation_directories
 
 # Download Razen files
-echo -e "${YELLOW}Downloading Razen files...${NC}"
-
-# Download main.py
-if ! curl -s -o "$TMP_DIR/main.py" "$RAZEN_REPO/main.py" &>/dev/null; then
-    cleanup_and_exit "Failed to download main.py"
-fi
-echo -e "  ${GREEN}✓${NC} Downloaded main.py"
-
-# Download src files
-for file in lexer.py parser.py interpreter.py runtime.py; do
-    if ! curl -s -o "$TMP_DIR/src/$file" "$RAZEN_REPO/src/$file" &>/dev/null; then
-        cleanup_and_exit "Failed to download src/$file"
-    fi
-    echo -e "  ${GREEN}✓${NC} Downloaded src/$file"
-done
-
-# Download properties files
-for file in variables.rzn keywords.rzn operators.rzn; do
-    if ! curl -s -o "$TMP_DIR/properties/$file" "$RAZEN_REPO/properties/$file" &>/dev/null; then
-        # Create empty file if download fails
-        touch "$TMP_DIR/properties/$file"
-        echo -e "  ${YELLOW}⚠${NC} Created empty properties/$file"
-    else
-        echo -e "  ${GREEN}✓${NC} Downloaded properties/$file"
-    fi
-done
-
-# Download script files
-for script in razen razen-debug razen-test razen-run razen-update razen-help; do
-    if ! curl -s -o "$TMP_DIR/scripts/$script" "$RAZEN_REPO/scripts/$script" &>/dev/null; then
-        # Create empty file if download fails
-        touch "$TMP_DIR/scripts/$script"
-        echo -e "  ${YELLOW}⚠${NC} Created empty scripts/$script"
-    else
-        echo -e "  ${GREEN}✓${NC} Downloaded scripts/$script"
-    fi
-done
-
-# Make scripts executable
-chmod +x "$TMP_DIR/scripts/"*
-echo -e "  ${GREEN}✓${NC} Made scripts executable"
+download_razen_files
 
 # Copy files to installation directory
-sudo cp "$TMP_DIR/main.py" "$INSTALL_DIR/"
-sudo cp "$TMP_DIR/src/"*.py "$INSTALL_DIR/src/" 2>/dev/null || true
-sudo cp "$TMP_DIR/properties/"*.rzn "$INSTALL_DIR/properties/"
-sudo cp "$TMP_DIR/scripts/"* "$INSTALL_DIR/scripts/"
-
-# Download and save the latest installer script for future updates
-if ! curl -s -o "$TMP_DIR/install-mac.sh" "$RAZEN_REPO/install-mac.sh" &>/dev/null; then
-    echo -e "${YELLOW}Warning: Could not download latest installer script. Using current version instead.${NC}"
-    # If we're running from a downloaded script, copy it
-    if [ -f "$0" ] && [[ "$0" != "/usr/local/bin/"* ]]; then
-        sudo cp "$0" "$INSTALL_DIR/install-mac.sh"
-    fi
-else
-    sudo cp "$TMP_DIR/install-mac.sh" "$INSTALL_DIR/install-mac.sh"
-    sudo chmod +x "$INSTALL_DIR/install-mac.sh"
-    echo -e "${GREEN}  ✓${NC} Saved latest installer script for future updates"
-fi
-
-# Create version file with proper permissions
-echo "$RAZEN_VERSION" | sudo tee "$INSTALL_DIR/version" > /dev/null
-
-# Create an empty __init__.py file in each directory to make them proper Python packages
-sudo touch "$INSTALL_DIR/__init__.py"
-sudo touch "$INSTALL_DIR/src/__init__.py"
-
-# Set proper permissions
-sudo chmod -R 755 "$INSTALL_DIR"
-sudo chown -R root:wheel "$INSTALL_DIR"
-
-echo -e "  ${GREEN}✓${NC} Copied files to installation directory"
-
-# Check for Rust installation
-echo -e "${YELLOW}Checking for Rust installation...${NC}"
-if ! command -v rustc &> /dev/null; then
-    echo -e "${YELLOW}Rust is not installed. Razen compiler requires Rust to run.${NC}"
-    echo -e "${YELLOW}Installing Rust automatically...${NC}"
-    
-    # Ask for confirmation before installing Rust
-    read -p "Do you want to install Rust now? (y/n): " -n 1 -r
-    echo
-    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-        echo -e "${RED}Rust installation is required for Razen to function properly.${NC}"
-        echo -e "${YELLOW}You can install Rust manually using:${NC}"
-        echo -e "  curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh"
-        rm -rf "$TMP_DIR"
-        exit 1
-    fi
-    
-    # Install Rust using rustup
-    echo -e "${YELLOW}Downloading and installing Rust...${NC}"
-    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-    
-    # Check if installation was successful
-    if [ $? -ne 0 ]; then
-        echo -e "${RED}Failed to install Rust. Please install it manually.${NC}"
-        echo -e "${YELLOW}You can install Rust manually using:${NC}"
-        echo -e "  curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh"
-        rm -rf "$TMP_DIR"
-        exit 1
-    fi
-    
-    # Source the cargo environment
-    source "$HOME/.cargo/env"
-    
-    # Verify Rust installation
-    if ! command -v rustc &> /dev/null; then
-        echo -e "${RED}Rust installation completed but rustc command not found.${NC}"
-        echo -e "${YELLOW}Please restart your terminal and run the installer again.${NC}"
-        rm -rf "$TMP_DIR"
-        exit 1
-    fi
-    
-    echo -e "  ${GREEN}✓${NC} Rust has been successfully installed"
-else
-    echo -e "  ${GREEN}✓${NC} Rust is already installed"
-fi
-
-# Check Rust version
-RUST_VERSION=$(rustc --version | cut -d' ' -f2)
-echo -e "  ${GREEN}✓${NC} Rust version: $RUST_VERSION"
-
-cd - > /dev/null
-echo -e "  ${GREEN}✓${NC} Generated parser tables"
+copy_files_to_install_dir
 
 # Create symbolic links
+symlink_result=1
 create_symlinks "$INSTALL_DIR"
-if [ $? -ne 0 ]; then
-    echo -e "${RED}Failed to create symbolic links.${NC}"
-    rm -rf "$TMP_DIR"
-    exit 1
-fi
+symlink_result=$?
 
-# Clean up
-rm -rf "$TMP_DIR"
-echo -e "  ${GREEN}✓${NC} Cleaned up temporary files"
+# Check for Rust installation
+check_and_install_rust
+rust_installed=$?
 
 # Ask about IDE extension installation
 echo -e "\n${YELLOW}Would you like to install IDE extensions for Razen?${NC}"
@@ -435,72 +833,19 @@ read -p "Enter your choice (1-3): " ide_choice
 echo
 
 # Install IDE extensions based on user choice
+vscode_ext_installed=1
+jetbrains_plugin_installed=1
+
 case $ide_choice in
     1)
-        echo -e "${YELLOW}Installing VS Code Extension for Razen...${NC}"
-        
-        # Check if VS Code is installed
-        if command -v code &> /dev/null || command -v codium &> /dev/null; then
-            # Create VS Code extensions directory if it doesn't exist
-            VSCODE_EXT_DIR="$HOME/.vscode/extensions/razen-lang.razen-language"
-            mkdir -p "$VSCODE_EXT_DIR"
-            
-            # Copy VS Code extension files
-            cp -r "$INSTALL_DIR/razen-vscode-extension/"* "$VSCODE_EXT_DIR/"
-            
-            echo -e "  ${GREEN}✓${NC} VS Code Extension installed successfully"
-            echo -e "  ${YELLOW}Location:${NC} $VSCODE_EXT_DIR"
-            echo -e "  ${YELLOW}Restart VS Code to activate the extension${NC}"
-        else
-            echo -e "${YELLOW}VS Code not detected. Installing extension files only...${NC}"
-            
-            # Create a directory in the user's home for the extension
-            VSCODE_EXT_DIR="$HOME/.razen/vscode-extension"
-            mkdir -p "$VSCODE_EXT_DIR"
-            
-            # Copy VS Code extension files
-            cp -r "$INSTALL_DIR/razen-vscode-extension/"* "$VSCODE_EXT_DIR/"
-            
-            echo -e "  ${GREEN}✓${NC} VS Code Extension files installed to: $VSCODE_EXT_DIR"
-            echo -e "  ${YELLOW}To use with VS Code, copy these files to:${NC}"
-            echo -e "  ${CYAN}~/.vscode/extensions/razen-lang.razen-language/${NC}"
-        fi
+        install_vscode_extension
+        vscode_ext_installed=$?
         ;;
     2)
-        echo -e "${YELLOW}Installing JetBrains Plugin for Razen...${NC}"
-        
-        # Check if any JetBrains IDE is installed
-        JETBRAINS_FOUND=false
-        for ide_dir in "$HOME/Library/Application Support/JetBrains" "$HOME/.local/share/JetBrains"; do
-            if [ -d "$ide_dir" ]; then
-                JETBRAINS_FOUND=true
-                break
-            fi
-        done
-        
-        # Create a directory for the JetBrains plugin
-        JETBRAINS_PLUGIN_DIR="$HOME/.razen/jetbrains-plugin"
-        mkdir -p "$JETBRAINS_PLUGIN_DIR"
-        
-        # Copy JetBrains plugin files
-        cp -r "$INSTALL_DIR/razen-jetbrains-plugin/"* "$JETBRAINS_PLUGIN_DIR/"
-        
-        if [ "$JETBRAINS_FOUND" = true ]; then
-            echo -e "  ${GREEN}✓${NC} JetBrains Plugin files installed to: $JETBRAINS_PLUGIN_DIR"
-            echo -e "  ${YELLOW}To activate the plugin:${NC}"
-            echo -e "  1. Open your JetBrains IDE"
-            echo -e "  2. Go to Settings/Preferences > Plugins"
-            echo -e "  3. Click the gear icon and select 'Install Plugin from Disk...'"
-            echo -e "  4. Navigate to $JETBRAINS_PLUGIN_DIR and select the plugin JAR file"
-            echo -e "     (You may need to build it first using Gradle)"
-        else
-            echo -e "  ${GREEN}✓${NC} JetBrains Plugin files installed to: $JETBRAINS_PLUGIN_DIR"
-            echo -e "  ${YELLOW}No JetBrains IDE detected. To use the plugin:${NC}"
-            echo -e "  1. Build the plugin using Gradle: cd $JETBRAINS_PLUGIN_DIR && ./gradlew buildPlugin"
-            echo -e "  2. Install the plugin from: $JETBRAINS_PLUGIN_DIR/build/distributions/"
-        fi
+        install_jetbrains_plugin
+        jetbrains_plugin_installed=$?
         ;;
-    *)
+    3)
         echo -e "${YELLOW}Skipping IDE extension installation.${NC}"
         echo -e "${CYAN}You can install extensions later from:${NC}"
         echo -e "  VS Code: $INSTALL_DIR/razen-vscode-extension/"
@@ -508,16 +853,19 @@ case $ide_choice in
         ;;
 esac
 
+# Display installation summary
+show_installation_summary "$INSTALL_DIR" "$RAZEN_VERSION" "$symlink_result" "$vscode_ext_installed" "$jetbrains_plugin_installed"
+
 # Success message
 echo -e "\n${GREEN}✅ Razen has been successfully installed!${NC}"
 echo -e "\n${YELLOW}Available commands:${NC}"
 echo -e "  ${GREEN}razen${NC} - Run Razen programs"
 echo -e "  ${GREEN}razen-debug${NC} - Run Razen programs in debug mode"
-echo -e "  ${GREEN}razen-test${NC} - Run Razen tests"
-echo -e "  ${GREEN}razen-run${NC} - Run Razen programs with additional options"
+echo -e "  ${GREEN}razen-test${NC} - Run tests for a Razen program"
+echo -e "  ${GREEN}razen-run${NC} - Run a Razen program with additional options"
 echo -e "  ${GREEN}razen-update${NC} - Update Razen to the latest version"
 echo -e "  ${GREEN}razen-help${NC} - Show help information"
-echo -e "  ${GREEN}razen-extension${NC} - Manage IDE extensions for Razen"
+echo -e "  ${GREEN}razen-extension${NC} - Manage Razen extensions"
 echo -e "  ${GREEN}razen new myprogram${NC} - Create a new Razen program"
 echo -e "  ${GREEN}razen version${NC} - Show Razen version"
 echo -e "\n${YELLOW}Example usage:${NC}"
