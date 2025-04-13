@@ -1,0 +1,249 @@
+type web;
+
+# Define the Task structure
+struct Task {
+    id: number,
+    text: string,
+    completed: boolean
+}
+
+# Initialize the tasks array
+take tasks = [];
+take taskIdCounter = 0;
+take currentFilter = "all";
+
+# DOM element references
+take taskInput = document.getElementById("taskInput");
+take addTaskButton = document.getElementById("addTask");
+take taskList = document.getElementById("taskList");
+take taskStats = document.getElementById("taskStats");
+take clearCompletedButton = document.getElementById("clearCompleted");
+take showAllButton = document.getElementById("showAll");
+take showActiveButton = document.getElementById("showActive");
+take showCompletedButton = document.getElementById("showCompleted");
+
+# Function to create a new task
+fun createTask(let text) {
+    if (text.trim() == "") {
+        return;
+    }
+    
+    let newTask = {
+        id: taskIdCounter,
+        text: text.trim(),
+        completed: false
+    };
+    
+    tasks.push(newTask);
+    taskIdCounter = taskIdCounter + 1;
+    
+    saveTasksToLocalStorage();
+    renderTasks();
+    updateTaskStats();
+}
+
+# Function to toggle task completion status
+fun toggleTaskCompletion(let id) {
+    for (let i = 0; i < tasks.length; i++) {
+        if (tasks[i].id == id) {
+            tasks[i].completed = !tasks[i].completed;
+            break;
+        }
+    }
+    
+    saveTasksToLocalStorage();
+    renderTasks();
+    updateTaskStats();
+}
+
+# Function to delete a task
+fun deleteTask(let id) {
+    let newTasks = [];
+    
+    for (let i = 0; i < tasks.length; i++) {
+        if (tasks[i].id != id) {
+            newTasks.push(tasks[i]);
+        }
+    }
+    
+    tasks = newTasks;
+    
+    saveTasksToLocalStorage();
+    renderTasks();
+    updateTaskStats();
+}
+
+# Function to clear all completed tasks
+fun clearCompletedTasks() {
+    let newTasks = [];
+    
+    for (let i = 0; i < tasks.length; i++) {
+        if (!tasks[i].completed) {
+            newTasks.push(tasks[i]);
+        }
+    }
+    
+    tasks = newTasks;
+    
+    saveTasksToLocalStorage();
+    renderTasks();
+    updateTaskStats();
+}
+
+# Function to filter tasks
+fun filterTasks(let filter) {
+    currentFilter = filter;
+    
+    # Update active filter button
+    showAllButton.classList.remove("active");
+    showActiveButton.classList.remove("active");
+    showCompletedButton.classList.remove("active");
+    
+    if (filter == "all") {
+        showAllButton.classList.add("active");
+    } else if (filter == "active") {
+        showActiveButton.classList.add("active");
+    } else if (filter == "completed") {
+        showCompletedButton.classList.add("active");
+    }
+    
+    renderTasks();
+}
+
+# Function to render tasks based on current filter
+fun renderTasks() {
+    # Clear the task list
+    taskList.innerHTML = "";
+    
+    for (let i = 0; i < tasks.length; i++) {
+        let task = tasks[i];
+        
+        # Apply filter
+        if (currentFilter == "active" && task.completed) {
+            continue;
+        }
+        
+        if (currentFilter == "completed" && !task.completed) {
+            continue;
+        }
+        
+        # Create task item
+        let taskItem = document.createElement("li");
+        taskItem.className = "task-item";
+        if (task.completed) {
+            taskItem.classList.add("task-completed");
+        }
+        
+        # Create checkbox
+        let checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.className = "task-checkbox";
+        checkbox.checked = task.completed;
+        
+        # Add event listener to checkbox
+        checkbox.addEventListener("change", fun() {
+            toggleTaskCompletion(task.id);
+        });
+        
+        # Create task text
+        let taskText = document.createElement("span");
+        taskText.className = "task-text";
+        taskText.textContent = task.text;
+        
+        # Create delete button
+        let deleteButton = document.createElement("button");
+        deleteButton.className = "delete-task";
+        deleteButton.textContent = "Delete";
+        
+        # Add event listener to delete button
+        deleteButton.addEventListener("click", fun() {
+            deleteTask(task.id);
+        });
+        
+        # Append elements to task item
+        taskItem.appendChild(checkbox);
+        taskItem.appendChild(taskText);
+        taskItem.appendChild(deleteButton);
+        
+        # Append task item to task list
+        taskList.appendChild(taskItem);
+    }
+}
+
+# Function to update task statistics
+fun updateTaskStats() {
+    let remainingTasks = 0;
+    
+    for (let i = 0; i < tasks.length; i++) {
+        if (!tasks[i].completed) {
+            remainingTasks = remainingTasks + 1;
+        }
+    }
+    
+    let taskText = remainingTasks == 1 ? "task" : "tasks";
+    taskStats.textContent = remainingTasks + " " + taskText + " remaining";
+}
+
+# Function to save tasks to local storage
+fun saveTasksToLocalStorage() {
+    let tasksJson = JSON.stringify(tasks);
+    localStorage.setItem("tasks", tasksJson);
+}
+
+# Function to load tasks from local storage
+fun loadTasksFromLocalStorage() {
+    let tasksJson = localStorage.getItem("tasks");
+    
+    if (tasksJson) {
+        tasks = JSON.parse(tasksJson);
+        
+        # Find the highest task ID to continue from
+        for (let i = 0; i < tasks.length; i++) {
+            if (tasks[i].id >= taskIdCounter) {
+                taskIdCounter = tasks[i].id + 1;
+            }
+        }
+        
+        renderTasks();
+        updateTaskStats();
+    }
+}
+
+# Event listener for add task button
+addTaskButton.addEventListener("click", fun() {
+    createTask(taskInput.value);
+    taskInput.value = "";
+    taskInput.focus();
+});
+
+# Event listener for task input (Enter key)
+taskInput.addEventListener("keypress", fun(event) {
+    if (event.key == "Enter") {
+        createTask(taskInput.value);
+        taskInput.value = "";
+    }
+});
+
+# Event listeners for filter buttons
+showAllButton.addEventListener("click", fun() {
+    filterTasks("all");
+});
+
+showActiveButton.addEventListener("click", fun() {
+    filterTasks("active");
+});
+
+showCompletedButton.addEventListener("click", fun() {
+    filterTasks("completed");
+});
+
+# Event listener for clear completed button
+clearCompletedButton.addEventListener("click", fun() {
+    clearCompletedTasks();
+});
+
+# Initialize the app
+document.addEventListener("DOMContentLoaded", fun() {
+    loadTasksFromLocalStorage();
+    taskInput.focus();
+});

@@ -1,0 +1,38 @@
+type web;
+
+# This is a test file to verify autocomplete functionality
+# Try typing after these comments to see autocomplete in action
+
+# Try variable declarations (type 'let', 'take', 'hold', or 'put')
+# You can also use shorthand notation: let.count.0
+
+# Try function declarations (type 'fun')
+
+# Try control flow (type 'if', 'while', 'for')
+
+# Try built-in functions (try typing a few letters of a function name)
+
+# Try string concatenation (using the + operator)
+take name = "World";
+take message = "Hello, " + name;
+
+# Try shorthand notation examples:
+# let.counter.10
+# take.greeting."Hello"
+# hold.isActive.true
+# put.data.{}
+
+# Try template snippets:
+
+# Document Types (these define the type of Razen program):
+# razen:web - Creates a web application (document type - still in development)
+# razen:cli - Creates a CLI application (document type)
+# razen:script - Creates a script (document type)
+# razen:freestyle - Creates a freestyle program (document type)
+
+# Features/Components (these work within document types):
+# razen:api - Creates an API server (feature for script/web document types)
+# razen:database - Creates a database integration (feature for any document type)
+# razen:component - Creates a reusable component (feature for web/script document types)
+
+# Try document-specific variables

@@ -10,6 +10,7 @@
   "categories": [
     "Programming Languages"
   ],
+  "main": "./src/extension.js",
   "contributes": {
     "languages": [
       {
@@ -29,16 +30,34 @@
         "scopeName": "source.razen",
         "path": "./syntaxes/razen.tmLanguage.json"
       }
+    ],
+    "snippets": [
+      {
+        "language": "razen",
+        "path": "./snippets/razen.json"
+      }
+    ],
+    "commands": [
+      {
+        "command": "razen.insertTemplate",
+        "title": "Razen: Insert Template"
+      }
     ]
   },
   "keywords": [
     "razen",
     "programming language",
     "syntax highlighting",
+    "autocomplete",
+    "intellisense",
+    "snippets",
     "rzn"
   ],
   "repository": {
     "type": "git",
     "url": "https://github.com/BasaiCorp/Razen-Lang"
+  },
+  "dependencies": {
+    "vscode-languageclient": "^7.0.0"
   }
 }

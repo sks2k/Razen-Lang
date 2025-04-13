@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Razen Web Example</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Razen Interactive Todo App</h1>
+        
+        <div class="input-section">
+            <input type="text" id="taskInput" placeholder="Enter a new task...">
+            <button id="addTask">Add Task</button>
+        </div>
+        
+        <div class="filter-section">
+            <button id="showAll" class="active">All</button>
+            <button id="showActive">Active</button>
+            <button id="showCompleted">Completed</button>
+        </div>
+        
+        <ul id="taskList">
+            <!-- Tasks will be added here dynamically -->
+        </ul>
+        
+        <div class="stats-section">
+            <p id="taskStats">0 tasks remaining</p>
+            <button id="clearCompleted">Clear Completed</button>
+        </div>
+    </div>
+
+    <!-- Include Razen script instead of JavaScript -->
+    <script type="text/razen" src="script.rzn"></script>
+</body>
+</html>
