@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Razen Language Update Utility
-# Copyright © 2025 Prathmesh Barot, Basai Corporation
+# Copyright 2025 Prathmesh Barot, Basai Corporation
 
 # Colors for terminal output
 GREEN="\033[0;32m"
@@ -25,7 +25,7 @@ echo "╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝╚══�
 echo -e "${NC}"
 echo -e "${YELLOW}Razen Update Utility${NC}"
 echo -e "${CYAN}By Prathmesh Barot, Basai Corporation${NC}"
-echo -e "${YELLOW}Copyright © 2025 Prathmesh Barot${NC}\n"
+echo -e "${YELLOW}Copyright 2025 Prathmesh Barot${NC}\n"
 sleep 1
 
 # Function to detect OS
@@ -49,12 +49,16 @@ find_install_path() {
     if [ "$OS" == "linux" ]; then
         if [ -d "/usr/local/lib/razen" ]; then
             echo "/usr/local/lib/razen"
+        elif [ -d "$HOME/.local/lib/razen" ]; then
+            echo "$HOME/.local/lib/razen"
         else
             echo ""
         fi
     elif [ "$OS" == "macos" ]; then
         if [ -d "/usr/local/razen" ]; then
             echo "/usr/local/razen"
+        elif [ -d "$HOME/.local/lib/razen" ]; then
+            echo "$HOME/.local/lib/razen"
         else
             echo ""
         fi
@@ -69,6 +73,31 @@ find_install_path() {
     fi
 }
 
+# Function to find bin directory
+find_bin_path() {
+    if [ -L "/usr/local/bin/razen" ]; then
+        echo "/usr/local/bin"
+    elif [ -L "/usr/bin/razen" ]; then
+        echo "/usr/bin"
+    elif [ -L "$HOME/.local/bin/razen" ]; then
+        echo "$HOME/.local/bin"
+    else
+        echo ""
+    fi
+}
+
+# Function to check internet connectivity
+check_internet() {
+    echo -e "${YELLOW}Checking internet connectivity...${NC}"
+    if ! ping -c 1 github.com &>/dev/null && ! ping -c 1 google.com &>/dev/null; then
+        echo -e "${RED}Error: No internet connection detected.${NC}"
+        echo -e "${YELLOW}Please check your network connection and try again.${NC}"
+        return 1
+    fi
+    echo -e "  ${GREEN}✓${NC} Internet connection detected"
+    return 0
+}
+
 # Find installation path
 INSTALL_PATH=$(find_install_path)
 
@@ -77,6 +106,17 @@ if [ -z "$INSTALL_PATH" ]; then
     echo -e "${YELLOW}Please install Razen first.${NC}"
     exit 1
 fi
+
+# Find bin directory
+BIN_PATH=$(find_bin_path)
+
+if [ -z "$BIN_PATH" ]; then
+    echo -e "${YELLOW}Warning: Razen symbolic links not found in standard locations.${NC}"
+    echo -e "${YELLOW}Symbolic links will be recreated during update.${NC}"
+fi
+
+# Check internet connectivity
+check_internet || exit 1
 
 # Get current version
 if [ -f "$INSTALL_PATH/version" ]; then
@@ -105,69 +145,328 @@ LATEST_VERSION=$(cat "$TMP_DIR/version.txt" | tr -d '\r\n')
 echo -e "${YELLOW}Latest version: ${GREEN}$LATEST_VERSION${NC}"
 
 # Compare versions
-if [ "$LATEST_VERSION" == "$CURRENT_VERSION" ]; then
+if [ "$LATEST_VERSION" == "$CURRENT_VERSION" ] && [ "$1" != "--force" ]; then
     echo -e "${GREEN}Razen is already up to date.${NC}"
     rm -rf "$TMP_DIR"
     exit 0
 else
-    echo -e "${YELLOW}New version available: $LATEST_VERSION${NC}"
-    echo -e "${YELLOW}Current version: $CURRENT_VERSION${NC}"
-    
-    read -p "Do you want to update Razen? (y/n): " -n 1 -r
-    echo
-    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-        echo -e "${BLUE}Update cancelled.${NC}"
-        rm -rf "$TMP_DIR"
-        exit 0
+    if [ "$1" == "--force" ]; then
+        echo -e "${YELLOW}Force update requested.${NC}"
+    else
+        echo -e "${YELLOW}New version available: $LATEST_VERSION${NC}"
+        echo -e "${YELLOW}Current version: $CURRENT_VERSION${NC}"
+        
+        read -p "Do you want to update Razen? (y/n): " -n 1 -r
+        echo
+        if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+            echo -e "${BLUE}Update cancelled.${NC}"
+            rm -rf "$TMP_DIR"
+            exit 0
+        fi
     fi
     
-    echo -e "${YELLOW}Downloading the latest installer...${NC}"
+    echo -e "${YELLOW}Updating Razen from version $CURRENT_VERSION to $LATEST_VERSION...${NC}"
     
-    # Download the appropriate installer based on OS
-    if [ "$OS" == "linux" ]; then
-        INSTALLER_URL="$RAZEN_REPO/install.sh"
-        INSTALLER_FILE="$TMP_DIR/install.sh"
-    elif [ "$OS" == "macos" ]; then
-        INSTALLER_URL="$RAZEN_REPO/install-mac.sh"
-        INSTALLER_FILE="$TMP_DIR/install-mac.sh"
-    elif [ "$OS" == "windows" ]; then
-        echo -e "${YELLOW}Windows installation detected.${NC}"
-        echo -e "${YELLOW}Please use PowerShell to update Windows installations:${NC}"
-        echo -e "${GREEN}Run: ${CYAN}.\install.ps1 update${NC}"
-        rm -rf "$TMP_DIR"
-        exit 0
+    # Create necessary directories in temp folder
+    mkdir -p "$TMP_DIR/src"
+    mkdir -p "$TMP_DIR/scripts"
+    mkdir -p "$TMP_DIR/properties"
+    mkdir -p "$TMP_DIR/examples"
+    echo -e "  ${GREEN}✓${NC} Created temporary directories"
+    
+    # Function to download directory contents
+    download_directory() {
+        local dir_name=$1
+        local target_dir=$2
+        local files_count=0
+        local success_count=0
+        
+        echo -e "${YELLOW}Downloading $dir_name files...${NC}"
+        
+        # First try to get a file listing
+        if curl -s "$RAZEN_REPO/$dir_name/" > "$TMP_DIR/filelist.html"; then
+            # Extract filenames from HTML (this is a simple approach and might need adjustment)
+            grep -o "href=\"[^\"]*\.rzn\"" "$TMP_DIR/filelist.html" | cut -d'"' -f2 > "$TMP_DIR/files.txt"
+            grep -o "href=\"[^\"]*\.sh\"" "$TMP_DIR/filelist.html" | cut -d'"' -f2 >> "$TMP_DIR/files.txt"
+            grep -o "href=\"[^\"]*\.py\"" "$TMP_DIR/filelist.html" | cut -d'"' -f2 >> "$TMP_DIR/files.txt"
+            
+            # Download each file
+            while read -r file; do
+                files_count=$((files_count + 1))
+                if curl -s --retry 3 --retry-delay 2 -o "$target_dir/$(basename "$file")" "$RAZEN_REPO/$dir_name/$file" &>/dev/null; then
+                    success_count=$((success_count + 1))
+                fi
+            done < "$TMP_DIR/files.txt"
+            
+            echo -e "  ${GREEN}✓${NC} Downloaded $success_count/$files_count files from $dir_name/"
+        else
+            # Fallback: try to download known files
+            case "$dir_name" in
+                "properties")
+                    local files="variables.rzn keywords.rzn operators.rzn functions.rzn loops.rzn conditionals.rzn types.rzn api.rzn syntax.rzn"
+                    ;;
+                "scripts")
+                    local files="razen razen-debug razen-test razen-run razen-update razen-help razen-docs razen-extension"
+                    ;;
+                "src")
+                    local files="main.py compiler.py parser.py lexer.py interpreter.py"
+                    ;;
+                "examples")
+                    local files="hello.rzn calculator.rzn web-example/script.rzn quiz.rzn guess.rzn"
+                    ;;
+                *)
+                    local files=""
+                    ;;
+            esac
+            
+            for file in $files; do
+                files_count=$((files_count + 1))
+                mkdir -p "$target_dir/$(dirname "$file")" 2>/dev/null
+                if curl -s --retry 3 --retry-delay 2 -o "$target_dir/$(basename "$file")" "$RAZEN_REPO/$dir_name/$file" &>/dev/null; then
+                    success_count=$((success_count + 1))
+                fi
+            done
+            
+            echo -e "  ${GREEN}✓${NC} Downloaded $success_count/$files_count files from $dir_name/"
+        fi
+    }
+    
+    # Download Razen compiler binary
+    echo -e "${YELLOW}Downloading Razen compiler binary...${NC}"
+    if ! curl -s --retry 3 --retry-delay 2 -o "$TMP_DIR/razen_compiler" "$RAZEN_REPO/target/release/razen_compiler" &>/dev/null; then
+        echo -e "${RED}Failed to download Razen compiler binary.${NC}"
+        echo -e "${YELLOW}Keeping existing binary.${NC}"
+        
+        # Copy existing binary if available
+        if [ -f "/usr/local/bin/razen_compiler" ]; then
+            cp "/usr/local/bin/razen_compiler" "$TMP_DIR/razen_compiler"
+            echo -e "  ${GREEN}✓${NC} Copied existing compiler binary"
+        elif [ -f "$HOME/.local/bin/razen_compiler" ]; then
+            cp "$HOME/.local/bin/razen_compiler" "$TMP_DIR/razen_compiler"
+            echo -e "  ${GREEN}✓${NC} Copied existing compiler binary"
+        else
+            echo -e "${RED}Error: Could not find existing compiler binary.${NC}"
+            rm -rf "$TMP_DIR"
+            exit 1
+        fi
     else
-        echo -e "${RED}Unsupported operating system: $OS${NC}"
+        echo -e "  ${GREEN}✓${NC} Downloaded Razen compiler binary"
+    fi
+    
+    # Make the binary executable
+    chmod +x "$TMP_DIR/razen_compiler" || {
+        echo -e "${RED}Error: Failed to make binary executable.${NC}"
         rm -rf "$TMP_DIR"
         exit 1
-    fi
+    }
     
-    # Download the installer
-    if ! curl -s -o "$INSTALLER_FILE" "$INSTALLER_URL"; then
-        echo -e "${RED}Error: Failed to download the installer.${NC}"
-        echo -e "${YELLOW}Please check your internet connection.${NC}"
+    # Download each directory
+    download_directory "properties" "$TMP_DIR/properties"
+    download_directory "scripts" "$TMP_DIR/scripts"
+    download_directory "src" "$TMP_DIR/src"
+    download_directory "examples" "$TMP_DIR/examples"
+    
+    # Make scripts executable
+    chmod +x "$TMP_DIR/scripts/"* || {
+        echo -e "${RED}Error: Failed to make scripts executable.${NC}"
         rm -rf "$TMP_DIR"
         exit 1
+    }
+    echo -e "  ${GREEN}✓${NC} Made scripts executable"
+    
+    # Save the version file
+    echo "$LATEST_VERSION" > "$TMP_DIR/version"
+    echo -e "  ${GREEN}✓${NC} Created version file: $LATEST_VERSION"
+    
+    # Update installation
+    echo -e "${YELLOW}Updating installation...${NC}"
+    
+    # Determine if we need sudo
+    NEED_SUDO=false
+    if [[ "$INSTALL_PATH" == "/usr/local/lib/razen" || "$INSTALL_PATH" == "/usr/local/razen" ]]; then
+        NEED_SUDO=true
     fi
-    echo -e "${GREEN}✓${NC} Downloaded latest installer"
     
-    # Make the installer executable
-    chmod +x "$INSTALLER_FILE"
+    # Function to copy files with or without sudo
+    copy_files() {
+        local src=$1
+        local dest=$2
+        
+        if [ "$NEED_SUDO" = true ]; then
+            sudo cp -r "$src" "$dest"
+        else
+            cp -r "$src" "$dest"
+        fi
+        return $?
+    }
     
-    # Run the installer with force update
-    echo -e "${YELLOW}Running installer to update Razen...${NC}"
-    echo -e "${YELLOW}You may be prompted for your password to install updates.${NC}"
-    echo ""
-    
-    sudo "$INSTALLER_FILE" --force-update
-    
-    # Check if update was successful
-    if [ $? -eq 0 ]; then
-        echo -e "${GREEN}✅ Update completed successfully!${NC}"
+    # Update compiler binary
+    echo -e "${YELLOW}Updating compiler binary...${NC}"
+    if [ "$NEED_SUDO" = true ]; then
+        sudo cp "$TMP_DIR/razen_compiler" "/usr/local/bin/razen_compiler" || {
+            echo -e "${RED}Error: Failed to update compiler binary.${NC}"
+            rm -rf "$TMP_DIR"
+            exit 1
+        }
     else
-        echo -e "${RED}Update failed. Please try again later.${NC}"
+        cp "$TMP_DIR/razen_compiler" "$HOME/.local/bin/razen_compiler" 2>/dev/null || {
+            mkdir -p "$HOME/.local/bin"
+            cp "$TMP_DIR/razen_compiler" "$HOME/.local/bin/razen_compiler" || {
+                echo -e "${RED}Error: Failed to update compiler binary.${NC}"
+                rm -rf "$TMP_DIR"
+                exit 1
+            }
+        }
     fi
+    echo -e "  ${GREEN}✓${NC} Updated compiler binary"
+    
+    # Update properties files
+    echo -e "${YELLOW}Updating properties files...${NC}"
+    copy_files "$TMP_DIR/properties/"* "$INSTALL_PATH/properties/" || {
+        echo -e "${RED}Error: Failed to update properties files.${NC}"
+        rm -rf "$TMP_DIR"
+        exit 1
+    }
+    echo -e "  ${GREEN}✓${NC} Updated properties files"
+    
+    # Update scripts
+    echo -e "${YELLOW}Updating scripts...${NC}"
+    copy_files "$TMP_DIR/scripts/"* "$INSTALL_PATH/scripts/" || {
+        echo -e "${RED}Error: Failed to update scripts.${NC}"
+        rm -rf "$TMP_DIR"
+        exit 1
+    }
+    echo -e "  ${GREEN}✓${NC} Updated scripts"
+    
+    # Update source files
+    echo -e "${YELLOW}Updating source files...${NC}"
+    if [ -d "$INSTALL_PATH/src" ]; then
+        copy_files "$TMP_DIR/src/"* "$INSTALL_PATH/src/" 2>/dev/null || true
+        echo -e "  ${GREEN}✓${NC} Updated source files"
+    else
+        if [ "$NEED_SUDO" = true ]; then
+            sudo mkdir -p "$INSTALL_PATH/src"
+            copy_files "$TMP_DIR/src/"* "$INSTALL_PATH/src/" 2>/dev/null || true
+        else
+            mkdir -p "$INSTALL_PATH/src"
+            copy_files "$TMP_DIR/src/"* "$INSTALL_PATH/src/" 2>/dev/null || true
+        fi
+        echo -e "  ${GREEN}✓${NC} Created and updated source files"
+    fi
+    
+    # Update examples
+    echo -e "${YELLOW}Updating example files...${NC}"
+    if [ -d "$INSTALL_PATH/examples" ]; then
+        copy_files "$TMP_DIR/examples/"* "$INSTALL_PATH/examples/" 2>/dev/null || true
+        echo -e "  ${GREEN}✓${NC} Updated example files"
+    else
+        if [ "$NEED_SUDO" = true ]; then
+            sudo mkdir -p "$INSTALL_PATH/examples"
+            copy_files "$TMP_DIR/examples/"* "$INSTALL_PATH/examples/" 2>/dev/null || true
+        else
+            mkdir -p "$INSTALL_PATH/examples"
+            copy_files "$TMP_DIR/examples/"* "$INSTALL_PATH/examples/" 2>/dev/null || true
+        fi
+        echo -e "  ${GREEN}✓${NC} Created and updated example files"
+    fi
+    
+    # Update version file
+    echo -e "${YELLOW}Updating version information...${NC}"
+    if [ "$NEED_SUDO" = true ]; then
+        echo "$LATEST_VERSION" | sudo tee "$INSTALL_PATH/version" > /dev/null || {
+            echo -e "${RED}Error: Failed to update version information.${NC}"
+            rm -rf "$TMP_DIR"
+            exit 1
+        }
+    else
+        echo "$LATEST_VERSION" > "$INSTALL_PATH/version" || {
+            echo -e "${RED}Error: Failed to update version information.${NC}"
+            rm -rf "$TMP_DIR"
+            exit 1
+        }
+    fi
+    echo -e "  ${GREEN}✓${NC} Updated version information: $LATEST_VERSION"
+    
+    # Function to recreate symbolic links
+    recreate_symlinks() {
+        echo -e "${YELLOW}Recreating symbolic links...${NC}"
+        
+        # List of all scripts that need symlinks
+        SCRIPTS="razen razen-debug razen-test razen-run razen-update razen-help razen-docs razen-extension"
+        
+        # Determine the appropriate bin directory
+        if [ -n "$BIN_PATH" ]; then
+            local target_bin="$BIN_PATH"
+        elif [ -w "/usr/local/bin" ]; then
+            local target_bin="/usr/local/bin"
+        elif [ -w "$HOME/.local/bin" ]; then
+            local target_bin="$HOME/.local/bin"
+        else
+            # Create user bin directory if it doesn't exist
+            mkdir -p "$HOME/.local/bin"
+            local target_bin="$HOME/.local/bin"
+            
+            # Add to PATH if not already there
+            if [[ ":$PATH:" != *":$HOME/.local/bin:"* ]]; then
+                echo 'export PATH="$HOME/.local/bin:$PATH"' >> "$HOME/.bashrc"
+                echo 'export PATH="$HOME/.local/bin:$PATH"' >> "$HOME/.profile"
+                echo -e "${YELLOW}Added $HOME/.local/bin to your PATH. Please restart your terminal after update.${NC}"
+            fi
+        fi
+        
+        echo -e "${YELLOW}Using bin directory: ${CYAN}$target_bin${NC}"
+        
+        # Create symlinks in the bin directory
+        local missing_links=0
+        for script in $SCRIPTS; do
+            if [ -f "$INSTALL_PATH/scripts/$script" ]; then
+                if [ -w "$target_bin" ]; then
+                    # Direct creation if we have write permissions
+                    ln -sf "$INSTALL_PATH/scripts/$script" "$target_bin/$script"
+                    echo -e "  ${GREEN}✓${NC} Created $target_bin/$script"
+                else
+                    # Use sudo if we don't have direct write permissions
+                    if sudo ln -sf "$INSTALL_PATH/scripts/$script" "$target_bin/$script"; then
+                        echo -e "  ${GREEN}✓${NC} Created $target_bin/$script"
+                    else
+                        echo -e "  ${RED}✗${NC} Failed to create symlink in $target_bin/$script (permission denied)"
+                        missing_links=$((missing_links + 1))
+                    fi
+                fi
+            else
+                echo -e "  ${RED}✗${NC} Failed to create $target_bin/$script (source file not found)"
+                missing_links=$((missing_links + 1))
+            fi
+        done
+        
+        # Verify all symlinks are created
+        if [ $missing_links -gt 0 ]; then
+            echo -e "${RED}Failed to create some symbolic links. Please check the errors above.${NC}"
+            echo -e "${YELLOW}You may need to manually create symlinks or add the scripts directory to your PATH.${NC}"
+            return 1
+        fi
+        
+        echo -e "${GREEN}✓${NC} All symbolic links created successfully in $target_bin"
+        return 0
+    }
+    
+    # Recreate symbolic links
+    recreate_symlinks || {
+        echo -e "${YELLOW}Warning: Failed to recreate some symbolic links.${NC}"
+        echo -e "${YELLOW}You may need to manually create them.${NC}"
+    }
     
     # Clean up
     rm -rf "$TMP_DIR"
+    
+    echo -e "\n${GREEN}✅ Razen has been successfully updated to version $LATEST_VERSION!${NC}"
+    echo -e "\n${YELLOW}Available commands:${NC}"
+    echo -e "  ${GREEN}razen${NC} - Run Razen programs"
+    echo -e "  ${GREEN}razen-debug${NC} - Run Razen programs in debug mode"
+    echo -e "  ${GREEN}razen-test${NC} - Run Razen tests"
+    echo -e "  ${GREEN}razen-run${NC} - Run Razen programs with additional options"
+    echo -e "  ${GREEN}razen-update${NC} - Update Razen to the latest version"
+    echo -e "  ${GREEN}razen-help${NC} - Show help information"
+    echo -e "  ${GREEN}razen new myprogram${NC} - Create a new Razen program"
+    echo -e "  ${GREEN}razen version${NC} - Show Razen version"
 fi

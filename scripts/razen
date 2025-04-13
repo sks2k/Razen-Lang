@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # Get the directory where this script is located
-SCRIPT_DIR=$(dirname "$0")
+SCRIPT_DIR=$(dirname "$(readlink -f "$0")")
 
 # First try the development directory structure (script is in scripts/)
 PROJECT_ROOT=$(cd "$SCRIPT_DIR/.." && pwd)
@@ -22,6 +22,10 @@ if [ ! -f "$RAZEN_BIN" ]; then
   elif [ -f "/usr/bin/razen_compiler" ]; then
     RAZEN_BIN="/usr/bin/razen_compiler"
     INSTALL_DIR="/usr/local/lib/razen"
+  # Check user's local bin directory
+  elif [ -f "$HOME/.local/bin/razen_compiler" ]; then
+    RAZEN_BIN="$HOME/.local/bin/razen_compiler"
+    INSTALL_DIR="$HOME/.local/lib/razen"
   # Check Windows paths if running in WSL
   elif [ -f "/mnt/c/Program Files/Razen/razen_compiler.exe" ]; then
     RAZEN_BIN="/mnt/c/Program Files/Razen/razen_compiler.exe"
@@ -41,6 +45,8 @@ GREEN="\033[0;32m"
 RED="\033[0;31m"
 YELLOW="\033[0;33m"
 BLUE="\033[0;34m"
+PURPLE="\033[0;35m"
+CYAN="\033[0;36m"
 NC="\033[0m" # No Color
 
 # Function to get the current version
@@ -51,8 +57,13 @@ get_version() {
   elif [ -f "$PROJECT_ROOT/version" ]; then
     cat "$PROJECT_ROOT/version"
   else
-    echo "beta v0.1.36" # Fallback version
+    echo "beta v0.1.53" # Fallback version
   fi
+}
+
+# Function to get current date in YYYY-MM-DD format
+get_current_date() {
+  date +"%Y-%m-%d"
 }
 
 # Handle commands
@@ -71,17 +82,43 @@ if [ "$1" == "new" ]; then
     
     echo -e "${YELLOW}Creating new Razen program: ${FILENAME}${NC}"
     
+    # Get current date
+    CURRENT_DATE=$(get_current_date)
+    
     cat > "$FILENAME" << EOF
-// New Razen program created on $(date)
-// Powered by Razen Language
+type freestyle;
 
-// Your code goes here
-let message = "Hello, World!"
-show "\${message}"
+# Razen Freestyle Program
+# Created: $CURRENT_DATE
 
-// Read user input
-read user_input = "What's your name? "
-show "Nice to meet you, \${user_input}!"
+# This is a freestyle Razen program where you can mix different paradigms
+
+# Variables
+take name = "Razen";
+let age = 1;
+hold isAwesome = true;
+
+# Display a welcome message
+show "Welcome to " + name + "!";
+show name + " is " + age + " year old.";
+
+if (isAwesome) {
+    show name + " is awesome!";
+}
+
+# Get user input
+show "What is your name?";
+read userName;
+show "Hello, " + userName + "!";
+
+# Create a simple loop
+let counter = 0;
+while (counter < 5) {
+    show "Counter: " + counter;
+    counter = counter + 1;
+}
+
+show "Program completed!";
 EOF
     
     echo -e "${GREEN}✓${NC} Created $FILENAME"
@@ -90,7 +127,7 @@ EOF
 elif [ "$1" == "version" ] || [ "$1" == "--version" ] || [ "$1" == "-v" ]; then
     VERSION=$(get_version)
     echo "Razen Language $VERSION"
-    echo "Copyright © 2025 Prathmesh Barot, Basai Corporation"
+    echo "Copyright 2025 Prathmesh Barot, Basai Corporation"
     exit 0
     
 elif [ "$1" == "help" ] || [ "$1" == "--help" ] || [ "$1" == "-h" ]; then
@@ -104,6 +141,7 @@ elif [ "$1" == "help" ] || [ "$1" == "--help" ] || [ "$1" == "-h" ]; then
         echo "  razen version            Display version information"
         echo "  razen help               Display this help message"
         echo "  razen uninstall          Uninstall Razen"
+        echo "  razen update             Update Razen to the latest version"
     fi
     exit 0
     
@@ -149,6 +187,17 @@ elif [ "$1" == "uninstall" ]; then
         echo -e "${BLUE}Uninstallation cancelled.${NC}"
     fi
     exit 0
+
+elif [ "$1" == "update" ]; then
+    # Check if razen-update is available
+    if command -v razen-update &>/dev/null; then
+        razen-update
+    else
+        echo -e "${RED}Error: razen-update script not found.${NC}"
+        echo -e "${YELLOW}Please reinstall Razen to fix this issue.${NC}"
+        exit 1
+    fi
+    exit 0
     
 elif [ "$1" == "run" ] && [ -n "$2" ]; then
     # Run mode with filename
@@ -170,9 +219,9 @@ elif [ "$1" == "run" ] && [ -n "$2" ]; then
         exit 1
     fi
     
-    # Execute the main Python script in 'run' mode
+    # Execute the Razen compiler in 'run' mode
     echo -e "${YELLOW}Running $FILENAME...${NC}"
-    python3 "$MAIN_PY" --mode=run "$ABSOLUTE_PATH" "$@"
+    "$RAZEN_BIN" run "$ABSOLUTE_PATH" "$@"
     exit $?
     
 elif [ -z "$1" ]; then
@@ -183,6 +232,7 @@ elif [ -z "$1" ]; then
     echo "       razen new <filename>"
     echo "       razen help"
     echo "       razen version"
+    echo "       razen update"
     echo "       razen uninstall"
     exit 1
 fi
@@ -215,5 +265,5 @@ fi
 echo -e "${YELLOW}Running $FILENAME...${NC}"
 "$RAZEN_BIN" run "$ABSOLUTE_PATH" "$@"
 
-# Capture the exit code from the Python script
+# Capture the exit code from the compiler
 exit $?

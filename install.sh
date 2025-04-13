@@ -3,7 +3,7 @@
 # Razen Language Installer Script
 # Author: Prathmesh Barot
 # Copyright 2025 Prathmesh Barot, Basai Corporation
-# Version: beta v0.1.36
+# Version: beta v0.1.53
 
 set -e  # Exit on error
 
@@ -78,9 +78,11 @@ else
     # Download version file if not present
     if ! curl -s -o version "$RAZEN_REPO/version" &>/dev/null; then
         echo -e "${RED}Failed to download version information. Using default version.${NC}"
-        RAZEN_VERSION="beta v0.1.36"
+        RAZEN_VERSION="beta v0.1.53"
     else
         RAZEN_VERSION=$(cat version)
+        # Store the version file for future reference
+        echo -e "  ${GREEN}✓${NC} Downloaded version information: $RAZEN_VERSION"
     fi
 fi
 
@@ -94,48 +96,57 @@ create_symlinks() {
     # List of all scripts that need symlinks
     SCRIPTS="razen razen-debug razen-test razen-run razen-update razen-help razen-docs razen-extension"
     
-    # Create symlinks in /usr/local/bin
-    for script in $SCRIPTS; do
-        if [ -f "$INSTALL_DIR/scripts/$script" ]; then
-            if ! sudo ln -sf "$INSTALL_DIR/scripts/$script" "/usr/local/bin/$script"; then
-                echo -e "  ${RED}✗${NC} Failed to create symlink in /usr/local/bin/$script (permission denied)"
-                return 1
-            fi
-            echo -e "  ${GREEN}✓${NC} Created /usr/local/bin/$script"
-        else
-            echo -e "  ${RED}✗${NC} Failed to create /usr/local/bin/$script (file not found)"
+    # Determine the appropriate bin directory based on permissions
+    if [ -w "/usr/local/bin" ]; then
+        BIN_DIR="/usr/local/bin"
+    elif [ -w "$HOME/.local/bin" ]; then
+        BIN_DIR="$HOME/.local/bin"
+    else
+        # Create user bin directory if it doesn't exist
+        mkdir -p "$HOME/.local/bin"
+        BIN_DIR="$HOME/.local/bin"
+        
+        # Add to PATH if not already there
+        if [[ ":$PATH:" != *":$HOME/.local/bin:"* ]]; then
+            echo 'export PATH="$HOME/.local/bin:$PATH"' >> "$HOME/.bashrc"
+            echo 'export PATH="$HOME/.local/bin:$PATH"' >> "$HOME/.profile"
+            echo -e "${YELLOW}Added $HOME/.local/bin to your PATH. Please restart your terminal after installation.${NC}"
         fi
-    done
+    fi
     
-    # Create symlinks in /usr/bin
-    for script in $SCRIPTS; do
-        if [ -f "/usr/local/bin/$script" ]; then
-            if ! sudo ln -sf "/usr/local/bin/$script" "/usr/bin/$script"; then
-                echo -e "  ${RED}✗${NC} Failed to create symlink in /usr/bin/$script (permission denied)"
-                # Not returning error here as /usr/local/bin should be sufficient
-            else
-                echo -e "  ${GREEN}✓${NC} Created /usr/bin/$script"
-            fi
-        else
-            echo -e "  ${RED}✗${NC} Failed to create /usr/bin/$script (file not found)"
-        fi
-    done
+    echo -e "${YELLOW}Using bin directory: ${CYAN}$BIN_DIR${NC}"
     
-    # Verify all symlinks are created
+    # Create symlinks in the bin directory
     local missing_links=0
     for script in $SCRIPTS; do
-        if [ ! -f "/usr/local/bin/$script" ]; then
-            echo -e "  ${RED}✗${NC} Missing symlink for $script in /usr/local/bin"
+        if [ -f "$INSTALL_DIR/scripts/$script" ]; then
+            if [ -w "$BIN_DIR" ]; then
+                # Direct creation if we have write permissions
+                ln -sf "$INSTALL_DIR/scripts/$script" "$BIN_DIR/$script"
+                echo -e "  ${GREEN}✓${NC} Created $BIN_DIR/$script"
+            else
+                # Use sudo if we don't have direct write permissions
+                if sudo ln -sf "$INSTALL_DIR/scripts/$script" "$BIN_DIR/$script"; then
+                    echo -e "  ${GREEN}✓${NC} Created $BIN_DIR/$script"
+                else
+                    echo -e "  ${RED}✗${NC} Failed to create symlink in $BIN_DIR/$script (permission denied)"
+                    missing_links=$((missing_links + 1))
+                fi
+            fi
+        else
+            echo -e "  ${RED}✗${NC} Failed to create $BIN_DIR/$script (source file not found)"
             missing_links=$((missing_links + 1))
         fi
     done
     
+    # Verify all symlinks are created
     if [ $missing_links -gt 0 ]; then
         echo -e "${RED}Failed to create some symbolic links. Please check the errors above.${NC}"
+        echo -e "${YELLOW}You may need to manually create symlinks or add the scripts directory to your PATH.${NC}"
         return 1
     fi
     
-    echo -e "${GREEN}✓${NC} All symbolic links created successfully"
+    echo -e "${GREEN}✓${NC} All symbolic links created successfully in $BIN_DIR"
     return 0
 }
 
@@ -283,6 +294,8 @@ fi
 mkdir -p "$TMP_DIR/src"
 mkdir -p "$TMP_DIR/scripts"
 mkdir -p "$TMP_DIR/properties"
+mkdir -p "$TMP_DIR/examples"
+echo -e "  ${GREEN}✓${NC} Created temporary directories"
 
 # Download Rust binary
 echo -e "${YELLOW}Downloading Razen compiler binary...${NC}"
@@ -319,32 +332,86 @@ if ! curl -s --retry 3 --retry-delay 2 -o "$TMP_DIR/razen_compiler" "$RAZEN_REPO
     
     # Copy the built binary
     cp "$TMP_DIR/razen-lang/target/release/razen_compiler" "$TMP_DIR/razen_compiler" || handle_error 6 "Failed to copy built binary" "Check file permissions"
+
+    # Copy all other files from the cloned repository
+    echo -e "${YELLOW}Copying files from cloned repository...${NC}"
+    cp -r "$TMP_DIR/razen-lang/properties/"* "$TMP_DIR/properties/" 2>/dev/null || true
+    cp -r "$TMP_DIR/razen-lang/scripts/"* "$TMP_DIR/scripts/" 2>/dev/null || true
+    cp -r "$TMP_DIR/razen-lang/src/"* "$TMP_DIR/src/" 2>/dev/null || true
+    cp -r "$TMP_DIR/razen-lang/examples/"* "$TMP_DIR/examples/" 2>/dev/null || true
+    echo -e "  ${GREEN}✓${NC} Copied files from cloned repository"
 else
     echo -e "  ${GREEN}✓${NC} Downloaded Razen compiler binary"
+    
+    # Download all required files from the repository
+    echo -e "${YELLOW}Downloading project files...${NC}"
+    
+    # Function to download directory contents
+    download_directory() {
+        local dir_name=$1
+        local target_dir=$2
+        local files_count=0
+        local success_count=0
+        
+        echo -e "${YELLOW}Downloading $dir_name files...${NC}"
+        
+        # First try to get a file listing
+        if curl -s "$RAZEN_REPO/$dir_name/" > "$TMP_DIR/filelist.html"; then
+            # Extract filenames from HTML (this is a simple approach and might need adjustment)
+            grep -o "href=\"[^\"]*\.rzn\"" "$TMP_DIR/filelist.html" | cut -d'"' -f2 > "$TMP_DIR/files.txt"
+            grep -o "href=\"[^\"]*\.sh\"" "$TMP_DIR/filelist.html" | cut -d'"' -f2 >> "$TMP_DIR/files.txt"
+            grep -o "href=\"[^\"]*\.py\"" "$TMP_DIR/filelist.html" | cut -d'"' -f2 >> "$TMP_DIR/files.txt"
+            
+            # Download each file
+            while read -r file; do
+                files_count=$((files_count + 1))
+                if curl -s --retry 3 --retry-delay 2 -o "$target_dir/$(basename "$file")" "$RAZEN_REPO/$dir_name/$file" &>/dev/null; then
+                    success_count=$((success_count + 1))
+                fi
+            done < "$TMP_DIR/files.txt"
+            
+            echo -e "  ${GREEN}✓${NC} Downloaded $success_count/$files_count files from $dir_name/"
+        else
+            # Fallback: try to download known files
+            case "$dir_name" in
+                "properties")
+                    local files="variables.rzn keywords.rzn operators.rzn functions.rzn loops.rzn conditionals.rzn types.rzn api.rzn syntax.rzn"
+                    ;;
+                "scripts")
+                    local files="razen razen-debug razen-test razen-run razen-update razen-help razen-docs razen-extension"
+                    ;;
+                "src")
+                    local files="main.py compiler.py parser.py lexer.py interpreter.py"
+                    ;;
+                "examples")
+                    local files="hello.rzn calculator.rzn web-example/script.rzn quiz.rzn guess.rzn"
+                    ;;
+                *)
+                    local files=""
+                    ;;
+            esac
+            
+            for file in $files; do
+                files_count=$((files_count + 1))
+                mkdir -p "$target_dir/$(dirname "$file")" 2>/dev/null
+                if curl -s --retry 3 --retry-delay 2 -o "$target_dir/$(basename "$file")" "$RAZEN_REPO/$dir_name/$file" &>/dev/null; then
+                    success_count=$((success_count + 1))
+                fi
+            done
+            
+            echo -e "  ${GREEN}✓${NC} Downloaded $success_count/$files_count files from $dir_name/"
+        fi
+    }
+    
+    # Download each directory
+    download_directory "properties" "$TMP_DIR/properties"
+    download_directory "scripts" "$TMP_DIR/scripts"
+    download_directory "src" "$TMP_DIR/src"
+    download_directory "examples" "$TMP_DIR/examples"
 fi
 
 # Make the binary executable
 chmod +x "$TMP_DIR/razen_compiler" || handle_error 7 "Failed to make binary executable" "Check file permissions"
-
-# Download properties files
-for file in variables.rzn keywords.rzn operators.rzn functions.rzn loops.rzn; do
-    echo -e "${YELLOW}Downloading $file...${NC}"
-    if ! curl -s --retry 3 --retry-delay 2 -o "$TMP_DIR/properties/$file" "$RAZEN_REPO/properties/$file" &>/dev/null; then
-        echo -e "  ${RED}✗${NC} Failed to download $file"
-    else
-        echo -e "  ${GREEN}✓${NC} Downloaded $file"
-    fi
-done
-
-# Download scripts
-for script in razen razen-debug razen-test razen-run razen-update razen-help razen-docs razen-extension; do
-    echo -e "${YELLOW}Downloading $script script...${NC}"
-    if ! curl -s --retry 3 --retry-delay 2 -o "$TMP_DIR/scripts/$script" "$RAZEN_REPO/scripts/$script" &>/dev/null; then
-        echo -e "  ${RED}✗${NC} Failed to download $script script"
-    else
-        echo -e "  ${GREEN}✓${NC} Downloaded $script script"
-    fi
-done
 
 # Make scripts executable
 chmod +x "$TMP_DIR/scripts/"* || handle_error 8 "Failed to make scripts executable" "Check file permissions"
@@ -379,6 +446,11 @@ sudo cp "$TMP_DIR/razen_compiler" "/usr/local/bin/" || handle_error 13 "Failed t
 sudo cp "$TMP_DIR/properties/"*.rzn "$INSTALL_DIR/properties/" 2>/dev/null || true
 sudo cp "$TMP_DIR/scripts/"* "$INSTALL_DIR/scripts/" || handle_error 14 "Failed to copy scripts" "Check file permissions"
 
+# Save the version file to the installation directory
+echo -e "${YELLOW}Saving version information...${NC}"
+echo "$RAZEN_VERSION" | sudo tee "$INSTALL_DIR/version" > /dev/null || handle_error 15 "Failed to save version information" "Check file permissions"
+echo -e "  ${GREEN}✓${NC} Saved version information: $RAZEN_VERSION"
+
 # Download and save the latest installer script for future updates
 if ! curl -s --retry 3 --retry-delay 2 -o "$TMP_DIR/install.sh" "$RAZEN_REPO/install.sh" &>/dev/null; then
     echo -e "${YELLOW}Warning: Could not download latest installer script. Using current version instead.${NC}"
@@ -395,14 +467,17 @@ fi
 sudo chmod +x "$INSTALL_DIR/install.sh" 2>/dev/null || true
 
 # Set proper permissions
-sudo chmod -R 755 "$INSTALL_DIR" || handle_error 15 "Failed to set permissions" "Check directory permissions"
-sudo chown -R root:root "$INSTALL_DIR" || handle_error 16 "Failed to set ownership" "Check if you have sudo permissions"
+sudo chmod -R 755 "$INSTALL_DIR" || handle_error 16 "Failed to set permissions" "Check directory permissions"
+sudo chown -R root:root "$INSTALL_DIR" || handle_error 17 "Failed to set ownership" "Check if you have sudo permissions"
 
 echo -e "  ${GREEN}✓${NC} Copied files to installation directory"
 
 # Check for Rust installation
 echo -e "${YELLOW}Checking for Rust installation...${NC}"
-if ! command -v rustc &> /dev/null; then
+if command -v rustc &> /dev/null; then
+    RUST_VERSION=$(rustc --version | cut -d' ' -f2)
+    echo -e "  ${GREEN}✓${NC} Rust is already installed (version $RUST_VERSION)"
+else
     echo -e "${YELLOW}Rust is not installed. Razen compiler requires Rust to run.${NC}"
     echo -e "${YELLOW}Installing Rust automatically...${NC}"
     
@@ -413,9 +488,20 @@ if ! command -v rustc &> /dev/null; then
     if [[ $rust_choice =~ ^[Yy]$ ]]; then
         # Download and run the Rust installer
         echo -e "${YELLOW}Downloading Rust installer...${NC}"
-        curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y || handle_error 17 "Failed to install Rust" "Try installing Rust manually"
+        curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y || handle_error 18 "Failed to install Rust" "Try installing Rust manually"
         
         echo -e "${GREEN}✓${NC} Rust installation completed"
+        
+        # Source the cargo environment
+        source "$HOME/.cargo/env"
+        
+        # Verify Rust installation
+        if ! command -v rustc &> /dev/null; then
+            handle_error 19 "Rust installation completed but rustc command not found" "Please restart your terminal and run the installer again"
+        fi
+        
+        RUST_VERSION=$(rustc --version | cut -d' ' -f2)
+        echo -e "  ${GREEN}✓${NC} Rust has been successfully installed (version $RUST_VERSION)"
     else
         echo -e "${RED}Rust installation skipped. Razen requires Rust to run.${NC}"
         echo -e "${YELLOW}Please install Rust manually with:${NC}"
@@ -423,26 +509,10 @@ if ! command -v rustc &> /dev/null; then
         rm -rf "$TMP_DIR"
         exit 1
     fi
-    
-    # Source the cargo environment
-    source "$HOME/.cargo/env"
-    
-    # Verify Rust installation
-    if ! command -v rustc &> /dev/null; then
-        handle_error 18 "Rust installation completed but rustc command not found" "Please restart your terminal and run the installer again"
-    fi
-    
-    echo -e "  ${GREEN}✓${NC} Rust has been successfully installed"
-else
-    echo -e "  ${GREEN}✓${NC} Rust is already installed"
 fi
 
-# Check Rust version
-RUST_VERSION=$(rustc --version | cut -d' ' -f2)
-echo -e "  ${GREEN}✓${NC} Rust version: $RUST_VERSION"
-
 # Create symbolic links
-create_symlinks "$INSTALL_DIR" || handle_error 19 "Failed to create symbolic links" "Check if you have sudo permissions"
+create_symlinks "$INSTALL_DIR" || handle_error 20 "Failed to create symbolic links" "Check if you have sudo permissions"
 
 # Clean up temporary files
 echo -e "${YELLOW}Cleaning up temporary files...${NC}"

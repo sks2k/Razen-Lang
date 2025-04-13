@@ -1,0 +1,10 @@
+type freestyle;
+connect from(./path/to/file);
+
+api gemini = from(./path/to/apikey);
+call gemini {
+    put prompt = get.(user);
+    get response = get.(ai);
+} 
+
+
