@@ -266,13 +266,16 @@ else
     download_directory "src" "$TMP_DIR/src"
     download_directory "examples" "$TMP_DIR/examples"
     
-    # Make scripts executable
-    chmod +x "$TMP_DIR/scripts/"* || {
-        echo -e "${RED}Error: Failed to make scripts executable.${NC}"
-        rm -rf "$TMP_DIR"
-        exit 1
-    }
-    echo -e "  ${GREEN}✓${NC} Made scripts executable"
+    # List of all scripts that need to be executable
+    SCRIPTS="razen razen-debug razen-test razen-run razen-update razen-help razen-docs razen-extension"
+    
+    # Make scripts executable if they exist
+    for script in $SCRIPTS; do
+        if [ -f "$TMP_DIR/scripts/$script" ]; then
+            chmod +x "$TMP_DIR/scripts/$script"
+            echo -e "  ${GREEN}✓${NC} Made $script executable"
+        fi
+    done
     
     # Save the version file
     echo "$LATEST_VERSION" > "$TMP_DIR/version"
