@@ -108,6 +108,24 @@ pub enum TokenType {
     Ping,          // website ping
     Bolt,          // performance optimization
     Seed,          // seed generation
+    Net,           // network operations
+    File,          // file operations
+    Json,          // JSON operations
+    Date,          // date and time operations
+    String,        // string utilities
+    Array,         // array utilities
+    Os,            // operating system info
+    Regex,         // regular expressions
+    Crypto,        // cryptography
+    Color,         // color manipulation
+    System,        // system commands
+    Ui,            // user interface
+    Storage,       // persistent storage
+    Audio,         // audio operations
+    Image,         // image processing
+    Validation,    // data validation
+    Log,           // logging utilities
+    Uuid,          // UUID generation
     
     // Delimiters
     LeftParen,      // (
@@ -243,6 +261,24 @@ impl fmt::Display for TokenType {
             TokenType::Ping => write!(f, "PING"),
             TokenType::Bolt => write!(f, "BOLT"),
             TokenType::Seed => write!(f, "SEED"),
+            TokenType::Net => write!(f, "NET"),
+            TokenType::File => write!(f, "FILE"),
+            TokenType::Json => write!(f, "JSON"),
+            TokenType::Date => write!(f, "DATE"),
+            TokenType::String => write!(f, "STRING"),
+            TokenType::Array => write!(f, "ARRAY"),
+            TokenType::Os => write!(f, "OS"),
+            TokenType::Regex => write!(f, "REGEX"),
+            TokenType::Crypto => write!(f, "CRYPTO"),
+            TokenType::Color => write!(f, "COLOR"),
+            TokenType::System => write!(f, "SYSTEM"),
+            TokenType::Ui => write!(f, "UI"),
+            TokenType::Storage => write!(f, "STORAGE"),
+            TokenType::Audio => write!(f, "AUDIO"),
+            TokenType::Image => write!(f, "IMAGE"),
+            TokenType::Validation => write!(f, "VALIDATION"),
+            TokenType::Log => write!(f, "LOG"),
+            TokenType::Uuid => write!(f, "UUID"),
             
             // Delimiters
             TokenType::LeftParen => write!(f, "("),
@@ -375,6 +411,24 @@ pub fn lookup_identifier(identifier: &str) -> TokenType {
         "ping" => TokenType::Ping,
         "bolt" => TokenType::Bolt,
         "seed" => TokenType::Seed,
+        "net" => TokenType::Net,
+        "file" => TokenType::File,
+        "json" => TokenType::Json,
+        "date" => TokenType::Date,
+        "string" => TokenType::String,
+        "array" => TokenType::Array,
+        "os" => TokenType::Os,
+        "regex" => TokenType::Regex,
+        "crypto" => TokenType::Crypto,
+        "color" => TokenType::Color,
+        "system" => TokenType::System,
+        "ui" => TokenType::Ui,
+        "storage" => TokenType::Storage,
+        "audio" => TokenType::Audio,
+        "image" => TokenType::Image,
+        "validation" => TokenType::Validation,
+        "log" => TokenType::Log,
+        "uuid" => TokenType::Uuid,
         
         // If not a keyword, it's an identifier
         _ => TokenType::Identifier,

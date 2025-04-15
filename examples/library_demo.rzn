@@ -1,0 +1,58 @@
+# Razen Library Demo
+# This example demonstrates using 5 different libraries in Razen
+
+# 1. Random library for random number generation
+lib random;
+
+# 2. Array library for array operations
+lib array;
+
+# 3. Date library for date/time operations
+lib date;
+
+# 4. File library for file operations
+lib file;
+
+# 5. Math library for mathematical operations
+lib math;
+
+# Main program
+show "===== Razen Library Demo =====";
+
+# Using Random library
+show "Random number between 1-100: " + Random.int(1, 100);
+let choices = ["apple", "banana", "orange", "grape", "mango"];
+show "Random fruit: " + Random.choice(choices);
+
+# Using Array library
+let numbers = [5, 3, 8, 1, 7, 2];
+show "Original array: " + numbers;
+show "Sorted array: " + Array.sort(numbers);
+show "Reversed array: " + Array.reverse(numbers);
+let sliced = Array.slice(numbers, 1, 4);
+show "Sliced array (1-4): " + sliced;
+numbers = Array.push(numbers, 10);
+show "After pushing 10: " + numbers;
+
+# Using Date library
+show "Current date: " + Date.now();
+show "Current year: " + Date.year();
+show "Current month: " + Date.month();
+show "Current day: " + Date.day();
+show "Formatted date: " + Date.format("YYYY-MM-DD");
+
+# Using File library
+show "Working with files:";
+File.write("test.txt", "Hello from Razen!");
+show "File content: " + File.read("test.txt");
+show "File exists: " + File.exists("test.txt");
+show "File size: " + File.size("test.txt") + " bytes";
+
+# Using Math library
+show "Math operations:";
+show "Square root of 16: " + Math.sqrt(16);
+show "Pi value: " + Math.pi();
+show "Sin(45): " + Math.sin(45);
+show "Round 3.7: " + Math.round(3.7);
+
+show "===== Demo Complete =====";

@@ -59,6 +59,49 @@ impl Parser {
         parser.register_prefix(TokenType::Minus, Parser::parse_prefix_expression);
         parser.register_prefix(TokenType::Not, Parser::parse_prefix_expression);
         
+        // Register library tokens as identifiers
+        parser.register_prefix(TokenType::Random, Parser::parse_identifier);
+        parser.register_prefix(TokenType::Ht, Parser::parse_identifier);
+        parser.register_prefix(TokenType::Coin, Parser::parse_identifier);
+        parser.register_prefix(TokenType::Math, Parser::parse_identifier);
+        parser.register_prefix(TokenType::Ping, Parser::parse_identifier);
+        parser.register_prefix(TokenType::Bolt, Parser::parse_identifier);
+        parser.register_prefix(TokenType::Seed, Parser::parse_identifier);
+        parser.register_prefix(TokenType::Net, Parser::parse_identifier);
+        parser.register_prefix(TokenType::File, Parser::parse_identifier);
+        parser.register_prefix(TokenType::Json, Parser::parse_identifier);
+        parser.register_prefix(TokenType::Date, Parser::parse_identifier);
+        parser.register_prefix(TokenType::String, Parser::parse_identifier);
+        parser.register_prefix(TokenType::Array, Parser::parse_identifier);
+        parser.register_prefix(TokenType::Os, Parser::parse_identifier);
+        parser.register_prefix(TokenType::Regex, Parser::parse_identifier);
+        parser.register_prefix(TokenType::Crypto, Parser::parse_identifier);
+        parser.register_prefix(TokenType::Color, Parser::parse_identifier);
+        parser.register_prefix(TokenType::System, Parser::parse_identifier);
+        parser.register_prefix(TokenType::Ui, Parser::parse_identifier);
+        parser.register_prefix(TokenType::Storage, Parser::parse_identifier);
+        parser.register_prefix(TokenType::Audio, Parser::parse_identifier);
+        parser.register_prefix(TokenType::Image, Parser::parse_identifier);
+        parser.register_prefix(TokenType::Validation, Parser::parse_identifier);
+        parser.register_prefix(TokenType::Log, Parser::parse_identifier);
+        parser.register_prefix(TokenType::Uuid, Parser::parse_identifier);
+        parser.register_prefix(TokenType::Read, Parser::parse_identifier);
+        parser.register_prefix(TokenType::Debug, Parser::parse_identifier);
+        parser.register_prefix(TokenType::Assert, Parser::parse_identifier);
+        parser.register_prefix(TokenType::Trace, Parser::parse_identifier);
+        parser.register_prefix(TokenType::Show, Parser::parse_identifier);
+        parser.register_prefix(TokenType::Exit, Parser::parse_identifier);
+        parser.register_prefix(TokenType::Api, Parser::parse_identifier);
+        parser.register_prefix(TokenType::Call, Parser::parse_identifier);
+        parser.register_prefix(TokenType::Connect, Parser::parse_identifier);
+        parser.register_prefix(TokenType::To, Parser::parse_identifier);
+        parser.register_prefix(TokenType::Import, Parser::parse_identifier);
+        parser.register_prefix(TokenType::Export, Parser::parse_identifier);
+        parser.register_prefix(TokenType::From, Parser::parse_identifier);
+        parser.register_prefix(TokenType::As, Parser::parse_identifier);
+        parser.register_prefix(TokenType::Get, Parser::parse_identifier);
+        parser.register_prefix(TokenType::Post, Parser::parse_identifier);
+        
         // Register infix parse functions
         parser.register_infix(TokenType::Plus, Parser::parse_infix_expression);
         parser.register_infix(TokenType::Minus, Parser::parse_infix_expression);
@@ -83,6 +126,7 @@ impl Parser {
         parser.register_infix(TokenType::PercentAssign, Parser::parse_assignment_expression);
         parser.register_infix(TokenType::LeftParen, Parser::parse_call_expression);
         parser.register_infix(TokenType::LeftBracket, Parser::parse_index_expression);
+        parser.register_infix(TokenType::Dot, Parser::parse_dot_expression);
         
         parser
     }
@@ -749,7 +793,20 @@ impl Parser {
     }
     
     fn parse_identifier(&mut self) -> Option<Expression> {
-        Some(Expression::Identifier(self.current_token.literal.clone()))
+        // Convert library tokens to identifiers when used in expressions
+        let identifier = match self.current_token.token_type {
+            TokenType::Random | TokenType::Ht | TokenType::Coin | TokenType::Math | 
+            TokenType::Ping | TokenType::Bolt | TokenType::Seed | TokenType::Net | 
+            TokenType::File | TokenType::Json | TokenType::Date | TokenType::String | 
+            TokenType::Array | TokenType::Os | TokenType::Regex | TokenType::Crypto | 
+            TokenType::Color | TokenType::System | TokenType::Ui | TokenType::Storage | 
+            TokenType::Audio | TokenType::Image | TokenType::Validation | 
+            TokenType::Log | TokenType::Uuid => {
+                self.current_token.literal.clone()
+            },
+            _ => self.current_token.literal.clone()
+        };
+        Some(Expression::Identifier(identifier))
     }
     
     fn parse_string_literal(&mut self) -> Option<Expression> {
@@ -893,6 +950,46 @@ impl Parser {
         })
     }
     
+    fn parse_dot_expression(&mut self, left: Expression) -> Option<Expression> {
+        self.next_token(); // Skip '.' token
+        
+        if !self.current_token_is(TokenType::Identifier) {
+            // Handle library tokens as identifiers
+            let is_library_token = match self.current_token.token_type {
+                TokenType::Random | TokenType::Ht | TokenType::Coin | TokenType::Math | 
+                TokenType::Ping | TokenType::Bolt | TokenType::Seed | TokenType::Net | 
+                TokenType::File | TokenType::Json | TokenType::Date | TokenType::String | 
+                TokenType::Array | TokenType::Os | TokenType::Regex | TokenType::Crypto | 
+                TokenType::Color | TokenType::System | TokenType::Ui | TokenType::Storage | 
+                TokenType::Audio | TokenType::Image | TokenType::Validation | 
+                TokenType::Log | TokenType::Uuid | TokenType::Get | TokenType::Post |
+                TokenType::Read | TokenType::Debug | TokenType::Assert | TokenType::Trace |
+                TokenType::Show | TokenType::Exit | TokenType::Api | TokenType::Call |
+                TokenType::Connect | TokenType::To | TokenType::Import | TokenType::Export |
+                TokenType::From | TokenType::As => true,
+                _ => false
+            };
+            
+            if !is_library_token {
+                self.errors.push(format!(
+                    "Expected identifier after '.', got {:?} at line {}, column {}",
+                    self.current_token.token_type, self.current_token.line, self.current_token.column
+                ));
+                return None;
+            }
+        }
+        
+        // Get the property name
+        let property = self.current_token.literal.clone();
+        
+        // Create a property access expression
+        Some(Expression::InfixExpression {
+            left: Box::new(left),
+            operator: ".".to_string(),
+            right: Box::new(Expression::Identifier(property)),
+        })
+    }
+    
     fn parse_expression_list(&mut self, end: TokenType) -> Option<Vec<Expression>> {
         let mut list = Vec::new();
         
@@ -939,6 +1036,7 @@ impl Parser {
             TokenType::Power => Precedence::Power,
             TokenType::LeftParen => Precedence::Call,
             TokenType::LeftBracket => Precedence::Index,
+            TokenType::Dot => Precedence::Call, // Dot has same precedence as function call
             _ => Precedence::Lowest,
         }
     }
@@ -1366,8 +1464,23 @@ impl Parser {
         let token_line = self.current_token.line;
         let token_column = self.current_token.column;
         
-        // Check for library name
-        if !self.expect_peek(TokenType::Identifier) {
+        // Move to the next token
+        self.next_token();
+        
+        // Check if the next token is a valid library name (either an identifier or a library token)
+        let is_valid_library = match self.current_token.token_type {
+            TokenType::Identifier | 
+            TokenType::Random | TokenType::Ht | TokenType::Coin | TokenType::Math | 
+            TokenType::Ping | TokenType::Bolt | TokenType::Seed | TokenType::Net | 
+            TokenType::File | TokenType::Json | TokenType::Date | TokenType::String | 
+            TokenType::Array | TokenType::Os | TokenType::Regex | TokenType::Crypto | 
+            TokenType::Color | TokenType::System | TokenType::Ui | TokenType::Storage | 
+            TokenType::Audio | TokenType::Image | TokenType::Validation | 
+            TokenType::Log | TokenType::Uuid => true,
+            _ => false
+        };
+        
+        if !is_valid_library {
             self.errors.push(format!(
                 "Expected library name after 'lib' keyword at line {}, column {}",
                 token_line, token_column
@@ -1379,20 +1492,8 @@ impl Parser {
         let lib_name = self.current_token.literal.clone();
         let lib_name_lower = lib_name.to_lowercase();
         
-        // Validate library name
-        match lib_name_lower.as_str() {
-            "random" | "ht" | "coin" | "math" | "ping" | "bolt" | "seed" => {
-                // Valid library name
-            },
-            _ => {
-                // Unknown library
-                self.errors.push(format!(
-                    "Unknown library: '{}' at line {}, column {}. Valid libraries are: random, ht, coin, math, ping, bolt, seed",
-                    lib_name, self.current_token.line, self.current_token.column
-                ));
-                // Continue parsing anyway to avoid cascading errors
-            }
-        }
+        // No need to validate library names anymore - the compiler will dynamically scan the properties/libs folder
+        // and register all available libraries. This makes the system more extensible.
         
         // Check for optional semicolon
         if self.peek_token_is(TokenType::Semicolon) {

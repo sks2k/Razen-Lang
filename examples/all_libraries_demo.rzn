@@ -1,0 +1,232 @@
+# Razen All Libraries Demo
+# This example demonstrates using all available libraries in Razen
+
+# Core libraries
+lib random;   # Random number generation
+lib ht;       # Head/tails coin flip
+lib coin;     # Coin toss utilities
+lib math;     # Mathematical operations
+lib ping;     # Website ping utilities
+lib bolt;     # Performance optimization
+lib seed;     # Seed generation for games
+
+# Data manipulation libraries
+lib string;   # String utilities
+lib array;    # Array/list utilities
+lib json;     # JSON processing
+
+# System libraries
+lib file;     # File I/O operations
+lib os;       # Operating system info
+lib system;   # System commands
+
+# Network libraries
+lib net;      # Networking utilities
+
+# Date and time
+lib date;     # Date and time manipulation
+
+# Media libraries
+lib audio;    # Audio operations
+lib image;    # Image processing
+
+# Utility libraries
+lib regex;    # Regular expressions
+lib crypto;   # Cryptography
+lib color;    # Color manipulation
+lib ui;       # User interface
+lib storage;  # Persistent storage
+lib validation; # Data validation
+lib log;      # Logging utilities
+lib uuid;     # UUID generation
+
+# Main program
+show "===== Razen Libraries Demo =====";
+
+# 1. Random library demo
+show "--- Random Library ---";
+show "Random number (1-100): " + Random.int(1, 100);
+show "Random float (0-1): " + Random.float(0, 1);
+let fruits = ["apple", "banana", "orange", "grape", "mango"];
+show "Random fruit: " + Random.choice(fruits);
+let numbers = [1, 2, 3, 4, 5];
+show "Shuffled array: " + Random.shuffle(numbers);
+
+# 2. HT (Head/Tails) library demo
+show "--- HT Library ---";
+show "Coin flip: " + HT.coin();
+show "Random boolean: " + HT.bool();
+
+# 3. Math library demo
+show "--- Math Library ---";
+show "Square root of 16: " + Math.sqrt(16);
+show "Pi value: " + Math.pi();
+show "Sine of 45 degrees: " + Math.sin(45);
+show "Cosine of 60 degrees: " + Math.cos(60);
+show "Absolute value of -5: " + Math.abs(-5);
+show "5 raised to power 3: " + Math.pow(5, 3);
+show "Minimum of 3 and 7: " + Math.min(3, 7);
+show "Maximum of 3 and 7: " + Math.max(3, 7);
+
+# 4. String library demo
+show "--- String Library ---";
+let text = "Hello, Razen!";
+show "Uppercase: " + String.toUpper(text);
+show "Lowercase: " + String.toLower(text);
+show "Length: " + String.length(text);
+show "Contains 'Razen': " + String.contains(text, "Razen");
+show "Replace: " + String.replace(text, "Razen", "World");
+show "Trim: " + String.trim("  trimmed  ");
+show "Split: " + String.split("a,b,c", ",");
+
+# 5. Array library demo
+show "--- Array Library ---";
+let arr = [5, 3, 8, 1, 7, 2];
+show "Original array: " + arr;
+show "Sorted array: " + Array.sort(arr);
+show "Reversed array: " + Array.reverse(arr);
+show "Sliced array (1-4): " + Array.slice(arr, 1, 4);
+arr = Array.push(arr, 10);
+show "After pushing 10: " + arr;
+show "Array join: " + Array.join(arr, "-");
+
+# 6. Date library demo
+show "--- Date Library ---";
+show "Current date: " + Date.now();
+show "Current year: " + Date.year();
+show "Current month: " + Date.month();
+show "Current day: " + Date.day();
+show "Formatted date: " + Date.format("YYYY-MM-DD");
+show "Add days: " + Date.addDays(Date.now(), 5);
+show "Day of week: " + Date.dayOfWeek();
+
+# 7. File library demo
+show "--- File Library ---";
+File.write("test.txt", "Hello from Razen!");
+show "File content: " + File.read("test.txt");
+show "File exists: " + File.exists("test.txt");
+show "File size: " + File.size("test.txt") + " bytes";
+show "File extension: " + File.extension("test.txt");
+show "File name: " + File.name("test.txt");
+
+# 8. JSON library demo
+show "--- JSON Library ---";
+let person = { "name": "John", "age": 30, "city": "New York" };
+let jsonStr = JSON.stringify(person);
+show "JSON string: " + jsonStr;
+show "Parsed JSON: " + JSON.parse(jsonStr);
+show "Pretty JSON: " + JSON.pretty(person);
+
+# 9. Net library demo
+show "--- Net Library ---";
+show "Fetch URL status: " + Net.status("https://example.com");
+show "Ping result: " + Net.ping("example.com");
+show "URL encode: " + Net.encode("Hello World!");
+show "URL decode: " + Net.decode("Hello%20World%21");
+
+# 10. OS library demo
+show "--- OS Library ---";
+show "Platform: " + OS.platform();
+show "Home directory: " + OS.home();
+show "Current directory: " + OS.cwd();
+show "Environment variable PATH: " + OS.env("PATH");
+
+# 11. Regex library demo
+show "--- Regex Library ---";
+show "Email validation: " + Regex.test("user@example.com", "^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$");
+show "Replace pattern: " + Regex.replace("Hello 123 World", "\\d+", "NUMBER");
+show "Match: " + Regex.match("The year is 2025", "\\d+");
+
+# 12. Crypto library demo
+show "--- Crypto Library ---";
+show "MD5 hash: " + Crypto.md5("password");
+show "SHA256 hash: " + Crypto.sha256("password");
+show "Random bytes: " + Crypto.randomBytes(8);
+show "UUID: " + Crypto.uuid();
+
+# 13. Color library demo
+show "--- Color Library ---";
+show "RGB to Hex: " + Color.rgbToHex(255, 0, 0);
+show "Hex to RGB: " + Color.hexToRgb("#00ff00");
+show "Lighten red: " + Color.lighten("#ff0000", 20);
+show "Darken blue: " + Color.darken("#0000ff", 20);
+
+# 14. System library demo
+show "--- System Library ---";
+show "CPU info: " + System.cpuInfo();
+show "Memory usage: " + System.memoryUsage();
+show "Uptime: " + System.uptime() + " seconds";
+show "Process ID: " + System.pid();
+
+# 15. Validation library demo
+show "--- Validation Library ---";
+show "Is email valid: " + Validation.isEmail("user@example.com");
+show "Is URL valid: " + Validation.isUrl("https://example.com");
+show "Is number: " + Validation.isNumber("123");
+show "Is date: " + Validation.isDate("2025-04-15");
+
+# 16. Log library demo
+show "--- Log Library ---";
+Log.info("This is an info message");
+Log.warn("This is a warning message");
+Log.error("This is an error message");
+Log.debug("This is a debug message");
+show "Log level: " + Log.getLevel();
+
+# 17. UUID library demo
+show "--- UUID Library ---";
+show "Generate UUID v4: " + UUID.v4();
+show "Generate UUID v1: " + UUID.v1();
+show "Is valid UUID: " + UUID.isValid("123e4567-e89b-12d3-a456-426614174000");
+show "UUID version: " + UUID.version("123e4567-e89b-12d3-a456-426614174000");
+
+# 18. Storage library demo
+show "--- Storage Library ---";
+Storage.set("username", "razen_user");
+show "Get value: " + Storage.get("username");
+show "Has key: " + Storage.has("username");
+Storage.remove("username");
+show "After removal, has key: " + Storage.has("username");
+
+# 19. UI library demo
+show "--- UI Library ---";
+show "Alert dialog would show: 'Welcome to Razen!'";
+show "Confirm dialog would ask: 'Are you sure?'";
+show "Prompt dialog would ask for input with default: 'Enter your name'";
+show "Progress bar at 50%: [=====     ]";
+
+# 20. Audio library demo
+show "--- Audio Library ---";
+show "Would play sound: 'beep.mp3'";
+show "Would set volume to: 80%";
+show "Would get duration of audio file: 3.5 seconds";
+
+# 21. Image library demo
+show "--- Image Library ---";
+show "Would resize image to: 800x600";
+show "Would convert image to grayscale";
+show "Would apply blur filter with radius: 5";
+show "Would crop image from coordinates (10,10) to (100,100)";
+
+# 22. Ping library demo
+show "--- Ping Library ---";
+show "Ping result for google.com: " + Ping.check("google.com");
+show "Ping response time: " + Ping.time("google.com") + "ms";
+
+# 23. Bolt library demo
+show "--- Bolt Library ---";
+show "Bolt would optimize code execution";
+show "Bolt would cache results for faster access";
+
+# 24. Seed library demo
+show "--- Seed Library ---";
+show "Generated seed: " + Seed.generate();
+show "Seed-based map: " + Seed.generateMap("RAZEN2025");
+show "Seed code: " + Seed.createCode(12);
+
+# 25. Coin library demo
+show "--- Coin Library ---";
+show "Coin toss: " + Coin.toss();
+show "Multiple coin tosses: " + Coin.multiToss(3);
+
+show "===== Demo Complete =====";

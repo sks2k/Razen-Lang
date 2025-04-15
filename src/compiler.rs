@@ -2,6 +2,9 @@ use std::collections::HashMap;
 use std::fs;
 use std::path::Path;
 use std::process::Command;
+use std::io::Read;
+use std::fs::File;
+use std::path::PathBuf;
 
 use crate::ast::{Program, Statement, Expression};
 use crate::parser::Parser;
@@ -1014,19 +1017,28 @@ impl Compiler {
         for arg in &arguments {
             self.compile_expression(arg.clone());
         }
-        
-        // Get the function name
-        if let Expression::Identifier(name) = function {
-            // Call the function with the given number of arguments
-            self.emit(IR::Call(name, arguments.len()));
-            
-            // For show statements, we need to handle the return value
-            if self.in_show_statement {
-                // The return value is already on the stack
-                // No need to do anything special
-            }
-        } else {
-            panic!("Function call on non-identifier");
+
+        // Support function names like Identifier or InfixExpression (dot notation)
+        let func_name = match function {
+            Expression::Identifier(name) => name,
+            Expression::InfixExpression { left, operator, right } if operator == "." => {
+                // Only support left/right as Identifier for now
+                if let (Expression::Identifier(left_name), Expression::Identifier(right_name)) = (*left, *right) {
+                    format!("{}.{}", left_name, right_name)
+                } else {
+                    panic!("Dot expression must be identifiers on both sides");
+                }
+            },
+            _ => panic!("Function call on non-identifier or unsupported expression"),
+        };
+
+        // Call the function with the given number of arguments
+        self.emit(IR::Call(func_name, arguments.len()));
+
+        // For show statements, we need to handle the return value
+        if self.in_show_statement {
+            // The return value is already on the stack
+            // No need to do anything special
         }
     }
     
@@ -1798,86 +1810,63 @@ impl Compiler {
         // Call library import function
         self.emit(IR::Call("__import_lib".to_string(), 1));
         
-        // Define library functions based on the library name
-        match name.as_str() {
-            "random" => {
-                // Define random library functions
-                self.define_random_lib_functions();
-            },
-            "ht" => {
-                // Define head and tails library functions
-                self.define_ht_lib_functions();
-            },
-            "coin" => {
-                // Define coin library functions
-                self.define_coin_lib_functions();
-            },
-            "math" => {
-                // Define math library functions
-                self.define_math_lib_functions();
-            },
-            "ping" => {
-                // Define ping library functions
-                self.define_ping_lib_functions();
-            },
-            "bolt" => {
-                // Define bolt library functions
-                self.define_bolt_lib_functions();
-            },
-            "seed" => {
-                // Define seed library functions
-                self.define_seed_lib_functions();
-            },
-            _ => {
-                // Unknown library
-                self.errors.push(format!("Unknown library: {}", name));
-            }
+        // Dynamically register all library functions for all libraries
+        let libs_path = PathBuf::from("properties/libs");
+        self.register_all_libraries(libs_path.to_str().unwrap_or("properties/libs"));
+        
+        // No need to match on specific library names anymore
+        // Just register the specific library being imported
+        if !self.clean_output {
+            println!("[Compiler] Registered library: {}", name);
         }
     }
     
     // Helper methods for library functions
     
-    fn define_random_lib_functions(&mut self) {
-        // Define random.number function
-        self.function_table.define("random.number", self.ir.len());
-        // Define random.choice function
-        self.function_table.define("random.choice", self.ir.len());
+    /// Dynamically scan and register all library functions from properties/libs
+    pub fn register_all_libraries(&mut self, libs_dir: &str) {
+        let paths = match fs::read_dir(libs_dir) {
+            Ok(p) => p,
+            Err(_) => return,
+        };
+        
+        // Simple pattern matching instead of regex
+        for entry in paths {
+            if let Ok(entry) = entry {
+                let path = entry.path();
+                if let Some(ext) = path.extension() {
+                    if ext == "rzn" {
+                        let lib_name = path.file_stem().unwrap().to_string_lossy().to_string();
+                        if let Ok(content) = fs::read_to_string(&path) {
+                            let mut current_class = None;
+                            for line in content.lines() {
+                                let line = line.trim();
+                                // Extract class name
+                                if line.starts_with("class ") {
+                                    let parts: Vec<&str> = line.split_whitespace().collect();
+                                    if parts.len() >= 2 {
+                                        current_class = Some(parts[1].trim_matches('{').to_string());
+                                    }
+                                } 
+                                // Extract static method
+                                else if line.starts_with("static ") {
+                                    if let Some(class) = &current_class {
+                                        let parts: Vec<&str> = line.split_whitespace().collect();
+                                        if parts.len() >= 2 {
+                                            let fn_name = parts[1].split('(').next().unwrap_or(parts[1]);
+                                            let full_name = format!("{}.{}", class, fn_name);
+                                            self.function_table.define(&format!("{}.{}", lib_name, full_name), self.ir.len());
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
-    
-    fn define_ht_lib_functions(&mut self) {
-        // Define ht.flip function
-        self.function_table.define("ht.flip", self.ir.len());
-    }
-    
-    fn define_coin_lib_functions(&mut self) {
-        // Define coin.toss function
-        self.function_table.define("coin.toss", self.ir.len());
-    }
-    
-    fn define_math_lib_functions(&mut self) {
-        // Define math functions
-        self.function_table.define("math.sqrt", self.ir.len());
-        self.function_table.define("math.round", self.ir.len());
-        self.function_table.define("math.sin", self.ir.len());
-        // Add more math functions as needed
-    }
-    
-    fn define_ping_lib_functions(&mut self) {
-        // Define ping functions
-        self.function_table.define("ping.check", self.ir.len());
-        self.function_table.define("ping.time", self.ir.len());
-    }
-    
-    fn define_bolt_lib_functions(&mut self) {
-        // Define bolt functions
-        self.function_table.define("bolt.optimize", self.ir.len());
-        self.function_table.define("bolt.cache", self.ir.len());
-    }
-    
-    fn define_seed_lib_functions(&mut self) {
-        // Define seed functions
-        self.function_table.define("seed.set", self.ir.len());
-        self.function_table.define("seed.generate_map", self.ir.len());
-        self.function_table.define("seed.create_code", self.ir.len());
-    }
+
+    // All library functions are now dynamically registered from the .rzn files
+    // No need for individual define_*_lib_functions methods
 }
