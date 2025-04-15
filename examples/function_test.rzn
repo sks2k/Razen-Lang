@@ -1,0 +1,75 @@
+# Razen Function Test
+# This file tests the basic function handling in Razen
+
+# Simple add function
+fun add(a, b) {
+    return a + b;
+}
+
+# Simple subtract function
+fun subtract(a, b) {
+    return a - b;
+}
+
+# Simple multiply function
+fun multiply(a, b) {
+    return a * b;
+}
+
+# Simple divide function
+fun divide(a, b) {
+    if (b == 0) {
+        throw "Division by zero is not allowed";
+    }
+    return a / b;
+}
+
+# Power function
+fun power(base, exponent) {
+    let result = 1;
+    let i = 0;
+    while (i < exponent) {
+        result = result * base;
+        i = i + 1;
+    }
+    return result;
+}
+
+# Square root function
+fun sqrt(x) {
+    # Newton's method for square root
+    let guess = x / 2;
+    let epsilon = 0.0001;
+    
+    while ((guess * guess - x) > epsilon || (x - guess * guess) > epsilon) {
+        guess = (guess + x / guess) / 2;
+    }
+    
+    return guess;
+}
+
+# Absolute value function
+fun abs(x) {
+    if (x < 0) {
+        return -x;
+    }
+    return x;
+}
+
+# Test the functions
+show "Testing basic functions:";
+show "add(5, 3) = " + add(5, 3);
+show "subtract(10, 4) = " + subtract(10, 4);
+show "multiply(6, 7) = " + multiply(6, 7);
+show "divide(20, 5) = " + divide(20, 5);
+show "power(2, 3) = " + power(2, 3);
+show "sqrt(16) = " + sqrt(16);
+show "abs(-7) = " + abs(-7);
+
+# Test function as arguments to other functions
+show "\nTesting functions as arguments:";
+show "add(multiply(2, 3), divide(10, 2)) = " + add(multiply(2, 3), divide(10, 2));
+
+# Test nested function calls
+show "\nTesting nested function calls:";
+show "power(add(1, 1), 3) = " + power(add(1, 1), 3);

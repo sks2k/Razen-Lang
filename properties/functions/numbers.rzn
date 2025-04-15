@@ -13,7 +13,7 @@
 #   random(10) => random number 0 <= n < 10
 #   random(100) => random number 0 <= n < 100
 #   random(1) => random number 0 <= n < 1
-func random(max) {
+fun random(max) {
     sum = Math.random() * max;
     return sum;
 }
@@ -29,7 +29,7 @@ func random(max) {
 #   round(3.6) => 4
 #   round(2.2) => 2
 #   round(-1.7) => -2
-func round(num) {
+fun round(num) {
     return Math.round(num);
 }
 

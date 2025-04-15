@@ -13,7 +13,7 @@
 #   upper("hello") => "HELLO"
 #   upper("razen") => "RAZEN"
 #   upper("Test123") => "TEST123"
-func upper(str) {
+fun upper(str) {
     return str.upper();
 }
 
@@ -28,7 +28,7 @@ func upper(str) {
 #   lower("HELLO") => "hello"
 #   lower("RAZEN") => "razen"
 #   lower("Test123") => "test123"
-func lower(str) {
+fun lower(str) {
     return str.lower();
 }
 
@@ -43,7 +43,7 @@ func lower(str) {
 #   substring("Hello", 1, 3) => "el"
 #   substring("Razen", 0, 3) => "Raz"
 #   substring("abcdef", 2, 5) => "cde"
-func substring(str, start, end) {
+fun substring(str, start, end) {
     return str.substring(start, end);
 }
 
@@ -58,7 +58,7 @@ func substring(str, start, end) {
 #   replace("Hello World", "World", "Razen") => "Hello Razen"
 #   replace("abc", "b", "d") => "adc"
 #   replace("banana", "a", "o") => "bonono"
-func replace(str, old, new) {
+fun replace(str, old, new) {
     return str.replace(old, new);
 }
 
@@ -73,7 +73,7 @@ func replace(str, old, new) {
 #   trim("  Hello  ") => "Hello"
 #   trim("\tRazen\n") => "Razen"
 #   trim("  test 123 ") => "test 123"
-func trim(str) {
+fun trim(str) {
     return str.trim();
 }
 

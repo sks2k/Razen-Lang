@@ -13,7 +13,7 @@
 #   add(5, 3) => 8
 #   add(10, 20) => 30
 #   add(-2, 7) => 5
-func add(a, b) {
+fun add(a, b) {
     return a + b;
 }
 
@@ -28,7 +28,7 @@ func add(a, b) {
 #   subtract(10, 3) => 7
 #   subtract(20, 5) => 15
 #   subtract(0, 8) => -8
-func subtract(a, b) {
+fun subtract(a, b) {
     return a - b;
 }
 
@@ -43,7 +43,7 @@ func subtract(a, b) {
 #   multiply(4, 3) => 12
 #   multiply(5, 2) => 10
 #   multiply(-1, 8) => -8
-func multiply(a, b) {
+fun multiply(a, b) {
     return a * b;
 }
 
@@ -59,7 +59,7 @@ func multiply(a, b) {
 #   divide(15, 3) => 5
 #   divide(7, 2) => 3.5
 #   divide(5, 0) => error
-func divide(a, b) {
+fun divide(a, b) {
     if (b == 0) {
         throw "Division by zero is not allowed";
     }
@@ -77,7 +77,7 @@ func divide(a, b) {
 #   power(2, 3) => 8
 #   power(5, 0) => 1
 #   power(7, 2) => 49
-func power(base, exponent) {
+fun power(base, exponent) {
     let result = 1;
     for (let i = 0; i < exponent; i = i + 1) {
         result = result * base;

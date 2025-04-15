@@ -10,7 +10,7 @@
 # Logic:    Appends item to array arr and returns the new array.
 # AST:      CallNode('push', [arr, item])
 # Example:  push([1, 2], 3) => [1, 2, 3]
-func push(arr, item) {
+fun push(arr, item) {
     arr.push(item);
     return arr;
 }
@@ -23,7 +23,7 @@ func push(arr, item) {
 # Logic:    Removes and returns the last item of arr.
 # AST:      CallNode('pop', [arr])
 # Example:  pop([1, 2, 3]) => 3 (arr becomes [1, 2])
-func pop(arr) {
+fun pop(arr) {
     return arr.pop();
 }
 
@@ -35,7 +35,7 @@ func pop(arr) {
 # Logic:    Joins array elements with separator into a string.
 # AST:      CallNode('join_array', [arr, separator])
 # Example:  join_array(["a", "b", "c"], "-") => "a-b-c"
-func join_array(arr, separator) {
+fun join_array(arr, separator) {
     return arr.join(separator);
 }
 
@@ -47,7 +47,7 @@ func join_array(arr, separator) {
 # Logic:    Returns a sorted version of arr.
 # AST:      CallNode('sort', [arr])
 # Example:  sort([3, 1, 2]) => [1, 2, 3]
-func sort(arr) {
+fun sort(arr) {
     return arr.sort();
 }
 
@@ -59,7 +59,7 @@ func sort(arr) {
 # Logic:    Returns arr in reverse order.
 # AST:      CallNode('reverse', [arr])
 # Example:  reverse([1, 2, 3]) => [3, 2, 1]
-func reverse(arr) {
+fun reverse(arr) {
     return arr.reverse();
 }
 
@@ -71,7 +71,7 @@ func reverse(arr) {
 # Logic:    Returns a subarray from index start to end (exclusive).
 # AST:      CallNode('slice', [arr, start, end])
 # Example:  slice([1, 2, 3, 4, 5], 1, 3) => [2, 3]
-func slice(arr, start, end) {
+fun slice(arr, start, end) {
     return arr.slice(start, end);
 }
 

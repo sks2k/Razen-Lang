@@ -13,7 +13,7 @@
 #   is_number(123) => true
 #   is_number("123") => false
 #   is_number(3.14) => true
-func is_number(value) {
+fun is_number(value) {
     return typeof(value) == "number";
 }
 
@@ -28,7 +28,7 @@ func is_number(value) {
 #   is_string("hello") => true
 #   is_string(123) => false
 #   is_string("") => true
-func is_string(value) {
+fun is_string(value) {
     return typeof(value) == "string";
 }
 
@@ -43,7 +43,7 @@ func is_string(value) {
 #   is_boolean(true) => true
 #   is_boolean(1) => false
 #   is_boolean(false) => true
-func is_boolean(value) {
+fun is_boolean(value) {
     return typeof(value) == "boolean";
 }
 
@@ -58,7 +58,7 @@ func is_boolean(value) {
 #   is_array([1, 2, 3]) => true
 #   is_array("[1, 2, 3]") => false
 #   is_array([]) => true
-func is_array(value) {
+fun is_array(value) {
     return typeof(value) == "array";
 }
 
@@ -73,7 +73,7 @@ func is_array(value) {
 #   is_map({"a": 1}) => true
 #   is_map([1, 2, 3]) => false
 #   is_map({}) => true
-func is_map(value) {
+fun is_map(value) {
     return typeof(value) == "map";
 }
 
@@ -88,7 +88,7 @@ func is_map(value) {
 #   is_null(null) => true
 #   is_null(0) => false
 #   is_null("") => false
-func is_null(value) {
+fun is_null(value) {
     return value == null;
 }
 

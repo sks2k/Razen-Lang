@@ -10,7 +10,7 @@
 # Logic:    Prints the message to the output.
 # AST:      CallNode('say', [message])
 # Example:  say("Hello World") => prints "Hello World"
-func say(message) {
+fun say(message) {
     show message;
 }
 
@@ -22,7 +22,7 @@ func say(message) {
 # Logic:    Prompts the user with a question and returns their input.
 # AST:      CallNode('ask', [question])
 # Example:  ask("What's your name?") => reads user input
-func ask(question) {
+fun ask(question) {
     read result = question;
     return result;
 }

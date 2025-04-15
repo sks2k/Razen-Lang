@@ -13,7 +13,7 @@
 #   point(123) => reference to 123
 #   point("Hello") => reference to "Hello"
 #   point([1,2,3]) => reference to array
-func point(value) {
+fun point(value) {
     ref = &value;
     return ref;
 }
@@ -28,7 +28,7 @@ func point(value) {
 # Examples:
 #   read(ref) => value pointed by ref
 #   read(null) => null
-func read(ref) {
+fun read(ref) {
     return *ref;
 }
 

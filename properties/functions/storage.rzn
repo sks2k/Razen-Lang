@@ -12,7 +12,7 @@
 # Examples:
 #   save("myKey", 123) => true
 #   save("user", "Alice") => true
-func save(key, value) {
+fun save(key, value) {
     storage[key] = value;
     return true;
 }
@@ -28,7 +28,7 @@ func save(key, value) {
 #   load("myKey") => 123
 #   load("user") => "Alice"
 #   load("missing") => null
-func load(key) {
+fun load(key) {
     if (key in storage) {
         return storage[key];
     }

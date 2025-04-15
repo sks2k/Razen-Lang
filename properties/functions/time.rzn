@@ -12,7 +12,7 @@
 # Examples:
 #   now() => 1681552287
 #   now() => 1681552300
-func now() {
+fun now() {
     return get_current_time();
 }
 
@@ -26,7 +26,7 @@ func now() {
 # Examples:
 #   sleep(1) => pauses for 1 second
 #   sleep(0.5) => pauses for half a second
-func sleep(seconds) {
+fun sleep(seconds) {
     wait(seconds);
 }
 

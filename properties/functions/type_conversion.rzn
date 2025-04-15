@@ -13,7 +13,7 @@
 #   int("123") => 123
 #   int(123.45) => 123
 #   int(true) => 1
-func int(value) {
+fun int(value) {
     return to_int(value);
 }
 
@@ -28,7 +28,7 @@ func int(value) {
 #   float("123.45") => 123.45
 #   float(123) => 123.0
 #   float("7") => 7.0
-func float(value) {
+fun float(value) {
     return to_float(value);
 }
 
@@ -43,7 +43,7 @@ func float(value) {
 #   str(123) => "123"
 #   str(true) => "true"
 #   str([1,2]) => "[1,2]"
-func str(value) {
+fun str(value) {
     return to_string(value);
 }
 
@@ -59,7 +59,7 @@ func str(value) {
 #   bool(0) => false
 #   bool("true") => true
 #   bool("") => false
-func bool(value) {
+fun bool(value) {
     return to_bool(value);
 }
 

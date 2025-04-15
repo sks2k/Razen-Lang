@@ -10,7 +10,7 @@
 # Logic:    Stores value in a box and returns it.
 # AST:      CallNode('put', [value])
 # Example:  put("Hello") => "Hello"
-func put(value) {
+fun put(value) {
     box = value;
     return box;
 }
@@ -23,7 +23,7 @@ func put(value) {
 # Logic:    Returns the value stored in the box.
 # AST:      CallNode('get', [box])
 # Example:  get(box) => previously boxed value
-func get(box) {
+fun get(box) {
     return box;
 }
 
