@@ -12,7 +12,7 @@ CYAN="\033[0;36m"
 NC="\033[0m" # No Color
 
 # Repository URL
-RAZEN_REPO="https://raw.githubusercontent.com/BasaiCorp/razen-lang/main"
+RAZEN_REPO="https://raw.githubusercontent.com/BasaiCorp/Razen-Lang/main"
 
 # Print banner
 echo -e "${BLUE}"
@@ -172,6 +172,8 @@ else
     mkdir -p "$TMP_DIR/scripts"
     mkdir -p "$TMP_DIR/properties"
     mkdir -p "$TMP_DIR/examples"
+    mkdir -p "$TMP_DIR/razen-vscode-extension"
+    mkdir -p "$TMP_DIR/razen-jetbrain-plugin"
     echo -e "  ${GREEN}✓${NC} Created temporary directories"
     
     # Function to download directory contents
@@ -181,53 +183,97 @@ else
         local files_count=0
         local success_count=0
         
-        echo -e "${YELLOW}Downloading $dir_name files...${NC}"
+        echo -e "${YELLOW}Downloading all files from $dir_name folder...${NC}"
         
-        # First try to get a file listing
-        if curl -s "$RAZEN_REPO/$dir_name/" > "$TMP_DIR/filelist.html"; then
-            # Extract filenames from HTML (this is a simple approach and might need adjustment)
-            grep -o "href=\"[^\"]*\.rzn\"" "$TMP_DIR/filelist.html" | cut -d'"' -f2 > "$TMP_DIR/files.txt"
-            grep -o "href=\"[^\"]*\.sh\"" "$TMP_DIR/filelist.html" | cut -d'"' -f2 >> "$TMP_DIR/files.txt"
-            grep -o "href=\"[^\"]*\.py\"" "$TMP_DIR/filelist.html" | cut -d'"' -f2 >> "$TMP_DIR/files.txt"
+        # Create target directory if it doesn't exist
+        mkdir -p "$target_dir" 2>/dev/null
+        
+        # GitHub raw content doesn't support directory listing, so we'll use the fallback list
+        # and try to download each file individually
+        
+        # Define the known files for each directory
+        case "$dir_name" in
+            "properties")
+                local files="variables.rzn keywords.rzn operators.rzn functions.rzn loops.rzn conditionals.rzn types.rzn api.rzn syntax.rzn usage.rzn"
+                ;;
+            "scripts")
+                local files="razen razen-debug razen-test razen-run razen-update razen-help razen-docs razen-extension razen-autogen razen-run-debug"
+                ;;
+            "src")
+                local files="main.rs compiler.rs parser.rs lexer.rs interpreter.rs ast.rs token.rs"
+                ;;
+            "examples")
+                local files="hello.rzn calculator.rzn web-example/script.rzn quiz.rzn guess.rzn 12-16.rzn return.rzn example.rzn web-example/index.html web-example/style.css"
+                ;;
+            "razen-vscode-extension")
+                local files="package.json syntaxes/razen.tmLanguage.json language-configuration.json README.md snippets/razen.json src/extension.js src/razenLanguageData.js src/test.rzn icons/razen-icon.png icons/razen-icon.svg"
+                ;;
+            "razen-jetbrain-plugin")
+                local files="plugin.xml build.gradle settings.gradle src/main/resources/META-INF/plugin.xml"
+                ;;
+            *)
+                local files=""
+                ;;
+        esac
+        
+        if [ -z "$files" ]; then
+            echo -e "  ${YELLOW}No known files for directory $dir_name${NC}"
+            return 0
+        fi
+        
+        echo -e "  ${CYAN}Downloading known files from repository...${NC}"
+        
+        # Download each file from the list
+        for file in $files; do
+            files_count=$((files_count + 1))
+            # Create subdirectories if needed
+            mkdir -p "$target_dir/$(dirname "$file")" 2>/dev/null
+            echo -e "    ${CYAN}Downloading${NC} $file"
             
-            # Download each file
-            while read -r file; do
-                files_count=$((files_count + 1))
-                if curl -s --retry 3 --retry-delay 2 -o "$target_dir/$(basename "$file")" "$RAZEN_REPO/$dir_name/$file" &>/dev/null; then
+            # Try to download the file
+            if curl -s --retry 3 --retry-delay 2 -o "$target_dir/$file" "$RAZEN_REPO/$dir_name/$file" &>/dev/null; then
+                # Check if the file was actually downloaded and has content
+                if [ -s "$target_dir/$file" ]; then
                     success_count=$((success_count + 1))
+                    echo -e "    ${GREEN}✓${NC} Downloaded $file"
+                    # Make scripts executable if they're in the scripts directory
+                    if [ "$dir_name" = "scripts" ]; then
+                        chmod +x "$target_dir/$file"
+                    fi
+                else
+                    # File exists but is empty (likely a 404 page)
+                    rm "$target_dir/$file" # Remove empty file
+                    echo -e "    ${RED}✗${NC} Failed to download $file (empty file)"
                 fi
-            done < "$TMP_DIR/files.txt"
-            
-            echo -e "  ${GREEN}✓${NC} Downloaded $success_count/$files_count files from $dir_name/"
+            else
+                echo -e "    ${RED}✗${NC} Failed to download $file"
+            fi
+        done
+        
+        # If no files were downloaded, try to use local files
+        if [ $success_count -eq 0 ]; then
+            echo -e "  ${YELLOW}No files downloaded from repository, checking local installation...${NC}"
+            if [ -d "/usr/local/lib/razen/$dir_name" ]; then
+                echo -e "  ${CYAN}Using files from local installation...${NC}"
+                cp -r "/usr/local/lib/razen/$dir_name/"* "$target_dir/" 2>/dev/null
+                local copied_count=$(find "$target_dir" -type f | wc -l)
+                if [ $copied_count -gt 0 ]; then
+                    echo -e "  ${GREEN}✓${NC} Copied $copied_count files from local installation"
+                    success_count=$copied_count
+                else
+                    echo -e "  ${RED}✗${NC} No files found in local installation"
+                fi
+            else
+                echo -e "  ${RED}✗${NC} Directory not found in local installation"
+            fi
+        fi
+        
+        if [ $success_count -eq 0 ]; then
+            echo -e "  ${RED}✗${NC} Failed to download any files from $dir_name/"
+            return 1
         else
-            # Fallback: try to download known files
-            case "$dir_name" in
-                "properties")
-                    local files="variables.rzn keywords.rzn operators.rzn functions.rzn loops.rzn conditionals.rzn types.rzn api.rzn syntax.rzn"
-                    ;;
-                "scripts")
-                    local files="razen razen-debug razen-test razen-run razen-update razen-help razen-docs razen-extension"
-                    ;;
-                "src")
-                    local files="main.py compiler.py parser.py lexer.py interpreter.py"
-                    ;;
-                "examples")
-                    local files="hello.rzn calculator.rzn web-example/script.rzn quiz.rzn guess.rzn"
-                    ;;
-                *)
-                    local files=""
-                    ;;
-            esac
-            
-            for file in $files; do
-                files_count=$((files_count + 1))
-                mkdir -p "$target_dir/$(dirname "$file")" 2>/dev/null
-                if curl -s --retry 3 --retry-delay 2 -o "$target_dir/$(basename "$file")" "$RAZEN_REPO/$dir_name/$file" &>/dev/null; then
-                    success_count=$((success_count + 1))
-                fi
-            done
-            
             echo -e "  ${GREEN}✓${NC} Downloaded $success_count/$files_count files from $dir_name/"
+            return 0
         fi
     }
     
@@ -265,6 +311,8 @@ else
     download_directory "scripts" "$TMP_DIR/scripts"
     download_directory "src" "$TMP_DIR/src"
     download_directory "examples" "$TMP_DIR/examples"
+    download_directory "razen-vscode-extension" "$TMP_DIR/razen-vscode-extension"
+    download_directory "razen-jetbrain-plugin" "$TMP_DIR/razen-jetbrain-plugin"
     
     # List of all scripts that need to be executable
     SCRIPTS="razen razen-debug razen-test razen-run razen-update razen-help razen-docs razen-extension"
@@ -319,62 +367,68 @@ else
     # Update compiler binary
     update_compiler
     
+    # Function to safely update directory with sudo if needed
+    safe_update_directory() {
+        local source_dir=$1
+        local target_dir=$2
+        local dir_name=$3
+        
+        echo -e "${YELLOW}Updating $dir_name files...${NC}"
+        
+        # Check if source directory has files
+        if [ ! "$(ls -A "$source_dir" 2>/dev/null)" ]; then
+            echo -e "  ${YELLOW}No files found in $source_dir, skipping update${NC}"
+            return 0
+        fi
+        
+        # Check if target directory exists
+        if [ ! -d "$target_dir" ]; then
+            echo -e "  ${CYAN}Creating $dir_name directory...${NC}"
+            if [ -w "$(dirname "$target_dir")" ]; then
+                mkdir -p "$target_dir"
+            else
+                sudo mkdir -p "$target_dir"
+            fi
+        fi
+        
+        # Copy files with proper permissions
+        if [ -w "$target_dir" ]; then
+            cp -r "$source_dir/"* "$target_dir/" 2>/dev/null
+            if [ $? -eq 0 ]; then
+                echo -e "  ${GREEN}✓${NC} Updated $dir_name files"
+            else
+                echo -e "  ${YELLOW}No files to update in $dir_name${NC}"
+            fi
+        else
+            # Need sudo
+            sudo cp -r "$source_dir/"* "$target_dir/" 2>/dev/null
+            if [ $? -eq 0 ]; then
+                echo -e "  ${GREEN}✓${NC} Updated $dir_name files (with sudo)"
+            else
+                echo -e "  ${YELLOW}No files to update in $dir_name${NC}"
+            fi
+        fi
+    }
+
     # Update properties files
-    echo -e "${YELLOW}Updating properties files...${NC}"
-    if [ -w "/usr/local/lib/razen/properties" ]; then
-        cp -r "$TMP_DIR/properties/"* "/usr/local/lib/razen/properties/"
-    else
-        sudo cp -r "$TMP_DIR/properties/"* "/usr/local/lib/razen/properties/"
-    fi
-    echo -e "  ${GREEN}✓${NC} Updated properties files"
-    
+    safe_update_directory "$TMP_DIR/properties" "/usr/local/lib/razen/properties" "properties"
+
     # Update scripts
-    echo -e "${YELLOW}Updating scripts...${NC}"
-    if [ -w "/usr/local/lib/razen/scripts" ]; then
-        cp -r "$TMP_DIR/scripts/"* "/usr/local/lib/razen/scripts/"
-    else
-        sudo cp -r "$TMP_DIR/scripts/"* "/usr/local/lib/razen/scripts/"
-    fi
-    echo -e "  ${GREEN}✓${NC} Updated scripts"
-    
+    safe_update_directory "$TMP_DIR/scripts" "/usr/local/lib/razen/scripts" "scripts"
+
     # Update source files
-    echo -e "${YELLOW}Updating source files...${NC}"
-    if [ -d "/usr/local/lib/razen/src" ]; then
-        if [ -w "/usr/local/lib/razen/src" ]; then
-            cp -r "$TMP_DIR/src/"* "/usr/local/lib/razen/src/"
-        else
-            sudo cp -r "$TMP_DIR/src/"* "/usr/local/lib/razen/src/"
-        fi
-        echo -e "  ${GREEN}✓${NC} Updated source files"
-    else
-        if [ -w "/usr/local/lib/razen" ]; then
-            mkdir -p "/usr/local/lib/razen/src"
-            cp -r "$TMP_DIR/src/"* "/usr/local/lib/razen/src/"
-        else
-            sudo mkdir -p "/usr/local/lib/razen/src"
-            sudo cp -r "$TMP_DIR/src/"* "/usr/local/lib/razen/src/"
-        fi
-        echo -e "  ${GREEN}✓${NC} Created and updated source files"
-    fi
-    
+    safe_update_directory "$TMP_DIR/src" "/usr/local/lib/razen/src" "source"
+
     # Update examples
-    echo -e "${YELLOW}Updating example files...${NC}"
-    if [ -d "/usr/local/lib/razen/examples" ]; then
-        if [ -w "/usr/local/lib/razen/examples" ]; then
-            cp -r "$TMP_DIR/examples/"* "/usr/local/lib/razen/examples/"
-        else
-            sudo cp -r "$TMP_DIR/examples/"* "/usr/local/lib/razen/examples/"
-        fi
-        echo -e "  ${GREEN}✓${NC} Updated example files"
-    else
-        if [ -w "/usr/local/lib/razen" ]; then
-            mkdir -p "/usr/local/lib/razen/examples"
-            cp -r "$TMP_DIR/examples/"* "/usr/local/lib/razen/examples/"
-        else
-            sudo mkdir -p "/usr/local/lib/razen/examples"
-            sudo cp -r "$TMP_DIR/examples/"* "/usr/local/lib/razen/examples/"
-        fi
-        echo -e "  ${GREEN}✓${NC} Created and updated example files"
+    safe_update_directory "$TMP_DIR/examples" "/usr/local/lib/razen/examples" "example"
+
+    # Update extensions if they were downloaded
+    if [ -d "$TMP_DIR/razen-vscode-extension" ] && [ "$(ls -A "$TMP_DIR/razen-vscode-extension" 2>/dev/null)" ]; then
+        safe_update_directory "$TMP_DIR/razen-vscode-extension" "/usr/local/lib/razen/razen-vscode-extension" "VS Code extension"
+    fi
+
+    if [ -d "$TMP_DIR/razen-jetbrain-plugin" ] && [ "$(ls -A "$TMP_DIR/razen-jetbrain-plugin" 2>/dev/null)" ]; then
+        safe_update_directory "$TMP_DIR/razen-jetbrain-plugin" "/usr/local/lib/razen/razen-jetbrain-plugin" "JetBrains plugin"
     fi
     
     # Update version file
@@ -382,7 +436,8 @@ else
     if [ -w "/usr/local/lib/razen" ]; then
         echo "$LATEST_VERSION" > "/usr/local/lib/razen/version"
     else
-        sudo echo "$LATEST_VERSION" > "/usr/local/lib/razen/version"
+        # Using sudo with echo requires a different approach
+        echo "$LATEST_VERSION" | sudo tee "/usr/local/lib/razen/version" > /dev/null
     fi
     echo -e "  ${GREEN}✓${NC} Updated version information: $LATEST_VERSION"
     
@@ -390,8 +445,19 @@ else
     recreate_symlinks() {
         echo -e "${YELLOW}Recreating symbolic links...${NC}"
         
-        # List of all scripts that need symlinks
-        SCRIPTS="razen razen-debug razen-test razen-run razen-update razen-help razen-docs razen-extension"
+        # Find all executable files in the scripts directory
+        if [ ! -d "/usr/local/lib/razen/scripts" ]; then
+            echo -e "  ${RED}✗${NC} Scripts directory not found"
+            return 1
+        fi
+        
+        # Get a list of all executable files in the scripts directory
+        SCRIPTS=$(find "/usr/local/lib/razen/scripts" -type f -executable -exec basename {} \; 2>/dev/null)
+        
+        if [ -z "$SCRIPTS" ]; then
+            echo -e "  ${RED}✗${NC} No executable scripts found"
+            return 1
+        fi
         
         # Determine the appropriate bin directory
         if [ -n "$BIN_PATH" ]; then
@@ -417,31 +483,38 @@ else
         
         # Create symlinks in the bin directory
         local missing_links=0
+        local link_count=0
+        
         for script in $SCRIPTS; do
-            if [ -f "/usr/local/lib/razen/scripts/$script" ]; then
+            script_path="/usr/local/lib/razen/scripts/$script"
+            if [ -f "$script_path" ] && [ -x "$script_path" ]; then
                 if [ -w "$target_bin" ]; then
                     # Direct creation if we have write permissions
-                    ln -sf "/usr/local/lib/razen/scripts/$script" "$target_bin/$script"
+                    ln -sf "$script_path" "$target_bin/$script"
                     echo -e "  ${GREEN}✓${NC} Created $target_bin/$script"
+                    link_count=$((link_count + 1))
                 else
                     # Use sudo if we don't have direct write permissions
-                    if sudo ln -sf "/usr/local/lib/razen/scripts/$script" "$target_bin/$script"; then
+                    if sudo ln -sf "$script_path" "$target_bin/$script"; then
                         echo -e "  ${GREEN}✓${NC} Created $target_bin/$script"
+                        link_count=$((link_count + 1))
                     else
                         echo -e "  ${RED}✗${NC} Failed to create symlink in $target_bin/$script (permission denied)"
                         missing_links=$((missing_links + 1))
                     fi
                 fi
-            else
-                echo -e "  ${RED}✗${NC} Failed to create $target_bin/$script (source file not found)"
-                missing_links=$((missing_links + 1))
             fi
         done
         
         # Verify all symlinks are created
         if [ $missing_links -gt 0 ]; then
-            echo -e "${RED}Failed to create some symbolic links. Please check the errors above.${NC}"
+            echo -e "${RED}Failed to create $missing_links symbolic links. Please check the errors above.${NC}"
             echo -e "${YELLOW}You may need to manually create symlinks or add the scripts directory to your PATH.${NC}"
+            return 1
+        fi
+        
+        if [ $link_count -eq 0 ]; then
+            echo -e "${RED}No symbolic links were created${NC}"
             return 1
         fi
         
