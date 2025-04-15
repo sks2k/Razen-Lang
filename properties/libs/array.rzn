@@ -1,0 +1,60 @@
+# Razen Array Library
+# Provides standard array operations for Razen code in a class-based structure.
+# Usage: import lib array;
+#        let arr = [1, 2, 3];
+#        arr = Array.push(arr, 4); # [1,2,3,4]
+#        let last = Array.pop(arr); # 4
+
+class Array {
+    # Appends item to array arr and returns the new array.
+    # Example: let a = [1, 2]; a = Array.push(a, 3); # [1, 2, 3]
+    static push(arr, item) {
+        arr.push(item);
+        return arr;
+    }
+
+    # Removes and returns the last item of arr.
+    # Example: let last = Array.pop([1, 2, 3]); # 3
+    static pop(arr) {
+        return arr.pop();
+    }
+
+    # Joins array elements into a string with separator sep.
+    # Example: Array.join(["a", "b", "c"], ",") => "a,b,c"
+    static join(arr, sep) {
+        return arr.join(sep);
+    }
+
+    # Returns a sorted copy of arr.
+    # Example: Array.sort([3, 1, 2]) => [1, 2, 3]
+    static sort(arr) {
+        return arr.sort();
+    }
+
+    # Returns a reversed copy of arr.
+    # Example: Array.reverse([1, 2, 3]) => [3, 2, 1]
+    static reverse(arr) {
+        return arr.reverse();
+    }
+
+    # Returns a subarray from start to end (exclusive).
+    # Example: Array.slice([1, 2, 3, 4], 1, 3) => [2, 3]
+    static slice(arr, start, end) {
+        return arr.slice(start, end);
+    }
+}
+
+# Example Usage:
+# import lib array;
+# let nums = [10, 20, 30];
+# nums = Array.push(nums, 40); # [10, 20, 30, 40]
+# let last = Array.pop(nums);  # 40
+# let s = Array.join(nums, "-"); # "10-20-30"
+# let sorted = Array.sort([3, 2, 1]);  # [1, 2, 3]
+# let rev = Array.reverse([1, 2, 3]);  # [3, 2, 1]
+# let part = Array.slice([1, 2, 3, 4], 1, 3); # [2, 3]
+
+# Integration Notes:
+# - Import with: import lib array;
+# - Call methods as Array.method(...)
+# - Compatible with Razen parser, lexer, and compiler.

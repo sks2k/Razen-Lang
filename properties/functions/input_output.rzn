@@ -1,0 +1,35 @@
+# Razen Input/Output Functions
+# Provides standard I/O for the Razen language.
+# Includes: syntax, logic, usage, and integration notes for parser/lexer/compiler/AST (Rust).
+
+# ------------------------------------------------------------------------------
+# Function: say(message)
+# Syntax:   say("Hello World")
+# Grammar:  FunctionCall -> 'say' '(' Expression ')'
+# Token:    IDENTIFIER (say), LPAREN, RPAREN
+# Logic:    Prints the message to the output.
+# AST:      CallNode('say', [message])
+# Example:  say("Hello World") => prints "Hello World"
+func say(message) {
+    show message;
+}
+
+# ------------------------------------------------------------------------------
+# Function: ask(question)
+# Syntax:   ask("What's your name?")
+# Grammar:  FunctionCall -> 'ask' '(' Expression ')'
+# Token:    IDENTIFIER (ask), LPAREN, RPAREN
+# Logic:    Prompts the user with a question and returns their input.
+# AST:      CallNode('ask', [question])
+# Example:  ask("What's your name?") => reads user input
+func ask(question) {
+    read result = question;
+    return result;
+}
+
+# ------------------------------------------------------------------------------
+# Integration Notes:
+# - Parser: Recognize 'say' and 'ask' function calls as valid expressions.
+# - Lexer: Tokenize identifiers, parens, etc. for Rust-based lexer.
+# - Compiler: Map 'say' to print/output, 'ask' to input/read in Rust.
+# - AST: Represent as CallNode with function name and argument list.

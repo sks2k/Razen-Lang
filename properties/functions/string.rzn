@@ -1,0 +1,85 @@
+# Razen String Functions
+# Provides string manipulation utilities for the Razen language.
+# Includes: syntax, logic, usage, and integration notes for parser/lexer/compiler/AST (Rust).
+
+# ------------------------------------------------------------------------------
+# Function: upper(str)
+# Syntax:   upper("hello")
+# Grammar:  FunctionCall -> 'upper' '(' Expression ')'
+# Token:    IDENTIFIER (upper), LPAREN, RPAREN
+# Logic:    Returns the string in uppercase.
+# AST:      CallNode('upper', [str])
+# Examples:
+#   upper("hello") => "HELLO"
+#   upper("razen") => "RAZEN"
+#   upper("Test123") => "TEST123"
+func upper(str) {
+    return str.upper();
+}
+
+# ------------------------------------------------------------------------------
+# Function: lower(str)
+# Syntax:   lower("HELLO")
+# Grammar:  FunctionCall -> 'lower' '(' Expression ')'
+# Token:    IDENTIFIER (lower), LPAREN, RPAREN
+# Logic:    Returns the string in lowercase.
+# AST:      CallNode('lower', [str])
+# Examples:
+#   lower("HELLO") => "hello"
+#   lower("RAZEN") => "razen"
+#   lower("Test123") => "test123"
+func lower(str) {
+    return str.lower();
+}
+
+# ------------------------------------------------------------------------------
+# Function: substring(str, start, end)
+# Syntax:   substring("Hello", 1, 3)
+# Grammar:  FunctionCall -> 'substring' '(' Expression ',' Expression ',' Expression ')'
+# Token:    IDENTIFIER (substring), LPAREN, COMMA, RPAREN
+# Logic:    Returns substring from start to end (exclusive).
+# AST:      CallNode('substring', [str, start, end])
+# Examples:
+#   substring("Hello", 1, 3) => "el"
+#   substring("Razen", 0, 3) => "Raz"
+#   substring("abcdef", 2, 5) => "cde"
+func substring(str, start, end) {
+    return str.substring(start, end);
+}
+
+# ------------------------------------------------------------------------------
+# Function: replace(str, old, new)
+# Syntax:   replace("Hello World", "World", "Razen")
+# Grammar:  FunctionCall -> 'replace' '(' Expression ',' Expression ',' Expression ')'
+# Token:    IDENTIFIER (replace), LPAREN, COMMA, RPAREN
+# Logic:    Returns a new string with all occurrences of old replaced by new.
+# AST:      CallNode('replace', [str, old, new])
+# Examples:
+#   replace("Hello World", "World", "Razen") => "Hello Razen"
+#   replace("abc", "b", "d") => "adc"
+#   replace("banana", "a", "o") => "bonono"
+func replace(str, old, new) {
+    return str.replace(old, new);
+}
+
+# ------------------------------------------------------------------------------
+# Function: trim(str)
+# Syntax:   trim("  Hello  ")
+# Grammar:  FunctionCall -> 'trim' '(' Expression ')'
+# Token:    IDENTIFIER (trim), LPAREN, RPAREN
+# Logic:    Removes whitespace from both ends of the string.
+# AST:      CallNode('trim', [str])
+# Examples:
+#   trim("  Hello  ") => "Hello"
+#   trim("\tRazen\n") => "Razen"
+#   trim("  test 123 ") => "test 123"
+func trim(str) {
+    return str.trim();
+}
+
+# ------------------------------------------------------------------------------
+# Integration Notes:
+# - Parser: Recognize these function calls as valid expressions.
+# - Lexer: Tokenize identifiers, parens, commas, etc. for Rust-based lexer.
+# - Compiler: Map to Rust string operations or equivalents.
+# - AST: Represent as CallNode with function name and argument list.

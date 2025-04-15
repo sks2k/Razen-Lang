@@ -1,0 +1,46 @@
+# Razen Binary Operation References
+# Documents binary operators for the Razen language.
+# Includes: operator, syntax, examples, logic, and integration notes for parser/lexer/compiler/AST (Rust).
+
+# ------------------------------------------------------------------------------
+# Operator: plus (+)
+# Syntax:   5 + 3
+# Logic:    Adds two numbers or concatenates strings.
+# Examples:
+#   5 + 3 => 8
+#   "Hello" + "World" => "HelloWorld"
+
+# ------------------------------------------------------------------------------
+# Operator: minus (-)
+# Syntax:   10 - 3
+# Logic:    Subtracts the right operand from the left.
+# Examples:
+#   10 - 3 => 7
+
+# ------------------------------------------------------------------------------
+# Operator: times (*)
+# Syntax:   4 * 3
+# Logic:    Multiplies two numbers.
+# Examples:
+#   4 * 3 => 12
+
+# ------------------------------------------------------------------------------
+# Operator: by (/)
+# Syntax:   10 / 2
+# Logic:    Divides the left operand by the right.
+# Examples:
+#   10 / 2 => 5
+
+# ------------------------------------------------------------------------------
+# Operator: join (+ for strings)
+# Syntax:   "Hello" + "World"
+# Logic:    Concatenates two strings.
+# Examples:
+#   "Hello" + "World" => "HelloWorld"
+
+# ------------------------------------------------------------------------------
+# Integration Notes:
+# - Parser: Recognize binary operators and precedence.
+# - Lexer: Tokenize operator symbols (+, -, *, /) for Rust-based lexer.
+# - Compiler: Map to Rust arithmetic and string operations.
+# - AST: Represent as BinaryOpNode with operator and operands.

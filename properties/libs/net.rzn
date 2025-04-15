@@ -1,0 +1,35 @@
+# Razen Net Library
+# Provides networking operations for Razen code in a class-based structure.
+# Usage: import lib net;
+#        let resp = Net.get("https://example.com");
+
+class Net {
+    # Sends a GET request to the given URL.
+    # Example: Net.get("https://api.com") => "response data"
+    static get(url) {
+        return http_get(url);
+    }
+
+    # Sends a POST request to the given URL with data.
+    # Example: Net.post("https://api.com", {a:1}) => "response data"
+    static post(url, data) {
+        return http_post(url, data);
+    }
+
+    # Pings a host and returns latency or status.
+    # Example: Net.ping("example.com") => 42
+    static ping(host) {
+        return ping_host(host);
+    }
+}
+
+# Example Usage:
+# import lib net;
+# let resp = Net.get("https://example.com");
+# let resp2 = Net.post("https://api.com", {foo: "bar"});
+# let latency = Net.ping("example.com");
+
+# Integration Notes:
+# - Import with: import lib net;
+# - Call methods as Net.method(...)
+# - Compatible with Razen parser, lexer, and compiler.

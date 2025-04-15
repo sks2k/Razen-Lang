@@ -1,0 +1,35 @@
+# Razen Regex Library
+# Provides regular expression operations for Razen code in a class-based structure.
+# Usage: import lib regex;
+#        let found = Regex.match("abc123", "\\d+");
+
+class Regex {
+    # Returns true if pattern matches the string.
+    # Example: Regex.match("abc123", "\\d+") => true
+    static match(str, pattern) {
+        return regex_match(str, pattern);
+    }
+
+    # Returns the first match of pattern in the string.
+    # Example: Regex.search("abc123", "\\d+") => "123"
+    static search(str, pattern) {
+        return regex_search(str, pattern);
+    }
+
+    # Replaces all pattern matches in str with repl.
+    # Example: Regex.replace("foo123bar", "\\d+", "X") => "fooXbar"
+    static replace(str, pattern, repl) {
+        return regex_replace(str, pattern, repl);
+    }
+}
+
+# Example Usage:
+# import lib regex;
+# let has_num = Regex.match("abc123", "\\d+");
+# let first = Regex.search("abc123", "\\d+");
+# let replaced = Regex.replace("foo123bar", "\\d+", "X");
+
+# Integration Notes:
+# - Import with: import lib regex;
+# - Call methods as Regex.method(...)
+# - Compatible with Razen parser, lexer, and compiler.

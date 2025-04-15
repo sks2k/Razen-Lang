@@ -1,0 +1,35 @@
+# Razen Crypto Library
+# Provides cryptographic utilities in a class-based structure.
+# Usage: lib crypto;
+#        let h = Crypto.hash("abc");
+
+class Crypto {
+    # Returns the hash of a string.
+    # Example: Crypto.hash("abc") => "900150983cd24fb0..."
+    static hash(str) {
+        return hash_string(str);
+    }
+
+    # Encrypts a string with a key.
+    # Example: Crypto.encrypt("msg", "key")
+    static encrypt(str, key) {
+        return encrypt_string(str, key);
+    }
+
+    # Decrypts a string with a key.
+    # Example: Crypto.decrypt("enc", "key")
+    static decrypt(enc, key) {
+        return decrypt_string(enc, key);
+    }
+}
+
+# Example Usage:
+# lib crypto;
+# let h = Crypto.hash("abc");
+# let enc = Crypto.encrypt("hello", "pass");
+# let dec = Crypto.decrypt(enc, "pass");
+
+# Integration Notes:
+# - Use 'lib crypto;' to enable.
+# - Call methods as Crypto.method(...)
+# - Compatible with Razen parser, lexer, and compiler.

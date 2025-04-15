@@ -1,0 +1,51 @@
+# Razen String Library
+# Provides standard string operations for Razen code in a class-based structure.
+# Usage: import lib string;
+#        let s = "hello world";
+#        let up = String.upper(s); # "HELLO WORLD"
+
+class String {
+    # Converts string to uppercase.
+    # Example: String.upper("abc") => "ABC"
+    static upper(str) {
+        return str.to_upper();
+    }
+
+    # Converts string to lowercase.
+    # Example: String.lower("ABC") => "abc"
+    static lower(str) {
+        return str.to_lower();
+    }
+
+    # Replaces all occurrences of old with new in str.
+    # Example: String.replace("foo bar", "foo", "baz") => "baz bar"
+    static replace(str, old, new) {
+        return str.replace(old, new);
+    }
+
+    # Removes whitespace from both ends of str.
+    # Example: String.trim("  hi ") => "hi"
+    static trim(str) {
+        return str.trim();
+    }
+
+    # Returns substring from start to end (exclusive).
+    # Example: String.substring("abcdef", 1, 4) => "bcd"
+    static substring(str, start, end) {
+        return str.substring(start, end);
+    }
+}
+
+# Example Usage:
+# import lib string;
+# let s = "  Hello World!  ";
+# let up = String.upper(s);      # "  HELLO WORLD!  "
+# let low = String.lower(s);     # "  hello world!  "
+# let trimmed = String.trim(s);  # "Hello World!"
+# let sub = String.substring(s, 2, 7); # "Hello"
+# let rep = String.replace(s, "World", "Razen"); # "  Hello Razen!  "
+
+# Integration Notes:
+# - Import with: import lib string;
+# - Call methods as String.method(...)
+# - Compatible with Razen parser, lexer, and compiler.

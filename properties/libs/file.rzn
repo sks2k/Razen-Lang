@@ -1,0 +1,42 @@
+# Razen File Library
+# Provides file operations for Razen code in a class-based structure.
+# Usage: import lib file;
+#        let data = File.read("foo.txt");
+
+class File {
+    # Reads the contents of a file.
+    # Example: File.read("foo.txt") => "file contents"
+    static read(path) {
+        return read_file(path);
+    }
+
+    # Writes data to a file.
+    # Example: File.write("foo.txt", "bar")
+    static write(path, data) {
+        write_file(path, data);
+    }
+
+    # Checks if a file exists.
+    # Example: File.exists("foo.txt") => true
+    static exists(path) {
+        return file_exists(path);
+    }
+
+    # Deletes a file.
+    # Example: File.delete("foo.txt")
+    static delete(path) {
+        delete_file(path);
+    }
+}
+
+# Example Usage:
+# import lib file;
+# let text = File.read("readme.md");
+# File.write("out.txt", text);
+# let ok = File.exists("out.txt");
+# File.delete("out.txt");
+
+# Integration Notes:
+# - Import with: import lib file;
+# - Call methods as File.method(...)
+# - Compatible with Razen parser, lexer, and compiler.

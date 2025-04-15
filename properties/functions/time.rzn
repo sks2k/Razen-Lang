@@ -1,0 +1,38 @@
+# Razen Time Functions
+# Provides time utilities for the Razen language.
+# Includes: syntax, logic, usage, and integration notes for parser/lexer/compiler/AST (Rust).
+
+# ------------------------------------------------------------------------------
+# Function: now()
+# Syntax:   now()
+# Grammar:  FunctionCall -> 'now' '(' ')'
+# Token:    IDENTIFIER (now), LPAREN, RPAREN
+# Logic:    Returns the current timestamp (seconds since epoch).
+# AST:      CallNode('now', [])
+# Examples:
+#   now() => 1681552287
+#   now() => 1681552300
+func now() {
+    return get_current_time();
+}
+
+# ------------------------------------------------------------------------------
+# Function: sleep(seconds)
+# Syntax:   sleep(2)
+# Grammar:  FunctionCall -> 'sleep' '(' Expression ')'
+# Token:    IDENTIFIER (sleep), LPAREN, RPAREN
+# Logic:    Pauses execution for the given number of seconds.
+# AST:      CallNode('sleep', [seconds])
+# Examples:
+#   sleep(1) => pauses for 1 second
+#   sleep(0.5) => pauses for half a second
+func sleep(seconds) {
+    wait(seconds);
+}
+
+# ------------------------------------------------------------------------------
+# Integration Notes:
+# - Parser: Recognize 'now' and 'sleep' function calls as valid expressions.
+# - Lexer: Tokenize identifiers, parens, etc. for Rust-based lexer.
+# - Compiler: Map to Rust time and sleep operations or equivalents.
+# - AST: Represent as CallNode with function name and argument list.

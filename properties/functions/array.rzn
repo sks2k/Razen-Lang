@@ -1,0 +1,83 @@
+# Razen Array Functions
+# This file defines standard array operations for the Razen language.
+# Includes: syntax, logic, usage, and integration notes for parser/lexer/compiler/AST.
+
+# ------------------------------------------------------------------------------
+# Function: push(arr, item)
+# Syntax:   push([a, b], x)
+# Grammar:  FunctionCall -> 'push' '(' Expression ',' Expression ')'
+# Token:    IDENTIFIER (push), LPAREN, COMMA, RPAREN
+# Logic:    Appends item to array arr and returns the new array.
+# AST:      CallNode('push', [arr, item])
+# Example:  push([1, 2], 3) => [1, 2, 3]
+func push(arr, item) {
+    arr.push(item);
+    return arr;
+}
+
+# ------------------------------------------------------------------------------
+# Function: pop(arr)
+# Syntax:   pop([a, b, c])
+# Grammar:  FunctionCall -> 'pop' '(' Expression ')'
+# Token:    IDENTIFIER (pop), LPAREN, RPAREN
+# Logic:    Removes and returns the last item of arr.
+# AST:      CallNode('pop', [arr])
+# Example:  pop([1, 2, 3]) => 3 (arr becomes [1, 2])
+func pop(arr) {
+    return arr.pop();
+}
+
+# ------------------------------------------------------------------------------
+# Function: join_array(arr, separator)
+# Syntax:   join_array([a, b], ",")
+# Grammar:  FunctionCall -> 'join_array' '(' Expression ',' Expression ')'
+# Token:    IDENTIFIER (join_array), LPAREN, COMMA, RPAREN
+# Logic:    Joins array elements with separator into a string.
+# AST:      CallNode('join_array', [arr, separator])
+# Example:  join_array(["a", "b", "c"], "-") => "a-b-c"
+func join_array(arr, separator) {
+    return arr.join(separator);
+}
+
+# ------------------------------------------------------------------------------
+# Function: sort(arr)
+# Syntax:   sort([c, a, b])
+# Grammar:  FunctionCall -> 'sort' '(' Expression ')'
+# Token:    IDENTIFIER (sort), LPAREN, RPAREN
+# Logic:    Returns a sorted version of arr.
+# AST:      CallNode('sort', [arr])
+# Example:  sort([3, 1, 2]) => [1, 2, 3]
+func sort(arr) {
+    return arr.sort();
+}
+
+# ------------------------------------------------------------------------------
+# Function: reverse(arr)
+# Syntax:   reverse([a, b, c])
+# Grammar:  FunctionCall -> 'reverse' '(' Expression ')'
+# Token:    IDENTIFIER (reverse), LPAREN, RPAREN
+# Logic:    Returns arr in reverse order.
+# AST:      CallNode('reverse', [arr])
+# Example:  reverse([1, 2, 3]) => [3, 2, 1]
+func reverse(arr) {
+    return arr.reverse();
+}
+
+# ------------------------------------------------------------------------------
+# Function: slice(arr, start, end)
+# Syntax:   slice([a, b, c], 0, 2)
+# Grammar:  FunctionCall -> 'slice' '(' Expression ',' Expression ',' Expression ')'
+# Token:    IDENTIFIER (slice), LPAREN, COMMA, RPAREN
+# Logic:    Returns a subarray from index start to end (exclusive).
+# AST:      CallNode('slice', [arr, start, end])
+# Example:  slice([1, 2, 3, 4, 5], 1, 3) => [2, 3]
+func slice(arr, start, end) {
+    return arr.slice(start, end);
+}
+
+# ------------------------------------------------------------------------------
+# Integration Notes:
+# - Parser: Recognize these function calls as valid expressions.
+# - Lexer: Tokenize identifiers, parens, commas, etc.
+# - Compiler: Map these to Rust/JS array operations or native equivalents.
+# - AST: Represent as CallNode with function name and argument list.

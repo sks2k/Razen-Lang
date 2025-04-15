@@ -1,0 +1,35 @@
+# Razen OS Library
+# Provides operating system info and utilities in a class-based structure.
+# Usage: import lib os;
+#        let env = OS.env("HOME");
+
+class OS {
+    # Gets the value of an environment variable.
+    # Example: OS.env("PATH") => "/usr/bin:/bin"
+    static env(name) {
+        return get_env(name);
+    }
+
+    # Gets the current working directory.
+    # Example: OS.cwd() => "/home/user"
+    static cwd() {
+        return get_cwd();
+    }
+
+    # Gets the platform name (e.g., "linux", "windows").
+    # Example: OS.platform() => "linux"
+    static platform() {
+        return get_platform();
+    }
+}
+
+# Example Usage:
+# import lib os;
+# let home = OS.env("HOME");
+# let dir = OS.cwd();
+# let plat = OS.platform();
+
+# Integration Notes:
+# - Import with: import lib os;
+# - Call methods as OS.method(...)
+# - Compatible with Razen parser, lexer, and compiler.

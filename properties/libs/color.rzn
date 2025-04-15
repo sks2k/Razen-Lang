@@ -1,0 +1,42 @@
+# Razen Color Library
+# Provides color manipulation utilities for Razen code in a class-based structure.
+# Usage: import lib color;
+#        let rgb = Color.hex_to_rgb("#ff0000");
+
+class Color {
+    # Converts hex color to rgb array.
+    # Example: Color.hex_to_rgb("#ff0000") => [255, 0, 0]
+    static hex_to_rgb(hex) {
+        return hex_to_rgb(hex);
+    }
+
+    # Converts rgb array to hex color.
+    # Example: Color.rgb_to_hex([255, 0, 0]) => "#ff0000"
+    static rgb_to_hex(rgb) {
+        return rgb_to_hex(rgb);
+    }
+
+    # Lightens a hex color by a percent (0-100).
+    # Example: Color.lighten("#888888", 20) => "#aaaaaa"
+    static lighten(hex, percent) {
+        return lighten_color(hex, percent);
+    }
+
+    # Darkens a hex color by a percent (0-100).
+    # Example: Color.darken("#888888", 20) => "#666666"
+    static darken(hex, percent) {
+        return darken_color(hex, percent);
+    }
+}
+
+# Example Usage:
+# import lib color;
+# let rgb = Color.hex_to_rgb("#ff0000");
+# let hex = Color.rgb_to_hex([0,255,0]);
+# let lighter = Color.lighten("#888888", 20);
+# let darker = Color.darken("#888888", 20);
+
+# Integration Notes:
+# - Import with: import lib color;
+# - Call methods as Color.method(...)
+# - Compatible with Razen parser, lexer, and compiler.

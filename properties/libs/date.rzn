@@ -1,0 +1,77 @@
+# Razen Date Library
+# Provides date/time operations for Razen code in a class-based structure.
+# Usage: import lib date;
+#        let t = Date.now();
+
+class Date {
+    # Returns the current timestamp.
+    # Example: Date.now() => 1681552287
+    static now() {
+        return get_current_time();
+    }
+
+    # Returns the current year.
+    # Example: Date.year() => 2025
+    static year() {
+        return get_current_year();
+    }
+
+    # Returns the current month (1-12).
+    # Example: Date.month() => 4
+    static month() {
+        return get_current_month();
+    }
+
+    # Returns the current day of month.
+    # Example: Date.day() => 15
+    static day() {
+        return get_current_day();
+    }
+
+    # Formats a timestamp as a string.
+    # Example: Date.format(Date.now(), "YYYY-MM-DD") => "2025-04-15"
+    static format(timestamp, fmt) {
+        return format_time(timestamp, fmt);
+    }
+
+    # Parses a date string with a format.
+    # Example: Date.parse("2025-04-15", "YYYY-MM-DD") => timestamp
+    static parse(str, fmt) {
+        return parse_time(str, fmt);
+    }
+
+    # Adds days to a timestamp.
+    # Example: Date.add_days(Date.now(), 5) => timestamp
+    static add_days(timestamp, days) {
+        return add_days_to_time(timestamp, days);
+    }
+}
+
+# Example Usage:
+# lib date;
+# let t = Date.now();
+# let y = Date.year();
+# let m = Date.month();
+# let d = Date.day();
+# let s = Date.format(t, "YYYY-MM-DD");
+# let ts = Date.parse("2025-04-15", "YYYY-MM-DD");
+# let next = Date.add_days(t, 7);
+
+# Integration Notes:
+# - Use 'lib date;' to enable.
+# - Call methods as Date.method(...)
+# - Compatible with Razen parser, lexer, and compiler.
+
+
+# Example Usage:
+# import lib date;
+# let t = Date.now();
+# let y = Date.year();
+# let m = Date.month();
+# let d = Date.day();
+# let s = Date.format(t, "YYYY-MM-DD");
+
+# Integration Notes:
+# - Import with: import lib date;
+# - Call methods as Date.method(...)
+# - Compatible with Razen parser, lexer, and compiler.

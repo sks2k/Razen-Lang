@@ -1,0 +1,42 @@
+# Razen Validation Library
+# Provides data validation utilities in a class-based structure.
+# Usage: lib validation;
+#        let ok = Validation.email("a@b.com");
+
+class Validation {
+    # Validates if the string is a valid email.
+    # Example: Validation.email("a@b.com") => true
+    static email(str) {
+        return validate_email(str);
+    }
+
+    # Validates if the string is a valid phone number.
+    # Example: Validation.phone("1234567890") => true
+    static phone(str) {
+        return validate_phone(str);
+    }
+
+    # Checks if value is not null or empty.
+    # Example: Validation.required("abc") => true
+    static required(val) {
+        return val != null && val != "";
+    }
+
+    # Checks if the string has at least min characters.
+    # Example: Validation.min_length("abc", 2) => true
+    static min_length(str, min) {
+        return str.length >= min;
+    }
+}
+
+# Example Usage:
+# lib validation;
+# let ok = Validation.email("a@b.com");
+# let phone = Validation.phone("1234567890");
+# let req = Validation.required("foo");
+# let min = Validation.min_length("abc", 2);
+
+# Integration Notes:
+# - Use 'lib validation;' to enable.
+# - Call methods as Validation.method(...)
+# - Compatible with Razen parser, lexer, and compiler.

@@ -1,0 +1,47 @@
+# Razen Storage Library
+# Provides persistent storage utilities for Razen code in a class-based structure.
+# Usage: import lib storage;
+#        Storage.set("key", "value");
+
+class Storage {
+    # Stores a value under a key.
+    # Example: Storage.set("foo", 123)
+    static set(key, value) {
+        storage[key] = value;
+    }
+
+    # Retrieves a value by key.
+    # Example: Storage.get("foo") => 123
+    static get(key) {
+        if (key in storage) {
+            return storage[key];
+        }
+        return null;
+    }
+
+    # Removes a value by key.
+    # Example: Storage.remove("foo")
+    static remove(key) {
+        if (key in storage) {
+            delete storage[key];
+        }
+    }
+
+    # Clears all stored values.
+    # Example: Storage.clear()
+    static clear() {
+        storage = {};
+    }
+}
+
+# Example Usage:
+# import lib storage;
+# Storage.set("foo", 123);
+# let v = Storage.get("foo");
+# Storage.remove("foo");
+# Storage.clear();
+
+# Integration Notes:
+# - Import with: import lib storage;
+# - Call methods as Storage.method(...)
+# - Compatible with Razen parser, lexer, and compiler.

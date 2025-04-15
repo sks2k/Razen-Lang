@@ -1,0 +1,35 @@
+# Razen UUID Library
+# Provides UUID generation and parsing utilities in a class-based structure.
+# Usage: lib uuid;
+#        let id = UUID.generate();
+
+class UUID {
+    # Generates a new UUID string.
+    # Example: UUID.generate() => "550e8400-e29b-41d4-a716-446655440000"
+    static generate() {
+        return uuid_generate();
+    }
+
+    # Parses a UUID string to object/parts.
+    # Example: UUID.parse("550e8400-e29b-41d4-a716-446655440000")
+    static parse(str) {
+        return uuid_parse(str);
+    }
+
+    # Checks if a string is a valid UUID.
+    # Example: UUID.is_valid("550e8400-e29b-41d4-a716-446655440000") => true
+    static is_valid(str) {
+        return uuid_is_valid(str);
+    }
+}
+
+# Example Usage:
+# lib uuid;
+# let id = UUID.generate();
+# let parts = UUID.parse(id);
+# let ok = UUID.is_valid(id);
+
+# Integration Notes:
+# - Use 'lib uuid;' to enable.
+# - Call methods as UUID.method(...)
+# - Compatible with Razen parser, lexer, and compiler.

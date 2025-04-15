@@ -1,0 +1,43 @@
+# Razen Storage Functions
+# Provides value storage utilities for the Razen language.
+# Includes: syntax, logic, usage, and integration notes for parser/lexer/compiler/AST (Rust).
+
+# ------------------------------------------------------------------------------
+# Function: save(key, value)
+# Syntax:   save("myKey", 123)
+# Grammar:  FunctionCall -> 'save' '(' Expression ',' Expression ')'
+# Token:    IDENTIFIER (save), LPAREN, COMMA, RPAREN
+# Logic:    Stores value under key and returns true if successful.
+# AST:      CallNode('save', [key, value])
+# Examples:
+#   save("myKey", 123) => true
+#   save("user", "Alice") => true
+func save(key, value) {
+    storage[key] = value;
+    return true;
+}
+
+# ------------------------------------------------------------------------------
+# Function: load(key)
+# Syntax:   load("myKey")
+# Grammar:  FunctionCall -> 'load' '(' Expression ')'
+# Token:    IDENTIFIER (load), LPAREN, RPAREN
+# Logic:    Loads value by key, returns null if not found.
+# AST:      CallNode('load', [key])
+# Examples:
+#   load("myKey") => 123
+#   load("user") => "Alice"
+#   load("missing") => null
+func load(key) {
+    if (key in storage) {
+        return storage[key];
+    }
+    return null;
+}
+
+# ------------------------------------------------------------------------------
+# Integration Notes:
+# - Parser: Recognize 'save' and 'load' function calls as valid expressions.
+# - Lexer: Tokenize identifiers, parens, etc. for Rust-based lexer.
+# - Compiler: Implement storage as a Rust map or dictionary.
+# - AST: Represent as CallNode with function name and argument list.

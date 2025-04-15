@@ -270,7 +270,10 @@ func isArray(put value) {
 # Example: isArray([1, 2, 3]) => true
 # Example: isArray("123") => false
 
-# 6 Input/Output
+#==============================================================================
+# 6️ Input/Output
+#==============================================================================
+
 func say(take message) {
     show message;
 }
@@ -284,7 +287,10 @@ func ask(take question) {
 # Example: ask("What's your name?") => reads user input
 # Example: ask("Enter a number:") => reads user input
 
-# 7 Numbers
+#==============================================================================
+# 7️ Numbers
+#==============================================================================
+
 func random(let max) {
     sum = Math.random() * max;
     return sum;
@@ -299,7 +305,10 @@ func round(let num) {
 # Example: round(3.7) => 4
 # Example: round(3.2) => 3
 
-# 8 Time
+#==============================================================================
+# 8️ Time
+#==============================================================================
+
 func time() {
     current = Date.now();
     return current;
@@ -312,7 +321,10 @@ func date() {
 }
 # Example: date() => current date string (e.g., "2023-03-15T12:34:56.789Z")
 
-# 9 Objects
+#==============================================================================
+# 9️ Objects
+#==============================================================================
+
 func keys(map obj) {
     key = Object.keys(obj);
     return key;
@@ -327,7 +339,10 @@ func values(map obj) {
 # Example: values({name: "John", age: 30}) => ["John", 30]
 # Example: values({}) => []
 
-# 10 Storage
+#==============================================================================
+# 10️ Storage
+#==============================================================================
+
 func save(put value) {
     store = value;
     return store;
@@ -341,7 +356,10 @@ func load(store) {
 # Example: load() => previously stored value
 # Example: load() => null (if nothing stored)
 
-# 11 Box
+#==============================================================================
+# 11️ Box
+#==============================================================================
+
 func put(put value) {
     box = value;
     return box;
@@ -355,7 +373,10 @@ func get(box) {
 # Example: get() => previously boxed value
 # Example: get() => null (if nothing boxed)
 
-# 12 References
+#==============================================================================
+# 12️ References
+#==============================================================================
+
 func point(put value) {
     ref = &value;
     return ref;

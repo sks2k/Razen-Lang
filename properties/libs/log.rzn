@@ -1,0 +1,42 @@
+# Razen Log Library
+# Provides logging utilities in a class-based structure.
+# Usage: lib log;
+#        Log.info("Started");
+
+class Log {
+    # Logs an info message.
+    # Example: Log.info("Started")
+    static info(msg) {
+        log_info(msg);
+    }
+
+    # Logs a warning message.
+    # Example: Log.warn("Be careful!")
+    static warn(msg) {
+        log_warn(msg);
+    }
+
+    # Logs an error message.
+    # Example: Log.error("Something went wrong")
+    static error(msg) {
+        log_error(msg);
+    }
+
+    # Logs a debug message.
+    # Example: Log.debug("x=5")
+    static debug(msg) {
+        log_debug(msg);
+    }
+}
+
+# Example Usage:
+# lib log;
+# Log.info("Started");
+# Log.warn("Careful");
+# Log.error("Oops");
+# Log.debug("x=42");
+
+# Integration Notes:
+# - Use 'lib log;' to enable.
+# - Call methods as Log.method(...)
+# - Compatible with Razen parser, lexer, and compiler.

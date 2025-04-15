@@ -1,0 +1,52 @@
+# Razen Math Library
+# Provides standard math operations for Razen code in a class-based structure.
+# Usage: import lib math;
+#        let result = Math.add(2, 3); # 5
+
+class Math {
+    # Returns the sum of a and b.
+    # Example: Math.add(2, 3) => 5
+    static add(a, b) {
+        return a + b;
+    }
+
+    # Returns the difference of a and b.
+    # Example: Math.subtract(5, 2) => 3
+    static subtract(a, b) {
+        return a - b;
+    }
+
+    # Returns the product of a and b.
+    # Example: Math.multiply(4, 3) => 12
+    static multiply(a, b) {
+        return a * b;
+    }
+
+    # Returns the quotient of a and b.
+    # Example: Math.divide(10, 2) => 5
+    static divide(a, b) {
+        if (b == 0) {
+            throw "Division by zero";
+        }
+        return a / b;
+    }
+
+    # Returns a raised to the power of b.
+    # Example: Math.power(2, 3) => 8
+    static power(a, b) {
+        return a ** b;
+    }
+}
+
+# Example Usage:
+# import lib math;
+# let sum = Math.add(5, 6);         # 11
+# let diff = Math.subtract(10, 2);  # 8
+# let prod = Math.multiply(3, 4);   # 12
+# let quot = Math.divide(20, 5);    # 4
+# let pow = Math.power(2, 4);       # 16
+
+# Integration Notes:
+# - Import with: import lib math;
+# - Call methods as Math.method(...)
+# - Compatible with Razen parser, lexer, and compiler.

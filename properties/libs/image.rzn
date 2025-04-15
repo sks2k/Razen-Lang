@@ -1,0 +1,42 @@
+# Razen Image Library
+# Provides image processing utilities in a class-based structure.
+# Usage: lib image;
+#        let img = Image.load("pic.png");
+
+class Image {
+    # Loads an image from a file.
+    # Example: Image.load("pic.png")
+    static load(path) {
+        return load_image(path);
+    }
+
+    # Saves an image to a file.
+    # Example: Image.save(img, "out.png")
+    static save(img, path) {
+        save_image(img, path);
+    }
+
+    # Resizes an image to width x height.
+    # Example: Image.resize(img, 100, 100)
+    static resize(img, width, height) {
+        return resize_image(img, width, height);
+    }
+
+    # Crops an image to x, y, width, height.
+    # Example: Image.crop(img, 10, 10, 50, 50)
+    static crop(img, x, y, width, height) {
+        return crop_image(img, x, y, width, height);
+    }
+}
+
+# Example Usage:
+# lib image;
+# let img = Image.load("pic.png");
+# Image.save(img, "copy.png");
+# let small = Image.resize(img, 64, 64);
+# let crop = Image.crop(img, 10, 10, 50, 50);
+
+# Integration Notes:
+# - Use 'lib image;' to enable.
+# - Call methods as Image.method(...)
+# - Compatible with Razen parser, lexer, and compiler.

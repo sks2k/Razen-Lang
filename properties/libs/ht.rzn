@@ -1,0 +1,28 @@
+# Razen HT (Head/Tails) Library
+# Provides coin flip and binary random utilities in a class-based structure.
+# Usage: lib ht;
+#        let res = HT.coin();
+
+class HT {
+    # Flips a coin, returns "head" or "tail".
+    # Example: HT.coin() => "head"
+    static coin() {
+        return coin_flip();
+    }
+
+    # Returns true or false randomly.
+    # Example: HT.bool() => true
+    static bool() {
+        return random_bool();
+    }
+}
+
+# Example Usage:
+# lib ht;
+# let res = HT.coin();
+# let b = HT.bool();
+
+# Integration Notes:
+# - Use 'lib ht;' to enable.
+# - Call methods as HT.method(...)
+# - Compatible with Razen parser, lexer, and compiler.

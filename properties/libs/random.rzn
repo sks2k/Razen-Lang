@@ -1,0 +1,43 @@
+# Razen Random Library
+# Provides random number and selection utilities in a class-based structure.
+# Usage: lib random;
+#        let n = Random.int(1, 10);
+
+class Random {
+    # Returns a random integer between min and max (inclusive).
+    # Example: Random.int(1, 6) => 4
+    static int(min, max) {
+        return random_int(min, max);
+    }
+
+    # Returns a random float between min and max.
+    # Example: Random.float(0, 1) => 0.42
+    static float(min, max) {
+        return random_float(min, max);
+    }
+
+    # Returns a random element from an array.
+    # Example: Random.choice([1,2,3]) => 2
+    static choice(arr) {
+        return random_choice(arr);
+    }
+
+    # Shuffles an array in place.
+    # Example: Random.shuffle([1,2,3]) => [3,1,2]
+    static shuffle(arr) {
+        return random_shuffle(arr);
+    }
+}
+
+# Example Usage:
+# lib random;
+# let n = Random.int(1, 100);
+# let f = Random.float(0, 1);
+# let pick = Random.choice(["a", "b", "c"]);
+# let arr = [1,2,3];
+# Random.shuffle(arr);
+
+# Integration Notes:
+# - Use 'lib random;' to enable.
+# - Call methods as Random.method(...)
+# - Compatible with Razen parser, lexer, and compiler.

@@ -1,0 +1,71 @@
+# Razen Type Conversion Functions
+# Provides type conversion utilities for the Razen language.
+# Includes: syntax, logic, usage, and integration notes for parser/lexer/compiler/AST (Rust).
+
+# ------------------------------------------------------------------------------
+# Function: int(value)
+# Syntax:   int("123")
+# Grammar:  FunctionCall -> 'int' '(' Expression ')'
+# Token:    IDENTIFIER (int), LPAREN, RPAREN
+# Logic:    Converts value to integer if possible.
+# AST:      CallNode('int', [value])
+# Examples:
+#   int("123") => 123
+#   int(123.45) => 123
+#   int(true) => 1
+func int(value) {
+    return to_int(value);
+}
+
+# ------------------------------------------------------------------------------
+# Function: float(value)
+# Syntax:   float("123.45")
+# Grammar:  FunctionCall -> 'float' '(' Expression ')'
+# Token:    IDENTIFIER (float), LPAREN, RPAREN
+# Logic:    Converts value to float if possible.
+# AST:      CallNode('float', [value])
+# Examples:
+#   float("123.45") => 123.45
+#   float(123) => 123.0
+#   float("7") => 7.0
+func float(value) {
+    return to_float(value);
+}
+
+# ------------------------------------------------------------------------------
+# Function: str(value)
+# Syntax:   str(123)
+# Grammar:  FunctionCall -> 'str' '(' Expression ')'
+# Token:    IDENTIFIER (str), LPAREN, RPAREN
+# Logic:    Converts value to string.
+# AST:      CallNode('str', [value])
+# Examples:
+#   str(123) => "123"
+#   str(true) => "true"
+#   str([1,2]) => "[1,2]"
+func str(value) {
+    return to_string(value);
+}
+
+# ------------------------------------------------------------------------------
+# Function: bool(value)
+# Syntax:   bool(1)
+# Grammar:  FunctionCall -> 'bool' '(' Expression ')'
+# Token:    IDENTIFIER (bool), LPAREN, RPAREN
+# Logic:    Converts value to boolean.
+# AST:      CallNode('bool', [value])
+# Examples:
+#   bool(1) => true
+#   bool(0) => false
+#   bool("true") => true
+#   bool("") => false
+func bool(value) {
+    return to_bool(value);
+}
+
+# ------------------------------------------------------------------------------
+# Integration Notes:
+# - Parser: Recognize these function calls as valid expressions.
+# - Lexer: Tokenize identifiers, parens, etc. for Rust-based lexer.
+# - Compiler: Map to Rust type conversion operations or equivalents.
+# - AST: Represent as CallNode with function name and argument list.

@@ -102,3 +102,23 @@ math => for mathematical operations and calculations. Use for advanced math func
 ping => for pinging a website. Use for checking website availability.
 bolt => for fast operations and speed up load of complex and high lines code means above then 1000 lines.
 seed => for generating game codes and seed and maps gen. (full features will add later.)
+
+# Additional built-in libraries (import using: import lib <name>;)
+string => string utilities (format, search, split, join, pad, etc.)
+array => array/list utilities (map, filter, reduce, unique, etc.)
+date => date and time manipulation (parse, format, add/subtract, etc.)
+file => file I/O (read, write, exists, delete, etc.)
+os => operating system info (env vars, cwd, platform, etc.)
+net => networking (http requests, fetch, ping, etc.)
+json => JSON encode/decode, validation, pretty print, etc.
+regex => regular expressions (search, match, replace, etc.)
+crypto => hashing, encryption, decryption, uuid, etc.
+color => color manipulation (hex/rgb conversion, lighten, darken, etc.)
+system => system commands, process info, uptime, etc.
+ui => user interface helpers (dialogs, alerts, input, etc.)
+storage => persistent storage (local, session, cache, etc.)
+audio => audio playback, recording, manipulation, etc.
+image => image processing (resize, crop, convert, etc.)
+validation => data validation helpers (email, phone, etc.)
+log => logging utilities (info, warn, error, debug, etc.)
+uuid => UUID generation and parsing.

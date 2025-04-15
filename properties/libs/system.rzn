@@ -1,0 +1,35 @@
+# Razen System Library
+# Provides system command and info utilities in a class-based structure.
+# Usage: lib system;
+#        let out = System.exec("ls");
+
+class System {
+    # Executes a system command and returns output.
+    # Example: System.exec("ls") => "file1\nfile2"
+    static exec(cmd) {
+        return exec_command(cmd);
+    }
+
+    # Returns system uptime in seconds.
+    # Example: System.uptime() => 12345
+    static uptime() {
+        return get_uptime();
+    }
+
+    # Returns system info (OS, CPU, etc.).
+    # Example: System.info() => {os: "linux", cpu: "x86_64"}
+    static info() {
+        return get_system_info();
+    }
+}
+
+# Example Usage:
+# lib system;
+# let out = System.exec("ls");
+# let up = System.uptime();
+# let inf = System.info();
+
+# Integration Notes:
+# - Use 'lib system;' to enable.
+# - Call methods as System.method(...)
+# - Compatible with Razen parser, lexer, and compiler.

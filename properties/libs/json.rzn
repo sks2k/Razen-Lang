@@ -1,0 +1,28 @@
+# Razen JSON Library
+# Provides JSON encode/decode for Razen code in a class-based structure.
+# Usage: import lib json;
+#        let s = JSON.stringify({a:1});
+
+class JSON {
+    # Converts an object to a JSON string.
+    # Example: JSON.stringify({a:1}) => '{"a":1}'
+    static stringify(obj) {
+        return to_json(obj);
+    }
+
+    # Parses a JSON string to an object.
+    # Example: JSON.parse('{"a":1}') => {a:1}
+    static parse(str) {
+        return from_json(str);
+    }
+}
+
+# Example Usage:
+# import lib json;
+# let s = JSON.stringify({foo: "bar"});
+# let obj = JSON.parse(s);
+
+# Integration Notes:
+# - Import with: import lib json;
+# - Call methods as JSON.method(...)
+# - Compatible with Razen parser, lexer, and compiler.

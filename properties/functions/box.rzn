@@ -1,0 +1,35 @@
+# Razen Box Functions
+# Provides basic value boxing/unboxing for the Razen language.
+# Includes: syntax, logic, usage, and integration notes for parser/lexer/compiler/AST (Rust).
+
+# ------------------------------------------------------------------------------
+# Function: put(value)
+# Syntax:   put(x)
+# Grammar:  FunctionCall -> 'put' '(' Expression ')'
+# Token:    IDENTIFIER (put), LPAREN, RPAREN
+# Logic:    Stores value in a box and returns it.
+# AST:      CallNode('put', [value])
+# Example:  put("Hello") => "Hello"
+func put(value) {
+    box = value;
+    return box;
+}
+
+# ------------------------------------------------------------------------------
+# Function: get(box)
+# Syntax:   get(box)
+# Grammar:  FunctionCall -> 'get' '(' Expression ')'
+# Token:    IDENTIFIER (get), LPAREN, RPAREN
+# Logic:    Returns the value stored in the box.
+# AST:      CallNode('get', [box])
+# Example:  get(box) => previously boxed value
+func get(box) {
+    return box;
+}
+
+# ------------------------------------------------------------------------------
+# Integration Notes:
+# - Parser: Recognize 'put' and 'get' function calls as valid expressions.
+# - Lexer: Tokenize identifiers, parens, etc. for Rust-based lexer.
+# - Compiler: Implement box storage using Rust variables or memory model.
+# - AST: Represent as CallNode with function name and argument list.

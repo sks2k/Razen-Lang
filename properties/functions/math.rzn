@@ -1,0 +1,93 @@
+# Razen Math Functions
+# Provides basic math operations for the Razen language.
+# Includes: syntax, logic, usage, and integration notes for parser/lexer/compiler/AST (Rust).
+
+# ------------------------------------------------------------------------------
+# Function: add(a, b)
+# Syntax:   add(5, 3)
+# Grammar:  FunctionCall -> 'add' '(' Expression ',' Expression ')'
+# Token:    IDENTIFIER (add), LPAREN, COMMA, RPAREN
+# Logic:    Returns the sum of a and b.
+# AST:      CallNode('add', [a, b])
+# Examples:
+#   add(5, 3) => 8
+#   add(10, 20) => 30
+#   add(-2, 7) => 5
+func add(a, b) {
+    return a + b;
+}
+
+# ------------------------------------------------------------------------------
+# Function: subtract(a, b)
+# Syntax:   subtract(10, 3)
+# Grammar:  FunctionCall -> 'subtract' '(' Expression ',' Expression ')'
+# Token:    IDENTIFIER (subtract), LPAREN, COMMA, RPAREN
+# Logic:    Returns the result of a minus b.
+# AST:      CallNode('subtract', [a, b])
+# Examples:
+#   subtract(10, 3) => 7
+#   subtract(20, 5) => 15
+#   subtract(0, 8) => -8
+func subtract(a, b) {
+    return a - b;
+}
+
+# ------------------------------------------------------------------------------
+# Function: multiply(a, b)
+# Syntax:   multiply(4, 3)
+# Grammar:  FunctionCall -> 'multiply' '(' Expression ',' Expression ')'
+# Token:    IDENTIFIER (multiply), LPAREN, COMMA, RPAREN
+# Logic:    Returns the product of a and b.
+# AST:      CallNode('multiply', [a, b])
+# Examples:
+#   multiply(4, 3) => 12
+#   multiply(5, 2) => 10
+#   multiply(-1, 8) => -8
+func multiply(a, b) {
+    return a * b;
+}
+
+# ------------------------------------------------------------------------------
+# Function: divide(a, b)
+# Syntax:   divide(10, 2)
+# Grammar:  FunctionCall -> 'divide' '(' Expression ',' Expression ')'
+# Token:    IDENTIFIER (divide), LPAREN, COMMA, RPAREN
+# Logic:    Returns the result of a divided by b. Throws error if b == 0.
+# AST:      CallNode('divide', [a, b])
+# Examples:
+#   divide(10, 2) => 5
+#   divide(15, 3) => 5
+#   divide(7, 2) => 3.5
+#   divide(5, 0) => error
+func divide(a, b) {
+    if (b == 0) {
+        throw "Division by zero is not allowed";
+    }
+    return a / b;
+}
+
+# ------------------------------------------------------------------------------
+# Function: power(base, exponent)
+# Syntax:   power(2, 3)
+# Grammar:  FunctionCall -> 'power' '(' Expression ',' Expression ')'
+# Token:    IDENTIFIER (power), LPAREN, COMMA, RPAREN
+# Logic:    Returns base raised to the power of exponent.
+# AST:      CallNode('power', [base, exponent])
+# Examples:
+#   power(2, 3) => 8
+#   power(5, 0) => 1
+#   power(7, 2) => 49
+func power(base, exponent) {
+    let result = 1;
+    for (let i = 0; i < exponent; i = i + 1) {
+        result = result * base;
+    }
+    return result;
+}
+
+# ------------------------------------------------------------------------------
+# Integration Notes:
+# - Parser: Recognize these function calls as valid expressions.
+# - Lexer: Tokenize identifiers, parens, commas, etc. for Rust-based lexer.
+# - Compiler: Map to Rust math operations or equivalents.
+# - AST: Represent as CallNode with function name and argument list.

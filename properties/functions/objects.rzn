@@ -1,0 +1,40 @@
+# Razen Reference Functions
+# Provides reference (pointer-like) utilities for the Razen language.
+# Includes: syntax, logic, usage, and integration notes for parser/lexer/compiler/AST (Rust).
+
+# ------------------------------------------------------------------------------
+# Function: point(value)
+# Syntax:   point(123)
+# Grammar:  FunctionCall -> 'point' '(' Expression ')'
+# Token:    IDENTIFIER (point), LPAREN, RPAREN
+# Logic:    Returns a reference to the value.
+# AST:      CallNode('point', [value])
+# Examples:
+#   point(123) => reference to 123
+#   point("Hello") => reference to "Hello"
+#   point([1,2,3]) => reference to array
+func point(value) {
+    ref = &value;
+    return ref;
+}
+
+# ------------------------------------------------------------------------------
+# Function: read(ref)
+# Syntax:   read(ref)
+# Grammar:  FunctionCall -> 'read' '(' Expression ')'
+# Token:    IDENTIFIER (read), LPAREN, RPAREN
+# Logic:    Returns the value pointed to by ref.
+# AST:      CallNode('read', [ref])
+# Examples:
+#   read(ref) => value pointed by ref
+#   read(null) => null
+func read(ref) {
+    return *ref;
+}
+
+# ------------------------------------------------------------------------------
+# Integration Notes:
+# - Parser: Recognize 'point' and 'read' function calls as valid expressions.
+# - Lexer: Tokenize identifiers, parens, etc. for Rust-based lexer.
+# - Compiler: Implement reference semantics using Rust references or smart pointers.
+# - AST: Represent as CallNode with function name and argument list.

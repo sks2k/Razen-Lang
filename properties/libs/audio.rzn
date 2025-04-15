@@ -1,0 +1,42 @@
+# Razen Audio Library
+# Provides audio playback and recording utilities in a class-based structure.
+# Usage: lib audio;
+#        Audio.play("song.mp3");
+
+class Audio {
+    # Plays an audio file.
+    # Example: Audio.play("song.mp3")
+    static play(path) {
+        play_audio(path);
+    }
+
+    # Pauses the current audio playback.
+    # Example: Audio.pause()
+    static pause() {
+        pause_audio();
+    }
+
+    # Stops the current audio playback.
+    # Example: Audio.stop()
+    static stop() {
+        stop_audio();
+    }
+
+    # Starts recording audio.
+    # Example: Audio.record("output.wav")
+    static record(path) {
+        record_audio(path);
+    }
+}
+
+# Example Usage:
+# lib audio;
+# Audio.play("song.mp3");
+# Audio.pause();
+# Audio.stop();
+# Audio.record("out.wav");
+
+# Integration Notes:
+# - Use 'lib audio;' to enable.
+# - Call methods as Audio.method(...)
+# - Compatible with Razen parser, lexer, and compiler.

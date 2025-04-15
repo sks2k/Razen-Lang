@@ -1,0 +1,41 @@
+# Razen Number Utility Functions
+# Provides number utilities for the Razen language.
+# Includes: syntax, logic, usage, and integration notes for parser/lexer/compiler/AST (Rust).
+
+# ------------------------------------------------------------------------------
+# Function: random(max)
+# Syntax:   random(10)
+# Grammar:  FunctionCall -> 'random' '(' Expression ')'
+# Token:    IDENTIFIER (random), LPAREN, RPAREN
+# Logic:    Returns a random number between 0 (inclusive) and max (exclusive).
+# AST:      CallNode('random', [max])
+# Examples:
+#   random(10) => random number 0 <= n < 10
+#   random(100) => random number 0 <= n < 100
+#   random(1) => random number 0 <= n < 1
+func random(max) {
+    sum = Math.random() * max;
+    return sum;
+}
+
+# ------------------------------------------------------------------------------
+# Function: round(num)
+# Syntax:   round(3.6)
+# Grammar:  FunctionCall -> 'round' '(' Expression ')'
+# Token:    IDENTIFIER (round), LPAREN, RPAREN
+# Logic:    Rounds num to the nearest integer.
+# AST:      CallNode('round', [num])
+# Examples:
+#   round(3.6) => 4
+#   round(2.2) => 2
+#   round(-1.7) => -2
+func round(num) {
+    return Math.round(num);
+}
+
+# ------------------------------------------------------------------------------
+# Integration Notes:
+# - Parser: Recognize 'random' and 'round' function calls as valid expressions.
+# - Lexer: Tokenize identifiers, parens, etc. for Rust-based lexer.
+# - Compiler: Map to Rust random and rounding operations or equivalents.
+# - AST: Represent as CallNode with function name and argument list.

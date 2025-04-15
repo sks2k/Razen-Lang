@@ -1,0 +1,100 @@
+# Razen Type Checking Functions
+# Provides type checking utilities for the Razen language.
+# Includes: syntax, logic, usage, and integration notes for parser/lexer/compiler/AST (Rust).
+
+# ------------------------------------------------------------------------------
+# Function: is_number(value)
+# Syntax:   is_number(123)
+# Grammar:  FunctionCall -> 'is_number' '(' Expression ')'
+# Token:    IDENTIFIER (is_number), LPAREN, RPAREN
+# Logic:    Returns true if value is a number.
+# AST:      CallNode('is_number', [value])
+# Examples:
+#   is_number(123) => true
+#   is_number("123") => false
+#   is_number(3.14) => true
+func is_number(value) {
+    return typeof(value) == "number";
+}
+
+# ------------------------------------------------------------------------------
+# Function: is_string(value)
+# Syntax:   is_string("hello")
+# Grammar:  FunctionCall -> 'is_string' '(' Expression ')'
+# Token:    IDENTIFIER (is_string), LPAREN, RPAREN
+# Logic:    Returns true if value is a string.
+# AST:      CallNode('is_string', [value])
+# Examples:
+#   is_string("hello") => true
+#   is_string(123) => false
+#   is_string("") => true
+func is_string(value) {
+    return typeof(value) == "string";
+}
+
+# ------------------------------------------------------------------------------
+# Function: is_boolean(value)
+# Syntax:   is_boolean(true)
+# Grammar:  FunctionCall -> 'is_boolean' '(' Expression ')'
+# Token:    IDENTIFIER (is_boolean), LPAREN, RPAREN
+# Logic:    Returns true if value is a boolean.
+# AST:      CallNode('is_boolean', [value])
+# Examples:
+#   is_boolean(true) => true
+#   is_boolean(1) => false
+#   is_boolean(false) => true
+func is_boolean(value) {
+    return typeof(value) == "boolean";
+}
+
+# ------------------------------------------------------------------------------
+# Function: is_array(value)
+# Syntax:   is_array([1, 2, 3])
+# Grammar:  FunctionCall -> 'is_array' '(' Expression ')'
+# Token:    IDENTIFIER (is_array), LPAREN, RPAREN
+# Logic:    Returns true if value is an array.
+# AST:      CallNode('is_array', [value])
+# Examples:
+#   is_array([1, 2, 3]) => true
+#   is_array("[1, 2, 3]") => false
+#   is_array([]) => true
+func is_array(value) {
+    return typeof(value) == "array";
+}
+
+# ------------------------------------------------------------------------------
+# Function: is_map(value)
+# Syntax:   is_map({"a": 1})
+# Grammar:  FunctionCall -> 'is_map' '(' Expression ')'
+# Token:    IDENTIFIER (is_map), LPAREN, RPAREN
+# Logic:    Returns true if value is a map/object.
+# AST:      CallNode('is_map', [value])
+# Examples:
+#   is_map({"a": 1}) => true
+#   is_map([1, 2, 3]) => false
+#   is_map({}) => true
+func is_map(value) {
+    return typeof(value) == "map";
+}
+
+# ------------------------------------------------------------------------------
+# Function: is_null(value)
+# Syntax:   is_null(null)
+# Grammar:  FunctionCall -> 'is_null' '(' Expression ')'
+# Token:    IDENTIFIER (is_null), LPAREN, RPAREN
+# Logic:    Returns true if value is null.
+# AST:      CallNode('is_null', [value])
+# Examples:
+#   is_null(null) => true
+#   is_null(0) => false
+#   is_null("") => false
+func is_null(value) {
+    return value == null;
+}
+
+# ------------------------------------------------------------------------------
+# Integration Notes:
+# - Parser: Recognize these function calls as valid expressions.
+# - Lexer: Tokenize identifiers, parens, etc. for Rust-based lexer.
+# - Compiler: Map to Rust type checking operations or equivalents.
+# - AST: Represent as CallNode with function name and argument list.
