@@ -470,6 +470,9 @@ impl Compiler {
             Statement::ShowStatement { value } => {
                 self.compile_show_statement(value);
             },
+            Statement::LoadStatement { cycles, block } => {
+                self.compile_load_statement(cycles, block);
+            },
             Statement::TryStatement { try_block, catch_block, finally_block } => {
                 self.compile_try_statement(try_block, catch_block, finally_block);
             },
@@ -905,7 +908,7 @@ impl Compiler {
             Expression::PrefixExpression { operator, right } => {
                 self.compile_prefix_expression(operator, *right);
             },
-            Expression::InfixExpression { left, operator, right } => {
+            Expression::InfixExpression { left, right, operator, .. } => {
                 self.compile_infix_expression(*left, operator, *right);
             },
             Expression::AssignmentExpression { left, operator, right } => {
@@ -1072,6 +1075,52 @@ impl Compiler {
         
         // Create the map with the given number of key-value pairs
         self.emit(IR::CreateMap(pairs.len()));
+    }
+    
+    fn compile_load_statement(&mut self, cycles: Expression, block: Vec<Statement>) {
+        // Determine cycles count - default to 3 if not a literal
+        let cycles_count = match cycles {
+            Expression::NumberLiteral(num) => num as usize,
+            _ => {
+                self.compile_expression(cycles.clone());
+                self.emit(IR::Pop); // We don't need the result, use default
+                3 // Default cycles
+            }
+        };
+        
+        // Clamp to 1-9 cycles
+        let cycles_count = cycles_count.clamp(1, 9);
+
+        // Verify the block only contains show statements
+        for stmt in &block {
+            if !matches!(stmt, Statement::ShowStatement { .. }) {
+                self.errors.push("Only 'show' statements are allowed inside a 'load' block".to_string());
+            }
+        }
+        
+        // Create a loop that runs for the specified number of cycles
+        for _ in 0..cycles_count {
+            // Process each show statement in the block
+            for stmt in &block {
+                if let Statement::ShowStatement { value } = stmt {
+                    // Show the loading message
+                    self.compile_expression(value.clone());
+                    self.emit(IR::Print);
+                    
+                    // Add a short delay (simulated with a sleep)
+                    self.emit(IR::PushNumber(0.3)); // 300ms delay
+                    self.emit(IR::Pop); // Discard the delay value
+                    
+                    // Clear the line to prepare for the next message
+                    self.emit(IR::PushString("\r".to_string()));
+                    self.emit(IR::Print);
+                }
+            }
+        }
+        
+        // Add a final newline to ensure output continues on a fresh line
+        self.emit(IR::PushString("\n".to_string()));
+        self.emit(IR::Print);
     }
     
     // Generate machine code from the IR

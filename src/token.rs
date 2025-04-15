@@ -7,6 +7,7 @@ pub enum TokenType {
     Take,   // String, Text
     Hold,   // Boolean
     Put,    // Any
+    Sum,    // Numeric sum (alias for let)
     
     // Mathematical operators
     Plus,       // +
@@ -62,6 +63,7 @@ pub enum TokenType {
     Show,
     Read,
     Exit,
+    Load,    // Loading animation
     
     // Boolean literals
     True,
@@ -160,6 +162,7 @@ impl fmt::Display for TokenType {
             TokenType::Take => write!(f, "TAKE"),
             TokenType::Hold => write!(f, "HOLD"),
             TokenType::Put => write!(f, "PUT"),
+            TokenType::Sum => write!(f, "SUM"),
             
             // Mathematical operators
             TokenType::Plus => write!(f, "+"),
@@ -215,6 +218,7 @@ impl fmt::Display for TokenType {
             TokenType::Show => write!(f, "SHOW"),
             TokenType::Read => write!(f, "READ"),
             TokenType::Exit => write!(f, "EXIT"),
+            TokenType::Load => write!(f, "LOAD"),
             
             // Boolean literals
             TokenType::True => write!(f, "TRUE"),
@@ -340,6 +344,7 @@ pub fn lookup_identifier(identifier: &str) -> TokenType {
         "take" => TokenType::Take,
         "hold" => TokenType::Hold,
         "put" => TokenType::Put,
+        "sum" => TokenType::Sum,
         
         // Control flow keywords
         "if" => TokenType::If,
@@ -365,6 +370,7 @@ pub fn lookup_identifier(identifier: &str) -> TokenType {
         "show" => TokenType::Show,
         "read" => TokenType::Read,
         "exit" => TokenType::Exit,
+        "load" => TokenType::Load,
         
         // Boolean literals
         "true" => TokenType::True,

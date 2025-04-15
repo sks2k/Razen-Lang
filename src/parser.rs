@@ -210,6 +210,7 @@ impl Parser {
             TokenType::Show => self.parse_show_statement(),
             TokenType::Read => self.parse_read_statement(),
             TokenType::Exit => self.parse_exit_statement(),
+            TokenType::Load => self.parse_load_statement(),
             TokenType::Try => self.parse_try_statement(),
             TokenType::Throw => self.parse_throw_statement(),
             TokenType::DocumentType => self.parse_document_type_declaration(),
@@ -1503,6 +1504,57 @@ impl Parser {
         Some(Statement::LibStatement {
             name: lib_name,
         })
+    }
+    
+    fn parse_load_statement(&mut self) -> Option<Statement> {
+        // Expect: load ( <number> ) { ... }
+        
+        // Expect opening parenthesis
+        if !self.expect_peek(TokenType::LeftParen) {
+            self.errors.push(format!(
+                "Expected '(' after 'load' keyword at line {}, column {}",
+                self.current_token.line, self.current_token.column
+            ));
+            return None;
+        }
+        
+        // Move past the '(' to the number
+        self.next_token();
+        
+        // Parse the number of cycles expression
+        let cycles = match self.parse_expression(Precedence::Lowest) {
+            Some(expr) => expr,
+            None => {
+                self.errors.push(format!(
+                    "Expected number after 'load(' at line {}, column {}",
+                    self.current_token.line, self.current_token.column
+                ));
+                return None;
+            }
+        };
+        
+        // Expect closing parenthesis
+        if !self.expect_peek(TokenType::RightParen) {
+            self.errors.push(format!(
+                "Expected ')' after load count at line {}, column {}",
+                self.current_token.line, self.current_token.column
+            ));
+            return None;
+        }
+        
+        // Expect opening brace for block
+        if !self.expect_peek(TokenType::LeftBrace) {
+            self.errors.push(format!(
+                "Expected '{{' after 'load()' at line {}, column {}",
+                self.current_token.line, self.current_token.column
+            ));
+            return None;
+        }
+        
+        // Parse the block of statements inside the load
+        let block = self.parse_block_statement();
+        
+        Some(Statement::LoadStatement { cycles, block })
     }
 }
 

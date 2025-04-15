@@ -1,0 +1,53 @@
+type freestyle;
+
+take product = "xAI API Key";
+let price = 1000;
+hold onSale = true;
+
+take MODEL1 = "Grok3 mini";
+take MODEL2 = "Grok2";
+take MODEL3 = "Grok3";
+
+if (onSale) {
+    let model1 = 30;
+    let model2 = 55;
+    let model3 = 235;
+
+    sum modelTotal = model1 + model2 + model3;
+} else {
+    let model1 = 45;
+    let model2 = 75;
+    let model3 = 300;
+
+    sum modelTotal = model1 + model2 + model3;
+}
+
+fun add(price, modelTotal) {
+    return price + modelTotal;
+}
+
+show MODEL1 + "'s Price is " + model1;
+show MODEL2 + "'s Price is " + model2;
+show MODEL3 + "'s Price is " + model3;
+
+if (onSale) {
+    show MODEL1 + " + " + MODEL2 + " + " + MODEL3 + " + " + product + " = " + add(price, modelTotal) + " (onSale Price) ";
+} else {
+    show MODEL1 + " + " + MODEL2 + " + " + MODEL3 + " + " + product + " = " + add(price, modelTotal);
+}
+
+show "Your total: " + add(price, modelTotal) + " Are you sure? confirm purchase (y/n)";
+read confirm;
+
+if (confirm == "y") {
+    load (2) {
+        show "Loading"
+        show "Loading."
+        show "Loading.."
+        show "Loading..."
+        show "Loading...."
+    }
+    show "Purchase successfull!" 
+} else {
+    show "Purchase cancelled."
+}

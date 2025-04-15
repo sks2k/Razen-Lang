@@ -127,6 +127,10 @@ pub enum Statement {
     LibStatement {
         name: String,
     },
+    LoadStatement {
+        cycles: Expression,
+        block: Vec<Statement>,
+    },
 }
 
 // Expression represents an expression in the program
@@ -366,6 +370,14 @@ impl fmt::Display for Node {
                     // Libraries (Section 16)
                     Statement::LibStatement { name } => {
                         write!(f, "lib {};", name)
+                    },
+                    Statement::LoadStatement { cycles, block } => {
+                        let mut result = format!("load ({}) {{\n", Node::Expression(cycles.clone()));
+                        for stmt in block {
+                            result.push_str(&format!("    {}", Node::Statement(stmt.clone())));
+                        }
+                        result.push_str("\n}");
+                        write!(f, "{}", result)
                     },
                 }
             },
