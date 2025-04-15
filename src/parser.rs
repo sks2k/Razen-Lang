@@ -172,10 +172,20 @@ impl Parser {
             // Module system
             TokenType::Use => self.parse_module_import(),
             TokenType::Export => self.parse_module_export(),
+            TokenType::Import => self.parse_import_statement(),
             // Developer tools
             TokenType::Debug => self.parse_debug_statement(),
             TokenType::Assert => self.parse_assert_statement(),
             TokenType::Trace => self.parse_trace_statement(),
+            // OOP Keywords
+            TokenType::Class => self.parse_class_declaration(),
+            // API Keywords
+            TokenType::Api => self.parse_api_declaration(),
+            TokenType::Call => self.parse_api_call(),
+            // Connection Keywords
+            TokenType::Connect => self.parse_connect_statement(),
+            // Library Keywords
+            TokenType::Lib => self.parse_lib_statement(),
             TokenType::Comment => {
                 // Skip comments and return None to continue parsing
                 None
@@ -931,6 +941,467 @@ impl Parser {
             TokenType::LeftBracket => Precedence::Index,
             _ => Precedence::Lowest,
         }
+    }
+    // Parse class declaration (class Name { ... })
+    fn parse_class_declaration(&mut self) -> Option<Statement> {
+        // Get the current token position for error reporting
+        let token_line = self.current_token.line;
+        let token_column = self.current_token.column;
+        
+        // Expect class name (identifier)
+        if !self.expect_peek(TokenType::Identifier) {
+            self.errors.push(format!(
+                "Expected class name after 'class' keyword at line {}, column {}",
+                token_line, token_column
+            ));
+            return None;
+        }
+        
+        let class_name = self.current_token.literal.clone();
+        
+        // Expect opening brace
+        if !self.expect_peek(TokenType::LeftBrace) {
+            self.errors.push(format!(
+                "Expected '{{' after class name at line {}, column {}",
+                self.current_token.line, self.current_token.column
+            ));
+            return None;
+        }
+        
+        // Parse class body
+        let body = self.parse_block_statement();
+        
+        Some(Statement::ClassDeclaration {
+            name: class_name,
+            body,
+        })
+    }
+    
+    // Parse API declaration (api name = from("url"))
+    fn parse_api_declaration(&mut self) -> Option<Statement> {
+        // Get the current token position for error reporting
+        let token_line = self.current_token.line;
+        let token_column = self.current_token.column;
+        
+        // Expect API name (identifier)
+        if !self.expect_peek(TokenType::Identifier) {
+            self.errors.push(format!(
+                "Expected API name after 'api' keyword at line {}, column {}",
+                token_line, token_column
+            ));
+            return None;
+        }
+        
+        let api_name = self.current_token.literal.clone();
+        
+        // Expect assignment operator
+        if !self.expect_peek(TokenType::Assign) {
+            self.errors.push(format!(
+                "Expected '=' after API name at line {}, column {}",
+                self.current_token.line, self.current_token.column
+            ));
+            return None;
+        }
+        
+        // Expect 'from' keyword
+        if !self.expect_peek(TokenType::From) {
+            self.errors.push(format!(
+                "Expected 'from' after '=' in API declaration at line {}, column {}",
+                self.current_token.line, self.current_token.column
+            ));
+            return None;
+        }
+        
+        // Expect opening parenthesis
+        if !self.expect_peek(TokenType::LeftParen) {
+            self.errors.push(format!(
+                "Expected '(' after 'from' in API declaration at line {}, column {}",
+                self.current_token.line, self.current_token.column
+            ));
+            return None;
+        }
+        
+        // Expect URL string
+        if !self.expect_peek(TokenType::StringLiteral) {
+            self.errors.push(format!(
+                "Expected string literal in API declaration, got {:?} instead at line {}, column {}",
+                self.current_token.token_type,
+                self.current_token.line,
+                self.current_token.column
+            ));
+            return None;
+        }
+        
+        let url = self.current_token.literal.clone();
+        
+        // Expect closing parenthesis
+        if !self.expect_peek(TokenType::RightParen) {
+            self.errors.push(format!(
+                "Expected ')' after URL in API declaration at line {}, column {}",
+                self.current_token.line, self.current_token.column
+            ));
+            return None;
+        }
+        
+        // Check for optional semicolon
+        if self.peek_token_is(TokenType::Semicolon) {
+            self.next_token();
+        }
+        
+        Some(Statement::ApiDeclaration {
+            name: api_name,
+            url,
+        })
+    }
+    
+    // Parse API call (call api_name { ... })
+    fn parse_api_call(&mut self) -> Option<Statement> {
+        // Get the current token position for error reporting
+        let token_line = self.current_token.line;
+        let token_column = self.current_token.column;
+        
+        // Expect API name (identifier)
+        if !self.expect_peek(TokenType::Identifier) {
+            self.errors.push(format!(
+                "Expected API name after 'call' keyword at line {}, column {}",
+                token_line, token_column
+            ));
+            return None;
+        }
+        
+        let api_name = self.current_token.literal.clone();
+        
+        // Expect opening brace
+        if !self.expect_peek(TokenType::LeftBrace) {
+            self.errors.push(format!(
+                "Expected '{{' after API name in call statement at line {}, column {}",
+                self.current_token.line, self.current_token.column
+            ));
+            return None;
+        }
+        
+        // Parse API call body
+        let body = self.parse_block_statement();
+        
+        Some(Statement::ApiCall {
+            name: api_name,
+            body,
+        })
+    }
+    
+    // Parse connect statement (connect name = from("url") { options })
+    fn parse_connect_statement(&mut self) -> Option<Statement> {
+        // Get the current token position for error reporting
+        let token_line = self.current_token.line;
+        let token_column = self.current_token.column;
+        
+        // Expect connection name (identifier)
+        if !self.expect_peek(TokenType::Identifier) {
+            self.errors.push(format!(
+                "Expected connection name after 'connect' keyword at line {}, column {}",
+                token_line, token_column
+            ));
+            return None;
+        }
+        
+        let connection_name = self.current_token.literal.clone();
+        
+        // Expect assignment operator
+        if !self.expect_peek(TokenType::Assign) {
+            self.errors.push(format!(
+                "Expected '=' after connection name at line {}, column {}",
+                self.current_token.line, self.current_token.column
+            ));
+            return None;
+        }
+        
+        // Expect 'from' keyword
+        if !self.expect_peek(TokenType::From) {
+            self.errors.push(format!(
+                "Expected 'from' after '=' in connect statement, got {:?} instead at line {}, column {}",
+                self.current_token.token_type,
+                self.current_token.line,
+                self.current_token.column
+            ));
+            return None;
+        }
+        
+        // Expect opening parenthesis
+        if !self.expect_peek(TokenType::LeftParen) {
+            self.errors.push(format!(
+                "Expected '(' after 'from' in connect statement at line {}, column {}",
+                self.current_token.line, self.current_token.column
+            ));
+            return None;
+        }
+        
+        // Expect URL string
+        if !self.expect_peek(TokenType::StringLiteral) {
+            self.errors.push(format!(
+                "Expected string literal in connect statement, got {:?} instead at line {}, column {}",
+                self.current_token.token_type,
+                self.current_token.line,
+                self.current_token.column
+            ));
+            return None;
+        }
+        
+        let url = self.current_token.literal.clone();
+        
+        // Expect closing parenthesis
+        if !self.expect_peek(TokenType::RightParen) {
+            self.errors.push(format!(
+                "Expected ')' after URL in connect statement at line {}, column {}",
+                self.current_token.line, self.current_token.column
+            ));
+            return None;
+        }
+        
+        let mut options = Vec::new();
+        
+        // Check for optional configuration block
+        if self.peek_token_is(TokenType::LeftBrace) {
+            self.next_token(); // Move to {
+            
+            // Parse configuration options
+            if !self.expect_peek(TokenType::RightBrace) {
+                // Parse options until we reach the closing brace
+                loop {
+                    // Expect option name (identifier)
+                    if !self.current_token_is(TokenType::Identifier) {
+                        self.errors.push(format!(
+                            "Expected option name in connect configuration at line {}, column {}",
+                            self.current_token.line, self.current_token.column
+                        ));
+                        return None;
+                    }
+                    
+                    let option_name = self.current_token.literal.clone();
+                    self.next_token();
+                    
+                    // Parse option value expression
+                    let option_value = if let Some(expr) = self.parse_expression(Precedence::Lowest) {
+                        expr
+                    } else {
+                        self.errors.push(format!(
+                            "Expected expression for option '{}' at line {}, column {}",
+                            option_name,
+                            self.current_token.line,
+                            self.current_token.column
+                        ));
+                        return None;
+                    };
+                    
+                    options.push((option_name, option_value));
+                    
+                    // Skip semicolon if present
+                    if self.current_token_is(TokenType::Semicolon) {
+                        self.next_token();
+                    }
+                    
+                    // Break if we've reached the end of the options block
+                    if self.current_token_is(TokenType::RightBrace) {
+                        break;
+                    }
+                    
+                    // If we haven't reached the end, there should be more options
+                    if self.current_token_is(TokenType::EOF) {
+                        self.errors.push(format!(
+                            "Unexpected end of file in connect configuration at line {}, column {}",
+                            self.current_token.line, self.current_token.column
+                        ));
+                        return None;
+                    }
+                }
+            }
+        }
+        
+        // Check for optional semicolon
+        if self.peek_token_is(TokenType::Semicolon) {
+            self.next_token();
+        }
+        
+        Some(Statement::ConnectStatement {
+            name: connection_name,
+            url,
+            options,
+        })
+    }
+    
+    // Parse import statement (import {name} from(./path/to/file))
+    fn parse_import_statement(&mut self) -> Option<Statement> {
+        // Get the current token position for error reporting
+        let token_line = self.current_token.line;
+        let token_column = self.current_token.column;
+        
+        // Check for { to start import list
+        if !self.expect_peek(TokenType::LeftBrace) {
+            self.errors.push(format!(
+                "Expected '{{' after 'import' keyword at line {}, column {}",
+                token_line, token_column
+            ));
+            return None;
+        }
+        
+        let mut imports = Vec::new();
+        
+        // Parse import names
+        self.next_token(); // Move past {
+        
+        // Handle empty import list
+        if self.current_token_is(TokenType::RightBrace) {
+            self.errors.push(format!(
+                "Empty import list at line {}, column {}",
+                self.current_token.line, self.current_token.column
+            ));
+            return None;
+        }
+        
+        // Parse import names
+        while !self.current_token_is(TokenType::RightBrace) && !self.current_token_is(TokenType::EOF) {
+            if self.current_token_is(TokenType::Identifier) {
+                imports.push(self.current_token.literal.clone());
+            } else {
+                self.errors.push(format!(
+                    "Expected identifier in import list, got {:?} instead at line {}, column {}",
+                    self.current_token.token_type,
+                    self.current_token.line,
+                    self.current_token.column
+                ));
+                return None;
+            }
+            
+            // Move to next token
+            self.next_token();
+            
+            // Check for comma or closing brace
+            if self.current_token_is(TokenType::Comma) {
+                self.next_token(); // Skip comma and continue
+            } else if !self.current_token_is(TokenType::RightBrace) {
+                self.errors.push(format!(
+                    "Expected ',' or '}}' after import name, got {:?} instead at line {}, column {}",
+                    self.current_token.token_type,
+                    self.current_token.line,
+                    self.current_token.column
+                ));
+                return None;
+            }
+        }
+        
+        // Check for from keyword
+        if !self.expect_peek(TokenType::From) {
+            self.errors.push(format!(
+                "Expected 'from' after import list at line {}, column {}",
+                self.current_token.line, self.current_token.column
+            ));
+            return None;
+        }
+        
+        // Check for opening parenthesis
+        if !self.expect_peek(TokenType::LeftParen) {
+            self.errors.push(format!(
+                "Expected '(' after 'from' in import statement at line {}, column {}",
+                self.current_token.line, self.current_token.column
+            ));
+            return None;
+        }
+        
+        // Parse path
+        self.next_token(); // Move past (
+        
+        // Path can be either a string literal or an identifier (for relative paths)
+        let path = if self.current_token_is(TokenType::StringLiteral) {
+            // String literal path
+            self.current_token.literal.clone()
+        } else if self.current_token_is(TokenType::Identifier) || self.current_token_is(TokenType::Dot) {
+            // Relative path starting with identifier or dot
+            let mut path_str = self.current_token.literal.clone();
+            
+            // Continue parsing path components
+            while self.peek_token_is(TokenType::Dot) || self.peek_token_is(TokenType::Slash) {
+                self.next_token();
+                path_str.push_str(&self.current_token.literal);
+                
+                // Check for path component after dot or slash
+                if self.peek_token_is(TokenType::Identifier) {
+                    self.next_token();
+                    path_str.push_str(&self.current_token.literal);
+                }
+            }
+            
+            path_str
+        } else {
+            self.errors.push(format!(
+                "Expected string literal or path in import statement, got {:?} instead at line {}, column {}",
+                self.current_token.token_type,
+                self.current_token.line,
+                self.current_token.column
+            ));
+            return None;
+        };
+        
+        // Check for closing parenthesis
+        if !self.expect_peek(TokenType::RightParen) {
+            self.errors.push(format!(
+                "Expected ')' after path in import statement at line {}, column {}",
+                self.current_token.line, self.current_token.column
+            ));
+            return None;
+        }
+        
+        // Check for optional semicolon
+        if self.peek_token_is(TokenType::Semicolon) {
+            self.next_token();
+        }
+        
+        Some(Statement::ImportStatement {
+            imports,
+            path,
+        })
+    }
+    
+    // Parse library import statement (lib name)
+    fn parse_lib_statement(&mut self) -> Option<Statement> {
+        // Get the current token position for error reporting
+        let token_line = self.current_token.line;
+        let token_column = self.current_token.column;
+        
+        // Check for library name
+        if !self.expect_peek(TokenType::Identifier) {
+            self.errors.push(format!(
+                "Expected library name after 'lib' keyword at line {}, column {}",
+                token_line, token_column
+            ));
+            return None;
+        }
+        
+        // Get library name and convert to lowercase for case-insensitive comparison
+        let lib_name = self.current_token.literal.clone();
+        let lib_name_lower = lib_name.to_lowercase();
+        
+        // Validate library name
+        match lib_name_lower.as_str() {
+            "random" | "ht" | "coin" | "math" | "ping" | "bolt" | "seed" => {
+                // Valid library name
+            },
+            _ => {
+                // Unknown library
+                self.errors.push(format!(
+                    "Unknown library: '{}' at line {}, column {}. Valid libraries are: random, ht, coin, math, ping, bolt, seed",
+                    lib_name, self.current_token.line, self.current_token.column
+                ));
+                // Continue parsing anyway to avoid cascading errors
+            }
+        }
+        
+        // Check for optional semicolon
+        if self.peek_token_is(TokenType::Semicolon) {
+            self.next_token();
+        }
+        
+        Some(Statement::LibStatement {
+            name: lib_name,
+        })
     }
 }
 

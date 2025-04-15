@@ -1,0 +1,58 @@
+# Razen Language Examples for Sections 12-16
+# This file demonstrates the usage of new variables and keywords added in sections 12-16
+
+# ===================================
+# Section 12 - OOP Keywords
+# ===================================
+show "Testing Section 12 - OOP Keywords";
+
+# Class declaration
+class User {
+    # Class properties
+    let id = 1;
+    take name = "Default User";
+    
+    # Class method
+    fun display() {
+        show "User ID: " + id + ", Name: " + name;
+    }
+}
+
+# Function with return
+fun get_message() {
+    return "Hello from function";
+}
+
+show get_message();
+
+# ===================================
+# Section 13 - API Integration
+# ===================================
+show "Testing Section 13 - API Integration";
+
+# API declaration
+api gemini = from("https://aistudio.google.com/api/gemini");
+
+# ===================================
+# Section 14 - Connection Management
+# ===================================
+show "Testing Section 14 - Connection Management";
+
+# Establish connection
+connect database = from("mysql://localhost:3306/mydb");
+
+# ===================================
+# Section 15 - Import/Export
+# ===================================
+show "Testing Section 15 - Import/Export";
+
+# Import statement
+import {user} from("./path/to/file");
+
+# Export statement
+export User;
+
+# Note: Library support will be implemented separately
+
+# End of test
+show "All tests completed successfully";

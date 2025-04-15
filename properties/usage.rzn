@@ -379,3 +379,120 @@ fun backup_directory(let source, let destination) {
     
     return backup_path;
 }
+
+# New variables use case after 11th section. means (12 to 16.) 
+
+# 12th
+
+class User {
+    show "this is class defining.";
+    if (true) {
+        show "this is class body.";
+    }
+}
+
+read input;
+
+if (input == "A") {
+    show "success";
+} else {
+    show "failure";
+    return User;
+}
+
+# 13th - API Integration
+
+api gemini = from("https://aistudio.google.com/api/gemini");
+
+call gemini {
+    post request = {
+        "prompt": "Tell me about Razen programming language",
+        "model": "gemini-pro"
+    };
+    
+    get response = await;
+    
+    if (response.status == 200) {
+        show "AI Response: " + response.data.text;
+    } else {
+        show "Error calling API: " + response.error;
+    }
+}
+
+# 14th - Connect and From Variables
+
+# Connect to a service using the connect and from keywords
+connect database = from("mysql://localhost:3306/mydb");
+connect api_service = from("https://api.example.com/v1");
+connect storage = from("s3://mybucket");
+
+# Example of using the connection
+if (database.connected) {
+    show "Successfully connected to database";
+    let users = database.query("SELECT * FROM users");
+}
+
+# Connect can also be used with authentication
+connect secure_api = from("https://secure.example.com/api") {
+    auth "Bearer " + get_env("API_TOKEN");
+    timeout 30;
+}
+
+# 15th Import/Export 
+import {user} from(./path/to/file);
+
+use user;
+show user;
+
+# Export
+
+export to(./path/to/file);
+
+# 16th Libraries Variables
+
+# 16.1 Random - For generating random numbers and selections
+lib random;
+let random_number = random.number(1, 100);  # Generate random number between 1 and 100
+let random_item = random.choice(["apple", "banana", "orange"]);  # Pick random item from list
+show "Random number: " + random_number;
+show "Random fruit: " + random_item;
+
+# 16.2 HT (Head and Tails) - For binary random selections
+lib ht;
+let coin_result = ht.flip();  # Returns either "head" or "tail"
+show "Coin flip result: " + coin_result;
+
+# 16.3 Coin - Alternative for binary random selections
+lib coin;
+let decision = coin.toss();  # Returns either true or false
+if (decision) {
+    show "Heads up!";
+} else {
+    show "Tails up!";
+}
+
+# 16.4 Math - For advanced mathematical operations
+lib math;
+let square_root = math.sqrt(16);  # Calculate square root
+let rounded = math.round(3.7);    # Round to nearest integer
+let sine_value = math.sin(45);    # Trigonometric function
+show "Advanced calculations: " + square_root + ", " + rounded + ", " + sine_value;
+
+# 16.5 Ping - For checking website availability
+lib ping;
+let is_online = ping.check("example.com");
+show "Website status: " + (is_online ? "Online" : "Offline");
+let response_time = ping.time("example.com");  # Get response time in ms
+show "Response time: " + response_time + "ms";
+
+# 16.6 Bolt - For optimizing performance of complex code
+lib bolt;
+bolt.optimize();  # Optimize subsequent code execution
+bolt.cache("calculation_result", math.sqrt(1000000));  # Cache results for reuse
+
+# 16.7 Seed - For generating deterministic random values
+lib seed;
+seed.set(12345);  # Set seed for deterministic random generation
+let map_data = seed.generate_map(100, 100);  # Generate a 100x100 map
+let game_id = seed.create_code(8);  # Generate 8-character game code
+show "Generated game code: " + game_id;

@@ -82,6 +82,33 @@ pub enum TokenType {
     Assert,        // assertions
     Trace,         // execution tracing
     
+    // 12 - OOP Keywords
+    Class,         // class declaration
+    
+    // 13 - API Keywords
+    Api,           // API declaration
+    Call,          // API calls
+    Get,           // API responses
+    Post,          // API requests
+    Await,         // For async operations
+    
+    // 14 - Connection Keywords
+    Connect,       // connecting to external services
+    To,            // for export destination
+    
+    // 15 - Import/Export Keywords
+    Import,        // importing modules
+    
+    // 16 - Library Keywords
+    Lib,           // libraries
+    Random,        // random number generation
+    Ht,            // head and tails
+    Coin,          // coin toss
+    Math,          // math operations
+    Ping,          // website ping
+    Bolt,          // performance optimization
+    Seed,          // seed generation
+    
     // Delimiters
     LeftParen,      // (
     RightParen,     // )
@@ -190,6 +217,33 @@ impl fmt::Display for TokenType {
             TokenType::Assert => write!(f, "ASSERT"),
             TokenType::Trace => write!(f, "TRACE"),
             
+            // OOP Keywords
+            TokenType::Class => write!(f, "CLASS"),
+            
+            // API Keywords
+            TokenType::Api => write!(f, "API"),
+            TokenType::Call => write!(f, "CALL"),
+            TokenType::Get => write!(f, "GET"),
+            TokenType::Post => write!(f, "POST"),
+            TokenType::Await => write!(f, "AWAIT"),
+            
+            // Connection Keywords
+            TokenType::Connect => write!(f, "CONNECT"),
+            TokenType::To => write!(f, "TO"),
+            
+            // Import/Export Keywords
+            TokenType::Import => write!(f, "IMPORT"),
+            
+            // Library Keywords
+            TokenType::Lib => write!(f, "LIB"),
+            TokenType::Random => write!(f, "RANDOM"),
+            TokenType::Ht => write!(f, "HT"),
+            TokenType::Coin => write!(f, "COIN"),
+            TokenType::Math => write!(f, "MATH"),
+            TokenType::Ping => write!(f, "PING"),
+            TokenType::Bolt => write!(f, "BOLT"),
+            TokenType::Seed => write!(f, "SEED"),
+            
             // Delimiters
             TokenType::LeftParen => write!(f, "("),
             TokenType::RightParen => write!(f, ")"),
@@ -294,6 +348,33 @@ pub fn lookup_identifier(identifier: &str) -> TokenType {
         "debug" => TokenType::Debug,
         "assert" => TokenType::Assert,
         "trace" => TokenType::Trace,
+        
+        // OOP Keywords (Section 12)
+        "class" => TokenType::Class,
+        
+        // API Keywords (Section 13)
+        "api" => TokenType::Api,
+        "call" => TokenType::Call,
+        "get" => TokenType::Get,
+        "post" => TokenType::Post,
+        "await" => TokenType::Await,
+        
+        // Connection Keywords (Section 14)
+        "connect" => TokenType::Connect,
+        "to" => TokenType::To,
+        
+        // Import/Export Keywords (Section 15)
+        "import" => TokenType::Import,
+        
+        // Library Keywords (Section 16)
+        "lib" => TokenType::Lib,
+        "random" => TokenType::Random,
+        "ht" => TokenType::Ht,
+        "coin" => TokenType::Coin,
+        "math" => TokenType::Math,
+        "ping" => TokenType::Ping,
+        "bolt" => TokenType::Bolt,
+        "seed" => TokenType::Seed,
         
         // If not a keyword, it's an identifier
         _ => TokenType::Identifier,

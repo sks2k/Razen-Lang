@@ -281,112 +281,108 @@ else
     echo "$LATEST_VERSION" > "$TMP_DIR/version"
     echo -e "  ${GREEN}✓${NC} Created version file: $LATEST_VERSION"
     
-    # Update installation
-    echo -e "${YELLOW}Updating installation...${NC}"
-    
-    # Determine if we need sudo
-    NEED_SUDO=false
-    if [[ "$INSTALL_PATH" == "/usr/local/lib/razen" || "$INSTALL_PATH" == "/usr/local/razen" ]]; then
-        NEED_SUDO=true
-    fi
-    
-    # Function to copy files with or without sudo
-    copy_files() {
-        local src=$1
-        local dest=$2
+    # Function to update compiler binary
+    update_compiler() {
+        echo -e "${YELLOW}Updating compiler binary...${NC}"
         
-        if [ "$NEED_SUDO" = true ]; then
-            sudo cp -r "$src" "$dest"
+        # Check if we need sudo for updating system-wide files
+        if [ -w "/usr/local/bin" ]; then
+            # We have write permissions, no sudo needed
+            cp "$TMP_DIR/razen_compiler" "/usr/local/bin/razen_compiler"
+            chmod +x "/usr/local/bin/razen_compiler"
         else
-            cp -r "$src" "$dest"
+            # Need sudo for system-wide files
+            echo -e "${YELLOW}Updating system-wide files. This may require sudo privileges...${NC}"
+            
+            # Try to update with sudo
+            if sudo cp "$TMP_DIR/razen_compiler" "/usr/local/bin/razen_compiler" \
+                && sudo chmod +x "/usr/local/bin/razen_compiler"; then
+                echo -e "  ${GREEN}✓${NC} Updated compiler binary"
+            else
+                # If sudo fails, try to update in user's bin directory
+                USER_BIN_DIR="$HOME/.local/bin"
+                mkdir -p "$USER_BIN_DIR"
+                cp "$TMP_DIR/razen_compiler" "$USER_BIN_DIR/razen_compiler"
+                chmod +x "$USER_BIN_DIR/razen_compiler"
+                echo -e "  ${YELLOW}Warning: Could not update system-wide binary. Installed in user's bin directory instead.${NC}"
+                echo -e "  ${YELLOW}You may need to restart your terminal for changes to take effect.${NC}"
+            fi
         fi
-        return $?
     }
     
-    # Update compiler binary
-    echo -e "${YELLOW}Updating compiler binary...${NC}"
-    if [ "$NEED_SUDO" = true ]; then
-        sudo cp "$TMP_DIR/razen_compiler" "/usr/local/bin/razen_compiler" || {
-            echo -e "${RED}Error: Failed to update compiler binary.${NC}"
-            rm -rf "$TMP_DIR"
-            exit 1
-        }
-    else
-        cp "$TMP_DIR/razen_compiler" "$HOME/.local/bin/razen_compiler" 2>/dev/null || {
-            mkdir -p "$HOME/.local/bin"
-            cp "$TMP_DIR/razen_compiler" "$HOME/.local/bin/razen_compiler" || {
-                echo -e "${RED}Error: Failed to update compiler binary.${NC}"
-                rm -rf "$TMP_DIR"
-                exit 1
-            }
-        }
+    # Check for sudo privileges early
+    if [ ! -w "/usr/local/bin" ] && ! sudo -v &>/dev/null; then
+        echo -e "${YELLOW}Note: This script may require sudo privileges to update system-wide files.${NC}"
+        echo -e "${YELLOW}If you don't have sudo access, the update will be installed in your user's bin directory.${NC}"
     fi
-    echo -e "  ${GREEN}✓${NC} Updated compiler binary"
+    
+    # Update compiler binary
+    update_compiler
     
     # Update properties files
     echo -e "${YELLOW}Updating properties files...${NC}"
-    copy_files "$TMP_DIR/properties/"* "$INSTALL_PATH/properties/" || {
-        echo -e "${RED}Error: Failed to update properties files.${NC}"
-        rm -rf "$TMP_DIR"
-        exit 1
-    }
+    if [ -w "/usr/local/lib/razen/properties" ]; then
+        cp -r "$TMP_DIR/properties/"* "/usr/local/lib/razen/properties/"
+    else
+        sudo cp -r "$TMP_DIR/properties/"* "/usr/local/lib/razen/properties/"
+    fi
     echo -e "  ${GREEN}✓${NC} Updated properties files"
     
     # Update scripts
     echo -e "${YELLOW}Updating scripts...${NC}"
-    copy_files "$TMP_DIR/scripts/"* "$INSTALL_PATH/scripts/" || {
-        echo -e "${RED}Error: Failed to update scripts.${NC}"
-        rm -rf "$TMP_DIR"
-        exit 1
-    }
+    if [ -w "/usr/local/lib/razen/scripts" ]; then
+        cp -r "$TMP_DIR/scripts/"* "/usr/local/lib/razen/scripts/"
+    else
+        sudo cp -r "$TMP_DIR/scripts/"* "/usr/local/lib/razen/scripts/"
+    fi
     echo -e "  ${GREEN}✓${NC} Updated scripts"
     
     # Update source files
     echo -e "${YELLOW}Updating source files...${NC}"
-    if [ -d "$INSTALL_PATH/src" ]; then
-        copy_files "$TMP_DIR/src/"* "$INSTALL_PATH/src/" 2>/dev/null || true
+    if [ -d "/usr/local/lib/razen/src" ]; then
+        if [ -w "/usr/local/lib/razen/src" ]; then
+            cp -r "$TMP_DIR/src/"* "/usr/local/lib/razen/src/"
+        else
+            sudo cp -r "$TMP_DIR/src/"* "/usr/local/lib/razen/src/"
+        fi
         echo -e "  ${GREEN}✓${NC} Updated source files"
     else
-        if [ "$NEED_SUDO" = true ]; then
-            sudo mkdir -p "$INSTALL_PATH/src"
-            copy_files "$TMP_DIR/src/"* "$INSTALL_PATH/src/" 2>/dev/null || true
+        if [ -w "/usr/local/lib/razen" ]; then
+            mkdir -p "/usr/local/lib/razen/src"
+            cp -r "$TMP_DIR/src/"* "/usr/local/lib/razen/src/"
         else
-            mkdir -p "$INSTALL_PATH/src"
-            copy_files "$TMP_DIR/src/"* "$INSTALL_PATH/src/" 2>/dev/null || true
+            sudo mkdir -p "/usr/local/lib/razen/src"
+            sudo cp -r "$TMP_DIR/src/"* "/usr/local/lib/razen/src/"
         fi
         echo -e "  ${GREEN}✓${NC} Created and updated source files"
     fi
     
     # Update examples
     echo -e "${YELLOW}Updating example files...${NC}"
-    if [ -d "$INSTALL_PATH/examples" ]; then
-        copy_files "$TMP_DIR/examples/"* "$INSTALL_PATH/examples/" 2>/dev/null || true
+    if [ -d "/usr/local/lib/razen/examples" ]; then
+        if [ -w "/usr/local/lib/razen/examples" ]; then
+            cp -r "$TMP_DIR/examples/"* "/usr/local/lib/razen/examples/"
+        else
+            sudo cp -r "$TMP_DIR/examples/"* "/usr/local/lib/razen/examples/"
+        fi
         echo -e "  ${GREEN}✓${NC} Updated example files"
     else
-        if [ "$NEED_SUDO" = true ]; then
-            sudo mkdir -p "$INSTALL_PATH/examples"
-            copy_files "$TMP_DIR/examples/"* "$INSTALL_PATH/examples/" 2>/dev/null || true
+        if [ -w "/usr/local/lib/razen" ]; then
+            mkdir -p "/usr/local/lib/razen/examples"
+            cp -r "$TMP_DIR/examples/"* "/usr/local/lib/razen/examples/"
         else
-            mkdir -p "$INSTALL_PATH/examples"
-            copy_files "$TMP_DIR/examples/"* "$INSTALL_PATH/examples/" 2>/dev/null || true
+            sudo mkdir -p "/usr/local/lib/razen/examples"
+            sudo cp -r "$TMP_DIR/examples/"* "/usr/local/lib/razen/examples/"
         fi
         echo -e "  ${GREEN}✓${NC} Created and updated example files"
     fi
     
     # Update version file
     echo -e "${YELLOW}Updating version information...${NC}"
-    if [ "$NEED_SUDO" = true ]; then
-        echo "$LATEST_VERSION" | sudo tee "$INSTALL_PATH/version" > /dev/null || {
-            echo -e "${RED}Error: Failed to update version information.${NC}"
-            rm -rf "$TMP_DIR"
-            exit 1
-        }
+    if [ -w "/usr/local/lib/razen" ]; then
+        echo "$LATEST_VERSION" > "/usr/local/lib/razen/version"
     else
-        echo "$LATEST_VERSION" > "$INSTALL_PATH/version" || {
-            echo -e "${RED}Error: Failed to update version information.${NC}"
-            rm -rf "$TMP_DIR"
-            exit 1
-        }
+        sudo echo "$LATEST_VERSION" > "/usr/local/lib/razen/version"
     fi
     echo -e "  ${GREEN}✓${NC} Updated version information: $LATEST_VERSION"
     
@@ -422,14 +418,14 @@ else
         # Create symlinks in the bin directory
         local missing_links=0
         for script in $SCRIPTS; do
-            if [ -f "$INSTALL_PATH/scripts/$script" ]; then
+            if [ -f "/usr/local/lib/razen/scripts/$script" ]; then
                 if [ -w "$target_bin" ]; then
                     # Direct creation if we have write permissions
-                    ln -sf "$INSTALL_PATH/scripts/$script" "$target_bin/$script"
+                    ln -sf "/usr/local/lib/razen/scripts/$script" "$target_bin/$script"
                     echo -e "  ${GREEN}✓${NC} Created $target_bin/$script"
                 else
                     # Use sudo if we don't have direct write permissions
-                    if sudo ln -sf "$INSTALL_PATH/scripts/$script" "$target_bin/$script"; then
+                    if sudo ln -sf "/usr/local/lib/razen/scripts/$script" "$target_bin/$script"; then
                         echo -e "  ${GREEN}✓${NC} Created $target_bin/$script"
                     else
                         echo -e "  ${RED}✗${NC} Failed to create symlink in $target_bin/$script (permission denied)"

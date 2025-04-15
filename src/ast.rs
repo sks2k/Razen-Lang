@@ -98,6 +98,35 @@ pub enum Statement {
     TraceStatement {
         value: Expression,
     },
+    // OOP (Section 12)
+    ClassDeclaration {
+        name: String,
+        body: Vec<Statement>,
+    },
+    // API Integration (Section 13)
+    ApiDeclaration {
+        name: String,
+        url: String,
+    },
+    ApiCall {
+        name: String,
+        body: Vec<Statement>,
+    },
+    // Connect and From (Section 14)
+    ConnectStatement {
+        name: String,
+        url: String,
+        options: Vec<(String, Expression)>,  // For auth, timeout, etc.
+    },
+    // Import/Export (Section 15)
+    ImportStatement {
+        imports: Vec<String>,
+        path: String,
+    },
+    // Libraries (Section 16)
+    LibStatement {
+        name: String,
+    },
 }
 
 // Expression represents an expression in the program
@@ -293,6 +322,50 @@ impl fmt::Display for Node {
                     },
                     Statement::TraceStatement { value } => {
                         write!(f, "trace {};", Node::Expression(value.clone()))
+                    },
+                    // OOP (Section 12)
+                    Statement::ClassDeclaration { name, body } => {
+                        let mut body_str = String::new();
+                        for stmt in body {
+                            body_str.push_str(&format!("{}", Node::Statement(stmt.clone())));
+                        }
+                        write!(f, "class {} {{
+{}
+}}", name, body_str)
+                    },
+                    // API Integration (Section 13)
+                    Statement::ApiDeclaration { name, url } => {
+                        write!(f, "api {} = from(\"{}\");", name, url)
+                    },
+                    Statement::ApiCall { name, body } => {
+                        let mut body_str = String::new();
+                        for stmt in body {
+                            body_str.push_str(&format!("{}", Node::Statement(stmt.clone())));
+                        }
+                        write!(f, "call {} {{
+{}
+}}", name, body_str)
+                    },
+                    // Connect and From (Section 14)
+                    Statement::ConnectStatement { name, url, options } => {
+                        let mut options_str = String::new();
+                        if !options.is_empty() {
+                            options_str.push_str(" {\n");
+                            for (option_name, option_value) in options {
+                                options_str.push_str(&format!("    {} {};\n", option_name, Node::Expression(option_value.clone())));
+                            }
+                            options_str.push_str("}");
+                        }
+                        write!(f, "connect {} = from(\"{}\"){}", name, url, options_str)
+                    },
+                    // Import/Export (Section 15)
+                    Statement::ImportStatement { imports, path } => {
+                        let imports_str = imports.join(", ");
+                        write!(f, "import {{{}}} from({});", imports_str, path)
+                    },
+                    // Libraries (Section 16)
+                    Statement::LibStatement { name } => {
+                        write!(f, "lib {};", name)
                     },
                 }
             },

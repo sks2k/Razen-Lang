@@ -67,9 +67,38 @@ read => for reading input from user. Use for getting user input and data entry.
 # 10️⃣ Control Flow Variables:
 while => for loop control. Use for repeated execution based on condition.
 fun => for function declaration. Use for code organization and reuse.
-return => for function return values. Use for sending results back from functions.
 
 # 11️⃣ Special Variables:
 true => for boolean true value. Use in boolean expressions.
 false => for boolean false value. Use in boolean expressions.
 null => for null/undefined value. Use for optional or uninitialized data.
+
+# 12 New variables/keywords:
+class => for class declaration. Use for object-oriented programming.
+return => for function return values. Use for sending results back from functions. (also can be used with proepr class name if coder wants to return user to the speified class or function or this so ii will return to that.)
+
+# 13 API Specified variables:
+api => for API declaration. Use for connecting to external services.
+call => for API calls. Use for making requests to external services.
+get => for API responses. Use for receiving data from external services.
+post => for API requests. Use for sending data to external services.
+
+# 14 Comman use keywords/variables:
+connect => for connecting to external services. Use for connecting to external services.
+from => for connecting to external services. Use for connecting to external services. mainly for import. (for import)
+to => for connecting to external services. Use for connecting to external services. mainly for export. (for export)
+
+# 15 Import/Export keywords/variables:
+import => for importing modules. Use for importing modules from other files.
+export => for exporting modules. Use for exporting modules to other files.
+use => for using the function or classs or imported things via import.
+
+# 16 Libraries variables:
+lib => for libraries. Use for using libraries.
+random => for generating random numbers. Use for generating random numbers and random selections.
+ht => (head and tails.) Use for generating random selections between two options.
+coin => for generating random selections between two options. Use for generating random selections between two options.
+math => for mathematical operations and calculations. Use for advanced math functions. and automaticly do maths operation not need to tell proepr things like diff and mod and sum these type just direct tell for more and advance work.
+ping => for pinging a website. Use for checking website availability.
+bolt => for fast operations and speed up load of complex and high lines code means above then 1000 lines.
+seed => for generating game codes and seed and maps gen. (full features will add later.)

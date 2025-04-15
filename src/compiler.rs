@@ -155,6 +155,7 @@ pub struct Compiler {
     clean_output: bool,              // Flag to only show program output
     errors: Vec<String>,            // Compilation errors
     variable_types: HashMap<String, String>, // Track variable types (name -> type)
+    in_show_statement: bool,        // Flag to track if we're inside a show statement
 }
 
 impl Compiler {
@@ -170,6 +171,7 @@ impl Compiler {
             clean_output: false,
             errors: Vec::new(),
             variable_types: HashMap::new(),
+            in_show_statement: false,
         }
     }
     
@@ -450,23 +452,6 @@ impl Compiler {
             Statement::IfStatement { condition, consequence, alternative } => {
                 self.compile_if_statement(condition, consequence, alternative);
             },
-            // Module system statements
-            Statement::ModuleImport { names, alias, source } => {
-                self.compile_module_import(names, alias, source);
-            },
-            Statement::ModuleExport { name } => {
-                self.compile_module_export(name);
-            },
-            // Developer tools statements
-            Statement::DebugStatement { value } => {
-                self.compile_debug_statement(value);
-            },
-            Statement::AssertStatement { condition, message } => {
-                self.compile_assert_statement(condition, message);
-            },
-            Statement::TraceStatement { value } => {
-                self.compile_trace_statement(value);
-            },
             Statement::WhileStatement { condition, body } => {
                 self.compile_while_statement(condition, body);
             },
@@ -513,6 +498,29 @@ impl Compiler {
             },
             Statement::TraceStatement { value } => {
                 self.compile_trace_statement(value);
+            },
+            // OOP (Section 12)
+            Statement::ClassDeclaration { name, body } => {
+                self.compile_class_declaration(name, body);
+            },
+            // API Integration (Section 13)
+            Statement::ApiDeclaration { name, url } => {
+                self.compile_api_declaration(name, url);
+            },
+            Statement::ApiCall { name, body } => {
+                self.compile_api_call(name, body);
+            },
+            // Connect and From (Section 14)
+            Statement::ConnectStatement { name, url, options } => {
+                self.compile_connect_statement(name, url, options);
+            },
+            // Import/Export (Section 15)
+            Statement::ImportStatement { imports, path } => {
+                self.compile_import_statement(imports, path);
+            },
+            // Libraries (Section 16)
+            Statement::LibStatement { name } => {
+                self.compile_lib_statement(name);
             },
         }
     }
@@ -806,8 +814,14 @@ impl Compiler {
     }
     
     fn compile_show_statement(&mut self, value: Expression) {
+        // Set the flag to indicate we're inside a show statement
+        self.in_show_statement = true;
+        
         // Compile the value to be shown
         self.compile_expression(value);
+        
+        // Reset the flag
+        self.in_show_statement = false;
         
         // Emit the print instruction
         self.emit(IR::Print);
@@ -1005,6 +1019,12 @@ impl Compiler {
         if let Expression::Identifier(name) = function {
             // Call the function with the given number of arguments
             self.emit(IR::Call(name, arguments.len()));
+            
+            // For show statements, we need to handle the return value
+            if self.in_show_statement {
+                // The return value is already on the stack
+                // No need to do anything special
+            }
         } else {
             panic!("Function call on non-identifier");
         }
@@ -1626,5 +1646,238 @@ impl Compiler {
         
         // Call trace function
         self.emit(IR::Call("__trace".to_string(), 1));
+    }
+    
+    // OOP Methods (Section 12)
+    
+    // Compile class declaration
+    fn compile_class_declaration(&mut self, name: String, body: Vec<Statement>) {
+        if !self.clean_output {
+            println!("[Compiler] Class declaration: {}", name);
+        }
+        
+        // Create a new scope for the class
+        self.enter_scope();
+        
+        // Store class name in symbol table
+        self.symbol_table.define(&name);
+        
+        // Emit class definition
+        self.emit(IR::PushString(name.clone()));
+        
+        // Compile class body
+        for stmt in body {
+            self.compile_statement(stmt);
+        }
+        
+        // Leave class scope
+        self.leave_scope();
+        
+        // Call class definition function
+        self.emit(IR::Call("__define_class".to_string(), 1));
+    }
+    
+    // API Integration Methods (Section 13)
+    
+    // Compile API declaration
+    fn compile_api_declaration(&mut self, name: String, url: String) {
+        if !self.clean_output {
+            println!("[Compiler] API declaration: {} from {}", name, url);
+        }
+        
+        // Store API name in symbol table
+        self.symbol_table.define(&name);
+        
+        // Create API object
+        self.emit(IR::CreateMap(0));
+        
+        // Add URL to API object
+        self.emit(IR::PushString("url".to_string()));
+        self.emit(IR::PushString(url.clone()));
+        self.emit(IR::SetKey);
+        
+        // Store API object in global variable
+        self.emit(IR::SetGlobal(name));
+    }
+    
+    // Compile API call
+    fn compile_api_call(&mut self, name: String, body: Vec<Statement>) {
+        if !self.clean_output {
+            println!("[Compiler] API call: {}", name);
+        }
+        
+        // Create a new scope for the API call
+        self.enter_scope();
+        
+        // Emit API call start
+        self.emit(IR::PushString(name.clone()));
+        
+        // Compile API call body
+        for stmt in body {
+            self.compile_statement(stmt);
+        }
+        
+        // Leave API call scope
+        self.leave_scope();
+        
+        // Call API execution function
+        self.emit(IR::Call("__execute_api_call".to_string(), 1));
+    }
+    
+    // Connect Methods (Section 14)
+    
+    // Compile connect statement
+    fn compile_connect_statement(&mut self, name: String, url: String, options: Vec<(String, Expression)>) {
+        if !self.clean_output {
+            println!("[Compiler] Connect statement: {} to {}", name, url);
+        }
+        
+        // Store connection name in symbol table
+        self.symbol_table.define(&name);
+        
+        // Emit connection definition
+        self.emit(IR::PushString(name.clone()));
+        self.emit(IR::PushString(url));
+        
+        // Create options map
+        self.emit(IR::PushNumber(options.len() as f64));
+        self.emit(IR::CreateMap(options.len()));
+        
+        // Compile connection options
+        for (option_name, option_value) in options {
+            self.emit(IR::PushString(option_name));
+            self.compile_expression(option_value);
+            self.emit(IR::SetKey);
+        }
+        
+        // Call connection function
+        self.emit(IR::Call("__connect".to_string(), 3));
+    }
+    
+    // Import/Export Methods (Section 15)
+    
+    // Compile import statement
+    fn compile_import_statement(&mut self, imports: Vec<String>, path: String) {
+        if !self.clean_output {
+            println!("[Compiler] Import statement: {:?} from {}", imports, path);
+        }
+        
+        // Emit import path
+        self.emit(IR::PushString(path));
+        
+        // Create array of imports
+        self.emit(IR::PushNumber(imports.len() as f64));
+        self.emit(IR::CreateArray(imports.len()));
+        
+        // Add each import to the array
+        for import in &imports {
+            self.emit(IR::PushString(import.clone()));
+            self.emit(IR::SetIndex);
+        }
+        
+        // Call import function
+        self.emit(IR::Call("__import".to_string(), 2));
+        
+        // Add each import to symbol table
+        for import in imports {
+            self.symbol_table.define(&import);
+        }
+    }
+    
+    // Library Methods (Section 16)
+    
+    // Compile library import statement
+    fn compile_lib_statement(&mut self, name: String) {
+        if !self.clean_output {
+            println!("[Compiler] Library import: {}", name);
+        }
+        
+        // Emit library name
+        self.emit(IR::PushString(name.clone()));
+        
+        // Call library import function
+        self.emit(IR::Call("__import_lib".to_string(), 1));
+        
+        // Define library functions based on the library name
+        match name.as_str() {
+            "random" => {
+                // Define random library functions
+                self.define_random_lib_functions();
+            },
+            "ht" => {
+                // Define head and tails library functions
+                self.define_ht_lib_functions();
+            },
+            "coin" => {
+                // Define coin library functions
+                self.define_coin_lib_functions();
+            },
+            "math" => {
+                // Define math library functions
+                self.define_math_lib_functions();
+            },
+            "ping" => {
+                // Define ping library functions
+                self.define_ping_lib_functions();
+            },
+            "bolt" => {
+                // Define bolt library functions
+                self.define_bolt_lib_functions();
+            },
+            "seed" => {
+                // Define seed library functions
+                self.define_seed_lib_functions();
+            },
+            _ => {
+                // Unknown library
+                self.errors.push(format!("Unknown library: {}", name));
+            }
+        }
+    }
+    
+    // Helper methods for library functions
+    
+    fn define_random_lib_functions(&mut self) {
+        // Define random.number function
+        self.function_table.define("random.number", self.ir.len());
+        // Define random.choice function
+        self.function_table.define("random.choice", self.ir.len());
+    }
+    
+    fn define_ht_lib_functions(&mut self) {
+        // Define ht.flip function
+        self.function_table.define("ht.flip", self.ir.len());
+    }
+    
+    fn define_coin_lib_functions(&mut self) {
+        // Define coin.toss function
+        self.function_table.define("coin.toss", self.ir.len());
+    }
+    
+    fn define_math_lib_functions(&mut self) {
+        // Define math functions
+        self.function_table.define("math.sqrt", self.ir.len());
+        self.function_table.define("math.round", self.ir.len());
+        self.function_table.define("math.sin", self.ir.len());
+        // Add more math functions as needed
+    }
+    
+    fn define_ping_lib_functions(&mut self) {
+        // Define ping functions
+        self.function_table.define("ping.check", self.ir.len());
+        self.function_table.define("ping.time", self.ir.len());
+    }
+    
+    fn define_bolt_lib_functions(&mut self) {
+        // Define bolt functions
+        self.function_table.define("bolt.optimize", self.ir.len());
+        self.function_table.define("bolt.cache", self.ir.len());
+    }
+    
+    fn define_seed_lib_functions(&mut self) {
+        // Define seed functions
+        self.function_table.define("seed.set", self.ir.len());
+        self.function_table.define("seed.generate_map", self.ir.len());
+        self.function_table.define("seed.create_code", self.ir.len());
     }
 }

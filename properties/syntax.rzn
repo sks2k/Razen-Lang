@@ -87,6 +87,53 @@ VAR: catch => Error Capture
 VAR: throw => Raise Exception  
 VAR: finally => Cleanup Execution  
 
+# 1️⃣1️⃣ OOP Variables
+VAR: class => Class Declaration
+VAR: new => Object Instantiation
+VAR: this => Current Instance
+VAR: extends => Inheritance
+VAR: super => Parent Class Access
+VAR: static => Class-level Property/Method
+VAR: private => Access Modifier
+VAR: public => Access Modifier
+VAR: protected => Access Modifier
+
+# 1️⃣2️⃣ API Integration
+VAR: api => API Declaration
+VAR: call => API Call
+VAR: get => HTTP GET Request
+VAR: post => HTTP POST Request
+VAR: put => HTTP PUT Request
+VAR: delete => HTTP DELETE Request
+VAR: response => API Response
+VAR: status => Response Status
+VAR: headers => HTTP Headers
+
+# 1️⃣3️⃣ Connection Management
+VAR: connect => Establish Connection
+VAR: from => Source Specification
+VAR: to => Destination Specification
+VAR: using => Authentication/Parameters
+VAR: disconnect => Close Connection
+VAR: reconnect => Re-establish Connection
+
+# 1️⃣4️⃣ Import/Export
+VAR: import => Import Module/Component
+VAR: export => Export Module/Component
+VAR: as => Alias Definition
+VAR: default => Default Export
+VAR: from => Source Module
+
+# 1️⃣5️⃣ Library Support
+VAR: lib => Library Import
+VAR: random => Random Number Generation
+VAR: ht => HTTP Utilities
+VAR: coin => Cryptocurrency Functions
+VAR: math => Mathematical Functions
+VAR: ping => Network Utilities
+VAR: bolt => Performance Utilities
+VAR: seed => Data Generation
+
 # =================================
 # 🔥 Functions  
 # =================================
@@ -199,6 +246,35 @@ RULE: OPEN_FILE => "OPEN" [FILE] "IN" [MODE]
 RULE: READ_FILE => "READ_FILE" [FILE]  
 RULE: WRITE_FILE => "WRITE_FILE" [FILE] [DATA]  
 RULE: CLOSE_FILE => "CLOSE" [FILE]  
+
+# ✅ OOP Syntax
+RULE: CLASS_DECL => "CLASS" [ID] "LBRACE" [CLASS_BODY] "RBRACE"
+RULE: CLASS_BODY => [METHOD_DECL] | [PROPERTY_DECL] | [METHOD_DECL] [CLASS_BODY] | [PROPERTY_DECL] [CLASS_BODY] | ""
+RULE: METHOD_DECL => [ACCESS_MODIFIER] "FUN" [ID] "LEFT_PAREN" [PARAMS] "RIGHT_PAREN" "LBRACE" [BLOCK] "RBRACE"
+RULE: PROPERTY_DECL => [ACCESS_MODIFIER] [VAR_TYPE] [ID] [ASSIGN] [EXPR]
+RULE: ACCESS_MODIFIER => "PUBLIC" | "PRIVATE" | "PROTECTED" | "STATIC" | ""
+
+# ✅ API Integration
+RULE: API_DECL => "API" [ID] "LBRACE" [API_BODY] "RBRACE"
+RULE: API_BODY => [ENDPOINT_DECL] | [ENDPOINT_DECL] [API_BODY] | ""
+RULE: ENDPOINT_DECL => [HTTP_METHOD] [STRING] "LBRACE" [BLOCK] "RBRACE"
+RULE: HTTP_METHOD => "GET" | "POST" | "PUT" | "DELETE"
+RULE: API_CALL => "CALL" [ID] "DOT" [ID] "LEFT_PAREN" [ARGS] "RIGHT_PAREN"
+
+# ✅ Connection Management
+RULE: CONNECT_STMT => "CONNECT" [ID] "FROM" [STRING] ["USING" [EXPR]]
+RULE: DISCONNECT_STMT => "DISCONNECT" [ID]
+
+# ✅ Import/Export
+RULE: IMPORT_STMT => "IMPORT" "LBRACE" [IMPORT_LIST] "RBRACE" "FROM" [STRING]
+RULE: IMPORT_LIST => [ID] | [ID] "COMMA" [IMPORT_LIST] | [ID] "AS" [ID] | [ID] "AS" [ID] "COMMA" [IMPORT_LIST]
+RULE: EXPORT_STMT => "EXPORT" [ID] | "EXPORT" "DEFAULT" [ID] | "EXPORT" "LBRACE" [EXPORT_LIST] "RBRACE"
+RULE: EXPORT_LIST => [ID] | [ID] "COMMA" [EXPORT_LIST] | [ID] "AS" [ID] | [ID] "AS" [ID] "COMMA" [EXPORT_LIST]
+
+# ✅ Library Support
+RULE: LIB_STMT => "LIB" [ID]
+RULE: LIB_CALL => [LIB_ID] "DOT" [FUNC_ID] "LEFT_PAREN" [ARGS] "RIGHT_PAREN"
+RULE: LIB_ID => "RANDOM" | "HT" | "COIN" | "MATH" | "PING" | "BOLT" | "SEED"
 
 # ✅ Expressions  
 RULE: EXPR => [TERM] [EXPR_TAIL]  
