@@ -1,0 +1,33 @@
+# Razen Time Library
+# Provides time utilities for the Razen language.
+# Usage: import lib time;
+#        let timestamp = Time.now();
+#        Time.sleep(2);
+
+class Time {
+    # Returns the current timestamp (seconds since epoch).
+    # Example: Time.now() => 1681552287
+    static now() {
+        return Date.timestamp();
+    }
+
+    # Pauses execution for the given number of seconds.
+    # Example: Time.sleep(1) => pauses for 1 second
+    static sleep(seconds) {
+        # Implementation depends on the runtime support
+        # This is a placeholder that will need runtime support
+        return 0;
+    }
+}
+
+# Example Usage:
+# import lib time;
+# let timestamp = Time.now();
+# Time.sleep(1);
+# let new_timestamp = Time.now();
+# show "Time difference: " + (new_timestamp - timestamp);
+
+# Integration Notes:
+# - Import with: import lib time;
+# - Call methods as Time.method(...)
+# - Compatible with Razen parser, lexer, and compiler.

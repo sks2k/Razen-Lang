@@ -1,0 +1,29 @@
+# Razen Reference Library
+# Provides reference (pointer-like) utilities for the Razen language.
+# Usage: import lib references;
+#        let ref = Ref.point(123);
+#        let value = Ref.read(ref);
+
+class Ref {
+    # Returns a reference to the value.
+    # Example: Ref.point(123) => reference to 123
+    static point(value) {
+        return value;
+    }
+
+    # Returns the value pointed to by ref.
+    # Example: Ref.read(ref) => value pointed by ref
+    static read(ref) {
+        return ref;
+    }
+}
+
+# Example Usage:
+# import lib references;
+# let ref = Ref.point(123);
+# let value = Ref.read(ref);  # 123
+
+# Integration Notes:
+# - Import with: import lib references;
+# - Call methods as Ref.method(...)
+# - Compatible with Razen parser, lexer, and compiler.

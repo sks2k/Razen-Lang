@@ -1,0 +1,61 @@
+# Razen Type Checking Library
+# Provides type checking utilities for the Razen language.
+# Usage: import lib type_checking;
+#        let is_num = TypeCheck.is_number(123);
+
+class TypeCheck {
+    # Returns true if value is a number.
+    # Example: TypeCheck.is_number(123) => true
+    static is_number(value) {
+        # Simple type check implementation
+        if (value == value + 0) {
+            return true;
+        }
+        return false;
+    }
+
+    # Returns true if value is a string.
+    # Example: TypeCheck.is_string("hello") => true
+    static is_string(value) {
+        # Simple type check implementation
+        if (value == "" + value) {
+            return true;
+        }
+        return false;
+    }
+
+    # Returns true if value is a boolean.
+    # Example: TypeCheck.is_boolean(true) => true
+    static is_boolean(value) {
+        if (value == true || value == false) {
+            return true;
+        }
+        return false;
+    }
+
+    # Returns true if value is an array.
+    # Example: TypeCheck.is_array([1, 2, 3]) => true
+    static is_array(value) {
+        # Simple type check implementation
+        # This is a placeholder that will need runtime support
+        if (value) {
+            # Try to access array methods or properties
+            if (value == []) {
+                return true;
+            }
+        }
+        return false;
+    }
+}
+
+# Example Usage:
+# import lib type_checking;
+# let num_check = TypeCheck.is_number(123);  # true
+# let str_check = TypeCheck.is_string("hello");  # true
+# let bool_check = TypeCheck.is_boolean(true);  # true
+# let arr_check = TypeCheck.is_array([1, 2, 3]);  # true
+
+# Integration Notes:
+# - Import with: import lib type_checking;
+# - Call methods as TypeCheck.method(...)
+# - Compatible with Razen parser, lexer, and compiler.

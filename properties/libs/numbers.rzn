@@ -1,0 +1,36 @@
+# Razen Number Utility Library
+# Provides number utilities for the Razen language.
+# Usage: import lib numbers;
+#        let rand = Numbers.random(10);
+#        let rounded = Numbers.round(3.6);
+
+class Numbers {
+    # Returns a random number between 0 (inclusive) and max (exclusive).
+    # Example: Numbers.random(10) => random number 0 <= n < 10
+    static random(max) {
+        return Random.float(0, max);
+    }
+
+    # Rounds num to the nearest integer.
+    # Example: Numbers.round(3.6) => 4
+    static round(num) {
+        let integer = num / 1;
+        let fraction = num - integer;
+        
+        if (fraction >= 0.5) {
+            return integer + 1;
+        } else {
+            return integer;
+        }
+    }
+}
+
+# Example Usage:
+# import lib numbers;
+# let rand = Numbers.random(100);  # random number between 0 and 100
+# let rounded = Numbers.round(3.6);  # 4
+
+# Integration Notes:
+# - Import with: import lib numbers;
+# - Call methods as Numbers.method(...)
+# - Compatible with Razen parser, lexer, and compiler.

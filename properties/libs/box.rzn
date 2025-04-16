@@ -1,0 +1,29 @@
+# Razen Box Library
+# Provides basic value boxing/unboxing for the Razen language.
+# Usage: import lib box;
+#        let boxed = Box.put(42);
+#        let value = Box.get(boxed);
+
+class Box {
+    # Stores value in a box and returns it.
+    # Example: Box.put(123) => boxed value
+    static put(value) {
+        return value;
+    }
+
+    # Returns the value stored in the box.
+    # Example: Box.get(box) => previously boxed value
+    static get(box) {
+        return box;
+    }
+}
+
+# Example Usage:
+# import lib box;
+# let boxed = Box.put(42);
+# let value = Box.get(boxed);  # 42
+
+# Integration Notes:
+# - Import with: import lib box;
+# - Call methods as Box.method(...)
+# - Compatible with Razen parser, lexer, and compiler.

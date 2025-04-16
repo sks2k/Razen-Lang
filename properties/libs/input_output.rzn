@@ -1,0 +1,31 @@
+# Razen Input/Output Library
+# Provides standard I/O operations for the Razen language.
+# Usage: import lib input_output;
+#        IO.say("Hello World");
+#        let name = IO.ask("What's your name?");
+
+class IO {
+    # Prints the message to the output.
+    # Example: IO.say("Hello World") => prints "Hello World"
+    static say(message) {
+        show message;
+    }
+
+    # Prompts the user with a question and returns their input.
+    # Example: IO.ask("What's your name?") => reads user input
+    static ask(question) {
+        read result = question;
+        return result;
+    }
+}
+
+# Example Usage:
+# import lib input_output;
+# IO.say("Hello World");
+# let name = IO.ask("What's your name?");
+# IO.say("Hello, " + name);
+
+# Integration Notes:
+# - Import with: import lib input_output;
+# - Call methods as IO.method(...)
+# - Compatible with Razen parser, lexer, and compiler.
