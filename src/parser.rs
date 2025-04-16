@@ -59,6 +59,56 @@ impl Parser {
         parser.register_prefix(TokenType::Minus, Parser::parse_prefix_expression);
         parser.register_prefix(TokenType::Not, Parser::parse_prefix_expression);
         
+        // Register mathematical keywords as identifier parsers
+        parser.register_prefix(TokenType::Sum, Parser::parse_identifier);
+        parser.register_prefix(TokenType::Diff, Parser::parse_identifier);
+        parser.register_prefix(TokenType::Prod, Parser::parse_identifier);
+        parser.register_prefix(TokenType::Div, Parser::parse_identifier);
+        parser.register_prefix(TokenType::Mod, Parser::parse_identifier);
+        
+        // Register string operation keywords as identifier parsers
+        parser.register_prefix(TokenType::Text, Parser::parse_identifier);
+        parser.register_prefix(TokenType::Concat, Parser::parse_identifier);
+        parser.register_prefix(TokenType::Slice, Parser::parse_identifier);
+        parser.register_prefix(TokenType::Len, Parser::parse_identifier);
+        
+        // Register list and array keywords as identifier parsers
+        parser.register_prefix(TokenType::List, Parser::parse_identifier);
+        parser.register_prefix(TokenType::Arr, Parser::parse_identifier);
+        parser.register_prefix(TokenType::Append, Parser::parse_identifier);
+        parser.register_prefix(TokenType::Remove, Parser::parse_identifier);
+        
+        // Register dictionary/map keywords as identifier parsers
+        parser.register_prefix(TokenType::Map, Parser::parse_identifier);
+        parser.register_prefix(TokenType::Key, Parser::parse_identifier);
+        parser.register_prefix(TokenType::Value, Parser::parse_identifier);
+        
+        // Register date/time keywords as identifier parsers
+        parser.register_prefix(TokenType::Current, Parser::parse_identifier);
+        parser.register_prefix(TokenType::Now, Parser::parse_identifier);
+        parser.register_prefix(TokenType::Year, Parser::parse_identifier);
+        parser.register_prefix(TokenType::Month, Parser::parse_identifier);
+        parser.register_prefix(TokenType::Day, Parser::parse_identifier);
+        parser.register_prefix(TokenType::Hour, Parser::parse_identifier);
+        parser.register_prefix(TokenType::Minute, Parser::parse_identifier);
+        parser.register_prefix(TokenType::Second, Parser::parse_identifier);
+        
+        // Register user-defined keywords as identifier parsers
+        parser.register_prefix(TokenType::Store, Parser::parse_identifier);
+        parser.register_prefix(TokenType::Box, Parser::parse_identifier);
+        parser.register_prefix(TokenType::Ref, Parser::parse_identifier);
+        
+        // Register logical keywords as identifier parsers
+        parser.register_prefix(TokenType::Is, Parser::parse_identifier);
+        parser.register_prefix(TokenType::When, Parser::parse_identifier);
+        
+        // Register control flow keywords as identifier parsers
+        parser.register_prefix(TokenType::If, Parser::parse_identifier);
+        parser.register_prefix(TokenType::Else, Parser::parse_identifier);
+        parser.register_prefix(TokenType::For, Parser::parse_identifier);
+        parser.register_prefix(TokenType::While, Parser::parse_identifier);
+        parser.register_prefix(TokenType::Load, Parser::parse_identifier);
+        
         // Register library tokens as identifiers
         parser.register_prefix(TokenType::Random, Parser::parse_identifier);
         parser.register_prefix(TokenType::Ht, Parser::parse_identifier);
@@ -199,10 +249,20 @@ impl Parser {
     
     fn parse_statement(&mut self) -> Option<Statement> {
         match self.current_token.token_type {
-            TokenType::Let | TokenType::Take | TokenType::Hold | TokenType::Put => self.parse_variable_declaration(),
+            // Variable declaration keywords
+            TokenType::Let | TokenType::Take | TokenType::Hold | TokenType::Put | 
+            TokenType::Sum | TokenType::Diff | TokenType::Prod | TokenType::Div | TokenType::Mod |
+            TokenType::Text | TokenType::Concat | TokenType::Slice | TokenType::Len |
+            TokenType::List | TokenType::Arr | TokenType::Append | TokenType::Remove |
+            TokenType::Map | TokenType::Key | TokenType::Value |
+            TokenType::Current | TokenType::Now | TokenType::Year | TokenType::Month | 
+            TokenType::Day | TokenType::Hour | TokenType::Minute | TokenType::Second |
+            TokenType::Store | TokenType::Box | TokenType::Ref => self.parse_variable_declaration(),
+            
             TokenType::Fun => self.parse_function_declaration(),
             TokenType::Return => self.parse_return_statement(),
             TokenType::If => self.parse_if_statement(),
+            TokenType::Else => self.parse_else_statement(),
             TokenType::While => self.parse_while_statement(),
             TokenType::For => self.parse_for_statement(),
             TokenType::Break => self.parse_break_statement(),
@@ -214,23 +274,32 @@ impl Parser {
             TokenType::Try => self.parse_try_statement(),
             TokenType::Throw => self.parse_throw_statement(),
             TokenType::DocumentType => self.parse_document_type_declaration(),
+            TokenType::Is => self.parse_is_statement(),
+            TokenType::When => self.parse_when_statement(),
+            
             // Module system
             TokenType::Use => self.parse_module_import(),
             TokenType::Export => self.parse_module_export(),
             TokenType::Import => self.parse_import_statement(),
+            
             // Developer tools
             TokenType::Debug => self.parse_debug_statement(),
             TokenType::Assert => self.parse_assert_statement(),
             TokenType::Trace => self.parse_trace_statement(),
+            
             // OOP Keywords
             TokenType::Class => self.parse_class_declaration(),
+            
             // API Keywords
             TokenType::Api => self.parse_api_declaration(),
             TokenType::Call => self.parse_api_call(),
+            
             // Connection Keywords
             TokenType::Connect => self.parse_connect_statement(),
+            
             // Library Keywords
             TokenType::Lib => self.parse_lib_statement(),
+            
             TokenType::Comment => {
                 // Skip comments and return None to continue parsing
                 None
@@ -1554,7 +1623,106 @@ impl Parser {
         // Parse the block of statements inside the load
         let block = self.parse_block_statement();
         
+        // Validate that all statements in the block are 'show' statements
+        for stmt in &block {
+            if !matches!(stmt, Statement::ShowStatement { .. }) {
+                self.errors.push(format!(
+                    "Only 'show' statements are allowed inside 'load' blocks at line {}, column {}",
+                    self.current_token.line, self.current_token.column
+                ));
+                break;
+            }
+        }
+        
         Some(Statement::LoadStatement { cycles, block })
+    }
+    
+    fn parse_is_statement(&mut self) -> Option<Statement> {
+        // 'is' is a comparison operator that works similar to '==' but can be used as a statement
+        // Example: is x 5 (checks if x equals 5)
+        
+        self.next_token(); // Move past 'is' to the identifier
+
+        if !self.current_token_is(TokenType::Identifier) {
+            self.errors.push(format!("Expected identifier after 'is' at line {}, column {}", 
+                self.current_token.line, self.current_token.column));
+            return None;
+        }
+        
+        let name = self.current_token.literal.clone();
+        self.next_token(); // Move to the value
+        
+        let value = self.parse_expression(Precedence::Lowest)?;
+        
+        // Create an expression that compares name == value
+        let left = Expression::Identifier(name);
+        let operator = String::from("==");
+        let right = value;
+        
+        let condition = Expression::InfixExpression {
+            left: Box::new(left),
+            operator,
+            right: Box::new(right),
+        };
+        
+        // Parse the block if there's a brace
+        let consequence = if self.peek_token_is(TokenType::LeftBrace) {
+            self.next_token(); // Move to '{'
+            self.parse_block_statement()
+        } else {
+            Vec::new()
+        };
+        
+        // Check for else block
+        let alternative = if self.peek_token_is(TokenType::Else) {
+            self.next_token(); // Move to 'else'
+            
+            if !self.expect_peek(TokenType::LeftBrace) {
+                return None;
+            }
+            
+            Some(self.parse_block_statement())
+        } else {
+            None
+        };
+        
+        // This is effectively an if statement with a different syntax
+        Some(Statement::IfStatement {
+            condition,
+            consequence,
+            alternative,
+        })
+    }
+    
+    fn parse_when_statement(&mut self) -> Option<Statement> {
+        // 'when' is a pattern matching statement, similar to a switch/case
+        // Example: when x { 1 => { ... }, 2 => { ... }, _ => { ... } }
+        
+        self.next_token(); // Move past 'when' to the expression
+        
+        let value = self.parse_expression(Precedence::Lowest)?;
+        
+        if !self.expect_peek(TokenType::LeftBrace) {
+            return None;
+        }
+        
+        // TODO: Implement pattern matching statements
+        // For now, we'll just parse a block and return it directly
+        let block = self.parse_block_statement();
+        
+        // Return a simple block statement until pattern matching is implemented
+        Some(Statement::BlockStatement {
+            statements: block,
+        })
+    }
+    
+    fn parse_else_statement(&mut self) -> Option<Statement> {
+        // 'else' should only appear after an 'if' statement
+        // This is a syntax error if it appears standalone
+        
+        self.errors.push(format!("Unexpected 'else' statement without matching 'if' at line {}, column {}",
+            self.current_token.line, self.current_token.column));
+        None
     }
 }
 

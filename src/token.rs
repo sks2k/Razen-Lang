@@ -9,6 +9,48 @@ pub enum TokenType {
     Put,    // Any
     Sum,    // Numeric sum (alias for let)
     
+    // Mathematical Variable Keywords
+    Diff,   // Difference (subtraction)
+    Prod,   // Product (multiplication)
+    Div,    // Division
+    Mod,    // Modulus/Remainder
+    
+    // String Variables
+    Text,   // String data storage
+    Concat, // String joining
+    Slice,  // Substring extraction
+    Len,    // String length
+    
+    // List & Array Variables
+    List,   // Dynamic arrays
+    Arr,    // Fixed-size arrays
+    Append, // Add elements to lists
+    Remove, // Remove elements from lists
+    
+    // Dictionary/Map Variables
+    Map,    // Key-value storage
+    Key,    // Dictionary keys
+    Value,  // Dictionary values
+    
+    // Date & Time Variables
+    Current, // Current date/time
+    Now,     // Current timestamp
+    Year,    // Year component
+    Month,   // Month component
+    Day,     // Day component
+    Hour,    // Hour component
+    Minute,  // Minute component
+    Second,  // Second component
+    
+    // User-Defined Variables
+    Store,  // Persistent storage
+    Box,    // Temporary storage
+    Ref,    // Reference variables
+    
+    // Logical Variables
+    Is,     // Equality comparison
+    When,   // Pattern matching
+    
     // Mathematical operators
     Plus,       // +
     Minus,      // -
@@ -163,6 +205,48 @@ impl fmt::Display for TokenType {
             TokenType::Hold => write!(f, "HOLD"),
             TokenType::Put => write!(f, "PUT"),
             TokenType::Sum => write!(f, "SUM"),
+            
+            // Mathematical Variable Keywords
+            TokenType::Diff => write!(f, "DIFF"),
+            TokenType::Prod => write!(f, "PROD"),
+            TokenType::Div => write!(f, "DIV"),
+            TokenType::Mod => write!(f, "MOD"),
+            
+            // String Variables
+            TokenType::Text => write!(f, "TEXT"),
+            TokenType::Concat => write!(f, "CONCAT"),
+            TokenType::Slice => write!(f, "SLICE"),
+            TokenType::Len => write!(f, "LEN"),
+            
+            // List & Array Variables
+            TokenType::List => write!(f, "LIST"),
+            TokenType::Arr => write!(f, "ARR"),
+            TokenType::Append => write!(f, "APPEND"),
+            TokenType::Remove => write!(f, "REMOVE"),
+            
+            // Dictionary/Map Variables
+            TokenType::Map => write!(f, "MAP"),
+            TokenType::Key => write!(f, "KEY"),
+            TokenType::Value => write!(f, "VALUE"),
+            
+            // Date & Time Variables
+            TokenType::Current => write!(f, "CURRENT"),
+            TokenType::Now => write!(f, "NOW"),
+            TokenType::Year => write!(f, "YEAR"),
+            TokenType::Month => write!(f, "MONTH"),
+            TokenType::Day => write!(f, "DAY"),
+            TokenType::Hour => write!(f, "HOUR"),
+            TokenType::Minute => write!(f, "MINUTE"),
+            TokenType::Second => write!(f, "SECOND"),
+            
+            // User-Defined Variables
+            TokenType::Store => write!(f, "STORE"),
+            TokenType::Box => write!(f, "BOX"),
+            TokenType::Ref => write!(f, "REF"),
+            
+            // Logical Variables
+            TokenType::Is => write!(f, "IS"),
+            TokenType::When => write!(f, "WHEN"),
             
             // Mathematical operators
             TokenType::Plus => write!(f, "+"),
@@ -345,6 +429,48 @@ pub fn lookup_identifier(identifier: &str) -> TokenType {
         "hold" => TokenType::Hold,
         "put" => TokenType::Put,
         "sum" => TokenType::Sum,
+        
+        // Mathematical Variable Keywords
+        "diff" => TokenType::Diff,
+        "prod" => TokenType::Prod,
+        "div" => TokenType::Div,
+        "mod" => TokenType::Mod,
+        
+        // String Variables
+        "text" => TokenType::Text,
+        "concat" => TokenType::Concat,
+        "slice" => TokenType::Slice,
+        "len" => TokenType::Len,
+        
+        // List & Array Variables
+        "list" => TokenType::List,
+        "arr" => TokenType::Arr,
+        "append" => TokenType::Append,
+        "remove" => TokenType::Remove,
+        
+        // Dictionary/Map Variables
+        "map" => TokenType::Map,
+        "key" => TokenType::Key,
+        "value" => TokenType::Value,
+        
+        // Date & Time Variables
+        "current" => TokenType::Current,
+        "now" => TokenType::Now,
+        "year" => TokenType::Year,
+        "month" => TokenType::Month,
+        "day" => TokenType::Day,
+        "hour" => TokenType::Hour,
+        "minute" => TokenType::Minute,
+        "second" => TokenType::Second,
+        
+        // User-Defined Variables
+        "store" => TokenType::Store,
+        "box" => TokenType::Box,
+        "ref" => TokenType::Ref,
+        
+        // Logical Variables
+        "is" => TokenType::Is,
+        "when" => TokenType::When,
         
         // Control flow keywords
         "if" => TokenType::If,

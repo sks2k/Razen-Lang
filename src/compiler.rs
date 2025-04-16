@@ -5,6 +5,7 @@ use std::process::Command;
 use std::io::Read;
 use std::fs::File;
 use std::path::PathBuf;
+use std::{thread, time::Duration};
 
 use crate::ast::{Program, Statement, Expression};
 use crate::parser::Parser;
@@ -76,6 +77,9 @@ enum IR {
     
     // Labels for jumps
     Label(String),
+    
+    // New instructions
+    Sleep,
 }
 
 // Symbol table for variable and function tracking
@@ -542,29 +546,36 @@ impl Compiler {
         if let Some(expr) = value.clone() {
             // Type checking based on variable type
             match var_type.as_str() {
-                "let" => {
+                // Numeric types
+                "let" | "sum" | "diff" | "prod" | "div" | "mod" => {
                     // Check that the value is a number
                     if !self.is_number_expression(&expr) {
-                        self.errors.push(format!("Type error: 'let' variables can only be used with numeric values, but '{}' was assigned a non-numeric value", name));
+                        self.errors.push(format!("Type error: '{}' variables can only be used with numeric values, but '{}' was assigned a non-numeric value", var_type, name));
                     }
                 },
-                "take" => {
+                // String types
+                "take" | "text" | "concat" | "slice" => {
                     // Check that the value is a string
                     if !self.is_string_expression(&expr) {
-                        self.errors.push(format!("Type error: 'take' variables can only be used with string values, but '{}' was assigned a non-string value", name));
+                        self.errors.push(format!("Type error: '{}' variables can only be used with string values, but '{}' was assigned a non-string value", var_type, name));
                     }
                 },
+                // Boolean types
                 "hold" => {
                     // Check that the value is a boolean
                     if !self.is_boolean_expression(&expr) {
-                        self.errors.push(format!("Type error: 'hold' variables can only be used with boolean values, but '{}' was assigned a non-boolean value", name));
+                        self.errors.push(format!("Type error: '{}' variables can only be used with boolean values, but '{}' was assigned a non-boolean value", var_type, name));
                     }
                 },
-                "put" => {
-                    // 'put' can hold any type, so no type checking needed
+                // Generic types - no type checking needed
+                "put" | "list" | "arr" | "map" | "store" | "box" | "ref" |
+                "len" | "key" | "value" | "current" | "now" | "year" | "month" |
+                "day" | "hour" | "minute" | "second" | "append" | "remove" => {
+                    // These can hold any type, so no type checking needed
                 },
                 _ => {
-                    self.errors.push(format!("Unknown variable type: {}", var_type));
+                    // For new variable types not explicitly handled
+                    // For now, we don't do type checking on these
                 }
             }
             
@@ -820,17 +831,27 @@ impl Compiler {
     }
     
     fn compile_show_statement(&mut self, value: Expression) {
-        // Set the flag to indicate we're inside a show statement
+        // Set the flag that we're inside a show statement
+        let old_in_show = self.in_show_statement;
         self.in_show_statement = true;
         
-        // Compile the value to be shown
+        // Compile the expression to be shown
         self.compile_expression(value);
         
-        // Reset the flag
-        self.in_show_statement = false;
-        
-        // Emit the print instruction
+        // Emit print instruction
         self.emit(IR::Print);
+        
+        // Add a newline character if we're not inside a load statement
+        if !old_in_show {
+            // Just one newline at the end of normal show statements
+            self.emit(IR::PushString("\n".to_string()));
+            self.emit(IR::Print);
+        }
+        // Note: If we are inside a load statement (old_in_show is true),
+        // we don't add any newlines since the load statement will handle the formatting
+        
+        // Reset the flag
+        self.in_show_statement = old_in_show;
     }
     
     fn compile_try_statement(&mut self, try_block: Vec<Statement>, catch_block: Option<Vec<Statement>>, finally_block: Option<Vec<Statement>>) {
@@ -1079,47 +1100,65 @@ impl Compiler {
     
     fn compile_load_statement(&mut self, cycles: Expression, block: Vec<Statement>) {
         // Determine cycles count - default to 3 if not a literal
-        let cycles_count = match cycles {
+        let cycles_value = match cycles {
             Expression::NumberLiteral(num) => num as usize,
             _ => {
+                // If not a number literal, we need to evaluate the expression at runtime
                 self.compile_expression(cycles.clone());
                 self.emit(IR::Pop); // We don't need the result, use default
                 3 // Default cycles
             }
         };
         
-        // Clamp to 1-9 cycles
-        let cycles_count = cycles_count.clamp(1, 9);
-
-        // Verify the block only contains show statements
+        // Clamp to 1-10 cycles
+        let cycles_count = cycles_value.clamp(1, 10);
+        
+        // Verify all statements in the block are 'show' statements
         for stmt in &block {
             if !matches!(stmt, Statement::ShowStatement { .. }) {
                 self.errors.push("Only 'show' statements are allowed inside a 'load' block".to_string());
             }
         }
         
-        // Create a loop that runs for the specified number of cycles
+        // Get the number of show statements
+        let show_count = block.len();
+        
+        if show_count == 0 {
+            // Nothing to show
+            return;
+        }
+        
+        // Flag that we're in a loading animation
+        let old_in_show = self.in_show_statement;
+        self.in_show_statement = true;
+        
+        // Loop through the cycles
         for _ in 0..cycles_count {
-            // Process each show statement in the block
+            // Loop through each show statement in the block
             for stmt in &block {
                 if let Statement::ShowStatement { value } = stmt {
-                    // Show the loading message
+                    // Compile and display the message
                     self.compile_expression(value.clone());
                     self.emit(IR::Print);
                     
-                    // Add a short delay (simulated with a sleep)
+                    // Add a delay (sleep)
                     self.emit(IR::PushNumber(0.3)); // 300ms delay
-                    self.emit(IR::Pop); // Discard the delay value
+                    self.emit(IR::Sleep); // Use Sleep instruction instead of Pop
                     
-                    // Clear the line to prepare for the next message
+                    // Clear the line with carriage return to prepare for next message
+                    // Note: We don't add any newlines here, just carriage return to overwrite the current line
                     self.emit(IR::PushString("\r".to_string()));
                     self.emit(IR::Print);
                 }
             }
         }
         
-        // Add a final newline to ensure output continues on a fresh line
-        self.emit(IR::PushString("\n".to_string()));
+        // Reset show statement flag
+        self.in_show_statement = old_in_show;
+        
+        // No need to add a final newline - this was causing extra line spacing
+        // Just ensure we're on a fresh line for the next output
+        self.emit(IR::PushString("\r".to_string()));
         self.emit(IR::Print);
     }
     
@@ -1180,6 +1219,7 @@ impl Compiler {
                 IR::DefineFunction(_, _) => code.push(0x27),
                 IR::Label(_) => code.push(0x28),
                 IR::SetGlobal(_) => code.push(0x2B), // Global variable operations
+                IR::Sleep => code.push(0x2C),
             }
         }
         
@@ -1513,7 +1553,10 @@ impl Compiler {
                 },
                 IR::Print => {
                     if let Some(value) = stack.pop() {
-                        println!("{}", value);
+                        // Print without automatically adding a newline
+                        use std::io::{self, Write};
+                        print!("{}", value);
+                        io::stdout().flush().unwrap();
                     }
                 },
                 IR::ReadInput => {
@@ -1547,6 +1590,10 @@ impl Compiler {
                             continue;
                         }
                     }
+                },
+                IR::Sleep => {
+                    // Sleep implementation
+                    thread::sleep(Duration::from_secs_f64(0.3));
                 },
                 _ => {
                     // For instructions not yet implemented, just log if in debug mode
