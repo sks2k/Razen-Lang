@@ -169,6 +169,11 @@ pub enum Expression {
     MapLiteral {
         pairs: Vec<(Expression, Expression)>,
     },
+    LibraryCall {
+        library: Box<Expression>,
+        function: Box<Expression>,
+        arguments: Vec<Expression>,
+    },
 }
 
 impl fmt::Display for Node {
@@ -423,6 +428,14 @@ impl fmt::Display for Node {
                         }
                         let pairs_str = pairs_vec.join(", ");
                         write!(f, "{{{}}}", pairs_str)
+                    },
+                    Expression::LibraryCall { library, function, arguments } => {
+                        let mut args = Vec::new();
+                        for arg in arguments {
+                            args.push(format!("{}", Node::Expression(arg.clone())));
+                        }
+                        let args_str = args.join(", ");
+                        write!(f, "{}[{}].call({})", Node::Expression(*library.clone()), Node::Expression(*function.clone()), args_str)
                     },
                 }
             },

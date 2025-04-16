@@ -1,0 +1,54 @@
+# Razen String Library (StrLib)
+# Provides standard string operations for Razen code in a class-based structure.
+# Usage: import lib strlib;
+#        let str = "hello world";
+#        let upper = StrLib[upper](str); # "HELLO WORLD"
+
+class StrLib {
+    # Converts string to uppercase.
+    # Example: StrLib[upper]("hello") => "HELLO"
+    static upper(str) {
+        return str.toUpperCase();
+    }
+
+    # Converts string to lowercase.
+    # Example: StrLib[lower]("HELLO") => "hello"
+    static lower(str) {
+        return str.toLowerCase();
+    }
+
+    # Returns a substring from start to end (exclusive).
+    # Example: StrLib[substring]("hello world", 0, 5) => "hello"
+    static substring(str, start, end) {
+        return str.substring(start, end);
+    }
+
+    # Replaces all occurrences of search with replacement.
+    # Example: StrLib[replace]("hello world", "world", "razen") => "hello razen"
+    static replace(str, search, replacement) {
+        return str.replace(search, replacement);
+    }
+
+    # Trims whitespace from both ends of a string.
+    # Example: StrLib[trim]("  hello  ") => "hello"
+    static trim(str) {
+        return str.trim();
+    }
+
+    # Checks if string starts with the specified prefix.
+    # Example: StrLib[startsWith]("hello world", "hello") => true
+    static startsWith(str, prefix) {
+        return str.startsWith(prefix);
+    }
+
+    # Checks if string ends with the specified suffix.
+    # Example: StrLib[endsWith]("hello world", "world") => true
+    static endsWith(str, suffix) {
+        return str.endsWith(suffix);
+    }
+}
+
+# Example Usage:
+# import lib strlib;
+# let greeting = "Hello, World!";
+# let lower = StrLib[lower](greeting); # "hello, world!"

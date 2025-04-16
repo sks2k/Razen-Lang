@@ -113,7 +113,7 @@ impl Parser {
         parser.register_prefix(TokenType::Random, Parser::parse_identifier);
         parser.register_prefix(TokenType::Ht, Parser::parse_identifier);
         parser.register_prefix(TokenType::Coin, Parser::parse_identifier);
-        parser.register_prefix(TokenType::Math, Parser::parse_identifier);
+        parser.register_prefix(TokenType::MathLib, Parser::parse_identifier);
         parser.register_prefix(TokenType::Ping, Parser::parse_identifier);
         parser.register_prefix(TokenType::Bolt, Parser::parse_identifier);
         parser.register_prefix(TokenType::Seed, Parser::parse_identifier);
@@ -121,8 +121,8 @@ impl Parser {
         parser.register_prefix(TokenType::File, Parser::parse_identifier);
         parser.register_prefix(TokenType::Json, Parser::parse_identifier);
         parser.register_prefix(TokenType::Date, Parser::parse_identifier);
-        parser.register_prefix(TokenType::String, Parser::parse_identifier);
-        parser.register_prefix(TokenType::Array, Parser::parse_identifier);
+        parser.register_prefix(TokenType::StrLib, Parser::parse_identifier);
+        parser.register_prefix(TokenType::ArrLib, Parser::parse_identifier);
         parser.register_prefix(TokenType::Os, Parser::parse_identifier);
         parser.register_prefix(TokenType::Regex, Parser::parse_identifier);
         parser.register_prefix(TokenType::Crypto, Parser::parse_identifier);
@@ -716,7 +716,7 @@ impl Parser {
         self.next_token();
         
         // Expect semicolon
-        if self.current_token_is(TokenType::Semicolon) {
+        if self.peek_token_is(TokenType::Semicolon) {
             self.next_token();
         }
         
@@ -739,7 +739,7 @@ impl Parser {
         self.next_token();
         
         // Expect semicolon
-        if self.current_token_is(TokenType::Semicolon) {
+        if self.peek_token_is(TokenType::Semicolon) {
             self.next_token();
         }
         
@@ -757,7 +757,7 @@ impl Parser {
         };
         
         // Expect semicolon
-        if self.current_token_is(TokenType::Semicolon) {
+        if self.peek_token_is(TokenType::Semicolon) {
             self.next_token();
         }
         
@@ -865,10 +865,10 @@ impl Parser {
     fn parse_identifier(&mut self) -> Option<Expression> {
         // Convert library tokens to identifiers when used in expressions
         let identifier = match self.current_token.token_type {
-            TokenType::Random | TokenType::Ht | TokenType::Coin | TokenType::Math | 
+            TokenType::Random | TokenType::Ht | TokenType::Coin | TokenType::MathLib | 
             TokenType::Ping | TokenType::Bolt | TokenType::Seed | TokenType::Net | 
-            TokenType::File | TokenType::Json | TokenType::Date | TokenType::String | 
-            TokenType::Array | TokenType::Os | TokenType::Regex | TokenType::Crypto | 
+            TokenType::File | TokenType::Json | TokenType::Date | TokenType::StrLib | 
+            TokenType::ArrLib | TokenType::Os | TokenType::Regex | TokenType::Crypto | 
             TokenType::Color | TokenType::System | TokenType::Ui | TokenType::Storage | 
             TokenType::Audio | TokenType::Image | TokenType::Validation | 
             TokenType::Log | TokenType::Uuid => {
@@ -1014,6 +1014,20 @@ impl Parser {
             return None;
         }
         
+        // Check if this is a library function call (e.g., ArrLib[push](1, 2))
+        if self.peek_token_is(TokenType::LeftParen) {
+            // This is a library function call
+            self.next_token(); // Consume the left paren
+            
+            let arguments = self.parse_expression_list(TokenType::RightParen)?;
+            
+            return Some(Expression::LibraryCall {
+                library: Box::new(left),
+                function: Box::new(index),
+                arguments,
+            });
+        }
+        
         Some(Expression::IndexExpression {
             left: Box::new(left),
             index: Box::new(index),
@@ -1026,10 +1040,10 @@ impl Parser {
         if !self.current_token_is(TokenType::Identifier) {
             // Handle library tokens as identifiers
             let is_library_token = match self.current_token.token_type {
-                TokenType::Random | TokenType::Ht | TokenType::Coin | TokenType::Math | 
+                TokenType::Random | TokenType::Ht | TokenType::Coin | TokenType::MathLib | 
                 TokenType::Ping | TokenType::Bolt | TokenType::Seed | TokenType::Net | 
-                TokenType::File | TokenType::Json | TokenType::Date | TokenType::String | 
-                TokenType::Array | TokenType::Os | TokenType::Regex | TokenType::Crypto | 
+                TokenType::File | TokenType::Json | TokenType::Date | TokenType::StrLib | 
+                TokenType::ArrLib | TokenType::Os | TokenType::Regex | TokenType::Crypto | 
                 TokenType::Color | TokenType::System | TokenType::Ui | TokenType::Storage | 
                 TokenType::Audio | TokenType::Image | TokenType::Validation | 
                 TokenType::Log | TokenType::Uuid | TokenType::Get | TokenType::Post |
@@ -1540,13 +1554,15 @@ impl Parser {
         // Check if the next token is a valid library name (either an identifier or a library token)
         let is_valid_library = match self.current_token.token_type {
             TokenType::Identifier | 
-            TokenType::Random | TokenType::Ht | TokenType::Coin | TokenType::Math | 
+            TokenType::Random | TokenType::Ht | TokenType::Coin | TokenType::MathLib | 
             TokenType::Ping | TokenType::Bolt | TokenType::Seed | TokenType::Net | 
-            TokenType::File | TokenType::Json | TokenType::Date | TokenType::String | 
-            TokenType::Array | TokenType::Os | TokenType::Regex | TokenType::Crypto | 
+            TokenType::File | TokenType::Json | TokenType::Date | TokenType::StrLib | 
+            TokenType::ArrLib | TokenType::Os | TokenType::Regex | TokenType::Crypto | 
             TokenType::Color | TokenType::System | TokenType::Ui | TokenType::Storage | 
             TokenType::Audio | TokenType::Image | TokenType::Validation | 
-            TokenType::Log | TokenType::Uuid => true,
+            TokenType::Log | TokenType::Uuid | TokenType::BoxLib | TokenType::IOLib |
+            TokenType::NumLib | TokenType::RefLib | TokenType::TimeLib | 
+            TokenType::TypeCheckLib | TokenType::TypeConvertLib => true,
             _ => false
         };
         

@@ -1,0 +1,68 @@
+# Razen Math Library (MathLib)
+# Provides mathematical operations for Razen code in a class-based structure.
+# Usage: import lib mathlib;
+#        let result = MathLib[add](5, 3); # 8
+
+class MathLib {
+    # Adds two numbers.
+    # Example: MathLib[add](5, 3) => 8
+    static add(a, b) {
+        return a + b;
+    }
+
+    # Subtracts b from a.
+    # Example: MathLib[subtract](10, 4) => 6
+    static subtract(a, b) {
+        return a - b;
+    }
+
+    # Multiplies two numbers.
+    # Example: MathLib[multiply](6, 7) => 42
+    static multiply(a, b) {
+        return a * b;
+    }
+
+    # Divides a by b.
+    # Example: MathLib[divide](20, 5) => 4
+    static divide(a, b) {
+        if (b == 0) {
+            throw "Division by zero is not allowed";
+        }
+        return a / b;
+    }
+
+    # Returns a raised to the power of b.
+    # Example: MathLib[power](2, 3) => 8
+    static power(a, b) {
+        return Math.pow(a, b);
+    }
+
+    # Returns the square root of a number.
+    # Example: MathLib[sqrt](16) => 4
+    static sqrt(a) {
+        return Math.sqrt(a);
+    }
+
+    # Returns the absolute value of a number.
+    # Example: MathLib[abs](-7) => 7
+    static abs(a) {
+        return Math.abs(a);
+    }
+
+    # Returns the floor of a number.
+    # Example: MathLib[floor](3.7) => 3
+    static floor(a) {
+        return Math.floor(a);
+    }
+
+    # Returns the ceiling of a number.
+    # Example: MathLib[ceil](3.2) => 4
+    static ceil(a) {
+        return Math.ceil(a);
+    }
+}
+
+# Example Usage:
+# import lib mathlib;
+# let sum = MathLib[add](5, 3); # 8
+# let product = MathLib[multiply](4, 5); # 20

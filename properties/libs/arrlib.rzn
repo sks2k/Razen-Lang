@@ -1,0 +1,51 @@
+# Razen Array Library (ArrLib)
+# Provides standard array operations for Razen code in a class-based structure.
+# Usage: import lib arrlib;
+#        let arr = [1, 2, 3];
+#        arr = ArrLib[push](arr, 4); # [1,2,3,4]
+#        let last = ArrLib[pop](arr); # 4
+
+class ArrLib {
+    # Appends item to array arr and returns the new array.
+    # Example: let a = [1, 2]; a = ArrLib[push](a, 3); # [1, 2, 3]
+    static push(arr, item) {
+        arr.push(item);
+        return arr;
+    }
+
+    # Removes and returns the last item of arr.
+    # Example: let last = ArrLib[pop]([1, 2, 3]); # 3
+    static pop(arr) {
+        return arr.pop();
+    }
+
+    # Joins array elements into a string with separator sep.
+    # Example: ArrLib[join](["a", "b", "c"], ",") => "a,b,c"
+    static join(arr, sep) {
+        return arr.join(sep);
+    }
+
+    # Returns a sorted copy of arr.
+    # Example: ArrLib[sort]([3, 1, 2]) => [1, 2, 3]
+    static sort(arr) {
+        return arr.sort();
+    }
+
+    # Returns a reversed copy of arr.
+    # Example: ArrLib[reverse]([1, 2, 3]) => [3, 2, 1]
+    static reverse(arr) {
+        return arr.reverse();
+    }
+
+    # Returns a subarray from start to end (exclusive).
+    # Example: ArrLib[slice]([1, 2, 3, 4], 1, 3) => [2, 3]
+    static slice(arr, start, end) {
+        return arr.slice(start, end);
+    }
+}
+
+# Example Usage:
+# import lib arrlib;
+# let nums = [10, 20, 30];
+# nums = ArrLib[push](nums, 40); # [10, 20, 30, 40]
+# let last = ArrLib[pop](nums);  # 40

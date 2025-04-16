@@ -148,7 +148,7 @@ pub enum TokenType {
     Random,        // random number generation
     Ht,            // head and tails
     Coin,          // coin toss
-    Math,          // math operations
+    MathLib,       // math operations
     Ping,          // website ping
     Bolt,          // performance optimization
     Seed,          // seed generation
@@ -156,8 +156,8 @@ pub enum TokenType {
     File,          // file operations
     Json,          // JSON operations
     Date,          // date and time operations
-    String,        // string utilities
-    Array,         // array utilities
+    StrLib,        // string utilities
+    ArrLib,        // array utilities
     Os,            // operating system info
     Regex,         // regular expressions
     Crypto,        // cryptography
@@ -170,6 +170,13 @@ pub enum TokenType {
     Validation,    // data validation
     Log,           // logging utilities
     Uuid,          // UUID generation
+    BoxLib,        // box operations library
+    IOLib,         // input/output operations library
+    NumLib,        // numbers utilities library
+    RefLib,        // reference operations library
+    TimeLib,       // time library
+    TypeCheckLib,  // type checking library
+    TypeConvertLib, // type conversion library
     
     // Delimiters
     LeftParen,      // (
@@ -345,7 +352,7 @@ impl fmt::Display for TokenType {
             TokenType::Random => write!(f, "RANDOM"),
             TokenType::Ht => write!(f, "HT"),
             TokenType::Coin => write!(f, "COIN"),
-            TokenType::Math => write!(f, "MATH"),
+            TokenType::MathLib => write!(f, "MATH"),
             TokenType::Ping => write!(f, "PING"),
             TokenType::Bolt => write!(f, "BOLT"),
             TokenType::Seed => write!(f, "SEED"),
@@ -353,8 +360,8 @@ impl fmt::Display for TokenType {
             TokenType::File => write!(f, "FILE"),
             TokenType::Json => write!(f, "JSON"),
             TokenType::Date => write!(f, "DATE"),
-            TokenType::String => write!(f, "STRING"),
-            TokenType::Array => write!(f, "ARRAY"),
+            TokenType::StrLib => write!(f, "STRING"),
+            TokenType::ArrLib => write!(f, "ARRAY"),
             TokenType::Os => write!(f, "OS"),
             TokenType::Regex => write!(f, "REGEX"),
             TokenType::Crypto => write!(f, "CRYPTO"),
@@ -367,6 +374,13 @@ impl fmt::Display for TokenType {
             TokenType::Validation => write!(f, "VALIDATION"),
             TokenType::Log => write!(f, "LOG"),
             TokenType::Uuid => write!(f, "UUID"),
+            TokenType::BoxLib => write!(f, "BOX"),
+            TokenType::IOLib => write!(f, "IO"),
+            TokenType::NumLib => write!(f, "NUM"),
+            TokenType::RefLib => write!(f, "REF"),
+            TokenType::TimeLib => write!(f, "TIME"),
+            TokenType::TypeCheckLib => write!(f, "TYPECHECK"),
+            TokenType::TypeConvertLib => write!(f, "TYPECONVERT"),
             
             // Delimiters
             TokenType::LeftParen => write!(f, "("),
@@ -539,7 +553,7 @@ pub fn lookup_identifier(identifier: &str) -> TokenType {
         "random" => TokenType::Random,
         "ht" => TokenType::Ht,
         "coin" => TokenType::Coin,
-        "math" => TokenType::Math,
+        "mathlib" => TokenType::MathLib,
         "ping" => TokenType::Ping,
         "bolt" => TokenType::Bolt,
         "seed" => TokenType::Seed,
@@ -547,8 +561,8 @@ pub fn lookup_identifier(identifier: &str) -> TokenType {
         "file" => TokenType::File,
         "json" => TokenType::Json,
         "date" => TokenType::Date,
-        "string" => TokenType::String,
-        "array" => TokenType::Array,
+        "strlib" => TokenType::StrLib,
+        "arrlib" => TokenType::ArrLib,
         "os" => TokenType::Os,
         "regex" => TokenType::Regex,
         "crypto" => TokenType::Crypto,
@@ -561,6 +575,13 @@ pub fn lookup_identifier(identifier: &str) -> TokenType {
         "validation" => TokenType::Validation,
         "log" => TokenType::Log,
         "uuid" => TokenType::Uuid,
+        "boxlib" => TokenType::BoxLib,
+        "iolib" => TokenType::IOLib,
+        "numlib" => TokenType::NumLib,
+        "reflib" => TokenType::RefLib,
+        "timelib" => TokenType::TimeLib,
+        "typechecklib" => TokenType::TypeCheckLib,
+        "typeconvertlib" => TokenType::TypeConvertLib,
         
         // If not a keyword, it's an identifier
         _ => TokenType::Identifier,

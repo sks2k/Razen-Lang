@@ -852,6 +852,11 @@ impl Compiler {
         
         // Reset the flag
         self.in_show_statement = old_in_show;
+        
+        // No need to add a final newline - this was causing extra line spacing
+        // Just ensure we're on a fresh line for the next output
+        self.emit(IR::PushString("\r".to_string()));
+        self.emit(IR::Print);
     }
     
     fn compile_try_statement(&mut self, try_block: Vec<Statement>, catch_block: Option<Vec<Statement>>, finally_block: Option<Vec<Statement>>) {
@@ -946,6 +951,9 @@ impl Compiler {
             },
             Expression::MapLiteral { pairs } => {
                 self.compile_map_literal(pairs);
+            },
+            Expression::LibraryCall { library, function, arguments } => {
+                self.compile_library_call(*library, *function, arguments);
             },
         }
     }
@@ -1096,6 +1104,49 @@ impl Compiler {
         
         // Create the map with the given number of key-value pairs
         self.emit(IR::CreateMap(pairs.len()));
+    }
+    
+    fn compile_library_call(&mut self, library: Expression, function: Expression, arguments: Vec<Expression>) {
+        // Compile each argument
+        for arg in &arguments {
+            self.compile_expression(arg.clone());
+        }
+
+        // Get the library name
+        let lib_name = match library {
+            Expression::Identifier(name) => name,
+            _ => panic!("Library call on non-identifier"),
+        };
+
+        // Get the function name
+        let func_name = match function {
+            Expression::Identifier(name) => name,
+            Expression::IndexExpression { left, index } => {
+                // Only support left as Identifier for now
+                if let Expression::Identifier(left_name) = *left {
+                    if let Expression::StringLiteral(index_str) = *index {
+                        format!("{}.{}", left_name, index_str)
+                    } else {
+                        panic!("Bracket notation must be used with string literal");
+                    }
+                } else {
+                    panic!("Bracket notation must be used with identifier on the left");
+                }
+            },
+            _ => panic!("Function name must be an identifier or bracket notation"),
+        };
+
+        // Create the full function name in the format "LibName.FunctionName"
+        let full_func_name = format!("{}.{}", lib_name, func_name);
+
+        // Call the library function with the given number of arguments
+        self.emit(IR::Call(full_func_name, arguments.len()));
+
+        // For show statements, we need to handle the return value
+        if self.in_show_statement {
+            // The return value is already on the stack
+            // No need to do anything special
+        }
     }
     
     fn compile_load_statement(&mut self, cycles: Expression, block: Vec<Statement>) {

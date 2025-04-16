@@ -1,0 +1,55 @@
+# Razen Time Library (TimeLib)
+# Provides time-related operations for Razen code in a class-based structure.
+# Usage: import lib timelib;
+#        let current = TimeLib[now](); # Current timestamp
+
+class TimeLib {
+    # Returns the current timestamp in milliseconds since epoch.
+    # Example: TimeLib[now]() => 1650123456789
+    static now() {
+        return Date.now();
+    }
+
+    # Pauses execution for the specified number of milliseconds.
+    # Example: TimeLib[sleep](1000); # Sleep for 1 second
+    static sleep(ms) {
+        let start = Date.now();
+        while (Date.now() - start < ms) {
+            // Busy wait
+        }
+    }
+
+    # Formats a timestamp into a readable date string.
+    # Example: TimeLib[format](1650123456789, "YYYY-MM-DD") => "2022-04-16"
+    static format(timestamp, format) {
+        // Simple implementation - in a real language this would use a date library
+        let date = new Date(timestamp);
+        return date.toISOString();
+    }
+
+    # Returns the current year.
+    # Example: TimeLib[year]() => 2025
+    static year() {
+        let date = new Date();
+        return date.getFullYear();
+    }
+
+    # Returns the current month (1-12).
+    # Example: TimeLib[month]() => 4 (for April)
+    static month() {
+        let date = new Date();
+        return date.getMonth() + 1; // JavaScript months are 0-indexed
+    }
+
+    # Returns the current day of the month.
+    # Example: TimeLib[day]() => 16
+    static day() {
+        let date = new Date();
+        return date.getDate();
+    }
+}
+
+# Example Usage:
+# import lib timelib;
+# let timestamp = TimeLib[now]();
+# TimeLib[sleep](1000); # Sleep for 1 second
