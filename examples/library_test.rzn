@@ -10,6 +10,8 @@ lib file;     # File library
 lib json;     # JSON library
 lib bolt;     # Bolt library for intensive operations
 lib seed;     # Seed library for generating game maps
+lib color;    # Color library for color manipulation
+lib crypto;   # Crypto library for encryption and hashing
 
 show "===== Razen Library System Test =====";
 
@@ -76,8 +78,20 @@ show "\n5. Testing Seed Library:";
 show "Generated seed: " + Seed[generate](10);
 show "2D map from seed: " + Seed[map]("razen123", 3, 3);
 
+# Test Color Library
+show "\n6. Testing Color Library:";
+show "Hex to RGB: #3366ff => " + Color[hex_to_rgb]("#3366ff");
+show "RGB to Hex: [0, 204, 102] => " + Color[rgb_to_hex]([0, 204, 102]);
+show "Lighten #888888 by 20%: " + Color[lighten]("#888888", 20);
+show "Darken #888888 by 20%: " + Color[darken]("#888888", 20);
+
+# Test Crypto Library
+show "\n7. Testing Crypto Library:";
+show "Hash of 'Hello, Razen!': " + Crypto[hash]("Hello, Razen!");
+show "Encrypted message test: " + Crypto[decrypt](Crypto[encrypt]("Hello, Razen!", "secret_key"), "secret_key");
+
 # Test bolt library functions (for intensive operations)
-show "\n6. Testing Bolt Library:";
+show "\n8. Testing Bolt Library:";
 show "Bolt run result: " + Bolt[run]("test");
 show "Bolt parallel result: " + Bolt[parallel]([1, 2, 3], "double");
 

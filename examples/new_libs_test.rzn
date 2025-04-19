@@ -1,0 +1,40 @@
+# Test for new libraries in Razen
+
+# Print header
+print("===== Razen New Libraries Test =====\n");
+
+# Test Color Library
+print("1. Testing Color Library:");
+let hex_color = "#ff5500";
+let rgb = Color[hex_to_rgb](hex_color);
+print("Hex to RGB: " + hex_color + " => " + rgb);
+
+let rgb_array = [0, 128, 255];
+let hex = Color[rgb_to_hex](rgb_array);
+print("RGB to Hex: " + rgb_array + " => " + hex);
+
+let lighter = Color[lighten]("#888888", 20);
+print("Lighten #888888 by 20%: " + lighter);
+
+let darker = Color[darken]("#888888", 20);
+print("Darken #888888 by 20%: " + darker);
+
+# Test Crypto Library
+print("\n2. Testing Crypto Library:");
+let message = "Hello, Razen!";
+let hash_result = Crypto[hash](message);
+print("Hash of '" + message + "': " + hash_result);
+
+let key = "secret_key";
+let encrypted = Crypto[encrypt](message, key);
+print("Encrypted: " + encrypted);
+
+let decrypted = Crypto[decrypt](encrypted, key);
+print("Decrypted: " + decrypted);
+
+# Test with wrong key - no try-catch in Razen, so we'll just comment this out
+# let wrong_key = "wrong_key";
+# let wrong_decryption = Crypto[decrypt](encrypted, wrong_key);
+# print("Wrong key decryption: " + wrong_decryption);
+
+print("\n===== All tests completed! =====");

@@ -108,8 +108,9 @@ impl LibraryManager {
         arr_lib.register_function("pop", crate::functions::arrlib::pop);
         arr_lib.register_function("join", crate::functions::arrlib::join);
         arr_lib.register_function("length", crate::functions::arrlib::length);
-        arr_lib.register_function("map", crate::functions::arrlib::map);
-        arr_lib.register_function("filter", crate::functions::arrlib::filter);
+        // These functions are not implemented yet, so we'll comment them out for now
+        // arr_lib.register_function("map", crate::functions::arrlib::map);
+        // arr_lib.register_function("filter", crate::functions::arrlib::filter);
         arr_lib.register_function("unique", crate::functions::arrlib::unique);
         self.register_library(arr_lib);
 
@@ -164,43 +165,59 @@ impl LibraryManager {
 
         // Random library
         let mut random_lib = Library::new("random");
-        random_lib.register_function("int", crate::functions::random::int);
-        random_lib.register_function("float", crate::functions::random::float);
-        random_lib.register_function("choice", crate::functions::random::choice);
-        random_lib.register_function("shuffle", crate::functions::random::shuffle);
+        random_lib.register_function("int", crate::functions::randomlib::int);
+        random_lib.register_function("float", crate::functions::randomlib::float);
+        random_lib.register_function("choice", crate::functions::randomlib::choice);
+        random_lib.register_function("shuffle", crate::functions::randomlib::shuffle);
         self.register_library(random_lib);
 
         // File library
         let mut file_lib = Library::new("file");
-        file_lib.register_function("read", crate::functions::file::read);
-        file_lib.register_function("write", crate::functions::file::write);
-        file_lib.register_function("append", crate::functions::file::append);
-        file_lib.register_function("exists", crate::functions::file::exists);
-        file_lib.register_function("delete", crate::functions::file::delete);
+        file_lib.register_function("read", crate::functions::filelib::read);
+        file_lib.register_function("write", crate::functions::filelib::write);
+        file_lib.register_function("append", crate::functions::filelib::append);
+        file_lib.register_function("exists", crate::functions::filelib::exists);
+        file_lib.register_function("delete", crate::functions::filelib::delete);
         self.register_library(file_lib);
 
         // JSON library
         let mut json_lib = Library::new("json");
-        json_lib.register_function("parse", crate::functions::json::parse);
-        json_lib.register_function("stringify", crate::functions::json::stringify);
+        json_lib.register_function("parse", crate::functions::jsonlib::parse);
+        json_lib.register_function("stringify", crate::functions::jsonlib::stringify);
         self.register_library(json_lib);
 
         // Network library
         let mut net_lib = Library::new("net");
-        net_lib.register_function("ping", crate::functions::net::ping);
+        net_lib.register_function("ping", crate::functions::netlib::ping);
         self.register_library(net_lib);
 
         // Bolt library
         let mut bolt_lib = Library::new("bolt");
-        bolt_lib.register_function("run", crate::functions::bolt::run);
-        bolt_lib.register_function("parallel", crate::functions::bolt::parallel);
+        bolt_lib.register_function("run", crate::functions::boltlib::run);
+        bolt_lib.register_function("parallel", crate::functions::boltlib::parallel);
         self.register_library(bolt_lib);
 
         // Seed library
         let mut seed_lib = Library::new("seed");
-        seed_lib.register_function("generate", crate::functions::seed::generate);
-        seed_lib.register_function("map", crate::functions::seed::map);
+        seed_lib.register_function("generate", crate::functions::seedlib::generate);
+        seed_lib.register_function("map", crate::functions::seedlib::map);
         self.register_library(seed_lib);
+
+        // Register color library functions
+        let mut color_lib = Library::new("color");
+        color_lib.register_function("hex_to_rgb", crate::functions::colorlib::hex_to_rgb);
+        color_lib.register_function("rgb_to_hex", crate::functions::colorlib::rgb_to_hex);
+        color_lib.register_function("lighten", crate::functions::colorlib::lighten);
+        color_lib.register_function("darken", crate::functions::colorlib::darken);
+        self.register_library(color_lib);
+
+        // Register crypto library functions
+        let mut crypto_lib = Library::new("crypto");
+        crypto_lib.register_function("hash", crate::functions::cryptolib::hash);
+        crypto_lib.register_function("encrypt", crate::functions::cryptolib::encrypt);
+        crypto_lib.register_function("decrypt", crate::functions::cryptolib::decrypt);
+        self.register_library(crypto_lib);
+
     }
 }
 
