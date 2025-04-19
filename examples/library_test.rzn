@@ -1,0 +1,84 @@
+# Razen Library System Test
+# This file tests the bracket notation for library function calls
+
+# Import libraries
+lib arrlib;   # Array library
+lib strlib;   # String library
+lib mathlib;  # Math library
+lib random;   # Random library
+lib file;     # File library
+lib json;     # JSON library
+lib bolt;     # Bolt library for intensive operations
+lib seed;     # Seed library for generating game maps
+
+show "===== Razen Library System Test =====";
+
+# Test array library functions
+show "\n1. Testing Array Library:";
+let myarray = [1, 2, 3];
+show "Original array: " + myarray;
+ArrLib[push](myarray, 4);
+show "After push: " + myarray;
+show "Popped value: " + ArrLib[pop](myarray);
+show "After pop: " + myarray;
+show "Join with dash: " + ArrLib[join](["a", "b", "c"], "-");
+show "Array length: " + ArrLib[length](myarray);
+
+# Test string library functions
+show "\n2. Testing String Library:";
+let mystring = "Hello, Razen!";
+show "Original string: " + mystring;
+show "Uppercase: " + StrLib[upper](mystring);
+show "Lowercase: " + StrLib[lower](mystring);
+show "Substring (0,5): " + StrLib[substring](mystring, 0, 5);
+show "Replace: " + StrLib[replace](mystring, "Razen", "World");
+show "Length: " + StrLib[length](mystring);
+show "Split by comma: " + StrLib[split](mystring, ",");
+show "Trimmed: " + StrLib[trim]("  spaced  ");
+show "Starts with 'Hello': " + StrLib[starts_with](mystring, "Hello");
+show "Ends with 'Razen!': " + StrLib[ends_with](mystring, "Razen!");
+show "Contains 'Raz': " + StrLib[contains](mystring, "Raz");
+show "Repeat 3 times: " + StrLib[repeat]("abc", 3);
+
+# Test math library functions
+show "\n3. Testing Math Library:";
+show "Add: " + MathLib[add](5, 3);
+show "Subtract: " + MathLib[subtract](10, 4);
+show "Multiply: " + MathLib[multiply](6, 7);
+show "Divide: " + MathLib[divide](20, 5);
+show "Power: " + MathLib[power](2, 3);
+show "Square root: " + MathLib[sqrt](16);
+show "Absolute: " + MathLib[abs](-15);
+show "Round: " + MathLib[round](3.7);
+show "Floor: " + MathLib[floor](3.7);
+show "Ceiling: " + MathLib[ceil](3.2);
+show "Sin(0): " + MathLib[sin](0);
+show "Cos(0): " + MathLib[cos](0);
+show "Tan(0): " + MathLib[tan](0);
+show "Log(100, 10): " + MathLib[log](100, 10);
+show "Exp(1): " + MathLib[exp](1);
+show "Random number: " + MathLib[random]();
+show "Max(3, 7, 2): " + MathLib[max](3, 7, 2);
+show "Min(3, 7, 2): " + MathLib[min](3, 7, 2);
+show "Modulo(10, 3): " + MathLib[modulo](10, 3);
+
+# Test random library functions
+show "\n4. Testing Random Library:";
+show "Random integer (1-10): " + Random[int](1, 10);
+show "Random float (0-1): " + Random[float](0, 1);
+show "Random choice: " + Random[choice](["apple", "banana", "cherry"]);
+let shuffled = [1, 2, 3, 4, 5];
+Random[shuffle](shuffled);
+show "Shuffled array: " + shuffled;
+
+# Test seed library functions
+show "\n5. Testing Seed Library:";
+show "Generated seed: " + Seed[generate](10);
+show "2D map from seed: " + Seed[map]("razen123", 3, 3);
+
+# Test bolt library functions (for intensive operations)
+show "\n6. Testing Bolt Library:";
+show "Bolt run result: " + Bolt[run]("test");
+show "Bolt parallel result: " + Bolt[parallel]([1, 2, 3], "double");
+
+show "\n===== All tests completed! =====";

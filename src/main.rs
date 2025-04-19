@@ -4,6 +4,9 @@ mod lexer;
 mod parser;
 mod compiler;
 mod syntax;
+mod value;
+mod functions;
+mod library;
 
 use std::env;
 use std::path::Path;
@@ -26,6 +29,9 @@ fn print_usage() {
 
 fn main() {
     let args: Vec<String> = env::args().collect();
+    
+    // Initialize the library system
+    library::initialize();
     
     if args.len() < 2 {
         print_usage();

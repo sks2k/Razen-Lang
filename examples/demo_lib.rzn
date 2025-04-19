@@ -1,0 +1,39 @@
+# Demo Library Implementation
+# This file defines a simple custom library to test bracket notation
+
+# Define a custom library
+class MyMath {
+    # Basic arithmetic operations
+    static add(a, b) {
+        return a + b;
+    }
+
+    static subtract(a, b) {
+        return a - b;
+    }
+
+    static multiply(a, b) {
+        return a * b;
+    }
+
+    static divide(a, b) {
+        if (b == 0) {
+            return "Error: Division by zero";
+        }
+        return a / b;
+    }
+}
+
+# Test the library 
+show "Testing MyMath library:";
+show "Add: MyMath.add(5, 3) = " + MyMath.add(5, 3);
+show "Subtract: MyMath.subtract(10, 4) = " + MyMath.subtract(10, 4);
+show "Multiply: MyMath.multiply(6, 7) = " + MyMath.multiply(6, 7);
+show "Divide: MyMath.divide(20, 5) = " + MyMath.divide(20, 5);
+
+# Test using bracket notation
+show "\nTesting bracket notation:";
+show "Add: MyMath[add](5, 3) = " + MyMath[add](5, 3);
+show "Subtract: MyMath[subtract](10, 4) = " + MyMath[subtract](10, 4);
+show "Multiply: MyMath[multiply](6, 7) = " + MyMath[multiply](6, 7);
+show "Divide: MyMath[divide](20, 5) = " + MyMath[divide](20, 5); 

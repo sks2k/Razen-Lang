@@ -9,6 +9,8 @@ use std::{thread, time::Duration};
 
 use crate::ast::{Program, Statement, Expression};
 use crate::parser::Parser;
+use crate::value::Value as RazenValue;
+use crate::library;
 
 // Intermediate representation for code generation
 #[derive(Debug, Clone)]
@@ -80,6 +82,9 @@ enum IR {
     
     // New instructions
     Sleep,
+    
+    // Library call
+    LibraryCall(String, String, usize),  // library name, function name, arg count
 }
 
 // Symbol table for variable and function tracking
@@ -1140,7 +1145,7 @@ impl Compiler {
         let full_func_name = format!("{}.{}", lib_name, func_name);
 
         // Call the library function with the given number of arguments
-        self.emit(IR::Call(full_func_name, arguments.len()));
+        self.emit(IR::LibraryCall(lib_name, full_func_name, arguments.len()));
 
         // For show statements, we need to handle the return value
         if self.in_show_statement {
@@ -1271,6 +1276,7 @@ impl Compiler {
                 IR::Label(_) => code.push(0x28),
                 IR::SetGlobal(_) => code.push(0x2B), // Global variable operations
                 IR::Sleep => code.push(0x2C),
+                IR::LibraryCall(_, _, _) => code.push(0x2D),
             }
         }
         
@@ -1497,7 +1503,7 @@ impl Compiler {
                             
                             let kv: Vec<&str> = entry.split(':').collect();
                             if kv.len() == 2 && kv[0] == key {
-                                new_map.push(format!("{key}:{value}"));
+                                new_map.push(format!("{}:{}", key, value));
                                 found = true;
                             } else {
                                 new_map.push(entry.to_string());
@@ -1505,7 +1511,7 @@ impl Compiler {
                         }
                         
                         if !found {
-                            new_map.push(format!("{key}:{value}"));
+                            new_map.push(format!("{}:{}", key, value));
                         }
                         
                         stack.push(new_map.join(","));
@@ -1646,6 +1652,106 @@ impl Compiler {
                     // Sleep implementation
                     thread::sleep(Duration::from_secs_f64(0.3));
                 },
+                IR::LibraryCall(lib_name, func_name, arg_count) => {
+                    // Library call implementation
+                    if !self.clean_output {
+                        println!("Calling library function: {}.{} with {} arguments", lib_name, func_name, arg_count);
+                    }
+                    
+                    // Extract just the function name without the library prefix
+                    let function_name = if func_name.contains('.') {
+                        let parts: Vec<&str> = func_name.split('.').collect();
+                        if parts.len() >= 2 {
+                            parts[1]
+                        } else {
+                            func_name
+                        }
+                    } else {
+                        func_name
+                    };
+                    
+                    // Pop the arguments from the stack (in reverse order)
+                    let mut args = Vec::new();
+                    for _ in 0..*arg_count {
+                        if let Some(arg) = stack.pop() {
+                            // Convert string stack values to Value enum
+                            if let Ok(i) = arg.parse::<i64>() {
+                                args.push(crate::value::Value::Int(i));
+                            } else if let Ok(f) = arg.parse::<f64>() {
+                                args.push(crate::value::Value::Float(f));
+                            } else if arg == "true" {
+                                args.push(crate::value::Value::Bool(true));
+                            } else if arg == "false" {
+                                args.push(crate::value::Value::Bool(false));
+                            } else if arg == "null" || arg == "undefined" {
+                                args.push(crate::value::Value::Null);
+                            } else if arg.starts_with('[') && arg.ends_with(']') {
+                                // Simple array parsing
+                                let inner = &arg[1..arg.len()-1];
+                                let elements: Vec<crate::value::Value> = inner
+                                    .split(',')
+                                    .map(|s| {
+                                        let s = s.trim();
+                                        if let Ok(i) = s.parse::<i64>() {
+                                            crate::value::Value::Int(i)
+                                        } else if let Ok(f) = s.parse::<f64>() {
+                                            crate::value::Value::Float(f)
+                                        } else {
+                                            crate::value::Value::String(s.to_string())
+                                        }
+                                    })
+                                    .collect();
+                                args.push(crate::value::Value::Array(elements));
+                            } else {
+                                // Default to string
+                                args.push(crate::value::Value::String(arg));
+                            }
+                        }
+                    }
+                    args.reverse(); // Reverse to get the original order
+                    
+                    // For debugging
+                    if !self.clean_output {
+                        for (i, arg) in args.iter().enumerate() {
+                            println!("Arg {}: {:?}", i, arg);
+                        }
+                    }
+                    
+                    // Call the library function
+                    let result = match crate::library::call_library(&lib_name.to_lowercase(), function_name, args) {
+                        Ok(value) => {
+                            // Convert the result back to a string for the stack
+                            match value {
+                                crate::value::Value::Int(i) => i.to_string(),
+                                crate::value::Value::Float(f) => f.to_string(),
+                                crate::value::Value::Bool(b) => b.to_string(),
+                                crate::value::Value::String(s) => s,
+                                crate::value::Value::Array(arr) => {
+                                    let elements: Vec<String> = arr.iter()
+                                        .map(|v| v.to_string())
+                                        .collect();
+                                    format!("[{}]", elements.join(", "))
+                                },
+                                crate::value::Value::Map(map) => {
+                                    let entries: Vec<String> = map.iter()
+                                        .map(|(k, v)| format!("{}:{}", k, v.to_string()))
+                                        .collect();
+                                    format!("{{{}}}", entries.join(", "))
+                                },
+                                crate::value::Value::Null => "null".to_string(),
+                            }
+                        },
+                        Err(e) => {
+                            if !self.clean_output {
+                                println!("Error calling library function: {}", e);
+                            }
+                            "undefined".to_string()
+                        }
+                    };
+                    
+                    // Push the result onto the stack
+                    stack.push(result);
+                },
                 _ => {
                     // For instructions not yet implemented, just log if in debug mode
                     if !self.clean_output {
@@ -1712,7 +1818,6 @@ impl Compiler {
         
         // Create a new compiler for the module
         let mut module_compiler = Compiler::new();
-        module_compiler.set_clean_output(true);
         
         // Compile the module
         module_compiler.compile_program(module_program);

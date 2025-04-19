@@ -1,0 +1,78 @@
+# Razen Bracket Notation Test
+# Tests the improved implementation of bracket notation for library function calls
+
+# Import libraries
+lib arrlib;   # Array library
+lib strlib;   # String library
+lib mathlib;  # Math library
+lib timelib;  # Time library
+lib random;   # Random library
+
+# Test array library functions
+show "Testing Array library functions:";
+let myarray = [1, 2, 3];
+show "Original array: " + myarray;
+
+# Test push method
+ArrLib[push](myarray, 4);
+show "Array after push: " + myarray;
+
+# Test pop method
+let popped = ArrLib[pop](myarray);
+show "Popped value: " + popped;
+show "Array after pop: " + myarray;
+
+# Test join method
+show "Join example: " + ArrLib[join](["a", "b", "c"], "-");
+
+# Test string library functions
+show "\nTesting String library functions:";
+let mystring = "hello world";
+show "Original string: " + mystring;
+
+# Test upper method
+show "Upper case: " + StrLib[upper](mystring);
+
+# Test lower method
+show "Lower case: " + StrLib[lower]("HELLO WORLD");
+
+# Test substring method
+show "Substring: " + StrLib[substring](mystring, 0, 5);
+
+# Test replace method
+show "Replace: " + StrLib[replace](mystring, "world", "razen");
+
+# Test math library functions
+show "\nTesting Math library functions:";
+
+# Test add method
+show "Add: " + MathLib[add](5, 3);
+
+# Test subtract method
+show "Subtract: " + MathLib[subtract](10, 4);
+
+# Test multiply method
+show "Multiply: " + MathLib[multiply](6, 7);
+
+# Test divide method
+show "Divide: " + MathLib[divide](20, 5);
+
+# Test time library functions
+show "\nTesting Time library functions:";
+
+# Test now method
+let current_time = TimeLib[now]();
+show "Current time: " + current_time;
+
+# Test random library functions
+show "\nTesting Random library functions:";
+
+# Test int method
+let random_int = Random[int](1, 10);
+show "Random integer between 1 and 10: " + random_int;
+
+# Test float method
+let random_float = Random[float](0, 1);
+show "Random float between 0 and 1: " + random_float;
+
+show "\nAll tests completed!"; 
