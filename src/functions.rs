@@ -11,6 +11,11 @@ mod bolt;
 mod seed;
 mod color;
 mod crypto;
+mod regex;
+mod uuid;
+mod os;
+mod validation;
+mod system;
 
 // Re-export common utilities and types
 use crate::value::Value;
@@ -62,4 +67,24 @@ pub mod colorlib {
 
 pub mod cryptolib {
     pub use super::crypto::*;
+}
+
+pub mod regexlib {
+    pub use super::regex::*;
+}
+
+pub mod uuidlib {
+    pub use super::uuid::*;
+}
+
+pub mod oslib {
+    pub use super::os::*;
+}
+
+pub mod validationlib {
+    pub use super::validation::*;
+}
+
+pub mod systemlib {
+    pub use super::system::*;
 }

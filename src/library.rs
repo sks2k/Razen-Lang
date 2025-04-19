@@ -218,6 +218,41 @@ impl LibraryManager {
         crypto_lib.register_function("decrypt", crate::functions::cryptolib::decrypt);
         self.register_library(crypto_lib);
 
+        // Register regex library functions
+        let mut regex_lib = Library::new("regex");
+        regex_lib.register_function("match", crate::functions::regexlib::match_pattern);
+        regex_lib.register_function("search", crate::functions::regexlib::search);
+        regex_lib.register_function("replace", crate::functions::regexlib::replace);
+        self.register_library(regex_lib);
+
+        // Register UUID library functions
+        let mut uuid_lib = Library::new("uuid");
+        uuid_lib.register_function("generate", crate::functions::uuidlib::generate);
+        uuid_lib.register_function("parse", crate::functions::uuidlib::parse);
+        uuid_lib.register_function("is_valid", crate::functions::uuidlib::is_valid);
+        self.register_library(uuid_lib);
+
+        // Register OS library functions
+        let mut os_lib = Library::new("os");
+        os_lib.register_function("env", crate::functions::oslib::env_var);
+        os_lib.register_function("cwd", crate::functions::oslib::cwd);
+        os_lib.register_function("platform", crate::functions::oslib::platform);
+        self.register_library(os_lib);
+
+        // Register Validation library functions
+        let mut validation_lib = Library::new("validation");
+        validation_lib.register_function("email", crate::functions::validationlib::email);
+        validation_lib.register_function("phone", crate::functions::validationlib::phone);
+        validation_lib.register_function("required", crate::functions::validationlib::required);
+        validation_lib.register_function("min_length", crate::functions::validationlib::min_length);
+        self.register_library(validation_lib);
+
+        // Register System library functions
+        let mut system_lib = Library::new("system");
+        system_lib.register_function("exec", crate::functions::systemlib::exec);
+        system_lib.register_function("uptime", crate::functions::systemlib::uptime);
+        system_lib.register_function("info", crate::functions::systemlib::info);
+        self.register_library(system_lib);
     }
 }
 

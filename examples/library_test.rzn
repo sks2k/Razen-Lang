@@ -12,6 +12,11 @@ lib bolt;     # Bolt library for intensive operations
 lib seed;     # Seed library for generating game maps
 lib color;    # Color library for color manipulation
 lib crypto;   # Crypto library for encryption and hashing
+lib regex;    # Regular expression library
+lib uuid;     # UUID generation and validation
+lib os;       # Operating system information
+lib validation; # Data validation
+lib system;   # System commands and information
 
 show "===== Razen Library System Test =====";
 
@@ -90,8 +95,40 @@ show "\n7. Testing Crypto Library:";
 show "Hash of 'Hello, Razen!': " + Crypto[hash]("Hello, Razen!");
 show "Encrypted message test: " + Crypto[decrypt](Crypto[encrypt]("Hello, Razen!", "secret_key"), "secret_key");
 
+# Test Regex Library
+show "\n8. Testing Regex Library:";
+show "Match test: " + Regex[match]("abc123", "\\d+");
+show "Search test: " + Regex[search]("abc123", "\\d+");
+show "Replace test: " + Regex[replace]("abc123def", "\\d+", "X");
+
+# Test UUID Library
+show "\n9. Testing UUID Library:";
+show "UUID generate: " + UUID[generate]();
+show "UUID is_valid (valid): " + UUID[is_valid]("550e8400-e29b-41d4-a716-446655440000");
+show "UUID is_valid (invalid): " + UUID[is_valid]("not-a-uuid");
+
+# Test OS Library
+show "\n10. Testing OS Library:";
+show "OS platform: " + OS[platform]();
+show "OS current directory: " + OS[cwd]();
+show "OS environment variable PATH: " + OS[env]("PATH");
+
+# Test Validation Library
+show "\n11. Testing Validation Library:";
+show "Email validation (valid): " + Validation[email]("user@example.com");
+show "Email validation (invalid): " + Validation[email]("not-an-email");
+show "Phone validation (valid): " + Validation[phone]("1234567890");
+show "Required validation (empty): " + Validation[required]("");
+show "Required validation (non-empty): " + Validation[required]("value");
+show "Min length validation: " + Validation[min_length]("abcdef", 3);
+
+# Test System Library
+show "\n12. Testing System Library:";
+show "System uptime: " + System[uptime]();
+show "System info: " + System[info]();
+
 # Test bolt library functions (for intensive operations)
-show "\n8. Testing Bolt Library:";
+show "\n13. Testing Bolt Library:";
 show "Bolt run result: " + Bolt[run]("test");
 show "Bolt parallel result: " + Bolt[parallel]([1, 2, 3], "double");
 
