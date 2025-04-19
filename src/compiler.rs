@@ -1752,6 +1752,27 @@ impl Compiler {
                     // Push the result onto the stack
                     stack.push(result);
                 },
+                IR::CreateArray(count) => {
+                    // Create array implementation
+                    let mut array = Vec::new();
+                    for _ in 0..*count {
+                        if let Some(value) = stack.pop() {
+                            array.push(value);
+                        }
+                    }
+                    array.reverse(); // Reverse to get the original order
+                    stack.push(format!("[{}]", array.join(", ")));
+                },
+                IR::CreateMap(count) => {
+                    // Create map implementation
+                    let mut map_entries = Vec::new();
+                    for _ in 0..*count {
+                        if let (Some(value), Some(key)) = (stack.pop(), stack.pop()) {
+                            map_entries.push(format!("{}:{}", key, value));
+                        }
+                    }
+                    stack.push(format!("{{{}}}", map_entries.join(", ")));
+                },
                 _ => {
                     // For instructions not yet implemented, just log if in debug mode
                     if !self.clean_output {
