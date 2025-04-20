@@ -16,6 +16,9 @@ mod uuid;
 mod os;
 mod validation;
 mod system;
+mod boxutil;
+mod log;
+mod ht;
 
 // Re-export common utilities and types
 use crate::value::Value;
@@ -87,4 +90,16 @@ pub mod validationlib {
 
 pub mod systemlib {
     pub use super::system::*;
+}
+
+pub mod boxutillib {
+    pub use super::boxutil::*;
+}
+
+pub mod loglib {
+    pub use super::log::*;
+}
+
+pub mod htlib {
+    pub use super::ht::*;
 }

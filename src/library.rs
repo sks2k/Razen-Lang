@@ -186,11 +186,6 @@ impl LibraryManager {
         json_lib.register_function("stringify", crate::functions::jsonlib::stringify);
         self.register_library(json_lib);
 
-        // Network library
-        let mut net_lib = Library::new("net");
-        net_lib.register_function("ping", crate::functions::netlib::ping);
-        self.register_library(net_lib);
-
         // Bolt library
         let mut bolt_lib = Library::new("bolt");
         bolt_lib.register_function("run", crate::functions::boltlib::run);
@@ -253,6 +248,33 @@ impl LibraryManager {
         system_lib.register_function("uptime", crate::functions::systemlib::uptime);
         system_lib.register_function("info", crate::functions::systemlib::info);
         self.register_library(system_lib);
+
+        // Register Box library functions
+        let mut box_lib = Library::new("boxlib");
+        box_lib.register_function("put", crate::functions::boxutillib::put);
+        box_lib.register_function("get", crate::functions::boxutillib::get);
+        self.register_library(box_lib);
+
+        // Register Log library functions
+        let mut log_lib = Library::new("loglib");
+        log_lib.register_function("info", crate::functions::loglib::info);
+        log_lib.register_function("warn", crate::functions::loglib::warn);
+        log_lib.register_function("error", crate::functions::loglib::error);
+        log_lib.register_function("debug", crate::functions::loglib::debug);
+        self.register_library(log_lib);
+
+        // Register HT (Head/Tails) library functions
+        let mut ht_lib = Library::new("htlib");
+        ht_lib.register_function("coin", crate::functions::htlib::coin);
+        ht_lib.register_function("bool", crate::functions::htlib::bool);
+        self.register_library(ht_lib);
+
+        // Register Net library functions
+        let mut net_lib = Library::new("netlib");
+        net_lib.register_function("ping", crate::functions::netlib::ping);
+        net_lib.register_function("get", crate::functions::netlib::get);
+        net_lib.register_function("post", crate::functions::netlib::post);
+        self.register_library(net_lib);
     }
 }
 

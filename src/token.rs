@@ -146,13 +146,13 @@ pub enum TokenType {
     // 16 - Library Keywords
     Lib,           // libraries
     Random,        // random number generation
-    Ht,            // head and tails
+    HTLib,         // head and tails library
     Coin,          // coin toss
     MathLib,       // math operations
     Ping,          // website ping
     Bolt,          // performance optimization
     Seed,          // seed generation
-    Net,           // network operations
+    NetLib,        // network operations
     File,          // file operations
     Json,          // JSON operations
     Date,          // date and time operations
@@ -162,13 +162,13 @@ pub enum TokenType {
     Regex,         // regular expressions
     Crypto,        // cryptography
     Color,         // color manipulation
-    System,        // system commands
+    System,        // system information
     Ui,            // user interface
     Storage,       // persistent storage
     Audio,         // audio operations
     Image,         // image processing
     Validation,    // data validation
-    Log,           // logging utilities
+    LogLib,        // logging utilities
     Uuid,          // UUID generation
     BoxLib,        // box operations library
     IOLib,         // input/output operations library
@@ -350,13 +350,13 @@ impl fmt::Display for TokenType {
             // Library Keywords
             TokenType::Lib => write!(f, "LIB"),
             TokenType::Random => write!(f, "RANDOM"),
-            TokenType::Ht => write!(f, "HT"),
+            TokenType::HTLib => write!(f, "HTLIB"),
             TokenType::Coin => write!(f, "COIN"),
             TokenType::MathLib => write!(f, "MATH"),
             TokenType::Ping => write!(f, "PING"),
             TokenType::Bolt => write!(f, "BOLT"),
             TokenType::Seed => write!(f, "SEED"),
-            TokenType::Net => write!(f, "NET"),
+            TokenType::NetLib => write!(f, "NETLIB"),
             TokenType::File => write!(f, "FILE"),
             TokenType::Json => write!(f, "JSON"),
             TokenType::Date => write!(f, "DATE"),
@@ -372,7 +372,7 @@ impl fmt::Display for TokenType {
             TokenType::Audio => write!(f, "AUDIO"),
             TokenType::Image => write!(f, "IMAGE"),
             TokenType::Validation => write!(f, "VALIDATION"),
-            TokenType::Log => write!(f, "LOG"),
+            TokenType::LogLib => write!(f, "LOGLIB"),
             TokenType::Uuid => write!(f, "UUID"),
             TokenType::BoxLib => write!(f, "BOX"),
             TokenType::IOLib => write!(f, "IO"),
@@ -551,13 +551,13 @@ pub fn lookup_identifier(identifier: &str) -> TokenType {
         // Library Keywords (Section 16)
         "lib" => TokenType::Lib,
         "random" => TokenType::Random,
-        "ht" => TokenType::Ht,
+        "htlib" => TokenType::HTLib,
         "coin" => TokenType::Coin,
         "mathlib" => TokenType::MathLib,
         "ping" => TokenType::Ping,
         "bolt" => TokenType::Bolt,
         "seed" => TokenType::Seed,
-        "net" => TokenType::Net,
+        "netlib" => TokenType::NetLib,
         "file" => TokenType::File,
         "json" => TokenType::Json,
         "date" => TokenType::Date,
@@ -573,7 +573,7 @@ pub fn lookup_identifier(identifier: &str) -> TokenType {
         "audio" => TokenType::Audio,
         "image" => TokenType::Image,
         "validation" => TokenType::Validation,
-        "log" => TokenType::Log,
+        "loglib" => TokenType::LogLib,
         "uuid" => TokenType::Uuid,
         "boxlib" => TokenType::BoxLib,
         "iolib" => TokenType::IOLib,

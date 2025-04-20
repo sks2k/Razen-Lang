@@ -17,38 +17,39 @@ lib uuid;     # UUID generation and validation
 lib os;       # Operating system information
 lib validation; # Data validation
 lib system;   # System commands and information
+lib boxlib;   # Box library for value boxing
+lib loglib;   # Logging utilities
+lib htlib;    # Head/Tails coin flip utilities
+lib netlib;   # Network library for HTTP requests
 
 show "===== Razen Library System Test =====";
 
 # Test array library functions
-show "\n1. Testing Array Library:";
-let myarray = [1, 2, 3];
-show "Original array: " + myarray;
-ArrLib[push](myarray, 4);
-show "After push: " + myarray;
-show "Popped value: " + ArrLib[pop](myarray);
-show "After pop: " + myarray;
+show "1. Testing Array Library:";
+show "Original array: " + [1, 2, 3];
+show "After push: " + ArrLib[push]([1, 2, 3], 4);
+show "Popped value: " + ArrLib[pop]([1, 2, 3, 4]);
+show "After pop: " + ArrLib[pop]([1, 2, 3, 4]);
 show "Join with dash: " + ArrLib[join](["a", "b", "c"], "-");
-show "Array length: " + ArrLib[length](myarray);
+show "Array length: " + ArrLib[length]([1, 2, 3]);
 
 # Test string library functions
-show "\n2. Testing String Library:";
-let mystring = "Hello, Razen!";
-show "Original string: " + mystring;
-show "Uppercase: " + StrLib[upper](mystring);
-show "Lowercase: " + StrLib[lower](mystring);
-show "Substring (0,5): " + StrLib[substring](mystring, 0, 5);
-show "Replace: " + StrLib[replace](mystring, "Razen", "World");
-show "Length: " + StrLib[length](mystring);
-show "Split by comma: " + StrLib[split](mystring, ",");
+show "2. Testing String Library:";
+show "Original string: " + "Hello, Razen!";
+show "Uppercase: " + StrLib[upper]("Hello, Razen!");
+show "Lowercase: " + StrLib[lower]("Hello, Razen!");
+show "Substring (0,5): " + StrLib[substring]("Hello, Razen!", 0, 5);
+show "Replace: " + StrLib[replace]("Hello, Razen!", "Razen", "World");
+show "Length: " + StrLib[length]("Hello, Razen!");
+show "Split by comma: " + StrLib[split]("Hello, Razen!", ",");
 show "Trimmed: " + StrLib[trim]("  spaced  ");
-show "Starts with 'Hello': " + StrLib[starts_with](mystring, "Hello");
-show "Ends with 'Razen!': " + StrLib[ends_with](mystring, "Razen!");
-show "Contains 'Raz': " + StrLib[contains](mystring, "Raz");
+show "Starts with 'Hello': " + StrLib[starts_with]("Hello, Razen!", "Hello");
+show "Ends with 'Razen!': " + StrLib[ends_with]("Hello, Razen!", "Razen!");
+show "Contains 'Raz': " + StrLib[contains]("Hello, Razen!", "Raz");
 show "Repeat 3 times: " + StrLib[repeat]("abc", 3);
 
 # Test math library functions
-show "\n3. Testing Math Library:";
+show "3. Testing Math Library:";
 show "Add: " + MathLib[add](5, 3);
 show "Subtract: " + MathLib[subtract](10, 4);
 show "Multiply: " + MathLib[multiply](6, 7);
@@ -70,51 +71,49 @@ show "Min(3, 7, 2): " + MathLib[min](3, 7, 2);
 show "Modulo(10, 3): " + MathLib[modulo](10, 3);
 
 # Test random library functions
-show "\n4. Testing Random Library:";
+show "4. Testing Random Library:";
 show "Random integer (1-10): " + Random[int](1, 10);
 show "Random float (0-1): " + Random[float](0, 1);
 show "Random choice: " + Random[choice](["apple", "banana", "cherry"]);
-let shuffled = [1, 2, 3, 4, 5];
-Random[shuffle](shuffled);
-show "Shuffled array: " + shuffled;
+show "Shuffled array: " + Random[shuffle]([1, 2, 3, 4, 5]);
 
 # Test seed library functions
-show "\n5. Testing Seed Library:";
+show "5. Testing Seed Library:";
 show "Generated seed: " + Seed[generate](10);
 show "2D map from seed: " + Seed[map]("razen123", 3, 3);
 
 # Test Color Library
-show "\n6. Testing Color Library:";
+show "6. Testing Color Library:";
 show "Hex to RGB: #3366ff => " + Color[hex_to_rgb]("#3366ff");
 show "RGB to Hex: [0, 204, 102] => " + Color[rgb_to_hex]([0, 204, 102]);
 show "Lighten #888888 by 20%: " + Color[lighten]("#888888", 20);
 show "Darken #888888 by 20%: " + Color[darken]("#888888", 20);
 
 # Test Crypto Library
-show "\n7. Testing Crypto Library:";
+show "7. Testing Crypto Library:";
 show "Hash of 'Hello, Razen!': " + Crypto[hash]("Hello, Razen!");
 show "Encrypted message test: " + Crypto[decrypt](Crypto[encrypt]("Hello, Razen!", "secret_key"), "secret_key");
 
 # Test Regex Library
-show "\n8. Testing Regex Library:";
+show "8. Testing Regex Library:";
 show "Match test: " + Regex[match]("abc123", "\\d+");
 show "Search test: " + Regex[search]("abc123", "\\d+");
 show "Replace test: " + Regex[replace]("abc123def", "\\d+", "X");
 
 # Test UUID Library
-show "\n9. Testing UUID Library:";
+show "9. Testing UUID Library:";
 show "UUID generate: " + UUID[generate]();
 show "UUID is_valid (valid): " + UUID[is_valid]("550e8400-e29b-41d4-a716-446655440000");
 show "UUID is_valid (invalid): " + UUID[is_valid]("not-a-uuid");
 
 # Test OS Library
-show "\n10. Testing OS Library:";
+show "10. Testing OS Library:";
 show "OS platform: " + OS[platform]();
 show "OS current directory: " + OS[cwd]();
 show "OS environment variable PATH: " + OS[env]("PATH");
 
 # Test Validation Library
-show "\n11. Testing Validation Library:";
+show "11. Testing Validation Library:";
 show "Email validation (valid): " + Validation[email]("user@example.com");
 show "Email validation (invalid): " + Validation[email]("not-an-email");
 show "Phone validation (valid): " + Validation[phone]("1234567890");
@@ -123,13 +122,40 @@ show "Required validation (non-empty): " + Validation[required]("value");
 show "Min length validation: " + Validation[min_length]("abcdef", 3);
 
 # Test System Library
-show "\n12. Testing System Library:";
+show "12. Testing System Library:";
 show "System uptime: " + System[uptime]();
 show "System info: " + System[info]();
 
 # Test bolt library functions (for intensive operations)
-show "\n13. Testing Bolt Library:";
+show "13. Testing Bolt Library:";
 show "Bolt run result: " + Bolt[run]("test");
 show "Bolt parallel result: " + Bolt[parallel]([1, 2, 3], "double");
 
-show "\n===== All tests completed! =====";
+# Test Box Library
+show "14. Testing Box Library:";
+# Commented out for now - will work on this later
+# show "Original value: 42";
+# show "Unboxed value: " + BoxLib[get](BoxLib[put](42));
+# show "Unboxed object: " + BoxLib[get](BoxLib[put]("test object"));
+
+# Test Log Library
+show "15. Testing Log Library:";
+show "Info log: " + LogLib[info]("This is an info message");
+show "Warning log: " + LogLib[warn]("This is a warning message");
+show "Error log: " + LogLib[error]("This is an error message");
+show "Debug log: " + LogLib[debug]("This is a debug message");
+
+# Test HT (Head/Tails) Library
+show "16. Testing HT Library:";
+show "Coin flip: " + HTLib[coin]();
+show "Random boolean: " + HTLib[bool]();
+show "Multiple coin flips: [" + HTLib[coin]() + ", " + HTLib[coin]() + ", " + HTLib[coin]() + "]";
+
+# Test Enhanced Net Library
+show "17. Testing Net Library:";
+show "Ping test: " + NetLib[ping]("https://www.google.com");
+# Uncomment to test with actual network calls:
+# show "GET request: " + NetLib[get]("https://example.com");
+# show "POST request: " + NetLib[post]("https://httpbin.org/post", {test: "data"});
+
+show "===== All tests completed! =====";

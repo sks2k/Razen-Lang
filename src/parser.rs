@@ -111,13 +111,13 @@ impl Parser {
         
         // Register library tokens as identifiers
         parser.register_prefix(TokenType::Random, Parser::parse_identifier);
-        parser.register_prefix(TokenType::Ht, Parser::parse_identifier);
+        parser.register_prefix(TokenType::HTLib, Parser::parse_identifier);
         parser.register_prefix(TokenType::Coin, Parser::parse_identifier);
         parser.register_prefix(TokenType::MathLib, Parser::parse_identifier);
         parser.register_prefix(TokenType::Ping, Parser::parse_identifier);
         parser.register_prefix(TokenType::Bolt, Parser::parse_identifier);
         parser.register_prefix(TokenType::Seed, Parser::parse_identifier);
-        parser.register_prefix(TokenType::Net, Parser::parse_identifier);
+        parser.register_prefix(TokenType::NetLib, Parser::parse_identifier);
         parser.register_prefix(TokenType::File, Parser::parse_identifier);
         parser.register_prefix(TokenType::Json, Parser::parse_identifier);
         parser.register_prefix(TokenType::Date, Parser::parse_identifier);
@@ -133,7 +133,7 @@ impl Parser {
         parser.register_prefix(TokenType::Audio, Parser::parse_identifier);
         parser.register_prefix(TokenType::Image, Parser::parse_identifier);
         parser.register_prefix(TokenType::Validation, Parser::parse_identifier);
-        parser.register_prefix(TokenType::Log, Parser::parse_identifier);
+        parser.register_prefix(TokenType::LogLib, Parser::parse_identifier);
         parser.register_prefix(TokenType::Uuid, Parser::parse_identifier);
         parser.register_prefix(TokenType::Read, Parser::parse_identifier);
         parser.register_prefix(TokenType::Debug, Parser::parse_identifier);
@@ -865,13 +865,13 @@ impl Parser {
     fn parse_identifier(&mut self) -> Option<Expression> {
         // Convert library tokens to identifiers when used in expressions
         let identifier = match self.current_token.token_type {
-            TokenType::Random | TokenType::Ht | TokenType::Coin | TokenType::MathLib | 
-            TokenType::Ping | TokenType::Bolt | TokenType::Seed | TokenType::Net | 
+            TokenType::Random | TokenType::HTLib | TokenType::Coin | TokenType::MathLib | 
+            TokenType::Ping | TokenType::Bolt | TokenType::Seed | TokenType::NetLib | 
             TokenType::File | TokenType::Json | TokenType::Date | TokenType::StrLib | 
             TokenType::ArrLib | TokenType::Os | TokenType::Regex | TokenType::Crypto | 
             TokenType::Color | TokenType::System | TokenType::Ui | TokenType::Storage | 
             TokenType::Audio | TokenType::Image | TokenType::Validation | 
-            TokenType::Log | TokenType::Uuid => {
+            TokenType::LogLib | TokenType::Uuid => {
                 self.current_token.literal.clone()
             },
             _ => self.current_token.literal.clone()
@@ -1040,13 +1040,13 @@ impl Parser {
         if !self.current_token_is(TokenType::Identifier) {
             // Handle library tokens as identifiers
             let is_library_token = match self.current_token.token_type {
-                TokenType::Random | TokenType::Ht | TokenType::Coin | TokenType::MathLib | 
-                TokenType::Ping | TokenType::Bolt | TokenType::Seed | TokenType::Net | 
+                TokenType::Random | TokenType::HTLib | TokenType::Coin | TokenType::MathLib | 
+                TokenType::Ping | TokenType::Bolt | TokenType::Seed | TokenType::NetLib | 
                 TokenType::File | TokenType::Json | TokenType::Date | TokenType::StrLib | 
                 TokenType::ArrLib | TokenType::Os | TokenType::Regex | TokenType::Crypto | 
                 TokenType::Color | TokenType::System | TokenType::Ui | TokenType::Storage | 
                 TokenType::Audio | TokenType::Image | TokenType::Validation | 
-                TokenType::Log | TokenType::Uuid | TokenType::Get | TokenType::Post |
+                TokenType::LogLib | TokenType::Uuid | TokenType::Get | TokenType::Post |
                 TokenType::Read | TokenType::Debug | TokenType::Assert | TokenType::Trace |
                 TokenType::Show | TokenType::Exit | TokenType::Api | TokenType::Call |
                 TokenType::Connect | TokenType::To | TokenType::Import | TokenType::Export |
@@ -1554,13 +1554,13 @@ impl Parser {
         // Check if the next token is a valid library name (either an identifier or a library token)
         let is_valid_library = match self.current_token.token_type {
             TokenType::Identifier | 
-            TokenType::Random | TokenType::Ht | TokenType::Coin | TokenType::MathLib | 
-            TokenType::Ping | TokenType::Bolt | TokenType::Seed | TokenType::Net | 
+            TokenType::Random | TokenType::HTLib | TokenType::Coin | TokenType::MathLib | 
+            TokenType::Ping | TokenType::Bolt | TokenType::Seed | TokenType::NetLib | 
             TokenType::File | TokenType::Json | TokenType::Date | TokenType::StrLib | 
             TokenType::ArrLib | TokenType::Os | TokenType::Regex | TokenType::Crypto | 
             TokenType::Color | TokenType::System | TokenType::Ui | TokenType::Storage | 
             TokenType::Audio | TokenType::Image | TokenType::Validation | 
-            TokenType::Log | TokenType::Uuid | TokenType::BoxLib | TokenType::IOLib |
+            TokenType::LogLib | TokenType::Uuid | TokenType::BoxLib | TokenType::IOLib |
             TokenType::NumLib | TokenType::RefLib | TokenType::TimeLib | 
             TokenType::TypeCheckLib | TokenType::TypeConvertLib => true,
             _ => false

@@ -228,7 +228,7 @@ impl Lexer {
     
     fn read_identifier(&mut self) -> String {
         let position = self.position;
-        while is_letter(self.ch) || is_digit(self.ch) {
+        while is_letter(self.ch) || is_digit(self.ch) || self.ch == '_' {
             self.read_char();
         }
         self.input[position..self.position].to_string()
