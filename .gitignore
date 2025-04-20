@@ -48,3 +48,10 @@ var/
 
 # Test files
 test_output/
+
+# Test files
+test.rzn 
+test_bracket_notion.rzn
+test_script.rzn 
+
+followers.py 

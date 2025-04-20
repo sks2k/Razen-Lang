@@ -3,7 +3,7 @@
 # Razen Language Installer Script
 # Author: Prathmesh Barot
 # Copyright 2025 Prathmesh Barot, Basai Corporation
-# Version: beta v0.1.65 (Colours Update in show Statement..!)
+# Version: beta v0.1.655 (Installer Updates & Colours Update in show Statement..!)
 
 set -e  # Exit on error
 
@@ -78,7 +78,7 @@ else
     # Download version file if not present
     if ! curl -s -o version "$RAZEN_REPO/version" &>/dev/null; then
         echo -e "${RED}Failed to download version information. Using default version.${NC}"
-        RAZEN_VERSION="beta v0.1.65 (Colours Update in show Statement..!)"
+        RAZEN_VERSION="beta v0.1.655 (Installer Updates & Colours Update in show Statement..!)"
     else
         RAZEN_VERSION=$(cat version)
         # Store the version file for future reference
@@ -346,6 +346,13 @@ if ! curl -s --retry 3 --retry-delay 2 -o "$TMP_DIR/razen_compiler" "$RAZEN_REPO
     
     # Copy the built binary
     cp "$TMP_DIR/razen-lang/target/release/razen_compiler" "$TMP_DIR/razen_compiler" || handle_error 6 "Failed to copy built binary" "Check file permissions"
+    
+    # Ensure functions directory is properly copied
+    if [ -d "$TMP_DIR/razen-lang/src/functions" ]; then
+        mkdir -p "$TMP_DIR/src/functions" 2>/dev/null
+        cp -r "$TMP_DIR/razen-lang/src/functions/"* "$TMP_DIR/src/functions/" 2>/dev/null || true
+        echo -e "  ${GREEN}✓${NC} Copied functions directory from cloned repository"
+    fi
 
     # Copy all other files from the cloned repository
     echo -e "${YELLOW}Copying files from cloned repository...${NC}"
@@ -418,6 +425,22 @@ else
                 if curl -s --retry 3 --retry-delay 2 -o "$target_dir/$file" "$RAZEN_REPO/$dir_name/$file" &>/dev/null; then
                     success_count=$((success_count + 1))
                     echo -e "    ${GREEN}✓${NC} Downloaded $file"
+                    
+                    # Special handling for functions directory
+                    if [[ "$dir_name" == "src" && "$file" == "functions.rs" ]]; then
+                        echo -e "    ${CYAN}Detected functions.rs, downloading functions directory...${NC}"
+                        mkdir -p "$target_dir/functions" 2>/dev/null
+                        local function_files="arrlib.rs mathlib.rs strlib.rs randomlib.rs filelib.rs jsonlib.rs boltlib.rs seedlib.rs colorlib.rs cryptolib.rs regexlib.rs uuidlib.rs oslib.rs validationlib.rs systemlib.rs boxutillib.rs loglib.rs htlib.rs netlib.rs timelib.rs color.rs"
+                        for func_file in $function_files; do
+                            echo -e "    ${CYAN}Downloading${NC} functions/$func_file"
+                            if curl -s --retry 3 --retry-delay 2 -o "$target_dir/functions/$func_file" "$RAZEN_REPO/src/functions/$func_file" &>/dev/null; then
+                                success_count=$((success_count + 1))
+                                echo -e "    ${GREEN}✓${NC} Downloaded functions/$func_file"
+                            else
+                                echo -e "    ${RED}✗${NC} Failed to download functions/$func_file"
+                            fi
+                        done
+                    fi
                 else
                     echo -e "    ${RED}✗${NC} Failed to download $file"
                 fi
@@ -430,18 +453,91 @@ else
             case "$dir_name" in
                 "properties")
                     local files="variables.rzn keywords.rzn operators.rzn functions.rzn loops.rzn conditionals.rzn types.rzn api.rzn syntax.rzn usage.rzn"
+                    # Create libs directory
+                    mkdir -p "$target_dir/libs" 2>/dev/null
+                    # Download library files
+                    local lib_files="arrlib.rzn strlib.rzn mathlib.rzn random.rzn file.rzn json.rzn bolt.rzn seed.rzn color.rzn crypto.rzn regex.rzn uuid.rzn os.rzn validation.rzn system.rzn boxlib.rzn loglib.rzn htlib.rzn netlib.rzn timelib.rzn"
+                    for lib_file in $lib_files; do
+                        echo -e "    ${CYAN}Downloading${NC} libs/$lib_file"
+                        if curl -s --retry 3 --retry-delay 2 -o "$target_dir/libs/$lib_file" "$RAZEN_REPO/properties/libs/$lib_file" &>/dev/null; then
+                            success_count=$((success_count + 1))
+                            echo -e "    ${GREEN}✓${NC} Downloaded libs/$lib_file"
+                        else
+                            echo -e "    ${RED}✗${NC} Failed to download libs/$lib_file"
+                        fi
+                    done
                     ;;
                 "scripts")
                     local files="razen razen-debug razen-test razen-run razen-update razen-help razen-docs razen-extension"
                     ;;
                 "src")
-                    local files="main.rs compiler.rs parser.rs lexer.rs interpreter.rs"
+                    local files="main.rs compiler.rs parser.rs lexer.rs interpreter.rs ast.rs token.rs value.rs library.rs functions.rs"
+                    
+                    # Download core files
+                    for src_file in $files; do
+                        echo -e "    ${CYAN}Downloading${NC} $src_file"
+                        if curl -s --retry 3 --retry-delay 2 -o "$target_dir/$src_file" "$RAZEN_REPO/src/$src_file" &>/dev/null; then
+                            success_count=$((success_count + 1))
+                            echo -e "    ${GREEN}✓${NC} Downloaded $src_file"
+                        else
+                            echo -e "    ${RED}✗${NC} Failed to download $src_file"
+                        fi
+                    done
+                    
+                    # Create functions directory
+                    mkdir -p "$target_dir/functions" 2>/dev/null
+                    echo -e "    ${GREEN}✓${NC} Created functions directory"
+                    
+                    # Download function files
+                    local function_files="arrlib.rs mathlib.rs strlib.rs randomlib.rs filelib.rs jsonlib.rs boltlib.rs seedlib.rs colorlib.rs cryptolib.rs regexlib.rs uuidlib.rs oslib.rs validationlib.rs systemlib.rs boxutillib.rs loglib.rs htlib.rs netlib.rs timelib.rs color.rs"
+                    for func_file in $function_files; do
+                        echo -e "    ${CYAN}Downloading${NC} functions/$func_file"
+                        if curl -s --retry 3 --retry-delay 2 -o "$target_dir/functions/$func_file" "$RAZEN_REPO/src/functions/$func_file" &>/dev/null; then
+                            success_count=$((success_count + 1))
+                            echo -e "    ${GREEN}✓${NC} Downloaded functions/$func_file"
+                        else
+                            echo -e "    ${RED}✗${NC} Failed to download functions/$func_file"
+                        fi
+                    done
                     ;;
                 "examples")
-                    local files="hello.rzn calculator.rzn web-example/script.rzn quiz.rzn guess.rzn 12-16.rzn"
+                    local files="hello.rzn calculator.rzn web-example/script.rzn quiz.rzn guess.rzn 12-16.rzn library_test.rzn color_test.rzn purchase.rzn order.rzn"
                     ;;
                 "razen-vscode-extension")
-                    local files="package.json syntaxes/razen.tmLanguage.json language-configuration.json README.md"
+                    local files="package.json syntaxes/razen.tmLanguage.json language-configuration/language-configuration.json README.md"
+                    # Create src directory
+                    mkdir -p "$target_dir/src" 2>/dev/null
+                    # Download extension source files
+                    local ext_files="extension.js razenLanguageData.js test.rzn"
+                    for ext_file in $ext_files; do
+                        echo -e "    ${CYAN}Downloading${NC} src/$ext_file"
+                        if curl -s --retry 3 --retry-delay 2 -o "$target_dir/src/$ext_file" "$RAZEN_REPO/razen-vscode-extension/src/$ext_file" &>/dev/null; then
+                            success_count=$((success_count + 1))
+                            echo -e "    ${GREEN}✓${NC} Downloaded src/$ext_file"
+                        else
+                            echo -e "    ${RED}✗${NC} Failed to download src/$ext_file"
+                        fi
+                    done
+                    # Create snippets directory
+                    mkdir -p "$target_dir/snippets" 2>/dev/null
+                    # Download snippets file
+                    echo -e "    ${CYAN}Downloading${NC} snippets/razen.json"
+                    if curl -s --retry 3 --retry-delay 2 -o "$target_dir/snippets/razen.json" "$RAZEN_REPO/razen-vscode-extension/snippets/razen.json" &>/dev/null; then
+                        success_count=$((success_count + 1))
+                        echo -e "    ${GREEN}✓${NC} Downloaded snippets/razen.json"
+                    else
+                        echo -e "    ${RED}✗${NC} Failed to download snippets/razen.json"
+                    fi
+                    # Create icons directory
+                    mkdir -p "$target_dir/icons" 2>/dev/null
+                    # Download icon file
+                    echo -e "    ${CYAN}Downloading${NC} icons/razen-icon.png"
+                    if curl -s --retry 3 --retry-delay 2 -o "$target_dir/icons/razen-icon.png" "$RAZEN_REPO/razen-vscode-extension/icons/razen-icon.png" &>/dev/null; then
+                        success_count=$((success_count + 1))
+                        echo -e "    ${GREEN}✓${NC} Downloaded icons/razen-icon.png"
+                    else
+                        echo -e "    ${RED}✗${NC} Failed to download icons/razen-icon.png"
+                    fi
                     ;;
                 "razen-jetbrain-plugin")
                     local files="plugin.xml build.gradle settings.gradle src/main/resources/META-INF/plugin.xml"

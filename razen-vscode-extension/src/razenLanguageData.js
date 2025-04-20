@@ -495,6 +495,78 @@ const razenConstants = [
         description: 'Not a Number',
         documentation: 'Represents a value that is not a valid number.\n\n```razen\nlet notANumber = MATH_NAN;\n```'
     },
+    // Color constants for ANSI terminal output
+    {
+        name: 'red',
+        description: 'Red color for console output',
+        documentation: 'Used with show statement to display text in red.\n\n```razen\nshow(red) "Error message";\n```'
+    },
+    {
+        name: 'green',
+        description: 'Green color for console output',
+        documentation: 'Used with show statement to display text in green.\n\n```razen\nshow(green) "Success message";\n```'
+    },
+    {
+        name: 'blue',
+        description: 'Blue color for console output',
+        documentation: 'Used with show statement to display text in blue.\n\n```razen\nshow(blue) "Information";\n```'
+    },
+    {
+        name: 'yellow',
+        description: 'Yellow color for console output',
+        documentation: 'Used with show statement to display text in yellow.\n\n```razen\nshow(yellow) "Warning message";\n```'
+    },
+    {
+        name: 'magenta',
+        description: 'Magenta color for console output',
+        documentation: 'Used with show statement to display text in magenta.\n\n```razen\nshow(magenta) "Special message";\n```'
+    },
+    {
+        name: 'cyan',
+        description: 'Cyan color for console output',
+        documentation: 'Used with show statement to display text in cyan.\n\n```razen\nshow(cyan) "Highlighted information";\n```'
+    },
+    {
+        name: 'white',
+        description: 'White color for console output',
+        documentation: 'Used with show statement to display text in white.\n\n```razen\nshow(white) "Standard message";\n```'
+    },
+    {
+        name: 'bright_red',
+        description: 'Bright red color for console output',
+        documentation: 'Used with show statement to display text in bright red.\n\n```razen\nshow(bright_red) "Critical error";\n```'
+    },
+    {
+        name: 'bright_green',
+        description: 'Bright green color for console output',
+        documentation: 'Used with show statement to display text in bright green.\n\n```razen\nshow(bright_green) "Important success";\n```'
+    },
+    {
+        name: 'bright_blue',
+        description: 'Bright blue color for console output',
+        documentation: 'Used with show statement to display text in bright blue.\n\n```razen\nshow(bright_blue) "Important information";\n```'
+    },
+    {
+        name: 'bright_yellow',
+        description: 'Bright yellow color for console output',
+        documentation: 'Used with show statement to display text in bright yellow.\n\n```razen\nshow(bright_yellow) "Important warning";\n```'
+    },
+    {
+        name: 'bright_magenta',
+        description: 'Bright magenta color for console output',
+        documentation: 'Used with show statement to display text in bright magenta.\n\n```razen\nshow(bright_magenta) "Important special message";\n```'
+    },
+    {
+        name: 'bright_cyan',
+        description: 'Bright cyan color for console output',
+        documentation: 'Used with show statement to display text in bright cyan.\n\n```razen\nshow(bright_cyan) "Important highlighted information";\n```'
+    },
+    {
+        name: 'bright_white',
+        description: 'Bright white color for console output',
+        documentation: 'Used with show statement to display text in bright white.\n\n```razen\nshow(bright_white) "Important standard message";\n```'
+    },
+    // Original color constants
     {
         name: 'COLOR_RED',
         description: 'Red color constant',
@@ -552,9 +624,222 @@ const razenConstants = [
     }
 ];
 
+// Razen Library Data
+const razenLibraries = [
+    {
+        name: 'arrlib',
+        description: 'Array Library',
+        functions: [
+            { name: 'push', description: 'Adds an element to an array', signature: 'ArrLib[push](array, element)' },
+            { name: 'pop', description: 'Removes and returns the last element', signature: 'ArrLib[pop](array)' },
+            { name: 'join', description: 'Joins array elements with a delimiter', signature: 'ArrLib[join](array, delimiter)' },
+            { name: 'length', description: 'Returns the array length', signature: 'ArrLib[length](array)' },
+            { name: 'unique', description: 'Returns array with unique elements', signature: 'ArrLib[unique](array)' }
+        ]
+    },
+    {
+        name: 'strlib',
+        description: 'String Library',
+        functions: [
+            { name: 'upper', description: 'Converts string to uppercase', signature: 'StrLib[upper](string)' },
+            { name: 'lower', description: 'Converts string to lowercase', signature: 'StrLib[lower](string)' },
+            { name: 'substring', description: 'Extracts a substring', signature: 'StrLib[substring](string, start, end)' },
+            { name: 'replace', description: 'Replaces text in a string', signature: 'StrLib[replace](string, search, replacement)' },
+            { name: 'length', description: 'Returns the string length', signature: 'StrLib[length](string)' },
+            { name: 'split', description: 'Splits string by delimiter', signature: 'StrLib[split](string, delimiter)' },
+            { name: 'trim', description: 'Removes whitespace from ends', signature: 'StrLib[trim](string)' },
+            { name: 'starts_with', description: 'Checks if string starts with prefix', signature: 'StrLib[starts_with](string, prefix)' },
+            { name: 'ends_with', description: 'Checks if string ends with suffix', signature: 'StrLib[ends_with](string, suffix)' },
+            { name: 'contains', description: 'Checks if string contains substring', signature: 'StrLib[contains](string, substring)' },
+            { name: 'repeat', description: 'Repeats string n times', signature: 'StrLib[repeat](string, count)' }
+        ]
+    },
+    {
+        name: 'mathlib',
+        description: 'Math Library',
+        functions: [
+            { name: 'add', description: 'Adds two numbers', signature: 'MathLib[add](a, b)' },
+            { name: 'subtract', description: 'Subtracts two numbers', signature: 'MathLib[subtract](a, b)' },
+            { name: 'multiply', description: 'Multiplies two numbers', signature: 'MathLib[multiply](a, b)' },
+            { name: 'divide', description: 'Divides two numbers', signature: 'MathLib[divide](a, b)' },
+            { name: 'power', description: 'Raises a to the power of b', signature: 'MathLib[power](a, b)' },
+            { name: 'sqrt', description: 'Square root of a number', signature: 'MathLib[sqrt](number)' },
+            { name: 'abs', description: 'Absolute value of a number', signature: 'MathLib[abs](number)' },
+            { name: 'round', description: 'Rounds a number', signature: 'MathLib[round](number)' },
+            { name: 'floor', description: 'Rounds down to nearest integer', signature: 'MathLib[floor](number)' },
+            { name: 'ceil', description: 'Rounds up to nearest integer', signature: 'MathLib[ceil](number)' },
+            { name: 'sin', description: 'Sine of an angle', signature: 'MathLib[sin](angle)' },
+            { name: 'cos', description: 'Cosine of an angle', signature: 'MathLib[cos](angle)' },
+            { name: 'tan', description: 'Tangent of an angle', signature: 'MathLib[tan](angle)' },
+            { name: 'log', description: 'Logarithm of a number', signature: 'MathLib[log](number, base)' },
+            { name: 'exp', description: 'Exponential function', signature: 'MathLib[exp](number)' },
+            { name: 'random', description: 'Random number between 0 and 1', signature: 'MathLib[random]()' },
+            { name: 'max', description: 'Maximum of numbers', signature: 'MathLib[max](a, b, ...)' },
+            { name: 'min', description: 'Minimum of numbers', signature: 'MathLib[min](a, b, ...)' },
+            { name: 'modulo', description: 'Modulo operation', signature: 'MathLib[modulo](a, b)' }
+        ]
+    },
+    {
+        name: 'timelib',
+        description: 'Time Library',
+        functions: [
+            { name: 'now', description: 'Current timestamp', signature: 'TimeLib[now]()' },
+            { name: 'format', description: 'Format timestamp', signature: 'TimeLib[format](timestamp, format)' },
+            { name: 'parse', description: 'Parse date string', signature: 'TimeLib[parse](dateString)' },
+            { name: 'sleep', description: 'Sleep for milliseconds', signature: 'TimeLib[sleep](milliseconds)' }
+        ]
+    },
+    {
+        name: 'random',
+        description: 'Random Library',
+        functions: [
+            { name: 'int', description: 'Random integer in range', signature: 'Random[int](min, max)' },
+            { name: 'float', description: 'Random float in range', signature: 'Random[float](min, max)' },
+            { name: 'choice', description: 'Random element from array', signature: 'Random[choice](array)' },
+            { name: 'shuffle', description: 'Shuffles an array', signature: 'Random[shuffle](array)' }
+        ]
+    },
+    {
+        name: 'file',
+        description: 'File Library',
+        functions: [
+            { name: 'read', description: 'Read file contents', signature: 'File[read](path)' },
+            { name: 'write', description: 'Write to file', signature: 'File[write](path, content)' },
+            { name: 'append', description: 'Append to file', signature: 'File[append](path, content)' },
+            { name: 'exists', description: 'Check if file exists', signature: 'File[exists](path)' }
+        ]
+    },
+    {
+        name: 'json',
+        description: 'JSON Library',
+        functions: [
+            { name: 'parse', description: 'Parse JSON string', signature: 'JSON[parse](jsonString)' },
+            { name: 'stringify', description: 'Convert to JSON string', signature: 'JSON[stringify](object)' }
+        ]
+    },
+    {
+        name: 'bolt',
+        description: 'Bolt Library for intensive operations',
+        functions: [
+            { name: 'run', description: 'Runs intensive operation', signature: 'Bolt[run](operation)' },
+            { name: 'parallel', description: 'Runs operations in parallel', signature: 'Bolt[parallel](items, operation)' }
+        ]
+    },
+    {
+        name: 'seed',
+        description: 'Seed Library for data generation',
+        functions: [
+            { name: 'generate', description: 'Generates a seed', signature: 'Seed[generate](length)' },
+            { name: 'map', description: 'Creates a 2D map from seed', signature: 'Seed[map](seed, width, height)' }
+        ]
+    },
+    {
+        name: 'color',
+        description: 'Color Library',
+        functions: [
+            { name: 'hex_to_rgb', description: 'Converts hex to RGB', signature: 'Color[hex_to_rgb](hexColor)' },
+            { name: 'rgb_to_hex', description: 'Converts RGB to hex', signature: 'Color[rgb_to_hex](rgbArray)' },
+            { name: 'lighten', description: 'Lightens a color', signature: 'Color[lighten](color, percentage)' },
+            { name: 'darken', description: 'Darkens a color', signature: 'Color[darken](color, percentage)' },
+            { name: 'get_ansi_color', description: 'Gets ANSI color code', signature: 'Color[get_ansi_color](colorName)' }
+        ]
+    },
+    {
+        name: 'crypto',
+        description: 'Cryptography Library',
+        functions: [
+            { name: 'hash', description: 'Hash a string', signature: 'Crypto[hash](string)' },
+            { name: 'encrypt', description: 'Encrypt data', signature: 'Crypto[encrypt](data, key)' },
+            { name: 'decrypt', description: 'Decrypt data', signature: 'Crypto[decrypt](data, key)' }
+        ]
+    },
+    {
+        name: 'regex',
+        description: 'Regular Expression Library',
+        functions: [
+            { name: 'match', description: 'Check if string matches pattern', signature: 'Regex[match](string, pattern)' },
+            { name: 'search', description: 'Search for pattern in string', signature: 'Regex[search](string, pattern)' },
+            { name: 'replace', description: 'Replace pattern in string', signature: 'Regex[replace](string, pattern, replacement)' }
+        ]
+    },
+    {
+        name: 'uuid',
+        description: 'UUID Library',
+        functions: [
+            { name: 'generate', description: 'Generate a UUID', signature: 'UUID[generate]()' },
+            { name: 'is_valid', description: 'Check if UUID is valid', signature: 'UUID[is_valid](uuid)' }
+        ]
+    },
+    {
+        name: 'os',
+        description: 'Operating System Library',
+        functions: [
+            { name: 'env', description: 'Get environment variable', signature: 'OS[env](name)' },
+            { name: 'cwd', description: 'Get current working directory', signature: 'OS[cwd]()' },
+            { name: 'platform', description: 'Get platform name', signature: 'OS[platform]()' }
+        ]
+    },
+    {
+        name: 'validation',
+        description: 'Validation Library',
+        functions: [
+            { name: 'email', description: 'Validate email address', signature: 'Validation[email](email)' },
+            { name: 'phone', description: 'Validate phone number', signature: 'Validation[phone](phone)' },
+            { name: 'required', description: 'Check if value is not empty', signature: 'Validation[required](value)' },
+            { name: 'min_length', description: 'Check minimum length', signature: 'Validation[min_length](value, length)' }
+        ]
+    },
+    {
+        name: 'system',
+        description: 'System Library',
+        functions: [
+            { name: 'exec', description: 'Execute system command', signature: 'System[exec](command)' },
+            { name: 'uptime', description: 'Get system uptime', signature: 'System[uptime]()' },
+            { name: 'info', description: 'Get system information', signature: 'System[info]()' }
+        ]
+    },
+    {
+        name: 'boxlib',
+        description: 'Box Library for value boxing',
+        functions: [
+            { name: 'put', description: 'Box a value', signature: 'BoxLib[put](value)' },
+            { name: 'get', description: 'Unbox a value', signature: 'BoxLib[get](box)' },
+            { name: 'is_box', description: 'Check if value is boxed', signature: 'BoxLib[is_box](value)' }
+        ]
+    },
+    {
+        name: 'loglib',
+        description: 'Logging Library',
+        functions: [
+            { name: 'info', description: 'Log info message', signature: 'LogLib[info](message)' },
+            { name: 'warn', description: 'Log warning message', signature: 'LogLib[warn](message)' },
+            { name: 'error', description: 'Log error message', signature: 'LogLib[error](message)' },
+            { name: 'debug', description: 'Log debug message', signature: 'LogLib[debug](message)' }
+        ]
+    },
+    {
+        name: 'htlib',
+        description: 'Head/Tails Library',
+        functions: [
+            { name: 'coin', description: 'Flip a coin', signature: 'HTLib[coin]()' },
+            { name: 'bool', description: 'Generate random boolean', signature: 'HTLib[bool]()' }
+        ]
+    },
+    {
+        name: 'netlib',
+        description: 'Network Library',
+        functions: [
+            { name: 'ping', description: 'Ping a host', signature: 'NetLib[ping](host)' },
+            { name: 'get', description: 'HTTP GET request', signature: 'NetLib[get](url)' },
+            { name: 'post', description: 'HTTP POST request', signature: 'NetLib[post](url, data)' }
+        ]
+    }
+];
+
 module.exports = {
     razenKeywords,
     razenVariables,
     razenFunctions,
-    razenConstants
+    razenConstants,
+    razenLibraries
 };

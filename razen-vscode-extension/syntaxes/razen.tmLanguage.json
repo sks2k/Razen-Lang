@@ -26,6 +26,9 @@
     },
     {
       "include": "#operators"
+    },
+    {
+      "include": "#colored-output"
     }
   ],
   "repository": {
@@ -89,6 +92,14 @@
           "captures": {
             "1": { "name": "entity.name.function.razen" }
           }
+        },
+        {
+          "name": "meta.library-call.razen",
+          "match": "\\b([a-zA-Z_][a-zA-Z0-9_]*)\\s*\\[(.*?)\\]\\s*\\(",
+          "captures": {
+            "1": { "name": "entity.name.class.razen" },
+            "2": { "name": "entity.name.function.razen" }
+          }
         }
       ]
     },
@@ -104,6 +115,14 @@
           "captures": {
             "1": { "name": "storage.type.razen" },
             "2": { "name": "variable.other.definition.razen" }
+          }
+        },
+        {
+          "name": "keyword.control.import.razen",
+          "match": "\\b(lib)\\s+([a-zA-Z_][a-zA-Z0-9_]*)\\s*;",
+          "captures": {
+            "1": { "name": "keyword.control.import.razen" },
+            "2": { "name": "entity.name.class.razen" }
           }
         },
         {
@@ -186,6 +205,18 @@
         {
           "name": "keyword.operator.accessor.razen",
           "match": "\\."
+        }
+      ]
+    },
+    "colored-output": {
+      "patterns": [
+        {
+          "name": "meta.colored-output.razen",
+          "match": "\\b(show)\\s*\\((red|green|blue|yellow|magenta|cyan|white|bright_red|bright_green|bright_blue|bright_yellow|bright_magenta|bright_cyan|bright_white)\\)\\s*",
+          "captures": {
+            "1": { "name": "storage.type.razen" },
+            "2": { "name": "support.constant.color.razen" }
+          }
         }
       ]
     }

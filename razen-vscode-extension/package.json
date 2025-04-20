@@ -2,7 +2,7 @@
   "name": "razen-language",
   "displayName": "Razen Language",
   "description": "Syntax highlighting and support for Razen programming language",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "publisher": "razen-lang",
   "engines": {
     "vscode": "^1.60.0"

@@ -1,5 +1,5 @@
 const vscode = require('vscode');
-const { razenKeywords, razenVariables, razenFunctions, razenConstants } = require('./razenLanguageData');
+const { razenKeywords, razenVariables, razenFunctions, razenConstants, razenLibraries } = require('./razenLanguageData');
 
 /**
  * @param {vscode.ExtensionContext} context
@@ -65,6 +65,10 @@ function activate(context) {
                 // Add context-aware suggestions based on the line prefix
                 const contextItems = getContextAwareCompletionItems(linePrefix, document, position);
                 completionItems.push(...contextItems);
+                
+                // Add library-specific completions if in a library context
+                const libraryItems = getLibraryCompletionItems(linePrefix);
+                completionItems.push(...libraryItems);
                 
                 return completionItems;
             }
@@ -690,6 +694,44 @@ function getDocumentDefinedItems(document) {
  * @param {vscode.Position} position 
  * @returns {vscode.CompletionItem[]}
  */
+function getLibraryCompletionItems(linePrefix) {
+    const completionItems = [];
+    
+    // Check if we're in a library function call context
+    const libraryMatch = linePrefix.match(/([A-Z][a-zA-Z0-9]*)\s*\[\s*([a-zA-Z0-9_]*)$/i);
+    if (libraryMatch) {
+        const libraryName = libraryMatch[1].toLowerCase();
+        const partialFunction = libraryMatch[2];
+        
+        // Find the matching library
+        const library = razenLibraries.find(lib => lib.name.toLowerCase() === libraryName.toLowerCase());
+        if (library) {
+            // Add all functions from this library as completion items
+            library.functions.forEach(func => {
+                if (!partialFunction || func.name.startsWith(partialFunction)) {
+                    const item = new vscode.CompletionItem(func.name, vscode.CompletionItemKind.Method);
+                    item.detail = func.signature;
+                    item.documentation = func.description;
+                    completionItems.push(item);
+                }
+            });
+        }
+    }
+    
+    // Check if we're after 'lib' keyword to suggest libraries
+    if (/\blib\s+([a-zA-Z0-9_]*)$/i.test(linePrefix)) {
+        razenLibraries.forEach(library => {
+            const item = new vscode.CompletionItem(library.name, vscode.CompletionItemKind.Module);
+            item.detail = library.description;
+            item.documentation = `Library for ${library.description.toLowerCase()}\n\nImport with: lib ${library.name};`;
+            item.insertText = `${library.name};`;
+            completionItems.push(item);
+        });
+    }
+    
+    return completionItems;
+}
+
 function getContextAwareCompletionItems(linePrefix, document, position) {
     const completionItems = [];
     
@@ -887,6 +929,57 @@ function getContextAwareCompletionItems(linePrefix, document, position) {
         const item = new vscode.CompletionItem(tryCatchSnippet.label, vscode.CompletionItemKind.Snippet);
         item.insertText = new vscode.SnippetString(tryCatchSnippet.snippet);
         completionItems.push(item);
+    }
+    
+    // Check if we're after 'show' keyword
+    if (/\bshow\s+$/.test(linePrefix)) {
+        // Add common output strings
+        const outputStrings = ['"";', '"Hello, World!";', '"Result: " + result;'];
+        outputStrings.forEach(str => {
+            const item = new vscode.CompletionItem(str, vscode.CompletionItemKind.Snippet);
+            completionItems.push(item);
+        });
+        
+        // Add colored output snippets
+        const colorSnippets = [
+            { label: 'show(red)', snippet: '(red) "${1:Error message}";' },
+            { label: 'show(green)', snippet: '(green) "${1:Success message}";' },
+            { label: 'show(blue)', snippet: '(blue) "${1:Information}";' },
+            { label: 'show(yellow)', snippet: '(yellow) "${1:Warning message}";' },
+            { label: 'show(magenta)', snippet: '(magenta) "${1:Special message}";' },
+            { label: 'show(cyan)', snippet: '(cyan) "${1:Highlighted information}";' },
+            { label: 'show(white)', snippet: '(white) "${1:Standard message}";' },
+            { label: 'show(bright_red)', snippet: '(bright_red) "${1:Critical error}";' },
+            { label: 'show(bright_green)', snippet: '(bright_green) "${1:Important success}";' },
+            { label: 'show(bright_blue)', snippet: '(bright_blue) "${1:Important information}";' },
+            { label: 'show(bright_yellow)', snippet: '(bright_yellow) "${1:Important warning}";' },
+            { label: 'show(bright_magenta)', snippet: '(bright_magenta) "${1:Important special message}";' },
+            { label: 'show(bright_cyan)', snippet: '(bright_cyan) "${1:Important highlighted information}";' },
+            { label: 'show(bright_white)', snippet: '(bright_white) "${1:Important standard message}";' }
+        ];
+        
+        colorSnippets.forEach(snippet => {
+            const item = new vscode.CompletionItem(snippet.label, vscode.CompletionItemKind.Snippet);
+            item.insertText = new vscode.SnippetString(snippet.snippet);
+            item.documentation = new vscode.MarkdownString(`Colored output using the ${snippet.label.replace('show(', '').replace(')', '')} color`);
+            completionItems.push(item);
+        });
+    }
+    
+    // Check if we're after 'show(' (for color parameter)
+    if (/\bshow\s*\(\s*$/.test(linePrefix)) {
+        // Add color options
+        const colors = [
+            'red', 'green', 'blue', 'yellow', 'magenta', 'cyan', 'white',
+            'bright_red', 'bright_green', 'bright_blue', 'bright_yellow', 'bright_magenta', 'bright_cyan', 'bright_white'
+        ];
+        
+        colors.forEach(color => {
+            const item = new vscode.CompletionItem(color, vscode.CompletionItemKind.Color);
+            item.documentation = `Use ${color} for colored console output`;
+            item.insertText = new vscode.SnippetString(`${color}) "\${1:message}";`);
+            completionItems.push(item);
+        });
     }
     
     return completionItems;
