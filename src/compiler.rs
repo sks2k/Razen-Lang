@@ -476,8 +476,8 @@ impl Compiler {
             Statement::ContinueStatement => {
                 self.compile_continue_statement();
             },
-            Statement::ShowStatement { value } => {
-                self.compile_show_statement(value);
+            Statement::ShowStatement { value, color } => {
+                self.compile_show_statement(value, color);
             },
             Statement::LoadStatement { cycles, block } => {
                 self.compile_load_statement(cycles, block);
@@ -835,16 +835,31 @@ impl Compiler {
         }
     }
     
-    fn compile_show_statement(&mut self, value: Expression) {
+    fn compile_show_statement(&mut self, value: Expression, color: Option<String>) {
         // Set the flag that we're inside a show statement
         let old_in_show = self.in_show_statement;
         self.in_show_statement = true;
+        
+        // If color is specified, add ANSI color code before printing the value
+        if let Some(color_name) = &color {
+            // Get the color code using our color utility
+            let color_code = crate::functions::colorlib::get_color_code(color_name);
+            self.emit(IR::PushString(color_code));
+            self.emit(IR::Print);
+        }
         
         // Compile the expression to be shown
         self.compile_expression(value);
         
         // Emit print instruction
         self.emit(IR::Print);
+        
+        // Reset color if it was set
+        if color.is_some() {
+            let reset_code = crate::functions::colorlib::get_color_code("reset");
+            self.emit(IR::PushString(reset_code));
+            self.emit(IR::Print);
+        }
         
         // Add a newline character if we're not inside a load statement
         if !old_in_show {
@@ -1192,10 +1207,25 @@ impl Compiler {
         for _ in 0..cycles_count {
             // Loop through each show statement in the block
             for stmt in &block {
-                if let Statement::ShowStatement { value } = stmt {
+                if let Statement::ShowStatement { value, color } = stmt {
+                    // If color is specified, add ANSI color code before printing the value
+                    if let Some(color_name) = color {
+                        // Get the color code using our color utility
+                        let color_code = crate::functions::colorlib::get_color_code(&color_name);
+                        self.emit(IR::PushString(color_code));
+                        self.emit(IR::Print);
+                    }
+                    
                     // Compile and display the message
                     self.compile_expression(value.clone());
                     self.emit(IR::Print);
+                    
+                    // Reset color if it was set
+                    if color.is_some() {
+                        let reset_code = crate::functions::colorlib::get_color_code("reset");
+                        self.emit(IR::PushString(reset_code));
+                        self.emit(IR::Print);
+                    }
                     
                     // Add a delay (sleep)
                     self.emit(IR::PushNumber(0.3)); // 300ms delay

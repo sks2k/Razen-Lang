@@ -541,13 +541,38 @@ impl Parser {
     fn parse_show_statement(&mut self) -> Option<Statement> {
         self.next_token();
         
+        // Check if there's a color parameter in parentheses
+        let color = if self.current_token_is(TokenType::LeftParen) {
+            self.next_token(); // Consume the left paren
+            
+            // Get the color name
+            let color_name = if !self.current_token.literal.is_empty() {
+                self.current_token.literal.clone()
+            } else {
+                self.current_token.token_type.to_string()
+            };
+            
+            self.next_token(); // Consume the color name
+            
+            // Expect right paren
+            if !self.current_token_is(TokenType::RightParen) {
+                self.errors.push(format!("Expected right parenthesis after color name, got {:?}", self.current_token.token_type));
+                return None;
+            }
+            
+            self.next_token(); // Consume the right paren
+            Some(color_name)
+        } else {
+            None
+        };
+        
         let value = self.parse_expression(Precedence::Lowest)?;
         
         if self.peek_token_is(TokenType::Semicolon) {
             self.next_token();
         }
         
-        Some(Statement::ShowStatement { value })
+        Some(Statement::ShowStatement { value, color })
     }
     
     fn parse_try_statement(&mut self) -> Option<Statement> {

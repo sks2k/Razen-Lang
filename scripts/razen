@@ -57,7 +57,7 @@ get_version() {
   elif [ -f "$PROJECT_ROOT/version" ]; then
     cat "$PROJECT_ROOT/version"
   else
-    echo "beta v0.1.61" # Fallback version
+    echo "beta v0.1.65 (Colours Update in show Statement..!)" # Fallback version
   fi
 }
 

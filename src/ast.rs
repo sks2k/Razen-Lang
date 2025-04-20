@@ -62,6 +62,7 @@ pub enum Statement {
     ContinueStatement,
     ShowStatement {
         value: Expression,
+        color: Option<String>, // Optional color parameter
     },
     TryStatement {
         try_block: Vec<Statement>,
@@ -265,8 +266,12 @@ impl fmt::Display for Node {
                     },
                     Statement::BreakStatement => write!(f, "break;"),
                     Statement::ContinueStatement => write!(f, "continue;"),
-                    Statement::ShowStatement { value } => {
-                        write!(f, "show {};", Node::Expression(value.clone()))
+                    Statement::ShowStatement { value, color } => {
+                        if let Some(c) = color {
+                            write!(f, "show({}) {};", c, Node::Expression(value.clone()))
+                        } else {
+                            write!(f, "show {};", Node::Expression(value.clone()))
+                        }
                     },
                     Statement::TryStatement { try_block, catch_block, finally_block } => {
                         let mut result = String::from("try {

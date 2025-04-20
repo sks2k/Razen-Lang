@@ -133,10 +133,7 @@ show "Bolt parallel result: " + Bolt[parallel]([1, 2, 3], "double");
 
 # Test Box Library
 show "14. Testing Box Library:";
-# Commented out for now - will work on this later
-# show "Original value: 42";
-# show "Unboxed value: " + BoxLib[get](BoxLib[put](42));
-# show "Unboxed object: " + BoxLib[get](BoxLib[put]("test object"));
+# We'll implement more BoxLib tests in a separate file later
 
 # Test Log Library
 show "15. Testing Log Library:";
@@ -159,3 +156,5 @@ show "Ping test: " + NetLib[ping]("https://www.google.com");
 # show "POST request: " + NetLib[post]("https://httpbin.org/post", {test: "data"});
 
 show "===== All tests completed! =====";
+
+show(blue) "All tests completed!";

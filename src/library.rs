@@ -198,12 +198,13 @@ impl LibraryManager {
         seed_lib.register_function("map", crate::functions::seedlib::map);
         self.register_library(seed_lib);
 
-        // Register color library functions
+        // Register Color library functions
         let mut color_lib = Library::new("color");
         color_lib.register_function("hex_to_rgb", crate::functions::colorlib::hex_to_rgb);
         color_lib.register_function("rgb_to_hex", crate::functions::colorlib::rgb_to_hex);
         color_lib.register_function("lighten", crate::functions::colorlib::lighten);
         color_lib.register_function("darken", crate::functions::colorlib::darken);
+        color_lib.register_function("get_ansi_color", crate::functions::colorlib::get_ansi_color);
         self.register_library(color_lib);
 
         // Register crypto library functions
@@ -253,6 +254,7 @@ impl LibraryManager {
         let mut box_lib = Library::new("boxlib");
         box_lib.register_function("put", crate::functions::boxutillib::put);
         box_lib.register_function("get", crate::functions::boxutillib::get);
+        box_lib.register_function("is_box", crate::functions::boxutillib::is_box);
         self.register_library(box_lib);
 
         // Register Log library functions

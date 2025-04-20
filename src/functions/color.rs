@@ -1,4 +1,60 @@
 use crate::value::Value;
+use std::collections::HashMap;
+use std::sync::Once;
+
+// Define color codes for terminal output
+static mut COLOR_CODES: Option<HashMap<String, String>> = None;
+static INIT: Once = Once::new();
+
+// Initialize color codes
+fn init_color_codes() {
+    unsafe {
+        let mut colors = HashMap::new();
+        // Basic colors
+        colors.insert("black".to_string(), "\u{001b}[30m".to_string());
+        colors.insert("red".to_string(), "\u{001b}[31m".to_string());
+        colors.insert("green".to_string(), "\u{001b}[32m".to_string());
+        colors.insert("yellow".to_string(), "\u{001b}[33m".to_string());
+        colors.insert("blue".to_string(), "\u{001b}[34m".to_string());
+        colors.insert("magenta".to_string(), "\u{001b}[35m".to_string());
+        colors.insert("cyan".to_string(), "\u{001b}[36m".to_string());
+        colors.insert("white".to_string(), "\u{001b}[37m".to_string());
+        
+        // Bright colors
+        colors.insert("bright_black".to_string(), "\u{001b}[90m".to_string());
+        colors.insert("bright_red".to_string(), "\u{001b}[91m".to_string());
+        colors.insert("bright_green".to_string(), "\u{001b}[92m".to_string());
+        colors.insert("bright_yellow".to_string(), "\u{001b}[93m".to_string());
+        colors.insert("bright_blue".to_string(), "\u{001b}[94m".to_string());
+        colors.insert("bright_magenta".to_string(), "\u{001b}[95m".to_string());
+        colors.insert("bright_cyan".to_string(), "\u{001b}[96m".to_string());
+        colors.insert("bright_white".to_string(), "\u{001b}[97m".to_string());
+        
+        // Reset code
+        colors.insert("reset".to_string(), "\u{001b}[0m".to_string());
+        
+        COLOR_CODES = Some(colors);
+    }
+}
+
+// Get color code by name
+pub fn get_color_code(color_name: &str) -> String {
+    INIT.call_once(|| {
+        init_color_codes();
+    });
+    
+    unsafe {
+        match &COLOR_CODES {
+            Some(colors) => {
+                let color_name = color_name.to_lowercase();
+                colors.get(&color_name)
+                    .cloned()
+                    .unwrap_or_else(|| colors.get("reset").unwrap().clone())
+            },
+            None => "\u{001b}[0m".to_string() // Default to reset if colors not initialized
+        }
+    }
+}
 
 /// Converts a hex color string to RGB array
 /// Example: hex_to_rgb("#ff0000") => [255, 0, 0]
@@ -182,4 +238,17 @@ pub fn darken(args: Vec<Value>) -> Result<Value, String> {
     // Convert back to hex
     let hex_args = vec![Value::Array(darkened)];
     rgb_to_hex(hex_args)
+}
+
+/// Get ANSI color code for terminal output
+/// Example: get_color_code("blue") => "\u{001b}[34m"
+pub fn get_ansi_color(args: Vec<Value>) -> Result<Value, String> {
+    if args.len() != 1 {
+        return Err("Color.get_ansi_color requires exactly 1 argument: color_name".to_string());
+    }
+    
+    let color_name = args[0].as_string()?;
+    let color_code = get_color_code(&color_name);
+    
+    Ok(Value::String(color_code))
 }
