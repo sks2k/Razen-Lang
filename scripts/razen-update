@@ -256,6 +256,9 @@ else
                                 echo -e "    ${RED}✗${NC} Failed to download functions/$func_file"
                             fi
                         done
+                        # Make sure we count the functions directory as a success
+                        files_count=$((files_count + 1))
+                        success_count=$((success_count + 1))
                     fi
                     
                     # Special handling for properties directory - download libs directory
@@ -502,6 +505,36 @@ else
     # Ensure functions directory is properly updated
     if [ -d "$TMP_DIR/src/functions" ]; then
         echo -e "${YELLOW}Ensuring functions directory is properly updated...${NC}"
+        if [ -w "/usr/local/lib/razen/src" ]; then
+            mkdir -p "/usr/local/lib/razen/src/functions" 2>/dev/null
+            cp -r "$TMP_DIR/src/functions/"* "/usr/local/lib/razen/src/functions/" 2>/dev/null
+            echo -e "  ${GREEN}✓${NC} Updated functions directory"
+        else
+            sudo mkdir -p "/usr/local/lib/razen/src/functions" 2>/dev/null
+            sudo cp -r "$TMP_DIR/src/functions/"* "/usr/local/lib/razen/src/functions/" 2>/dev/null
+            echo -e "  ${GREEN}✓${NC} Updated functions directory (with sudo)"
+        fi
+    else
+        echo -e "${YELLOW}Warning: src/functions directory not found in downloaded files${NC}"
+        echo -e "${CYAN}Attempting to download functions directory directly...${NC}"
+        mkdir -p "$TMP_DIR/src/functions" 2>/dev/null
+        local function_files="arrlib.rs mathlib.rs strlib.rs randomlib.rs filelib.rs jsonlib.rs boltlib.rs seedlib.rs colorlib.rs cryptolib.rs regexlib.rs uuidlib.rs oslib.rs validationlib.rs systemlib.rs boxutillib.rs loglib.rs htlib.rs netlib.rs timelib.rs color.rs"
+        local downloaded_count=0
+        local total_files=0
+        
+        for func_file in $function_files; do
+            total_files=$((total_files + 1))
+            if curl -s --retry 3 --retry-delay 2 -o "$TMP_DIR/src/functions/$func_file" "$RAZEN_REPO/src/functions/$func_file" &>/dev/null; then
+                downloaded_count=$((downloaded_count + 1))
+                echo -e "  ${GREEN}✓${NC} Downloaded $func_file"
+            else
+                echo -e "  ${RED}✗${NC} Failed to download $func_file"
+            fi
+        done
+        
+        echo -e "  ${GREEN}✓${NC} Downloaded $downloaded_count/$total_files function files"
+        
+        # Now copy the downloaded files
         if [ -w "/usr/local/lib/razen/src" ]; then
             mkdir -p "/usr/local/lib/razen/src/functions" 2>/dev/null
             cp -r "$TMP_DIR/src/functions/"* "/usr/local/lib/razen/src/functions/" 2>/dev/null
