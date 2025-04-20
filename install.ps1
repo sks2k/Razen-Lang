@@ -1,12 +1,12 @@
 # Razen Language Installer for Windows
 # Copyright 2025 Prathmesh Barot, Basai Corporation
-# Version: beta v0.1.4
+# Version: beta v0.1.657 (Colours & Installers & Updaters updated properly.)
 
 # Enable TLS 1.2 for all web requests
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
 # Repository URL
-$RAZEN_REPO = "https://raw.githubusercontent.com/BasaiCorp/razen-lang/main"
+$RAZEN_REPO = "https://raw.githubusercontent.com/BasaiCorp/Razen-Lang/main"
 
 # Error handling and cleanup function
 function Handle-Error {
@@ -499,8 +499,8 @@ function Install-VSCodeExtension {
                             "close" = ")"
                         }
                         @{
-                            "open" = "`""
-                            "close" = "`""
+                            "open" = "```
+                            "close" = "```
                         }
                         @{
                             "open" = "'"
@@ -535,8 +535,8 @@ function Install-VSCodeExtension {
                         }
                         "strings" = @{
                             "name" = "string.quoted.double.razen"
-                            "begin" = "`""
-                            "end" = "`""
+                            "begin" = "```
+                            "end" = "```
                             "patterns" = @(
                                 @{
                                     "name" = "constant.character.escape.razen"
@@ -734,9 +734,9 @@ function Show-InstallationSummary {
     
     # Support information
     Write-ColorOutput "`nSupport:" "Yellow"
-    Write-ColorOutput "  • GitHub: https://github.com/BasaiCorp/razen-lang" "White"
+    Write-ColorOutput "  • GitHub: https://github.com/BasaiCorp/Razen-Lang" "White"
     Write-ColorOutput "  • Documentation: Coming soon" "White"
-    Write-ColorOutput "  • Report Issues: https://github.com/BasaiCorp/razen-lang/issues" "White"
+    Write-ColorOutput "  • Report Issues: https://github.com/BasaiCorp/Razen-Lang/issues" "White"
     
     Write-ColorOutput "`nThank you for installing Razen! Happy coding!" "Cyan"
 }
@@ -888,10 +888,18 @@ Write-ColorOutput "Creating installation directories..." "Yellow"
 $dirsToCreate = @(
     $installDir,
     (Join-Path $installDir "src"),
-    (Join-Path $installDir "scripts"),
+    (Join-Path $installDir "src\functions"),
     (Join-Path $installDir "properties"),
-    # Add directories for extensions if they are part of the core download
+    (Join-Path $installDir "properties\libs"),
+    (Join-Path $installDir "scripts"),
+    (Join-Path $installDir "examples"),
+    (Join-Path $installDir "examples\web-example"),
     (Join-Path $installDir "razen-vscode-extension"),
+    (Join-Path $installDir "razen-vscode-extension\src"),
+    (Join-Path $installDir "razen-vscode-extension\syntaxes"),
+    (Join-Path $installDir "razen-vscode-extension\language-configuration"),
+    (Join-Path $installDir "razen-vscode-extension\snippets"),
+    (Join-Path $installDir "razen-vscode-extension\icons"),
     (Join-Path $installDir "razen-jetbrains-plugin")
 )
 
@@ -921,10 +929,18 @@ while (-not $downloadSuccess -and $retryCount -lt $maxRetries) {
         if (-not (Download-File -Uri "$RAZEN_REPO/main.py" -OutFilePath (Join-Path $TMP_DIR "main.py") -Description "main.py")) { $downloadSuccess = $false }
         
         # Download src files
-        $srcFiles = @("lexer.py", "parser.py", "interpreter.py", "runtime.py", "__init__.py") # Add __init__.py here
+        $srcFiles = @("main.rs", "compiler.rs", "parser.rs", "lexer.rs", "interpreter.rs", "ast.rs", "token.rs", "value.rs", "library.rs", "functions.rs")
         New-Item -ItemType Directory -Path (Join-Path $TMP_DIR "src") -Force | Out-Null # Ensure temp src dir exists
         foreach ($file in $srcFiles) {
             if (-not (Download-File -Uri "$RAZEN_REPO/src/$file" -OutFilePath (Join-Path $TMP_DIR "src\$file") -Description "src/$file")) { $downloadSuccess = $false }
+        }
+        
+        # Download function files
+        Write-ColorOutput "    Downloading function files..." "Yellow"
+        $functionFiles = @("arrlib.rs", "mathlib.rs", "strlib.rs", "randomlib.rs", "filelib.rs", "jsonlib.rs", "boltlib.rs", "seedlib.rs", "colorlib.rs", "cryptolib.rs", "regexlib.rs", "uuidlib.rs", "oslib.rs", "validationlib.rs", "systemlib.rs", "boxutillib.rs", "loglib.rs", "htlib.rs", "netlib.rs", "timelib.rs", "color.rs")
+        New-Item -ItemType Directory -Path (Join-Path $TMP_DIR "src\functions") -Force | Out-Null # Ensure temp src/functions dir exists
+        foreach ($file in $functionFiles) {
+            if (-not (Download-File -Uri "$RAZEN_REPO/src/functions/$file" -OutFilePath (Join-Path $TMP_DIR "src\functions\$file") -Description "src/functions/$file")) { $downloadSuccess = $false }
         }
         
         # Download properties files
@@ -939,13 +955,13 @@ while (-not $downloadSuccess -and $retryCount -lt $maxRetries) {
         }
         
         # Download script files
-        $scriptsToDownload = @("razen", "razen-debug", "razen-test", "razen-run", "razen-update", "razen-help", "razen-extension", "razen.cmd") # Add razen.cmd if it exists in repo
+        $scriptsToDownload = @("razen", "razen-debug", "razen-test", "razen-run", "razen-update", "razen-help", "razen-extension", "razen-docs", "razen-autogen", "razen-run-debug")
         New-Item -ItemType Directory -Path (Join-Path $TMP_DIR "scripts") -Force | Out-Null # Ensure temp scripts dir exists
         foreach ($script in $scriptsToDownload) {
              if (-not (Download-File -Uri "$RAZEN_REPO/scripts/$script" -OutFilePath (Join-Path $TMP_DIR "scripts\$script") -Description "scripts/$script")) {
                 Write-ColorOutput "    ⚠ Creating empty scripts/$script as fallback." "Yellow"
                 New-Item -ItemType File -Path (Join-Path $TMP_DIR "scripts\$script") -Force | Out-Null
-                # Continue, maybe crucial scripts missing? Decide if $downloadSuccess should be $false here.
+                # Continue even if download fails, with empty file
              }
         }
         

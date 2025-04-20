@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Razen Language Update Utility
 # Copyright 2025 Prathmesh Barot, Basai Corporation
+# Version: beta v0.1.657 (Colours & Installers & Updaters updated properly.)
 
 # Colors for terminal output
 GREEN="\033[0;32m"
@@ -200,13 +201,13 @@ else
                 local files="razen razen-debug razen-test razen-run razen-update razen-help razen-docs razen-extension razen-autogen razen-run-debug"
                 ;;
             "src")
-                local files="main.rs compiler.rs parser.rs lexer.rs interpreter.rs ast.rs token.rs"
+                local files="main.rs compiler.rs parser.rs lexer.rs interpreter.rs ast.rs token.rs value.rs library.rs functions.rs"
                 ;;
             "examples")
-                local files="hello.rzn calculator.rzn web-example/script.rzn quiz.rzn guess.rzn 12-16.rzn return.rzn example.rzn web-example/index.html web-example/style.css"
+                local files="hello.rzn calculator.rzn web-example/script.rzn quiz.rzn guess.rzn 12-16.rzn return.rzn example.rzn web-example/index.html web-example/style.css library_test.rzn color_test.rzn purchase.rzn order.rzn"
                 ;;
             "razen-vscode-extension")
-                local files="package.json syntaxes/razen.tmLanguage.json language-configuration.json README.md snippets/razen.json src/extension.js src/razenLanguageData.js src/test.rzn icons/razen-icon.png icons/razen-icon.svg"
+                local files="package.json syntaxes/razen.tmLanguage.json language-configuration/language-configuration.json README.md snippets/razen.json src/extension.js src/razenLanguageData.js src/test.rzn icons/razen-icon.png icons/razen-icon.svg"
                 ;;
             "razen-jetbrain-plugin")
                 local files="plugin.xml build.gradle settings.gradle src/main/resources/META-INF/plugin.xml"
@@ -239,6 +240,38 @@ else
                     # Make scripts executable if they're in the scripts directory
                     if [ "$dir_name" = "scripts" ]; then
                         chmod +x "$target_dir/$file"
+                    fi
+                    
+                    # Special handling for functions.rs - download functions directory
+                    if [[ "$dir_name" == "src" && "$file" == "functions.rs" ]]; then
+                        echo -e "    ${CYAN}Detected functions.rs, downloading functions directory...${NC}"
+                        mkdir -p "$target_dir/functions" 2>/dev/null
+                        local function_files="arrlib.rs mathlib.rs strlib.rs randomlib.rs filelib.rs jsonlib.rs boltlib.rs seedlib.rs colorlib.rs cryptolib.rs regexlib.rs uuidlib.rs oslib.rs validationlib.rs systemlib.rs boxutillib.rs loglib.rs htlib.rs netlib.rs timelib.rs color.rs"
+                        for func_file in $function_files; do
+                            echo -e "    ${CYAN}Downloading${NC} functions/$func_file"
+                            if curl -s --retry 3 --retry-delay 2 -o "$target_dir/functions/$func_file" "$RAZEN_REPO/src/functions/$func_file" &>/dev/null; then
+                                success_count=$((success_count + 1))
+                                echo -e "    ${GREEN}✓${NC} Downloaded functions/$func_file"
+                            else
+                                echo -e "    ${RED}✗${NC} Failed to download functions/$func_file"
+                            fi
+                        done
+                    fi
+                    
+                    # Special handling for properties directory - download libs directory
+                    if [[ "$dir_name" == "properties" && "$file" == "functions.rzn" ]]; then
+                        echo -e "    ${CYAN}Detected functions.rzn, downloading libs directory...${NC}"
+                        mkdir -p "$target_dir/libs" 2>/dev/null
+                        local lib_files="arrlib.rzn strlib.rzn mathlib.rzn random.rzn file.rzn json.rzn bolt.rzn seed.rzn color.rzn crypto.rzn regex.rzn uuid.rzn os.rzn validation.rzn system.rzn boxlib.rzn loglib.rzn htlib.rzn netlib.rzn timelib.rzn"
+                        for lib_file in $lib_files; do
+                            echo -e "    ${CYAN}Downloading${NC} libs/$lib_file"
+                            if curl -s --retry 3 --retry-delay 2 -o "$target_dir/libs/$lib_file" "$RAZEN_REPO/properties/libs/$lib_file" &>/dev/null; then
+                                success_count=$((success_count + 1))
+                                echo -e "    ${GREEN}✓${NC} Downloaded libs/$lib_file"
+                            else
+                                echo -e "    ${RED}✗${NC} Failed to download libs/$lib_file"
+                            fi
+                        done
                     fi
                 else
                     # File exists but is empty (likely a 404 page)
@@ -310,6 +343,39 @@ else
     download_directory "properties" "$TMP_DIR/properties"
     download_directory "scripts" "$TMP_DIR/scripts"
     download_directory "src" "$TMP_DIR/src"
+    
+    # Handle src/functions directory separately if it wasn't already downloaded
+    if [ ! -d "$TMP_DIR/src/functions" ]; then
+        echo -e "${YELLOW}Ensuring functions directory is properly downloaded...${NC}"
+        mkdir -p "$TMP_DIR/src/functions" 2>/dev/null
+        local function_files="arrlib.rs mathlib.rs strlib.rs randomlib.rs filelib.rs jsonlib.rs boltlib.rs seedlib.rs colorlib.rs cryptolib.rs regexlib.rs uuidlib.rs oslib.rs validationlib.rs systemlib.rs boxutillib.rs loglib.rs htlib.rs netlib.rs timelib.rs color.rs"
+        for func_file in $function_files; do
+            echo -e "    ${CYAN}Downloading${NC} functions/$func_file"
+            if curl -s --retry 3 --retry-delay 2 -o "$TMP_DIR/src/functions/$func_file" "$RAZEN_REPO/src/functions/$func_file" &>/dev/null; then
+                echo -e "    ${GREEN}✓${NC} Downloaded functions/$func_file"
+            else
+                echo -e "    ${RED}✗${NC} Failed to download functions/$func_file"
+            fi
+        done
+        echo -e "  ${GREEN}✓${NC} Completed functions directory download"
+    fi
+    
+    # Handle properties/libs directory separately if it wasn't already downloaded
+    if [ ! -d "$TMP_DIR/properties/libs" ]; then
+        echo -e "${YELLOW}Ensuring libs directory is properly downloaded...${NC}"
+        mkdir -p "$TMP_DIR/properties/libs" 2>/dev/null
+        local lib_files="arrlib.rzn strlib.rzn mathlib.rzn random.rzn file.rzn json.rzn bolt.rzn seed.rzn color.rzn crypto.rzn regex.rzn uuid.rzn os.rzn validation.rzn system.rzn boxlib.rzn loglib.rzn htlib.rzn netlib.rzn timelib.rzn"
+        for lib_file in $lib_files; do
+            echo -e "    ${CYAN}Downloading${NC} libs/$lib_file"
+            if curl -s --retry 3 --retry-delay 2 -o "$TMP_DIR/properties/libs/$lib_file" "$RAZEN_REPO/properties/libs/$lib_file" &>/dev/null; then
+                echo -e "    ${GREEN}✓${NC} Downloaded libs/$lib_file"
+            else
+                echo -e "    ${RED}✗${NC} Failed to download libs/$lib_file"
+            fi
+        done
+        echo -e "  ${GREEN}✓${NC} Completed libs directory download"
+    fi
+    
     download_directory "examples" "$TMP_DIR/examples"
     download_directory "razen-vscode-extension" "$TMP_DIR/razen-vscode-extension"
     download_directory "razen-jetbrain-plugin" "$TMP_DIR/razen-jetbrain-plugin"
@@ -412,12 +478,40 @@ else
 
     # Update properties files
     safe_update_directory "$TMP_DIR/properties" "/usr/local/lib/razen/properties" "properties"
+    
+    # Ensure libs directory is properly updated
+    if [ -d "$TMP_DIR/properties/libs" ]; then
+        echo -e "${YELLOW}Ensuring libs directory is properly updated...${NC}"
+        if [ -w "/usr/local/lib/razen/properties" ]; then
+            mkdir -p "/usr/local/lib/razen/properties/libs" 2>/dev/null
+            cp -r "$TMP_DIR/properties/libs/"* "/usr/local/lib/razen/properties/libs/" 2>/dev/null
+            echo -e "  ${GREEN}✓${NC} Updated libs directory"
+        else
+            sudo mkdir -p "/usr/local/lib/razen/properties/libs" 2>/dev/null
+            sudo cp -r "$TMP_DIR/properties/libs/"* "/usr/local/lib/razen/properties/libs/" 2>/dev/null
+            echo -e "  ${GREEN}✓${NC} Updated libs directory (with sudo)"
+        fi
+    fi
 
     # Update scripts
     safe_update_directory "$TMP_DIR/scripts" "/usr/local/lib/razen/scripts" "scripts"
 
     # Update source files
     safe_update_directory "$TMP_DIR/src" "/usr/local/lib/razen/src" "source"
+    
+    # Ensure functions directory is properly updated
+    if [ -d "$TMP_DIR/src/functions" ]; then
+        echo -e "${YELLOW}Ensuring functions directory is properly updated...${NC}"
+        if [ -w "/usr/local/lib/razen/src" ]; then
+            mkdir -p "/usr/local/lib/razen/src/functions" 2>/dev/null
+            cp -r "$TMP_DIR/src/functions/"* "/usr/local/lib/razen/src/functions/" 2>/dev/null
+            echo -e "  ${GREEN}✓${NC} Updated functions directory"
+        else
+            sudo mkdir -p "/usr/local/lib/razen/src/functions" 2>/dev/null
+            sudo cp -r "$TMP_DIR/src/functions/"* "/usr/local/lib/razen/src/functions/" 2>/dev/null
+            echo -e "  ${GREEN}✓${NC} Updated functions directory (with sudo)"
+        fi
+    fi
 
     # Update examples
     safe_update_directory "$TMP_DIR/examples" "/usr/local/lib/razen/examples" "example"
@@ -425,6 +519,60 @@ else
     # Update extensions if they were downloaded
     if [ -d "$TMP_DIR/razen-vscode-extension" ] && [ "$(ls -A "$TMP_DIR/razen-vscode-extension" 2>/dev/null)" ]; then
         safe_update_directory "$TMP_DIR/razen-vscode-extension" "/usr/local/lib/razen/razen-vscode-extension" "VS Code extension"
+        
+        # Ensure VSCode extension directories are properly updated
+        echo -e "${YELLOW}Ensuring VSCode extension directories are properly updated...${NC}"
+        
+        # Create src directory
+        if [ -w "/usr/local/lib/razen/razen-vscode-extension" ]; then
+            mkdir -p "/usr/local/lib/razen/razen-vscode-extension/src" 2>/dev/null
+            mkdir -p "/usr/local/lib/razen/razen-vscode-extension/snippets" 2>/dev/null
+            mkdir -p "/usr/local/lib/razen/razen-vscode-extension/icons" 2>/dev/null
+            mkdir -p "/usr/local/lib/razen/razen-vscode-extension/language-configuration" 2>/dev/null
+            mkdir -p "/usr/local/lib/razen/razen-vscode-extension/syntaxes" 2>/dev/null
+            
+            # Copy specific files if they exist
+            if [ -d "$TMP_DIR/razen-vscode-extension/src" ]; then
+                cp -r "$TMP_DIR/razen-vscode-extension/src/"* "/usr/local/lib/razen/razen-vscode-extension/src/" 2>/dev/null
+            fi
+            if [ -d "$TMP_DIR/razen-vscode-extension/snippets" ]; then
+                cp -r "$TMP_DIR/razen-vscode-extension/snippets/"* "/usr/local/lib/razen/razen-vscode-extension/snippets/" 2>/dev/null
+            fi
+            if [ -d "$TMP_DIR/razen-vscode-extension/icons" ]; then
+                cp -r "$TMP_DIR/razen-vscode-extension/icons/"* "/usr/local/lib/razen/razen-vscode-extension/icons/" 2>/dev/null
+            fi
+            if [ -d "$TMP_DIR/razen-vscode-extension/language-configuration" ]; then
+                cp -r "$TMP_DIR/razen-vscode-extension/language-configuration/"* "/usr/local/lib/razen/razen-vscode-extension/language-configuration/" 2>/dev/null
+            fi
+            if [ -d "$TMP_DIR/razen-vscode-extension/syntaxes" ]; then
+                cp -r "$TMP_DIR/razen-vscode-extension/syntaxes/"* "/usr/local/lib/razen/razen-vscode-extension/syntaxes/" 2>/dev/null
+            fi
+            echo -e "  ${GREEN}✓${NC} Updated VSCode extension subdirectories"
+        else
+            sudo mkdir -p "/usr/local/lib/razen/razen-vscode-extension/src" 2>/dev/null
+            sudo mkdir -p "/usr/local/lib/razen/razen-vscode-extension/snippets" 2>/dev/null
+            sudo mkdir -p "/usr/local/lib/razen/razen-vscode-extension/icons" 2>/dev/null
+            sudo mkdir -p "/usr/local/lib/razen/razen-vscode-extension/language-configuration" 2>/dev/null
+            sudo mkdir -p "/usr/local/lib/razen/razen-vscode-extension/syntaxes" 2>/dev/null
+            
+            # Copy specific files if they exist
+            if [ -d "$TMP_DIR/razen-vscode-extension/src" ]; then
+                sudo cp -r "$TMP_DIR/razen-vscode-extension/src/"* "/usr/local/lib/razen/razen-vscode-extension/src/" 2>/dev/null
+            fi
+            if [ -d "$TMP_DIR/razen-vscode-extension/snippets" ]; then
+                sudo cp -r "$TMP_DIR/razen-vscode-extension/snippets/"* "/usr/local/lib/razen/razen-vscode-extension/snippets/" 2>/dev/null
+            fi
+            if [ -d "$TMP_DIR/razen-vscode-extension/icons" ]; then
+                sudo cp -r "$TMP_DIR/razen-vscode-extension/icons/"* "/usr/local/lib/razen/razen-vscode-extension/icons/" 2>/dev/null
+            fi
+            if [ -d "$TMP_DIR/razen-vscode-extension/language-configuration" ]; then
+                sudo cp -r "$TMP_DIR/razen-vscode-extension/language-configuration/"* "/usr/local/lib/razen/razen-vscode-extension/language-configuration/" 2>/dev/null
+            fi
+            if [ -d "$TMP_DIR/razen-vscode-extension/syntaxes" ]; then
+                sudo cp -r "$TMP_DIR/razen-vscode-extension/syntaxes/"* "/usr/local/lib/razen/razen-vscode-extension/syntaxes/" 2>/dev/null
+            fi
+            echo -e "  ${GREEN}✓${NC} Updated VSCode extension subdirectories (with sudo)"
+        fi
     fi
 
     if [ -d "$TMP_DIR/razen-jetbrain-plugin" ] && [ "$(ls -A "$TMP_DIR/razen-jetbrain-plugin" 2>/dev/null)" ]; then

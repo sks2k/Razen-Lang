@@ -2,10 +2,10 @@
 
 # Razen Language Installer for macOS
 # Copyright 2025 Prathmesh Barot, Basai Corporation
-# Version: beta v0.1.4
+# Version: beta v0.1.657 (Colours & Installers & Updaters updated properly.)
 
 # Repository URL
-RAZEN_REPO="https://raw.githubusercontent.com/BasaiCorp/razen-lang/main"
+RAZEN_REPO="https://raw.githubusercontent.com/BasaiCorp/Razen-Lang/main"
 
 # Colors for output
 BLUE='\033[0;34m'
@@ -547,7 +547,7 @@ create_installation_directories() {
     echo -e "  ${GREEN}✓${NC} Created main installation directory"
     
     # Create subdirectories
-    local subdirs=("src" "properties" "scripts" "examples" "razen-vscode-extension" "razen-jetbrains-plugin")
+    local subdirs=("src" "src/functions" "properties" "properties/libs" "scripts" "examples" "examples/web-example" "razen-vscode-extension" "razen-vscode-extension/src" "razen-vscode-extension/syntaxes" "razen-vscode-extension/language-configuration" "razen-vscode-extension/snippets" "razen-vscode-extension/icons" "razen-jetbrains-plugin")
     for dir in "${subdirs[@]}"; do
         if ! sudo mkdir -p "$INSTALL_DIR/$dir"; then
             cleanup_and_exit "Failed to create $INSTALL_DIR/$dir" "Check your permissions and try again"
@@ -570,7 +570,7 @@ download_razen_files() {
     fi
     
     # Download src files
-    local src_files=("lexer.py" "parser.py" "interpreter.py" "runtime.py" "__init__.py")
+    local src_files=("main.rs" "compiler.rs" "parser.rs" "lexer.rs" "interpreter.rs" "ast.rs" "token.rs" "value.rs" "library.rs" "functions.rs")
     for file in "${src_files[@]}"; do
         if ! download_with_retry "$RAZEN_REPO/src/$file" "$TMP_DIR/src/$file" "src/$file"; then
             echo -e "  ${RED}✗${NC} Failed to download src/$file"
@@ -580,8 +580,23 @@ download_razen_files() {
         fi
     done
     
+    # Create functions directory and download function files
+    mkdir -p "$TMP_DIR/src/functions"
+    echo -e "  ${GREEN}✓${NC} Created functions directory"
+    
+    # Download function files
+    local function_files=("arrlib.rs" "mathlib.rs" "strlib.rs" "randomlib.rs" "filelib.rs" "jsonlib.rs" "boltlib.rs" "seedlib.rs" "colorlib.rs" "cryptolib.rs" "regexlib.rs" "uuidlib.rs" "oslib.rs" "validationlib.rs" "systemlib.rs" "boxutillib.rs" "loglib.rs" "htlib.rs" "netlib.rs" "timelib.rs" "color.rs")
+    for file in "${function_files[@]}"; do
+        if ! download_with_retry "$RAZEN_REPO/src/functions/$file" "$TMP_DIR/src/functions/$file" "src/functions/$file"; then
+            echo -e "  ${RED}✗${NC} Failed to download src/functions/$file"
+            # Create empty file as fallback
+            touch "$TMP_DIR/src/functions/$file"
+            echo -e "  ${YELLOW}⚠${NC} Created empty src/functions/$file as fallback"
+        fi
+    done
+    
     # Download properties files
-    local prop_files=("variables.rzn" "keywords.rzn" "operators.rzn" "functions.rzn" "loops.rzn")
+    local prop_files=("variables.rzn" "keywords.rzn" "operators.rzn" "functions.rzn" "loops.rzn" "conditionals.rzn" "types.rzn" "api.rzn" "syntax.rzn" "usage.rzn")
     for file in "${prop_files[@]}"; do
         if ! download_with_retry "$RAZEN_REPO/properties/$file" "$TMP_DIR/properties/$file" "properties/$file"; then
             echo -e "  ${YELLOW}⚠${NC} Failed to download properties/$file"
@@ -591,8 +606,23 @@ download_razen_files() {
         fi
     done
     
+    # Create libs directory and download library files
+    mkdir -p "$TMP_DIR/properties/libs"
+    echo -e "  ${GREEN}✓${NC} Created libs directory"
+    
+    # Download library files
+    local lib_files=("arrlib.rzn" "strlib.rzn" "mathlib.rzn" "random.rzn" "file.rzn" "json.rzn" "bolt.rzn" "seed.rzn" "color.rzn" "crypto.rzn" "regex.rzn" "uuid.rzn" "os.rzn" "validation.rzn" "system.rzn" "boxlib.rzn" "loglib.rzn" "htlib.rzn" "netlib.rzn" "timelib.rzn")
+    for file in "${lib_files[@]}"; do
+        if ! download_with_retry "$RAZEN_REPO/properties/libs/$file" "$TMP_DIR/properties/libs/$file" "properties/libs/$file"; then
+            echo -e "  ${YELLOW}⚠${NC} Failed to download properties/libs/$file"
+            # Create empty file as fallback
+            touch "$TMP_DIR/properties/libs/$file"
+            echo -e "  ${YELLOW}⚠${NC} Created empty properties/libs/$file as fallback"
+        fi
+    done
+    
     # Download script files
-    local script_files=("razen" "razen-debug" "razen-test" "razen-run" "razen-update" "razen-help" "razen-extension" "razen-docs")
+    local script_files=("razen" "razen-debug" "razen-test" "razen-run" "razen-update" "razen-help" "razen-extension" "razen-docs" "razen-autogen" "razen-run-debug")
     for script in "${script_files[@]}"; do
         if ! download_with_retry "$RAZEN_REPO/scripts/$script" "$TMP_DIR/scripts/$script" "scripts/$script"; then
             echo -e "  ${YELLOW}⚠${NC} Failed to download scripts/$script"
@@ -608,11 +638,15 @@ download_razen_files() {
     
     # Download example files
     mkdir -p "$TMP_DIR/examples"
-    local example_files=("hello.rzn" "calculator.rzn" "quiz.rzn")
+    local example_files=("hello.rzn" "calculator.rzn" "web-example/script.rzn" "quiz.rzn" "guess.rzn" "12-16.rzn" "library_test.rzn" "color_test.rzn" "purchase.rzn" "order.rzn" "web-example/index.html" "web-example/style.css")
     for file in "${example_files[@]}"; do
         if ! download_with_retry "$RAZEN_REPO/examples/$file" "$TMP_DIR/examples/$file" "examples/$file"; then
             echo -e "  ${YELLOW}⚠${NC} Failed to download examples/$file"
-            # Continue without example files
+            # Create directory for file if needed
+            mkdir -p "$(dirname "$TMP_DIR/examples/$file")"
+            # Create empty file as fallback
+            touch "$TMP_DIR/examples/$file"
+            echo -e "  ${YELLOW}⚠${NC} Created empty examples/$file as fallback"
         fi
     done
     
@@ -669,9 +703,20 @@ copy_files_to_install_dir() {
     fi
     
     # Copy VS Code extension files
-    if [ -d "$TMP_DIR/razen-vscode-extension" ] && [ "$(ls -A "$TMP_DIR/razen-vscode-extension" 2>/dev/null)" ]; then
-        sudo cp -r "$TMP_DIR/razen-vscode-extension/"* "$INSTALL_DIR/razen-vscode-extension/" 2>/dev/null
+    if [ -d "$TMP_DIR/razen-vscode-extension" ]; then
+        # Copy all extension files
+        sudo cp -r "$TMP_DIR/razen-vscode-extension/"* "$INSTALL_DIR/razen-vscode-extension/" 2>/dev/null || true
         echo -e "  ${GREEN}✓${NC} Copied VS Code extension files"
+        
+        # Ensure all subdirectories are properly copied
+        for subdir in "src" "syntaxes" "language-configuration" "snippets" "icons"; do
+            if [ -d "$TMP_DIR/razen-vscode-extension/$subdir" ]; then
+                sudo cp -r "$TMP_DIR/razen-vscode-extension/$subdir/"* "$INSTALL_DIR/razen-vscode-extension/$subdir/" 2>/dev/null || true
+                echo -e "  ${GREEN}✓${NC} Copied VS Code extension $subdir files"
+            fi
+        done
+    else
+        echo -e "  ${YELLOW}⚠${NC} VS Code extension files not found"
     fi
     
     # Copy JetBrains plugin files
