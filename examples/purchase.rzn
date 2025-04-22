@@ -88,14 +88,11 @@ if (choise == 1) {
             show "Your API Key UUID is " + UUID[generate]();
             diff wallet = wallet - keyPrice;
             show wallet;
-            navigate to MainMenu;
         } else {
             show "Purchase Cancelled";
-            navigate to MainMenu;
         }
     } else {
         show "Not enough Credits";
-        navigate to MainMenu;
     }
 } else {
     show wallet;
@@ -130,14 +127,11 @@ if (choise == 2) {
             show model1 + "is now added to your account for a Month"
             diff wallet = wallet - keyPrice;
             show wallet;
-            navigate to MainMenu;
         } else {
             show "Purchase Cancelled";
-            navigate to MainMenu;
         }
     } else {
         show "Not enough Credits";
-        navigate to MainMenu;
     }
 } else {
     show wallet;

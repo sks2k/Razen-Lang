@@ -145,6 +145,43 @@ fi
 LATEST_VERSION=$(cat "$TMP_DIR/version.txt" | tr -d '\r\n')
 echo -e "${YELLOW}Latest version: ${GREEN}$LATEST_VERSION${NC}"
 
+# Check if install.sh exists in the installation directory
+if [ -f "$INSTALL_PATH/install.sh" ]; then
+    echo -e "${YELLOW}Found install.sh in installation directory. Using it for update...${NC}"
+    
+    # Make sure it's executable
+    chmod +x "$INSTALL_PATH/install.sh"
+    
+    # Run the installer with current directory as working directory
+    cd "$INSTALL_PATH"
+    
+    # Run the installer with --update flag
+    if [ "$1" == "--force" ]; then
+        echo -e "${YELLOW}Force update requested. Proceeding with update...${NC}"
+        ./install.sh --update --force
+    else
+        echo -e "${YELLOW}Update available. Proceeding with update...${NC}"
+        ./install.sh --update
+    fi
+    
+    # Check if update was successful
+    if [ $? -eq 0 ]; then
+        echo -e "\n${GREEN}✅ Razen has been successfully updated to version $LATEST_VERSION!${NC}"
+        echo -e "\n${YELLOW}Available commands:${NC}"
+        echo -e "  ${GREEN}razen${NC} - Run Razen programs"
+        echo -e "  ${GREEN}razen-debug${NC} - Run Razen programs in debug mode"
+        echo -e "  ${GREEN}razen-test${NC} - Run Razen tests"
+        echo -e "  ${GREEN}razen-run${NC} - Run Razen programs with additional options"
+        echo -e "  ${GREEN}razen-update${NC} - Update Razen to the latest version"
+        echo -e "  ${GREEN}razen-help${NC} - Show help information"
+        echo -e "  ${GREEN}razen new myprogram${NC} - Create a new Razen program"
+        echo -e "  ${GREEN}razen version${NC} - Show Razen version"
+        exit 0
+    else
+        echo -e "${YELLOW}Update using install.sh failed. Falling back to manual update process...${NC}"
+    fi
+fi
+
 # Compare versions
 if [ "$LATEST_VERSION" == "$CURRENT_VERSION" ] && [ "$1" != "--force" ]; then
     echo -e "${GREEN}Razen is already up to date.${NC}"
@@ -152,32 +189,177 @@ if [ "$LATEST_VERSION" == "$CURRENT_VERSION" ] && [ "$1" != "--force" ]; then
     exit 0
 else
     if [ "$1" == "--force" ]; then
-        echo -e "${YELLOW}Force update requested.${NC}"
+        echo -e "${YELLOW}Force update requested. Proceeding with manual update...${NC}"
     else
-        echo -e "${YELLOW}New version available: $LATEST_VERSION${NC}"
-        echo -e "${YELLOW}Current version: $CURRENT_VERSION${NC}"
-        
-        read -p "Do you want to update Razen? (y/n): " -n 1 -r
-        echo
-        if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-            echo -e "${BLUE}Update cancelled.${NC}"
-            rm -rf "$TMP_DIR"
-            exit 0
-        fi
+        echo -e "${YELLOW}Update available. Proceeding with manual update...${NC}"
     fi
     
-    echo -e "${YELLOW}Updating Razen from version $CURRENT_VERSION to $LATEST_VERSION...${NC}"
+    # Try to download install.sh first
+    echo -e "${YELLOW}Downloading latest install.sh from GitHub...${NC}"
+    if curl -s --retry 3 --retry-delay 2 -o "$TMP_DIR/install.sh" "$RAZEN_REPO/install.sh" &>/dev/null; then
+        echo -e "  ${GREEN}✓${NC} Downloaded install.sh"
+        chmod +x "$TMP_DIR/install.sh"
+        
+        # Run the installer with temp directory as working directory
+        cd "$TMP_DIR"
+        
+        # Run the installer with --update flag and specify the installation path
+        if [ "$1" == "--force" ]; then
+            echo -e "${YELLOW}Force update requested. Running installer...${NC}"
+            ./install.sh --update --force --path="$INSTALL_PATH"
+        else
+            echo -e "${YELLOW}Running installer...${NC}"
+            ./install.sh --update --path="$INSTALL_PATH"
+        fi
+        
+        # Check if update was successful
+        if [ $? -eq 0 ]; then
+            echo -e "\n${GREEN}✅ Razen has been successfully updated to version $LATEST_VERSION!${NC}"
+            echo -e "\n${YELLOW}Available commands:${NC}"
+            echo -e "  ${GREEN}razen${NC} - Run Razen programs"
+            echo -e "  ${GREEN}razen-debug${NC} - Run Razen programs in debug mode"
+            echo -e "  ${GREEN}razen-test${NC} - Run Razen tests"
+            echo -e "  ${GREEN}razen-run${NC} - Run Razen programs with additional options"
+            echo -e "  ${GREEN}razen-update${NC} - Update Razen to the latest version"
+            echo -e "  ${GREEN}razen-help${NC} - Show help information"
+            echo -e "  ${GREEN}razen new myprogram${NC} - Create a new Razen program"
+            echo -e "  ${GREEN}razen version${NC} - Show Razen version"
+            exit 0
+        else
+            echo -e "${YELLOW}Update using downloaded install.sh failed. Falling back to manual update process...${NC}"
+            cd - > /dev/null
+        fi
+    else
+        echo -e "  ${YELLOW}⚠${NC} Failed to download install.sh, falling back to manual update process"
+    fi
     
-    # Create necessary directories in temp folder
-    mkdir -p "$TMP_DIR/src"
-    mkdir -p "$TMP_DIR/scripts"
-    mkdir -p "$TMP_DIR/properties"
-    mkdir -p "$TMP_DIR/examples"
-    mkdir -p "$TMP_DIR/razen-vscode-extension"
-    mkdir -p "$TMP_DIR/razen-jetbrain-plugin"
-    echo -e "  ${GREEN}✓${NC} Created temporary directories"
+    # Download latest version from GitHub (fallback method)
+    echo -e "${YELLOW}Downloading latest version from GitHub using manual process...${NC}"
+    if ! curl -s --retry 3 --retry-delay 2 -o "$TMP_DIR/razen_compiler" "$RAZEN_REPO/target/release/razen_compiler" &>/dev/null; then
+        echo -e "${RED}Failed to download Razen compiler binary.${NC}"
+        echo -e "${YELLOW}Attempting to build from source...${NC}"
+        
+        # Check if cargo is available
+        if ! command -v cargo &>/dev/null; then
+            echo -e "${RED}Cargo not found. Cannot build from source.${NC}"
+            echo -e "${YELLOW}Keeping existing binary if available.${NC}"
+            
+            # Copy existing binary if available
+            if [ -f "/usr/local/bin/razen_compiler" ]; then
+                cp "/usr/local/bin/razen_compiler" "$TMP_DIR/razen_compiler"
+                echo -e "  ${GREEN}✓${NC} Copied existing compiler binary"
+            elif [ -f "$HOME/.local/bin/razen_compiler" ]; then
+                cp "$HOME/.local/bin/razen_compiler" "$TMP_DIR/razen_compiler"
+                echo -e "  ${GREEN}✓${NC} Copied existing compiler binary"
+            else
+                echo -e "${RED}Error: Could not find existing compiler binary.${NC}"
+                rm -rf "$TMP_DIR"
+                exit 1
+            fi
+        else
+            # Create Cargo.toml file
+            echo -e "${YELLOW}Creating Cargo.toml file for build...${NC}"
+            cat > "$TMP_DIR/Cargo.toml" << 'EOF'
+[package]
+name = "razen_compiler"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+# For machine code generation
+cranelift = "0.104"
+cranelift-module = "0.104"
+cranelift-jit = "0.104"      # For potentially running code directly
+cranelift-object = "0.104" # For writing object files
+target-lexicon = "0.12"     # For defining target architecture
+
+# For linking object files
+cc = "1.0"
+
+# Error handling helper
+thiserror = "1.0"
+
+# For library system
+rand = "0.8"
+rand_chacha = "0.3"
+lazy_static = "1.4"
+chrono = "0.4"
+serde_json = "1.0"
+
+# For crypto library
+sha2 = "0.10"
+base64 = "0.21"
+aes-gcm = "0.10"
+hkdf = "0.12"
+
+# For regex library
+regex = "1.9"
+
+# For UUID library
+uuid = { version = "1.4", features = ["v4", "serde"] }
+
+# For networking and HTTP requests
+curl = "0.4.44"
+reqwest = { version = "0.11", features = ["blocking", "json"] }
+tokio = { version = "1", features = ["full"] }
+
+# For logging
+log = "0.4"
+env_logger = "0.10"
+EOF
+            echo -e "  ${GREEN}✓${NC} Created Cargo.toml file"
+            
+            # Create src directory and move downloaded source files
+            mkdir -p "$TMP_DIR/src/functions"
+            
+            # Check for required dependencies
+            echo -e "${YELLOW}Checking Rust dependencies...${NC}"
+            for dep in "cranelift" "thiserror" "rand" "chrono" "serde_json" "regex" "uuid" "reqwest" "tokio"; do
+                if ! cargo search $dep &>/dev/null; then
+                    echo -e "  ${YELLOW}⚠${NC} Dependency $dep not found, will be installed during build"
+                else
+                    echo -e "  ${GREEN}✓${NC} Dependency $dep available"
+                fi
+            done
+            
+            # Build the project
+            echo -e "${YELLOW}Building Razen from source...${NC}"
+            cd "$TMP_DIR"
+            if ! cargo build --release; then
+                echo -e "${RED}Failed to build Razen from source.${NC}"
+                echo -e "${YELLOW}Keeping existing binary if available.${NC}"
+                
+                # Copy existing binary if available
+                if [ -f "/usr/local/bin/razen_compiler" ]; then
+                    cp "/usr/local/bin/razen_compiler" "$TMP_DIR/razen_compiler"
+                    echo -e "  ${GREEN}✓${NC} Copied existing compiler binary"
+                elif [ -f "$HOME/.local/bin/razen_compiler" ]; then
+                    cp "$HOME/.local/bin/razen_compiler" "$TMP_DIR/razen_compiler"
+                    echo -e "  ${GREEN}✓${NC} Copied existing compiler binary"
+                else
+                    echo -e "${RED}Error: Could not find existing compiler binary.${NC}"
+                    rm -rf "$TMP_DIR"
+                    exit 1
+                fi
+            else
+                # Copy the built binary
+                cp "$TMP_DIR/target/release/razen_compiler" "$TMP_DIR/razen_compiler"
+                echo -e "  ${GREEN}✓${NC} Built and copied Razen compiler from source"
+                cd - > /dev/null
+            fi
+        fi
+    else
+        echo -e "  ${GREEN}✓${NC} Downloaded Razen compiler binary"
+    fi
     
-    # Function to download directory contents
+    # Make the binary executable
+    chmod +x "$TMP_DIR/razen_compiler" || {
+        echo -e "${RED}Error: Failed to make binary executable.${NC}"
+        rm -rf "$TMP_DIR"
+        exit 1
+    }
+    
+    # Download each directory
     download_directory() {
         local dir_name=$1
         local target_dir=$2
@@ -317,19 +499,116 @@ else
     echo -e "${YELLOW}Downloading Razen compiler binary...${NC}"
     if ! curl -s --retry 3 --retry-delay 2 -o "$TMP_DIR/razen_compiler" "$RAZEN_REPO/target/release/razen_compiler" &>/dev/null; then
         echo -e "${RED}Failed to download Razen compiler binary.${NC}"
-        echo -e "${YELLOW}Keeping existing binary.${NC}"
+        echo -e "${YELLOW}Attempting to build from source...${NC}"
         
-        # Copy existing binary if available
-        if [ -f "/usr/local/bin/razen_compiler" ]; then
-            cp "/usr/local/bin/razen_compiler" "$TMP_DIR/razen_compiler"
-            echo -e "  ${GREEN}✓${NC} Copied existing compiler binary"
-        elif [ -f "$HOME/.local/bin/razen_compiler" ]; then
-            cp "$HOME/.local/bin/razen_compiler" "$TMP_DIR/razen_compiler"
-            echo -e "  ${GREEN}✓${NC} Copied existing compiler binary"
+        # Check if cargo is available
+        if ! command -v cargo &>/dev/null; then
+            echo -e "${RED}Cargo not found. Cannot build from source.${NC}"
+            echo -e "${YELLOW}Keeping existing binary if available.${NC}"
+            
+            # Copy existing binary if available
+            if [ -f "/usr/local/bin/razen_compiler" ]; then
+                cp "/usr/local/bin/razen_compiler" "$TMP_DIR/razen_compiler"
+                echo -e "  ${GREEN}✓${NC} Copied existing compiler binary"
+            elif [ -f "$HOME/.local/bin/razen_compiler" ]; then
+                cp "$HOME/.local/bin/razen_compiler" "$TMP_DIR/razen_compiler"
+                echo -e "  ${GREEN}✓${NC} Copied existing compiler binary"
+            else
+                echo -e "${RED}Error: Could not find existing compiler binary.${NC}"
+                rm -rf "$TMP_DIR"
+                exit 1
+            fi
         else
-            echo -e "${RED}Error: Could not find existing compiler binary.${NC}"
-            rm -rf "$TMP_DIR"
-            exit 1
+            # Create Cargo.toml file
+            echo -e "${YELLOW}Creating Cargo.toml file for build...${NC}"
+            cat > "$TMP_DIR/Cargo.toml" << 'EOF'
+[package]
+name = "razen_compiler"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+# For machine code generation
+cranelift = "0.104"
+cranelift-module = "0.104"
+cranelift-jit = "0.104"      # For potentially running code directly
+cranelift-object = "0.104" # For writing object files
+target-lexicon = "0.12"     # For defining target architecture
+
+# For linking object files
+cc = "1.0"
+
+# Error handling helper
+thiserror = "1.0"
+
+# For library system
+rand = "0.8"
+rand_chacha = "0.3"
+lazy_static = "1.4"
+chrono = "0.4"
+serde_json = "1.0"
+
+# For crypto library
+sha2 = "0.10"
+base64 = "0.21"
+aes-gcm = "0.10"
+hkdf = "0.12"
+
+# For regex library
+regex = "1.9"
+
+# For UUID library
+uuid = { version = "1.4", features = ["v4", "serde"] }
+
+# For networking and HTTP requests
+curl = "0.4.44"
+reqwest = { version = "0.11", features = ["blocking", "json"] }
+tokio = { version = "1", features = ["full"] }
+
+# For logging
+log = "0.4"
+env_logger = "0.10"
+EOF
+            echo -e "  ${GREEN}✓${NC} Created Cargo.toml file"
+            
+            # Create src directory and move downloaded source files
+            mkdir -p "$TMP_DIR/src/functions"
+            
+            # Check for required dependencies
+            echo -e "${YELLOW}Checking Rust dependencies...${NC}"
+            for dep in "cranelift" "thiserror" "rand" "chrono" "serde_json" "regex" "uuid" "reqwest" "tokio"; do
+                if ! cargo search $dep &>/dev/null; then
+                    echo -e "  ${YELLOW}⚠${NC} Dependency $dep not found, will be installed during build"
+                else
+                    echo -e "  ${GREEN}✓${NC} Dependency $dep available"
+                fi
+            done
+            
+            # Build the project
+            echo -e "${YELLOW}Building Razen from source...${NC}"
+            cd "$TMP_DIR"
+            if ! cargo build --release; then
+                echo -e "${RED}Failed to build Razen from source.${NC}"
+                echo -e "${YELLOW}Keeping existing binary if available.${NC}"
+                
+                # Copy existing binary if available
+                if [ -f "/usr/local/bin/razen_compiler" ]; then
+                    cp "/usr/local/bin/razen_compiler" "$TMP_DIR/razen_compiler"
+                    echo -e "  ${GREEN}✓${NC} Copied existing compiler binary"
+                elif [ -f "$HOME/.local/bin/razen_compiler" ]; then
+                    cp "$HOME/.local/bin/razen_compiler" "$TMP_DIR/razen_compiler"
+                    echo -e "  ${GREEN}✓${NC} Copied existing compiler binary"
+                else
+                    echo -e "${RED}Error: Could not find existing compiler binary.${NC}"
+                    rm -rf "$TMP_DIR"
+                    exit 1
+                fi
+            else
+                # Copy the built binary
+                cp "$TMP_DIR/target/release/razen_compiler" "$TMP_DIR/razen_compiler"
+                echo -e "  ${GREEN}✓${NC} Built and copied Razen compiler from source"
+                cd - > /dev/null
+            fi
         fi
     else
         echo -e "  ${GREEN}✓${NC} Downloaded Razen compiler binary"
@@ -352,17 +631,33 @@ else
         echo -e "${YELLOW}Ensuring functions directory is properly downloaded...${NC}"
         mkdir -p "$TMP_DIR/src/functions" 2>/dev/null
         local function_files="arrlib.rs mathlib.rs strlib.rs randomlib.rs filelib.rs jsonlib.rs boltlib.rs seedlib.rs colorlib.rs cryptolib.rs regexlib.rs uuidlib.rs oslib.rs validationlib.rs systemlib.rs boxutillib.rs loglib.rs htlib.rs netlib.rs timelib.rs color.rs"
+        local downloaded_count=0
+        local total_files=0
+        
         for func_file in $function_files; do
-            echo -e "    ${CYAN}Downloading${NC} functions/$func_file"
+            total_files=$((total_files + 1))
             if curl -s --retry 3 --retry-delay 2 -o "$TMP_DIR/src/functions/$func_file" "$RAZEN_REPO/src/functions/$func_file" &>/dev/null; then
-                echo -e "    ${GREEN}✓${NC} Downloaded functions/$func_file"
+                downloaded_count=$((downloaded_count + 1))
+                echo -e "  ${GREEN}✓${NC} Downloaded functions/$func_file"
             else
-                echo -e "    ${RED}✗${NC} Failed to download functions/$func_file"
+                echo -e "  ${RED}✗${NC} Failed to download functions/$func_file"
             fi
         done
-        echo -e "  ${GREEN}✓${NC} Completed functions directory download"
+        
+        echo -e "  ${GREEN}✓${NC} Downloaded $downloaded_count/$total_files function files"
+        
+        # Now copy the downloaded files
+        if [ -w "/usr/local/lib/razen/src" ]; then
+            mkdir -p "/usr/local/lib/razen/src/functions" 2>/dev/null
+            cp -r "$TMP_DIR/src/functions/"* "/usr/local/lib/razen/src/functions/" 2>/dev/null
+            echo -e "  ${GREEN}✓${NC} Updated functions directory"
+        else
+            sudo mkdir -p "/usr/local/lib/razen/src/functions" 2>/dev/null
+            sudo cp -r "$TMP_DIR/src/functions/"* "/usr/local/lib/razen/src/functions/" 2>/dev/null
+            echo -e "  ${GREEN}✓${NC} Updated functions directory (with sudo)"
+        fi
     fi
-    
+
     # Handle properties/libs directory separately if it wasn't already downloaded
     if [ ! -d "$TMP_DIR/properties/libs" ]; then
         echo -e "${YELLOW}Ensuring libs directory is properly downloaded...${NC}"
@@ -526,9 +821,9 @@ else
             total_files=$((total_files + 1))
             if curl -s --retry 3 --retry-delay 2 -o "$TMP_DIR/src/functions/$func_file" "$RAZEN_REPO/src/functions/$func_file" &>/dev/null; then
                 downloaded_count=$((downloaded_count + 1))
-                echo -e "  ${GREEN}✓${NC} Downloaded $func_file"
+                echo -e "  ${GREEN}✓${NC} Downloaded functions/$func_file"
             else
-                echo -e "  ${RED}✗${NC} Failed to download $func_file"
+                echo -e "  ${RED}✗${NC} Failed to download functions/$func_file"
             fi
         done
         
@@ -708,6 +1003,19 @@ else
         echo -e "${YELLOW}Warning: Failed to recreate some symbolic links.${NC}"
         echo -e "${YELLOW}You may need to manually create them.${NC}"
     }
+    
+    # Save the install.sh to the installation directory for future updates
+    if [ -f "$TMP_DIR/install.sh" ]; then
+        if [ -w "$INSTALL_PATH" ]; then
+            cp "$TMP_DIR/install.sh" "$INSTALL_PATH/install.sh"
+            chmod +x "$INSTALL_PATH/install.sh"
+            echo -e "  ${GREEN}✓${NC} Saved install.sh to installation directory for future updates"
+        else
+            sudo cp "$TMP_DIR/install.sh" "$INSTALL_PATH/install.sh"
+            sudo chmod +x "$INSTALL_PATH/install.sh"
+            echo -e "  ${GREEN}✓${NC} Saved install.sh to installation directory for future updates (with sudo)"
+        fi
+    fi
     
     # Clean up
     rm -rf "$TMP_DIR"

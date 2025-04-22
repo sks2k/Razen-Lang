@@ -1,0 +1,29 @@
+The install.sh has some issues with downlaoding right files.
+it will first check and find these folders and their files from github repo.
+for this it will make do git clone in a temorary or any folder where razen stores. andthe cloning it will copy/downlaod these folder's and files to the main razen folder.
+/src folder and it's files
+/src/functions folder and it's files
+/properties folder and it's files
+/properties/libs folder and it's files
+/scripts folder and it's files
+/examples folder and it's files
+/docs folder and it's files
+Cargo.toml files
+
+also show that which all files are detected.
+
+and show a message that all files are downloaded successfully.
+and also show a downloded log for each file.
+
+and the in the scripts folder it will make all scripts executable and make symbolic links for them all as their name.
+
+and tehn it will detect the rust is installed or not and make sure proeprly detect.
+
+and then go to folder where these files downlaoded and then run the cargo build command.
+and after it build successfully, it will show a message that all files are built successfully.
+
+and the install.sh is good but need to update it.
+
+and then it will show a message that all files are installed successfully.
+
+this way we get perfect one and no error becuase we will directly colne first github repo and then copy all files to the main razen folder.
