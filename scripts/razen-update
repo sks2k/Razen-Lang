@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Razen Language Update Utility
 # Copyright 2025 Prathmesh Barot, Basai Corporation
-# Version: beta v0.1.657 (Colours & Installers & Updaters updated properly.)
+# Version: beta v0.1.658 (Enhanced GitHub cloning and installation process)
 
 # Colors for terminal output
 GREEN="\033[0;32m"
@@ -12,8 +12,9 @@ PURPLE="\033[0;35m"
 CYAN="\033[0;36m"
 NC="\033[0m" # No Color
 
-# Repository URL
+# Repository URLs
 RAZEN_REPO="https://raw.githubusercontent.com/BasaiCorp/Razen-Lang/main"
+RAZEN_GIT_REPO="https://github.com/BasaiCorp/Razen-Lang.git"
 
 # Print banner
 echo -e "${BLUE}"
@@ -60,12 +61,19 @@ find_install_path() {
             echo "/usr/local/razen"
         elif [ -d "$HOME/.local/lib/razen" ]; then
             echo "$HOME/.local/lib/razen"
+        elif [ -d "$HOME/Library/razen" ]; then
+            echo "$HOME/Library/razen"
         else
             echo ""
         fi
     elif [ "$OS" == "windows" ]; then
+        # Check for Windows installation paths when running in WSL or similar
         if [ -d "/mnt/c/Program Files/Razen" ]; then
             echo "/mnt/c/Program Files/Razen"
+        elif [ -d "$HOME/AppData/Local/Razen" ]; then
+            echo "$HOME/AppData/Local/Razen"
+        elif [ -d "/c/Program Files/Razen" ]; then
+            echo "/c/Program Files/Razen"
         else
             echo ""
         fi
@@ -145,9 +153,9 @@ fi
 LATEST_VERSION=$(cat "$TMP_DIR/version.txt" | tr -d '\r\n')
 echo -e "${YELLOW}Latest version: ${GREEN}$LATEST_VERSION${NC}"
 
-# Check if install.sh exists in the installation directory
-if [ -f "$INSTALL_PATH/install.sh" ]; then
-    echo -e "${YELLOW}Found install.sh in installation directory. Using it for update...${NC}"
+# Check for appropriate installer based on OS
+if [ "$OS" == "linux" ] && [ -f "$INSTALL_PATH/install.sh" ]; then
+    echo -e "${YELLOW}Found Linux installer in installation directory. Using it for update...${NC}"
     
     # Make sure it's executable
     chmod +x "$INSTALL_PATH/install.sh"
@@ -180,6 +188,75 @@ if [ -f "$INSTALL_PATH/install.sh" ]; then
     else
         echo -e "${YELLOW}Update using install.sh failed. Falling back to manual update process...${NC}"
     fi
+elif [ "$OS" == "macos" ] && [ -f "$INSTALL_PATH/install-mac.sh" ]; then
+    echo -e "${YELLOW}Found macOS installer in installation directory. Using it for update...${NC}"
+    
+    # Make sure it's executable
+    chmod +x "$INSTALL_PATH/install-mac.sh"
+    
+    # Run the installer with current directory as working directory
+    cd "$INSTALL_PATH"
+    
+    # Run the installer with --update flag
+    if [ "$1" == "--force" ]; then
+        echo -e "${YELLOW}Force update requested. Proceeding with update...${NC}"
+        ./install-mac.sh --update --force
+    else
+        echo -e "${YELLOW}Update available. Proceeding with update...${NC}"
+        ./install-mac.sh --update
+    fi
+    
+    # Check if update was successful
+    if [ $? -eq 0 ]; then
+        echo -e "\n${GREEN}✅ Razen has been successfully updated to version $LATEST_VERSION!${NC}"
+        echo -e "\n${YELLOW}Available commands:${NC}"
+        echo -e "  ${GREEN}razen${NC} - Run Razen programs"
+        echo -e "  ${GREEN}razen-debug${NC} - Run Razen programs in debug mode"
+        echo -e "  ${GREEN}razen-test${NC} - Run Razen tests"
+        echo -e "  ${GREEN}razen-run${NC} - Run Razen programs with additional options"
+        echo -e "  ${GREEN}razen-update${NC} - Update Razen to the latest version"
+        echo -e "  ${GREEN}razen-help${NC} - Show help information"
+        echo -e "  ${GREEN}razen new myprogram${NC} - Create a new Razen program"
+        echo -e "  ${GREEN}razen version${NC} - Show Razen version"
+        exit 0
+    else
+        echo -e "${YELLOW}Update using install-mac.sh failed. Falling back to manual update process...${NC}"
+    fi
+elif [ "$OS" == "windows" ] && [ -f "$INSTALL_PATH/install.ps1" ]; then
+    echo -e "${YELLOW}Found Windows installer in installation directory.${NC}"
+    
+    # Check if PowerShell is available
+    if command -v powershell &> /dev/null; then
+        echo -e "${YELLOW}Using PowerShell to run the Windows installer...${NC}"
+        
+        # Run the installer with --update flag
+        if [ "$1" == "--force" ]; then
+            echo -e "${YELLOW}Force update requested. Proceeding with update...${NC}"
+            powershell -ExecutionPolicy Bypass -File "$INSTALL_PATH/install.ps1" update --force
+        else
+            echo -e "${YELLOW}Update available. Proceeding with update...${NC}"
+            powershell -ExecutionPolicy Bypass -File "$INSTALL_PATH/install.ps1" update
+        fi
+        
+        # Check if update was successful
+        if [ $? -eq 0 ]; then
+            echo -e "\n${GREEN}✅ Razen has been successfully updated to version $LATEST_VERSION!${NC}"
+            echo -e "\n${YELLOW}Available commands:${NC}"
+            echo -e "  ${GREEN}razen${NC} - Run Razen programs"
+            echo -e "  ${GREEN}razen-debug${NC} - Run Razen programs in debug mode"
+            echo -e "  ${GREEN}razen-test${NC} - Run Razen tests"
+            echo -e "  ${GREEN}razen-run${NC} - Run Razen programs with additional options"
+            echo -e "  ${GREEN}razen-update${NC} - Update Razen to the latest version"
+            echo -e "  ${GREEN}razen-help${NC} - Show help information"
+            echo -e "  ${GREEN}razen new myprogram${NC} - Create a new Razen program"
+            echo -e "  ${GREEN}razen version${NC} - Show Razen version"
+            exit 0
+        else
+            echo -e "${YELLOW}Update using install.ps1 failed. Falling back to manual update process...${NC}"
+        fi
+    else
+        echo -e "${YELLOW}PowerShell not found. Cannot run Windows installer. Falling back to manual update process...${NC}"
+    fi
 fi
 
 # Compare versions
@@ -194,23 +271,97 @@ else
         echo -e "${YELLOW}Update available. Proceeding with manual update...${NC}"
     fi
     
-    # Try to download install.sh first
-    echo -e "${YELLOW}Downloading latest install.sh from GitHub...${NC}"
-    if curl -s --retry 3 --retry-delay 2 -o "$TMP_DIR/install.sh" "$RAZEN_REPO/install.sh" &>/dev/null; then
-        echo -e "  ${GREEN}✓${NC} Downloaded install.sh"
-        chmod +x "$TMP_DIR/install.sh"
-        
-        # Run the installer with temp directory as working directory
-        cd "$TMP_DIR"
-        
-        # Run the installer with --update flag and specify the installation path
-        if [ "$1" == "--force" ]; then
-            echo -e "${YELLOW}Force update requested. Running installer...${NC}"
-            ./install.sh --update --force --path="$INSTALL_PATH"
+    # Try to download the appropriate installer based on OS
+    if [ "$OS" == "linux" ]; then
+        echo -e "${YELLOW}Downloading latest Linux installer from GitHub...${NC}"
+        if curl -s --retry 3 --retry-delay 2 -o "$TMP_DIR/install.sh" "$RAZEN_REPO/install.sh" &>/dev/null; then
+            echo -e "  ${GREEN}✓${NC} Downloaded install.sh"
+            chmod +x "$TMP_DIR/install.sh"
+            
+            # Run the installer with temp directory as working directory
+            cd "$TMP_DIR"
+            
+            # Run the installer with --update flag and specify the installation path
+            if [ "$1" == "--force" ]; then
+                echo -e "${YELLOW}Force update requested. Running installer...${NC}"
+                ./install.sh --update --force --path="$INSTALL_PATH"
+            else
+                echo -e "${YELLOW}Running installer...${NC}"
+                ./install.sh --update --path="$INSTALL_PATH"
+            fi
         else
-            echo -e "${YELLOW}Running installer...${NC}"
-            ./install.sh --update --path="$INSTALL_PATH"
+            echo -e "  ${YELLOW}⚠${NC} Failed to download Linux installer"
+            DOWNLOAD_FAILED=true
         fi
+    elif [ "$OS" == "macos" ]; then
+        echo -e "${YELLOW}Downloading latest macOS installer from GitHub...${NC}"
+        if curl -s --retry 3 --retry-delay 2 -o "$TMP_DIR/install-mac.sh" "$RAZEN_REPO/install-mac.sh" &>/dev/null; then
+            echo -e "  ${GREEN}✓${NC} Downloaded install-mac.sh"
+            chmod +x "$TMP_DIR/install-mac.sh"
+            
+            # Run the installer with temp directory as working directory
+            cd "$TMP_DIR"
+            
+            # Run the installer with --update flag and specify the installation path
+            if [ "$1" == "--force" ]; then
+                echo -e "${YELLOW}Force update requested. Running installer...${NC}"
+                ./install-mac.sh --update --force --path="$INSTALL_PATH"
+            else
+                echo -e "${YELLOW}Running installer...${NC}"
+                ./install-mac.sh --update --path="$INSTALL_PATH"
+            fi
+        else
+            echo -e "  ${YELLOW}⚠${NC} Failed to download macOS installer"
+            DOWNLOAD_FAILED=true
+        fi
+    elif [ "$OS" == "windows" ]; then
+        echo -e "${YELLOW}Downloading latest Windows installer from GitHub...${NC}"
+        if curl -s --retry 3 --retry-delay 2 -o "$TMP_DIR/install.ps1" "$RAZEN_REPO/install.ps1" &>/dev/null; then
+            echo -e "  ${GREEN}✓${NC} Downloaded install.ps1"
+            
+            # Check if PowerShell is available
+            if command -v powershell &> /dev/null; then
+                # Run the installer with temp directory as working directory
+                cd "$TMP_DIR"
+                
+                # Run the installer with update flag
+                if [ "$1" == "--force" ]; then
+                    echo -e "${YELLOW}Force update requested. Running installer...${NC}"
+                    powershell -ExecutionPolicy Bypass -File "./install.ps1" update --force
+                else
+                    echo -e "${YELLOW}Running installer...${NC}"
+                    powershell -ExecutionPolicy Bypass -File "./install.ps1" update
+                fi
+            else
+                echo -e "${YELLOW}PowerShell not found. Cannot run Windows installer.${NC}"
+                DOWNLOAD_FAILED=true
+            fi
+        else
+            echo -e "  ${YELLOW}⚠${NC} Failed to download Windows installer"
+            DOWNLOAD_FAILED=true
+        fi
+    else
+        echo -e "${YELLOW}Unknown operating system. Trying Linux installer as fallback...${NC}"
+        if curl -s --retry 3 --retry-delay 2 -o "$TMP_DIR/install.sh" "$RAZEN_REPO/install.sh" &>/dev/null; then
+            echo -e "  ${GREEN}✓${NC} Downloaded install.sh"
+            chmod +x "$TMP_DIR/install.sh"
+            
+            # Run the installer with temp directory as working directory
+            cd "$TMP_DIR"
+            
+            # Run the installer with --update flag and specify the installation path
+            if [ "$1" == "--force" ]; then
+                echo -e "${YELLOW}Force update requested. Running installer...${NC}"
+                ./install.sh --update --force --path="$INSTALL_PATH"
+            else
+                echo -e "${YELLOW}Running installer...${NC}"
+                ./install.sh --update --path="$INSTALL_PATH"
+            fi
+        else
+            echo -e "  ${YELLOW}⚠${NC} Failed to download Linux installer"
+            DOWNLOAD_FAILED=true
+        fi
+    fi
         
         # Check if update was successful
         if [ $? -eq 0 ]; then

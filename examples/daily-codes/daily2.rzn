@@ -1,0 +1,21 @@
+type cli;
+
+# Libs Import
+lib netlib;
+
+# I/O Statement for getting Website URL
+show(yellow) "Enter a website url here:";
+read website;
+take status = NetLib[ping](website);
+
+# IF ELSE Condition for it if the website is Online so show Website is Online or Website is Offline
+if (status == "true") {
+    show(green) "Website is Online";
+} else {
+    show(red) "Website is Offline";
+    show(blue) "Check your url again or the website is moved to the new address."
+}
+
+# Show Test is successful
+show(green) "Test Done!"
+show(blue) "Daily code by Prathmesh </> (2/100)"

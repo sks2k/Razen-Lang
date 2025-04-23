@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Razen Language Help Script
 # Copyright © 2025 Prathmesh Barot, Basai Corporation
-# Version: beta v0.1.657 (Colours & Installers & Updaters updated properly.)
+# Version: beta v0.1.658 (Enhanced GitHub cloning and installation process)
 
 # Colors for terminal output
 BLUE="\033[0;34m"

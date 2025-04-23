@@ -2,10 +2,11 @@
 
 # Razen Language Installer for macOS
 # Copyright 2025 Prathmesh Barot, Basai Corporation
-# Version: beta v0.1.657 (Colours & Installers & Updaters updated properly.)
+# Version: beta v0.1.658 (Enhanced GitHub cloning and installation process)
 
-# Repository URL
+# Repository URLs
 RAZEN_REPO="https://raw.githubusercontent.com/BasaiCorp/Razen-Lang/main"
+RAZEN_GIT_REPO="https://github.com/BasaiCorp/Razen-Lang.git"
 
 # Colors for output
 BLUE='\033[0;34m'
@@ -794,6 +795,63 @@ check_and_install_rust() {
     return 0
 }
 
+# Function to build the Razen compiler
+build_razen_compiler() {
+    echo -e "${YELLOW}Building Razen compiler...${NC}"
+    
+    # Check if Rust is installed
+    if ! command -v rustc &> /dev/null || ! command -v cargo &> /dev/null; then
+        echo -e "${YELLOW}Rust not installed or not properly configured. Skipping build.${NC}"
+        echo -e "${YELLOW}Creating placeholder binary for installation to continue...${NC}"
+        echo '#!/bin/bash\necho "Razen compiler placeholder - Rust not installed"' > "$TMP_DIR/razen_compiler"
+        chmod +x "$TMP_DIR/razen_compiler"
+        return 1
+    fi
+    
+    # Check if Cargo.toml exists
+    if [ ! -f "$TMP_DIR/Cargo.toml" ]; then
+        echo -e "${YELLOW}Cargo.toml not found. Creating a default one...${NC}"
+        create_default_cargo_toml "$TMP_DIR/Cargo.toml"
+    fi
+    
+    # Navigate to the temporary directory
+    cd "$TMP_DIR"
+    
+    echo -e "${CYAN}Running cargo build...${NC}"
+    
+    # Try to build the compiler
+    if ! cargo build --release; then
+        echo -e "${RED}Failed to build Razen compiler.${NC}"
+        echo -e "${YELLOW}Creating placeholder binary for installation to continue...${NC}"
+        echo '#!/bin/bash\necho "Razen compiler placeholder - Build failed"' > "$TMP_DIR/razen_compiler"
+        chmod +x "$TMP_DIR/razen_compiler"
+        
+        # Return to the original directory
+        cd - > /dev/null
+        return 1
+    fi
+    
+    # Check if the binary was created
+    if [ -f "$TMP_DIR/target/release/razen_compiler" ]; then
+        echo -e "${GREEN}✓${NC} Successfully built Razen compiler"
+        cp "$TMP_DIR/target/release/razen_compiler" "$TMP_DIR/razen_compiler"
+        chmod +x "$TMP_DIR/razen_compiler"
+    else
+        echo -e "${RED}Build completed but binary not found.${NC}"
+        echo -e "${YELLOW}Creating placeholder binary for installation to continue...${NC}"
+        echo '#!/bin/bash\necho "Razen compiler placeholder - Binary not found after build"' > "$TMP_DIR/razen_compiler"
+        chmod +x "$TMP_DIR/razen_compiler"
+        
+        # Return to the original directory
+        cd - > /dev/null
+        return 1
+    fi
+    
+    # Return to the original directory
+    cd - > /dev/null
+    return 0
+}
+
 # Get version from the version file
 echo -e "${YELLOW}Checking Razen version...${NC}"
 if [ -f "version" ]; then
@@ -803,11 +861,18 @@ else
     # Download version file if not present
     if ! download_with_retry "$RAZEN_REPO/version" "version" "version information"; then
         echo -e "${YELLOW}Using default version due to download failure.${NC}"
-        RAZEN_VERSION="beta v0.1.4"
+        RAZEN_VERSION="beta v0.1.658"
     else
         RAZEN_VERSION=$(cat version)
         echo -e "  ${GREEN}✓${NC} Downloaded version information: $RAZEN_VERSION"
     fi
+fi
+
+# Display appropriate message based on update mode
+if [ "$UPDATE_MODE" = true ]; then
+    echo -e "${YELLOW}Updating Razen to $RAZEN_VERSION...${NC}"
+else
+    echo -e "${YELLOW}Installing Razen $RAZEN_VERSION...${NC}"
 fi
 
 # Remove any trailing whitespace or newlines
@@ -842,19 +907,136 @@ fi
 echo -e "${GREEN}  ✓ Created temporary directory${NC}"
 
 # Create necessary directories in temp folder
-mkdir -p "$TMP_DIR/src"
-mkdir -p "$TMP_DIR/properties"
+mkdir -p "$TMP_DIR/src/functions"
+mkdir -p "$TMP_DIR/properties/libs"
 mkdir -p "$TMP_DIR/scripts"
 mkdir -p "$TMP_DIR/examples"
 mkdir -p "$TMP_DIR/razen-vscode-extension"
 mkdir -p "$TMP_DIR/razen-jetbrains-plugin"
+echo -e "${GREEN}  ✓ Created all necessary directories${NC}"
+
+# Process command line arguments
+UPDATE_MODE=false
+FORCE_UPDATE=false
+CUSTOM_INSTALL_PATH=""
+
+# Process command line arguments
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        --uninstall)
+            uninstall_razen
+            exit $?
+            ;;
+        --update)
+            UPDATE_MODE=true
+            ;;
+        --force)
+            FORCE_UPDATE=true
+            ;;
+        --path=*)
+            CUSTOM_INSTALL_PATH="${1#*=}"
+            ;;
+        *)
+            echo -e "${RED}Unknown option: $1${NC}"
+            echo -e "${YELLOW}Available options: --uninstall, --update, --force, --path=PATH${NC}"
+            exit 1
+            ;;
+    esac
+    shift
+done
 
 # Create installation directory
 INSTALL_DIR="/usr/local/razen"
+
+# If update mode is enabled, set the installation directory
+if [ "$UPDATE_MODE" = true ] && [ -n "$CUSTOM_INSTALL_PATH" ]; then
+    INSTALL_DIR="$CUSTOM_INSTALL_PATH"
+    echo -e "${YELLOW}Update mode: Using custom installation path: $INSTALL_DIR${NC}"
+elif [ "$UPDATE_MODE" = true ]; then
+    # Try to find existing installation
+    if [ -d "/usr/local/razen" ]; then
+        INSTALL_DIR="/usr/local/razen"
+    elif [ -d "$HOME/.local/lib/razen" ]; then
+        INSTALL_DIR="$HOME/.local/lib/razen"
+    elif [ -d "$HOME/Library/razen" ]; then
+        INSTALL_DIR="$HOME/Library/razen"
+    fi
+    echo -e "${YELLOW}Update mode: Using detected installation path: $INSTALL_DIR${NC}"
+fi
+
+# Check for existing installation
+if [ "$UPDATE_MODE" = true ] || [ -d "$INSTALL_DIR" ] && [ "$FORCE_UPDATE" != "true" ]; then
+    # Check for updates
+    check_for_updates
+    UPDATE_STATUS=$?
+    
+    if [ $UPDATE_STATUS -eq 2 ]; then
+        # New version available
+        echo -e "${YELLOW}Do you want to update Razen to the latest version? (y/n)${NC}"
+        read -p "Enter your choice: " update_choice
+        
+        if [[ $update_choice =~ ^[Yy]$ ]]; then
+            echo -e "${YELLOW}Proceeding with update...${NC}"
+        else
+            echo -e "${YELLOW}Update cancelled. Exiting.${NC}"
+            rm -rf "$TMP_DIR"
+            exit 0
+        fi
+    elif [ $UPDATE_STATUS -eq 0 ]; then
+        # Already up to date
+        if [ "$UPDATE_MODE" = true ]; then
+            echo -e "${GREEN}No update needed. Exiting.${NC}"
+            rm -rf "$TMP_DIR"
+            exit 0
+        fi
+    else
+        # Error checking for updates
+        echo -e "${YELLOW}Continuing with installation despite update check failure.${NC}"
+    fi
+fi
+
 create_installation_directories
 
-# Download Razen files
-download_razen_files
+# Flag to determine if we should use direct download
+USE_DIRECT_DOWNLOAD=false
+
+# First attempt to clone the GitHub repository
+echo -e "${YELLOW}Attempting to clone the GitHub repository...${NC}"
+if check_git_installed && clone_github_repository "$TMP_DIR"; then
+    echo -e "${GREEN}✓${NC} Successfully cloned the GitHub repository"
+    
+    # Copy files from the cloned repository
+    if copy_from_repository "$TMP_DIR" "$TMP_DIR"; then
+        echo -e "${GREEN}✓${NC} Successfully copied files from the cloned repository"
+        USE_DIRECT_DOWNLOAD=false
+        
+        # Verify the directory structure
+        echo -e "${CYAN}Verifying directory structure:${NC}"
+        verify_directory_structure "$TMP_DIR"
+    else
+        echo -e "${YELLOW}Failed to copy files from cloned repository. Trying direct download method...${NC}"
+        USE_DIRECT_DOWNLOAD=true
+    fi
+else
+    # Fallback to the direct download method if cloning fails
+    echo -e "${YELLOW}Git clone failed. Trying direct download method...${NC}"
+    USE_DIRECT_DOWNLOAD=true
+fi
+
+# If direct download is needed
+if [ "$USE_DIRECT_DOWNLOAD" = true ]; then
+    # Download Razen files
+    download_razen_files
+    
+    # Create Cargo.toml if it doesn't exist
+    if [ ! -f "$TMP_DIR/Cargo.toml" ]; then
+        echo -e "${YELLOW}Cargo.toml not found. Creating a default one...${NC}"
+        create_default_cargo_toml "$TMP_DIR/Cargo.toml"
+    fi
+    
+    # Verify directory structure
+    verify_directory_structure "$TMP_DIR"
+fi
 
 # Copy files to installation directory
 copy_files_to_install_dir
@@ -867,6 +1049,19 @@ symlink_result=$?
 # Check for Rust installation
 check_and_install_rust
 rust_installed=$?
+
+# Build the Razen compiler if Rust is installed
+if [ $rust_installed -eq 0 ]; then
+    build_razen_compiler
+    build_result=$?
+    if [ $build_result -eq 0 ]; then
+        echo -e "${GREEN}✓${NC} Razen compiler built successfully"
+    else
+        echo -e "${YELLOW}Razen compiler build failed or was skipped. Using placeholder.${NC}"
+    fi
+else
+    echo -e "${YELLOW}Skipping Razen compiler build due to missing Rust.${NC}"
+fi
 
 # Ask about IDE extension installation
 echo -e "\n${YELLOW}Would you like to install IDE extensions for Razen?${NC}"

@@ -1,12 +1,13 @@
 # Razen Language Installer for Windows
 # Copyright 2025 Prathmesh Barot, Basai Corporation
-# Version: beta v0.1.657 (Colours & Installers & Updaters updated properly.)
+# Version: beta v0.1.658 (Enhanced GitHub cloning and installation process)
 
 # Enable TLS 1.2 for all web requests
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
-# Repository URL
+# Repository URLs
 $RAZEN_REPO = "https://raw.githubusercontent.com/BasaiCorp/Razen-Lang/main"
+$RAZEN_GIT_REPO = "https://github.com/BasaiCorp/Razen-Lang.git"
 
 # Error handling and cleanup function
 function Handle-Error {
@@ -56,6 +57,224 @@ function Test-InternetConnectivity {
     Write-ColorOutput "  ✗ No internet connection detected" "Red"
     Write-ColorOutput "    Please check your network connection and try again" "Yellow"
     return $false
+}
+
+# Function to check if Git is installed
+function Test-GitInstalled {
+    try {
+        $gitVersion = (git --version 2>$null)
+        if ($gitVersion) {
+            Write-ColorOutput "  ✓ Git detected: $gitVersion" "Green"
+            return $true
+        }
+        Write-ColorOutput "  ✗ Git not found" "Red"
+        return $false
+    } catch {
+        Write-ColorOutput "  ✗ Git not found" "Red"
+        return $false
+    }
+}
+
+# Function to clone the GitHub repository
+function Clone-GitRepository {
+    param (
+        [string]$TargetDir
+    )
+    
+    Write-ColorOutput "Cloning the Razen GitHub repository..." "Yellow"
+    
+    # Check if git is installed
+    if (-not (Test-GitInstalled)) {
+        Write-ColorOutput "Git is not installed. Please install Git first." "Red"
+        Write-ColorOutput "You can download Git from https://git-scm.com/downloads" "Yellow"
+        return $false
+    }
+    
+    # Try to clone from the official repository
+    Write-ColorOutput "  Attempting to clone from: $RAZEN_GIT_REPO" "Cyan"
+    try {
+        git clone --depth 1 $RAZEN_GIT_REPO "$TargetDir\razen-repo" 2>$null
+        if (Test-Path "$TargetDir\razen-repo") {
+            Write-ColorOutput "  ✓ Successfully cloned Razen repository" "Green"
+            
+            # Count and log files in the cloned repository
+            $fileCount = (Get-ChildItem -Recurse -File "$TargetDir\razen-repo").Count
+            Write-ColorOutput "  ✓ Cloned repository contains $fileCount files" "Green"
+            
+            # List key directories to verify
+            foreach ($dir in @("src", "properties", "scripts")) {
+                if (Test-Path "$TargetDir\razen-repo\$dir") {
+                    $dirFileCount = (Get-ChildItem -Recurse -File "$TargetDir\razen-repo\$dir").Count
+                    Write-ColorOutput "  ✓ Found $dir directory with $dirFileCount files" "Green"
+                } else {
+                    Write-ColorOutput "  ⚠ Directory $dir not found in cloned repository" "Yellow"
+                }
+            }
+            
+            return $true
+        }
+    } catch {
+        # Try a fallback repository if the main one fails
+        Write-ColorOutput "Main repository clone failed, trying fallback..." "Yellow"
+        
+        try {
+            git clone --depth 1 "https://github.com/BasaiCorp/Razen-Lang.git" "$TargetDir\razen-repo" 2>$null
+            if (Test-Path "$TargetDir\razen-repo") {
+                Write-ColorOutput "  ✓ Successfully cloned from fallback repository" "Green"
+                
+                # Count and log files in the cloned repository
+                $fileCount = (Get-ChildItem -Recurse -File "$TargetDir\razen-repo").Count
+                Write-ColorOutput "  ✓ Cloned repository contains $fileCount files" "Green"
+                
+                # List key directories to verify
+                foreach ($dir in @("src", "properties", "scripts")) {
+                    if (Test-Path "$TargetDir\razen-repo\$dir") {
+                        $dirFileCount = (Get-ChildItem -Recurse -File "$TargetDir\razen-repo\$dir").Count
+                        Write-ColorOutput "  ✓ Found $dir directory with $dirFileCount files" "Green"
+                    } else {
+                        Write-ColorOutput "  ⚠ Directory $dir not found in cloned repository" "Yellow"
+                    }
+                }
+                
+                return $true
+            }
+        } catch {
+            Write-ColorOutput "All git clone attempts failed" "Red"
+            return $false
+        }
+    }
+    
+    Write-ColorOutput "Failed to clone repository" "Red"
+    return $false
+}
+
+# Function to copy files from the cloned repository
+function Copy-FromRepository {
+    param (
+        [string]$SourceDir,
+        [string]$TargetDir
+    )
+    
+    Write-ColorOutput "Copying files from cloned repository..." "Yellow"
+    
+    # Check if the repository was cloned successfully
+    $repoDir = Join-Path $SourceDir "razen-repo"
+    if (-not (Test-Path $repoDir)) {
+        Write-ColorOutput "  ✗ Repository directory not found." "Red"
+        return $false
+    }
+    
+    # Define required folders to copy
+    $requiredFolders = @("src", "properties", "scripts", "examples", "docs", "razen-vscode-extension", "razen-jetbrains-plugin")
+    
+    # Initialize counters for detailed logging
+    $totalCopied = 0
+    $totalMissing = 0
+    $copiedFilesList = @()
+    
+    # Copy files from the cloned repository
+    try {
+        # Copy main.py if it exists
+        if (Test-Path "$repoDir\main.py") {
+            Copy-Item "$repoDir\main.py" "$TargetDir\main.py" -Force
+            Write-ColorOutput "  ✓ Copied main.py" "Green"
+            $totalCopied++
+            $copiedFilesList += "main.py"
+        } else {
+            Write-ColorOutput "  ⚠ main.py not found in repository" "Yellow"
+            $totalMissing++
+        }
+        
+        # Copy Cargo.toml if it exists
+        if (Test-Path "$repoDir\Cargo.toml") {
+            Copy-Item "$repoDir\Cargo.toml" "$TargetDir\Cargo.toml" -Force
+            Write-ColorOutput "  ✓ Copied Cargo.toml" "Green"
+            $totalCopied++
+            $copiedFilesList += "Cargo.toml"
+        } else {
+            Write-ColorOutput "  ⚠ Cargo.toml not found in repository" "Yellow"
+            $totalMissing++
+        }
+        
+        # Copy each required folder
+        foreach ($folder in $requiredFolders) {
+            if (Test-Path "$repoDir\$folder") {
+                Write-ColorOutput "  Copying $folder/ directory..." "Blue"
+                
+                # Create the target directory if it doesn't exist
+                if (-not (Test-Path "$TargetDir\$folder")) {
+                    New-Item -ItemType Directory -Path "$TargetDir\$folder" -Force | Out-Null
+                }
+                
+                # Get file count before copying
+                $filesBefore = (Get-ChildItem "$TargetDir\$folder" -Recurse -File).Count
+                
+                # Copy all files and subdirectories recursively
+                Copy-Item "$repoDir\$folder\*" "$TargetDir\$folder" -Recurse -Force -ErrorAction SilentlyContinue
+                
+                # Get file count after copying
+                $filesAfter = (Get-ChildItem "$TargetDir\$folder" -Recurse -File).Count
+                $filesCopied = $filesAfter - $filesBefore
+                
+                if ($filesCopied -gt 0) {
+                    Write-ColorOutput "  ✓ Copied $filesCopied files from $folder directory" "Green"
+                    $totalCopied += $filesCopied
+                    
+                    # Log some sample files (up to 5)
+                    $sampleFiles = Get-ChildItem "$TargetDir\$folder" -Recurse -File | Select-Object -First 5 | ForEach-Object { $_.Name }
+                    Write-ColorOutput "    Sample files: $($sampleFiles -join ', ')" "Blue"
+                    
+                    $copiedFilesList += "$folder"
+                } else {
+                    Write-ColorOutput "  ⚠ No files copied from $folder (directory empty or copy failed)" "Yellow"
+                    $totalMissing++
+                }
+            } else {
+                Write-ColorOutput "  ⚠ $folder not found in repository, creating empty directory" "Yellow"
+                New-Item -ItemType Directory -Path "$TargetDir\$folder" -Force | Out-Null
+                $totalMissing++
+            }
+        }
+        
+        # Check for src/functions and properties/libs subdirectories
+        Write-ColorOutput "Checking for important subdirectories:" "Cyan"
+        
+        # Check for src/functions
+        if (Test-Path "$TargetDir\src\functions") {
+            $funcCount = (Get-ChildItem "$TargetDir\src\functions" -File).Count
+            Write-ColorOutput "  ✓ Found src/functions directory with $funcCount files" "Green"
+        } else {
+            Write-ColorOutput "  ⚠ src/functions directory not found, creating it" "Yellow"
+            New-Item -ItemType Directory -Path "$TargetDir\src\functions" -Force | Out-Null
+        }
+        
+        # Check for properties/libs
+        if (Test-Path "$TargetDir\properties\libs") {
+            $libsCount = (Get-ChildItem "$TargetDir\properties\libs" -File).Count
+            Write-ColorOutput "  ✓ Found properties/libs directory with $libsCount files" "Green"
+        } else {
+            Write-ColorOutput "  ⚠ properties/libs directory not found, creating it" "Yellow"
+            New-Item -ItemType Directory -Path "$TargetDir\properties\libs" -Force | Out-Null
+        }
+        
+        # Summary of copied files
+        Write-ColorOutput "Copy summary:" "Cyan"
+        Write-ColorOutput "  ✓ Successfully copied $totalCopied files from repository" "Green"
+        if ($totalMissing -gt 0) {
+            Write-ColorOutput "  ⚠ $totalMissing directories or files were missing or empty" "Yellow"
+        }
+        
+        # Return success if we copied at least some files
+        if ($totalCopied -gt 0) {
+            return $true
+        } else {
+            Write-ColorOutput "  ✗ No files were copied from the repository." "Red"
+            return $false
+        }
+    } catch {
+        Write-ColorOutput "  ✗ Error copying files from repository: $($_.Exception.Message)" "Red"
+        return $false
+    }
 }
 
 # Function to check if running as administrator
@@ -165,8 +384,22 @@ function Perform-Update {
         $installerFile = Join-Path $env:TEMP "razen-update-installer.ps1"
         Invoke-WebRequest -Uri $installerUrl -OutFile $installerFile -ErrorAction Stop
 
-        # Run the installer with the latest version
-        & $installerFile
+        # Build arguments for the installer
+        $updateArgs = @()
+        if ($FORCE_UPDATE) {
+            $updateArgs += "--force-update"
+        } else {
+            $updateArgs += "--update"
+        }
+        
+        # Add installation path
+        if ($installDir) {
+            $updateArgs += "--path=$installDir"
+        }
+
+        # Run the installer with the latest version and arguments
+        Write-ColorOutput "Running installer with arguments: $updateArgs" "Yellow"
+        & $installerFile $updateArgs
         return $LASTEXITCODE
     } catch {
         Write-ColorOutput "Failed to download the latest installer." "Red"
@@ -176,6 +409,217 @@ function Perform-Update {
         # Clean up temporary installer file
         if (Test-Path $installerFile) {
             Remove-Item $installerFile -Force -ErrorAction SilentlyContinue
+        }
+    }
+}
+
+# Function to create a default Cargo.toml file
+function Create-DefaultCargoToml {
+    param (
+        [string]$TargetFile
+    )
+    
+    Write-ColorOutput "Creating default Cargo.toml file..." "Yellow"
+    
+    $cargoContent = @"
+[package]
+name = "razen_compiler"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+# For machine code generation
+cranelift = "0.100.0"
+cranelift-module = "0.100.0"
+cranelift-jit = "0.100.0"
+cranelift-object = "0.100.0"
+target-lexicon = "0.12.12"
+cc = "1.0.83"
+
+# Error handling helper
+thiserror = "1.0"
+
+# For library system
+rand = "0.8"
+rand_chacha = "0.3"
+lazy_static = "1.4"
+chrono = "0.4"
+serde_json = "1.0"
+
+# For crypto library
+sha2 = "0.10"
+base64 = "0.21"
+aes-gcm = "0.10"
+hkdf = "0.12"
+
+# For regex library
+regex = "1.9"
+
+# For UUID library
+uuid = { version = "1.4", features = ["v4", "serde"] }
+
+# For networking and HTTP requests
+curl = "0.4.44"
+reqwest = { version = "0.11", features = ["blocking", "json"] }
+tokio = { version = "1", features = ["full"] }
+
+# For logging
+log = "0.4"
+env_logger = "0.10"
+"@
+    
+    try {
+        Set-Content -Path $TargetFile -Value $cargoContent -Force -ErrorAction Stop
+        Write-ColorOutput "  ✓ Created default Cargo.toml file" "Green"
+        return $true
+    } catch {
+        Write-ColorOutput "  ✗ Failed to create Cargo.toml file" "Red"
+        Write-ColorOutput "    Error: $($_.Exception.Message)" "Red"
+        return $false
+    }
+}
+
+# Function to verify directory structure after copying
+function Verify-DirectoryStructure {
+    param (
+        [string]$TargetDir
+    )
+    
+    Write-ColorOutput "Verifying directory structure..." "Yellow"
+    
+    foreach ($dir in @("src", "properties", "scripts")) {
+        if (Test-Path "$TargetDir\$dir") {
+            $dirFileCount = (Get-ChildItem -Recurse -File "$TargetDir\$dir").Count
+            Write-ColorOutput "  ✓ $dir directory contains $dirFileCount files" "Green"
+        } else {
+            Write-ColorOutput "  ✗ $dir directory is missing" "Red"
+            return $false
+        }
+    }
+    
+    # Check for specific important subdirectories
+    if (-not (Test-Path "$TargetDir\src\functions")) {
+        Write-ColorOutput "  ⚠ src/functions directory is missing, creating it" "Yellow"
+        New-Item -ItemType Directory -Path "$TargetDir\src\functions" -Force | Out-Null
+    }
+    
+    if (-not (Test-Path "$TargetDir\properties\libs")) {
+        Write-ColorOutput "  ⚠ properties/libs directory is missing, creating it" "Yellow"
+        New-Item -ItemType Directory -Path "$TargetDir\properties\libs" -Force | Out-Null
+    }
+    
+    # Check for Cargo.toml
+    if (-not (Test-Path "$TargetDir\Cargo.toml")) {
+        Write-ColorOutput "  ⚠ Cargo.toml is missing, creating a default one" "Yellow"
+        Create-DefaultCargoToml -TargetFile "$TargetDir\Cargo.toml"
+    }
+    
+    return $true
+}
+
+# Function to check for Rust installation
+function Test-RustInstalled {
+    try {
+        $rustcVersion = (rustc --version 2>$null)
+        if ($rustcVersion) {
+            $rustcVersionNum = $rustcVersion -replace 'rustc ([0-9]+\.[0-9]+\.[0-9]+).*', '$1'
+            Write-ColorOutput "  ✓ Rustc detected: $rustcVersion" "Green"
+            
+            # Check if rustc version is sufficient (needs 1.60.0 or higher)
+            if ([version]$rustcVersionNum -ge [version]"1.60.0") {
+                Write-ColorOutput "  ✓ Rustc version is sufficient (>= 1.60.0)" "Green"
+            } else {
+                Write-ColorOutput "  ⚠ Rustc version is too old (< 1.60.0), consider updating" "Yellow"
+            }
+            
+            # Check for cargo
+            $cargoVersion = (cargo --version 2>$null)
+            if ($cargoVersion) {
+                Write-ColorOutput "  ✓ Cargo detected: $cargoVersion" "Green"
+                
+                # Check if cargo can find required dependencies
+                Write-ColorOutput "  Checking cargo environment..." "Cyan"
+                try {
+                    $cargoList = (cargo --list 2>$null)
+                    Write-ColorOutput "  ✓ Cargo environment is working properly" "Green"
+                } catch {
+                    Write-ColorOutput "  ⚠ Cargo environment may have issues" "Yellow"
+                }
+                
+                # Check for rustup (for better Rust management)
+                try {
+                    $rustupVersion = (rustup --version 2>$null)
+                    if ($rustupVersion) {
+                        Write-ColorOutput "  ✓ Rustup detected: $rustupVersion" "Green"
+                        
+                        # Check active toolchain
+                        $activeToolchain = (rustup show active-toolchain 2>$null)
+                        Write-ColorOutput "  ✓ Active Rust toolchain: $activeToolchain" "Green"
+                    }
+                } catch {
+                    Write-ColorOutput "  ⚠ Rustup not found (recommended for managing Rust)" "Yellow"
+                }
+                
+                Write-ColorOutput "  ✓ Rust is properly installed" "Green"
+                return $true
+            } else {
+                Write-ColorOutput "  ✗ Cargo not found" "Red"
+                return $false
+            }
+        } else {
+            Write-ColorOutput "  ✗ Rustc not found" "Red"
+            return $false
+        }
+    } catch {
+        Write-ColorOutput "  ✗ Rust is not installed or not properly configured" "Red"
+        return $false
+    }
+}
+
+# Function to install Rust
+function Install-Rust {
+    Write-ColorOutput "Installing Rust..." "Yellow"
+    
+    try {
+        # Download rustup-init.exe
+        $rustupInitUrl = "https://win.rustup.rs/x86_64"
+        $rustupInitPath = "$env:TEMP\rustup-init.exe"
+        
+        Write-ColorOutput "  Downloading Rust installer..." "Cyan"
+        Invoke-WebRequest -Uri $rustupInitUrl -OutFile $rustupInitPath -UseBasicParsing
+        
+        if (Test-Path $rustupInitPath) {
+            Write-ColorOutput "  ✓ Downloaded Rust installer" "Green"
+            
+            # Run rustup-init.exe with default settings
+            Write-ColorOutput "  Installing Rust (this may take a few minutes)..." "Cyan"
+            Start-Process -FilePath $rustupInitPath -ArgumentList "-y" -Wait
+            
+            # Refresh environment variables
+            $env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User")
+            
+            # Verify installation
+            if (Test-RustInstalled) {
+                Write-ColorOutput "  ✓ Rust has been successfully installed" "Green"
+                return $true
+            } else {
+                Write-ColorOutput "  ✗ Rust installation verification failed" "Red"
+                Write-ColorOutput "    You may need to restart your PowerShell session" "Yellow"
+                return $false
+            }
+        } else {
+            Write-ColorOutput "  ✗ Failed to download Rust installer" "Red"
+            return $false
+        }
+    } catch {
+        Write-ColorOutput "  ✗ Failed to install Rust" "Red"
+        Write-ColorOutput "    Error: $($_.Exception.Message)" "Red"
+        Write-ColorOutput "    Please install Rust manually from https://rustup.rs" "Yellow"
+        return $false
+    } finally {
+        # Clean up the installer
+        if (Test-Path $rustupInitPath) {
+            Remove-Item $rustupInitPath -Force -ErrorAction SilentlyContinue
         }
     }
 }
@@ -811,14 +1255,44 @@ if ($DO_UNINSTALL) {
     Uninstall-Razen # This function exits the script
 }
 
-# Define installation directory
+# Define default installation directory
 $installDir = "C:\Program Files\Razen"
+
+# Check if we're running with admin privileges
+$isAdmin = ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+
+# If not running as admin, use local app data instead
+if (-not $isAdmin) {
+    $installDir = "$env:LOCALAPPDATA\Razen"
+    Write-ColorOutput "Running without admin privileges. Will install to $installDir" "Yellow"
+}
 
 # Check for update action or if already installed (presence of version file)
 $versionFilePath = Join-Path $installDir "version"
+
+# Check if Razen is installed in other locations
+if (-not (Test-Path $versionFilePath)) {
+    $alternateInstallDirs = @(
+        "$env:LOCALAPPDATA\Razen",
+        "$env:USERPROFILE\Razen",
+        "$env:ProgramFiles\Razen",
+        "$env:ProgramFiles(x86)\Razen"
+    )
+    
+    foreach ($altDir in $alternateInstallDirs) {
+        $altVersionPath = Join-Path $altDir "version"
+        if (Test-Path $altVersionPath) {
+            $installDir = $altDir
+            $versionFilePath = $altVersionPath
+            Write-ColorOutput "Found existing Razen installation at $installDir" "Cyan"
+            break
+        }
+    }
+}
+
 if ($DO_UPDATE_CHECK -or (Test-Path $versionFilePath)) {
     if ($DO_UPDATE_CHECK) { Write-ColorOutput "Update requested." "Cyan"}
-    elseif (Test-Path $versionFilePath) { Write-ColorOutput "Existing installation detected. Checking for updates." "Cyan"}
+    elseif (Test-Path $versionFilePath) { Write-ColorOutput "Existing installation detected at $installDir. Checking for updates." "Cyan"}
 
     # Check for updates
     $updateStatus = Check-ForUpdates
@@ -840,8 +1314,19 @@ if ($DO_UPDATE_CHECK -or (Test-Path $versionFilePath)) {
             Remove-Item $TMP_DIR -Recurse -Force -ErrorAction SilentlyContinue
             exit 1
         }
-        # Assuming Perform-Update runs the new installer which then exits
-        Write-ColorOutput "Update process started." "Green" # Message before exiting current script
+        
+        # Show success message after update
+        Write-ColorOutput "\n✅ Razen has been successfully updated to version $LATEST_VERSION!" "Green"
+        Write-ColorOutput "\nAvailable commands:" "Yellow"
+        Write-ColorOutput "  razen - Run Razen programs" "Green"
+        Write-ColorOutput "  razen-debug - Run Razen programs in debug mode" "Green"
+        Write-ColorOutput "  razen-test - Run Razen tests" "Green"
+        Write-ColorOutput "  razen-run - Run Razen programs with additional options" "Green"
+        Write-ColorOutput "  razen-update - Update Razen to the latest version" "Green"
+        Write-ColorOutput "  razen-help - Show help information" "Green"
+        Write-ColorOutput "  razen new myprogram - Create a new Razen program" "Green"
+        Write-ColorOutput "  razen version - Show Razen version" "Green"
+        
         Remove-Item $TMP_DIR -Recurse -Force -ErrorAction SilentlyContinue
         exit 0
     } elseif ($updateStatus -eq 0) { # Already up to date
@@ -917,105 +1402,222 @@ foreach ($dir in $dirsToCreate) {
 }
 Write-ColorOutput "  ✓ Installation directory structure prepared." "Green"
 
+# Flag to determine if we should use direct download
+$USE_DIRECT_DOWNLOAD = $false
 
-# Helper function for downloads
-$maxRetries = 3
-$retryCount = 0
-$downloadSuccess = $false
+# First attempt to clone the GitHub repository
+Write-ColorOutput "Attempting to clone the GitHub repository..." "Yellow"
+if (Clone-GitRepository -TargetDir $TMP_DIR) {
+    Write-ColorOutput "✓ Successfully cloned the GitHub repository" "Green"
+    
+    # Copy files from the cloned repository
+    if (Copy-FromRepository -SourceDir $TMP_DIR -TargetDir $TMP_DIR) {
+        Write-ColorOutput "✓ Successfully copied files from the cloned repository" "Green"
+        $USE_DIRECT_DOWNLOAD = $false
+        
+        # Verify the directory structure
+        Write-ColorOutput "Verifying directory structure:" "Cyan"
+        Verify-DirectoryStructure -TargetDir $TMP_DIR
+    } else {
+        Write-ColorOutput "Failed to copy files from cloned repository. Trying direct download method..." "Yellow"
+        $USE_DIRECT_DOWNLOAD = $true
+    }
+} else {
+    # Fallback to the direct download method if cloning fails
+    Write-ColorOutput "Git clone failed. Trying direct download method..." "Yellow"
+    $USE_DIRECT_DOWNLOAD = $true
+}
 
-while (-not $downloadSuccess -and $retryCount -lt $maxRetries) {
-    try {
-        # Download main.py
-        if (-not (Download-File -Uri "$RAZEN_REPO/main.py" -OutFilePath (Join-Path $TMP_DIR "main.py") -Description "main.py")) { $downloadSuccess = $false }
-        
-        # Download src files
-        $srcFiles = @("main.rs", "compiler.rs", "parser.rs", "lexer.rs", "interpreter.rs", "ast.rs", "token.rs", "value.rs", "library.rs", "functions.rs")
-        New-Item -ItemType Directory -Path (Join-Path $TMP_DIR "src") -Force | Out-Null # Ensure temp src dir exists
-        foreach ($file in $srcFiles) {
-            if (-not (Download-File -Uri "$RAZEN_REPO/src/$file" -OutFilePath (Join-Path $TMP_DIR "src\$file") -Description "src/$file")) { $downloadSuccess = $false }
-        }
-        
-        # Download function files
-        Write-ColorOutput "    Downloading function files..." "Yellow"
-        $functionFiles = @("arrlib.rs", "mathlib.rs", "strlib.rs", "randomlib.rs", "filelib.rs", "jsonlib.rs", "boltlib.rs", "seedlib.rs", "colorlib.rs", "cryptolib.rs", "regexlib.rs", "uuidlib.rs", "oslib.rs", "validationlib.rs", "systemlib.rs", "boxutillib.rs", "loglib.rs", "htlib.rs", "netlib.rs", "timelib.rs", "color.rs")
-        New-Item -ItemType Directory -Path (Join-Path $TMP_DIR "src\functions") -Force | Out-Null # Ensure temp src/functions dir exists
-        foreach ($file in $functionFiles) {
-            if (-not (Download-File -Uri "$RAZEN_REPO/src/functions/$file" -OutFilePath (Join-Path $TMP_DIR "src\functions\$file") -Description "src/functions/$file")) { $downloadSuccess = $false }
-        }
-        
-        # Download properties files
-        $propFiles = @("variables.rzn", "keywords.rzn", "operators.rzn")
-        New-Item -ItemType Directory -Path (Join-Path $TMP_DIR "properties") -Force | Out-Null # Ensure temp props dir exists
-        foreach ($file in $propFiles) {
-            if (-not (Download-File -Uri "$RAZEN_REPO/properties/$file" -OutFilePath (Join-Path $TMP_DIR "properties\$file") -Description "properties/$file")) {
-                Write-ColorOutput "    ⚠ Creating empty properties/$file as fallback." "Yellow"
-                New-Item -ItemType File -Path (Join-Path $TMP_DIR "properties\$file") -Force | Out-Null
-                # Continue even if download fails, with empty file
+# If direct download is needed
+if ($USE_DIRECT_DOWNLOAD) {
+    # Helper function for downloads
+    $maxRetries = 3
+    $retryCount = 0
+    $downloadSuccess = $false
+
+    while (-not $downloadSuccess -and $retryCount -lt $maxRetries) {
+        try {
+            # Download main.py
+            if (-not (Download-File -Uri "$RAZEN_REPO/main.py" -OutFilePath (Join-Path $TMP_DIR "main.py") -Description "main.py")) { $downloadSuccess = $false }
+            
+            # Download src files
+            $srcFiles = @("main.rs", "compiler.rs", "parser.rs", "lexer.rs", "interpreter.rs", "ast.rs", "token.rs", "value.rs", "library.rs", "functions.rs")
+            New-Item -ItemType Directory -Path (Join-Path $TMP_DIR "src") -Force | Out-Null # Ensure temp src dir exists
+            foreach ($file in $srcFiles) {
+                if (-not (Download-File -Uri "$RAZEN_REPO/src/$file" -OutFilePath (Join-Path $TMP_DIR "src\$file") -Description "src/$file")) { $downloadSuccess = $false }
+            }
+            
+            # Download function files
+            Write-ColorOutput "    Downloading function files..." "Yellow"
+            $functionFiles = @("arrlib.rs", "mathlib.rs", "strlib.rs", "randomlib.rs", "filelib.rs", "jsonlib.rs", "boltlib.rs", "seedlib.rs", "colorlib.rs", "cryptolib.rs", "regexlib.rs", "uuidlib.rs", "oslib.rs", "validationlib.rs", "systemlib.rs", "boxutillib.rs", "loglib.rs", "htlib.rs", "netlib.rs", "timelib.rs", "color.rs")
+            New-Item -ItemType Directory -Path (Join-Path $TMP_DIR "src\functions") -Force | Out-Null # Ensure temp src/functions dir exists
+            foreach ($file in $functionFiles) {
+                if (-not (Download-File -Uri "$RAZEN_REPO/src/functions/$file" -OutFilePath (Join-Path $TMP_DIR "src\functions\$file") -Description "src/functions/$file")) { $downloadSuccess = $false }
+            }
+            
+            # Download properties files
+            $propFiles = @("variables.rzn", "keywords.rzn", "operators.rzn")
+            New-Item -ItemType Directory -Path (Join-Path $TMP_DIR "properties") -Force | Out-Null # Ensure temp props dir exists
+            foreach ($file in $propFiles) {
+                if (-not (Download-File -Uri "$RAZEN_REPO/properties/$file" -OutFilePath (Join-Path $TMP_DIR "properties\$file") -Description "properties/$file")) {
+                    Write-ColorOutput "    ⚠ Creating empty properties/$file as fallback." "Yellow"
+                    New-Item -ItemType File -Path (Join-Path $TMP_DIR "properties\$file") -Force | Out-Null
+                    # Continue even if download fails, with empty file
+                }
+            }
+            
+            # Download script files
+            $scriptsToDownload = @("razen", "razen-debug", "razen-test", "razen-run", "razen-update", "razen-help", "razen-extension", "razen-docs", "razen-autogen", "razen-run-debug")
+            New-Item -ItemType Directory -Path (Join-Path $TMP_DIR "scripts") -Force | Out-Null # Ensure temp scripts dir exists
+            foreach ($script in $scriptsToDownload) {
+                 if (-not (Download-File -Uri "$RAZEN_REPO/scripts/$script" -OutFilePath (Join-Path $TMP_DIR "scripts\$script") -Description "scripts/$script")) {
+                    Write-ColorOutput "    ⚠ Creating empty scripts/$script as fallback." "Yellow"
+                    New-Item -ItemType File -Path (Join-Path $TMP_DIR "scripts\$script") -Force | Out-Null
+                    # Continue even if download fails, with empty file
+                 }
+            }
+            
+            # Download extension files
+            Write-ColorOutput "Downloading IDE extension placeholders (if available)..." "Yellow"
+            Download-File -Uri "$RAZEN_REPO/razen-vscode-extension/README.md" -OutFilePath (Join-Path $TMP_DIR "razen-vscode-extension\README.md") -Description "VS Code Extension README" # Example
+            Download-File -Uri "$RAZEN_REPO/razen-jetbrains-plugin/README.md" -OutFilePath (Join-Path $TMP_DIR "razen-jetbrains-plugin\README.md") -Description "JetBrains Plugin README" # Example
+            
+            $downloadSuccess = $true
+        } catch {
+            $retryCount++
+            if ($retryCount -lt $maxRetries) {
+                Write-ColorOutput "  ✗ Download attempt $retryCount failed. Retrying in 2 seconds..." "Yellow"
+                Start-Sleep -Seconds 2
+            } else {
+                Write-ColorOutput "  ✗ Failed to download Razen core files after $maxRetries attempts" "Red"
+                Write-ColorOutput "    Error: $($_.Exception.Message)" "Red"
+                Write-ColorOutput "    Please check your internet connection and try again." "Yellow"
+                Remove-Item $TMP_DIR -Recurse -Force -ErrorAction SilentlyContinue
+                exit 1
             }
         }
-        
-        # Download script files
-        $scriptsToDownload = @("razen", "razen-debug", "razen-test", "razen-run", "razen-update", "razen-help", "razen-extension", "razen-docs", "razen-autogen", "razen-run-debug")
-        New-Item -ItemType Directory -Path (Join-Path $TMP_DIR "scripts") -Force | Out-Null # Ensure temp scripts dir exists
-        foreach ($script in $scriptsToDownload) {
-             if (-not (Download-File -Uri "$RAZEN_REPO/scripts/$script" -OutFilePath (Join-Path $TMP_DIR "scripts\$script") -Description "scripts/$script")) {
-                Write-ColorOutput "    ⚠ Creating empty scripts/$script as fallback." "Yellow"
-                New-Item -ItemType File -Path (Join-Path $TMP_DIR "scripts\$script") -Force | Out-Null
-                # Continue even if download fails, with empty file
-             }
-        }
-        
-        # Download extension files (assuming they are directories in the repo)
-        # This part needs adjustment based on how extensions are stored in the repo.
-        # Option 1: Download zip files
-        # Option 2: Download individual files recursively (complex)
-        # Option 3: Assume they are pre-packaged and download core files only for now
-        # Let's assume we only download placeholders or need manual steps for now.
-        # We created the target dirs earlier. Let's download a placeholder README or core file if available.
-        Write-ColorOutput "Downloading IDE extension placeholders (if available)..." "Yellow"
-        Download-File -Uri "$RAZEN_REPO/razen-vscode-extension/README.md" -OutFilePath (Join-Path $TMP_DIR "razen-vscode-extension\README.md") -Description "VS Code Extension README" # Example
-        Download-File -Uri "$RAZEN_REPO/razen-jetbrains-plugin/README.md" -OutFilePath (Join-Path $TMP_DIR "razen-jetbrains-plugin\README.md") -Description "JetBrains Plugin README" # Example
-        
-        $downloadSuccess = $true
-    } catch {
-        $retryCount++
-        if ($retryCount -lt $maxRetries) {
-            Write-ColorOutput "  ✗ Download attempt $retryCount failed. Retrying in 2 seconds..." "Yellow"
-            Start-Sleep -Seconds 2
-        } else {
-            Write-ColorOutput "  ✗ Failed to download Razen core files after $maxRetries attempts" "Red"
-            Write-ColorOutput "    Error: $($_.Exception.Message)" "Red"
-            Write-ColorOutput "    Please check your internet connection and try again." "Yellow"
-            Remove-Item $TMP_DIR -Recurse -Force -ErrorAction SilentlyContinue
-            exit 1
-        }
     }
-}
 
-if (-not $downloadSuccess) {
-    Handle-Error -ErrorMessage "Failed to download Razen core files" -RecoveryHint "Check your internet connection and try again"
+    if (-not $downloadSuccess) {
+        Handle-Error -ErrorMessage "Failed to download Razen core files" -RecoveryHint "Check your internet connection and try again"
+    }
+    Write-ColorOutput "  ✓ All downloads completed." "Green"
+    
+    # Create Cargo.toml if it doesn't exist
+    if (-not (Test-Path "$TMP_DIR\Cargo.toml")) {
+        Write-ColorOutput "Cargo.toml not found. Creating a default one..." "Yellow"
+        Create-DefaultCargoToml -TargetFile "$TMP_DIR\Cargo.toml"
+    }
+    
+    # Verify directory structure
+    Verify-DirectoryStructure -TargetDir $TMP_DIR
 }
-Write-ColorOutput "  ✓ All downloads completed." "Green"
-
 
 # Copy downloaded files from temporary directory to installation directory
 Write-ColorOutput "Copying files to installation directory..." "Yellow"
 try {
-    # Copy main.py
-    Copy-Item (Join-Path $TMP_DIR "main.py") $installDir -Force -ErrorAction Stop
-    # Copy src directory contents
-    Copy-Item (Join-Path $TMP_DIR "src\*") (Join-Path $installDir "src") -Recurse -Force -ErrorAction Stop
-    # Copy properties directory contents
-    Copy-Item (Join-Path $TMP_DIR "properties\*") (Join-Path $installDir "properties") -Recurse -Force -ErrorAction Stop
-    # Copy scripts directory contents
-    Copy-Item (Join-Path $TMP_DIR "scripts\*") (Join-Path $installDir "scripts") -Recurse -Force -ErrorAction Stop
-    # Copy extension directory contents (placeholders for now)
-    Copy-Item (Join-Path $TMP_DIR "razen-vscode-extension\*") (Join-Path $installDir "razen-vscode-extension") -Recurse -Force -ErrorAction Stop
-    Copy-Item (Join-Path $TMP_DIR "razen-jetbrains-plugin\*") (Join-Path $installDir "razen-jetbrains-plugin") -Recurse -Force -ErrorAction Stop
-
-    Write-ColorOutput "  ✓ Copied files to $installDir" "Green"
+    # Copy all files from temp to installation directory
+    Copy-Item -Path "$TMP_DIR\*" -Destination $installDir -Recurse -Force
+    Write-ColorOutput "  ✓ Files copied successfully to $installDir" "Green"
+    
+    # Set proper permissions for script files
+    Write-ColorOutput "Setting proper permissions for script files..." "Yellow"
+    try {
+        $scriptFiles = Get-ChildItem -Path "$installDir\scripts" -File -ErrorAction SilentlyContinue
+        foreach ($script in $scriptFiles) {
+            # In Windows, we don't need to set executable permissions like in Linux/macOS,
+            # but we should ensure the files are not read-only
+            if (Test-Path $script.FullName) {
+                Set-ItemProperty -Path $script.FullName -Name IsReadOnly -Value $false
+                Write-ColorOutput "  ✓ Set permissions for $($script.Name)" "Green"
+            }
+        }
+        Write-ColorOutput "  ✓ All script permissions set successfully" "Green"
+    } catch {
+        Write-ColorOutput "  ✗ Warning: Could not set permissions for some script files" "Yellow"
+        Write-ColorOutput "    Error: $($_.Exception.Message)" "Yellow"
+        # Continue installation despite permission issues
+    }
 } catch {
-     Handle-Error -ErrorMessage "Failed to copy downloaded files to installation directory" -RecoveryHint "Check permissions and try again"
+    Handle-Error -ErrorMessage "Failed to copy files to installation directory" -RecoveryHint "Check permissions and try again"
+}
+
+# Check if Rust is installed and build the compiler
+Write-ColorOutput "Checking for Rust installation..." "Yellow"
+if (Test-RustInstalled) {
+    Write-ColorOutput "  ✓ Rust is installed" "Green"
+    
+    # Build the Razen compiler
+    Write-ColorOutput "Building Razen compiler..." "Yellow"
+    try {
+        # Change to the installation directory
+        Push-Location $installDir
+        
+        # Run cargo build
+        $buildOutput = & cargo build 2>&1
+        
+        if ($LASTEXITCODE -eq 0) {
+            Write-ColorOutput "  ✓ Razen compiler built successfully" "Green"
+        } else {
+            Write-ColorOutput "  ✗ Failed to build Razen compiler" "Red"
+            Write-ColorOutput "Build output:" "Red"
+            Write-ColorOutput $buildOutput "Red"
+            Write-ColorOutput "You may need to build the compiler manually later." "Yellow"
+        }
+        
+        # Return to previous directory
+        Pop-Location
+    } catch {
+        Write-ColorOutput "  ✗ Error during build process: $($_.Exception.Message)" "Red"
+        Write-ColorOutput "You may need to build the compiler manually later." "Yellow"
+    }
+} else {
+    Write-ColorOutput "  ✗ Rust is not installed" "Yellow"
+    
+    # Ask if the user wants to install Rust
+    Write-ColorOutput "Rust is required to build the Razen compiler." "Yellow"
+    Write-ColorOutput "Do you want to install Rust now? (y/n)" "Cyan"
+    $installRust = Read-Host
+    
+    if ($installRust -eq "y" -or $installRust -eq "Y") {
+        # Install Rust
+        if (Install-Rust) {
+            Write-ColorOutput "  ✓ Rust installed successfully" "Green"
+            
+            # Build the Razen compiler
+            Write-ColorOutput "Building Razen compiler..." "Yellow"
+            try {
+                # Change to the installation directory
+                Push-Location $installDir
+                
+                # Run cargo build
+                $buildOutput = & cargo build 2>&1
+                
+                if ($LASTEXITCODE -eq 0) {
+                    Write-ColorOutput "  ✓ Razen compiler built successfully" "Green"
+                } else {
+                    Write-ColorOutput "  ✗ Failed to build Razen compiler" "Red"
+                    Write-ColorOutput "Build output:" "Red"
+                    Write-ColorOutput $buildOutput "Red"
+                    Write-ColorOutput "You may need to build the compiler manually later." "Yellow"
+                }
+                
+                # Return to previous directory
+                Pop-Location
+            } catch {
+                Write-ColorOutput "  ✗ Error during build process: $($_.Exception.Message)" "Red"
+                Write-ColorOutput "You may need to build the compiler manually later." "Yellow"
+            }
+        } else {
+            Write-ColorOutput "  ✗ Failed to install Rust" "Red"
+            Write-ColorOutput "Please install Rust manually from https://www.rust-lang.org/tools/install" "Yellow"
+            Write-ColorOutput "After installing Rust, you can build the Razen compiler by running 'cargo build' in the $installDir directory." "Yellow"
+        }
+    } else {
+        Write-ColorOutput "Skipping Rust installation." "Yellow"
+        Write-ColorOutput "You will need to install Rust manually from https://www.rust-lang.org/tools/install" "Yellow"
+        Write-ColorOutput "After installing Rust, you can build the Razen compiler by running 'cargo build' in the $installDir directory." "Yellow"
+    }
 }
 
 # Download and save the latest installer script for future updates
