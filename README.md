@@ -1,4 +1,4 @@
-# Razen Programming Language (beta v0.1.5)
+# Razen Programming Language (beta v0.1.658)
 
 ## Overview
 Razen is a modern, intuitive programming language designed for clarity, performance, and ease of use. With a clean syntax inspired by Python and strong type safety, Razen offers an excellent balance between development speed and runtime performance.
@@ -11,11 +11,14 @@ Developed by Prathmesh Barot, Basai Corporation.
 - **Built-in Debugging**: Comprehensive debugging tools including step-by-step execution
 - **String Interpolation**: Powerful nested string interpolation with `${...}` syntax
 - **Type Safety**: Strong type checking for variables with different variable types
-- **Web Development**: First-class support for building web applications with HTML integration
+- **Rich Library System**: Extensive library system with bracket notation for function calls
 - **Expressive Conditionals**: Clean if/else syntax with support for nested conditions
 - **Interactive Mode**: Built-in REPL for testing code snippets
 - **Lightweight**: Small footprint with minimal dependencies
 - **Cross-platform support**: Works on Linux, macOS, and Windows
+- **OOP Support**: Class-based object-oriented programming capabilities
+- **Colored Output**: Built-in support for colored terminal output
+- **Robust Error Handling**: Comprehensive error handling with try/catch blocks
 
 ## Installation
 
@@ -121,16 +124,16 @@ razen new hello
 
 This creates a new file `hello.rzn` with a Hello World template:
 ```razen
-// New Razen program created on [current date]
-// Powered by Razen Language
+# New Razen program created on [current date]
+# Powered by Razen Language
 
-// Your code goes here
-let message = "Hello, World!"
-show "${message}"
+# Your code goes here
+let message = "Hello, World!";
+show message;
 
-// Read user input
-read user_input = "What's your name? "
-show "Nice to meet you, ${user_input}!"
+# Read user input
+read user_input = "What's your name? ";
+show "Nice to meet you, " + user_input + "!";
 ```
 
 Run it with:
@@ -143,74 +146,107 @@ razen-run hello.rzn
 ### Basic Razen Program
 
 ```razen
-// Variables with type enforcement
-let number = 42          // Numeric values only
-take message = "Hello"   // String values only
-hold is_active = true    // Boolean values only
-put anything = "flexible" // Any type allowed
+# Variables with type enforcement
+let number = 42;          # Numeric values only
+take message = "Hello";   # String values only
+hold is_active = true;    # Boolean values only
+put anything = "flexible"; # Any type allowed
 
-// String interpolation
-show "Hello, ${message}!"
+# String concatenation
+show "Hello, " + message + "!";
 
-// Calculations
-let total = number * 2.5
-show "Total: ${total}"
+# Calculations
+let total = number * 2.5;
+show "Total: " + total;
 
-// Conditionals
-if total > 50 {
-    show "Qualifies for free shipping!"
+# Conditionals
+if (total > 50) {
+    show "Qualifies for free shipping!";
 } else {
-    show "Add more items for free shipping."
+    show "Add more items for free shipping.";
 }
 
-// Input
-read user_input = "Enter your name: "
-show "Hello, ${user_input}!"
+# Input
+read user_input = "Enter your name: ";
+show "Hello, " + user_input + "!";
 
-// Nested interpolation
-take inner = "value"
-take outer = "Outer with ${inner}"
-show "${outer}"
+# String concatenation
+take inner = "value";
+take outer = "Outer with " + inner;
+show outer;
 ```
 
-### Web Development with Razen
+### Colored Output
 
-```html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Razen Web App</title>
-</head>
-<razen>
-    // Define variables using standard Razen syntax
-    let counter = 0;
-    take greeting = "Hello from Razen!";
-    
-    // Initialize when the page loads
-    on window load {
-        // Update the greeting text
-        get greeting_element {
-            text content = greeting;
-        }
-        
-        // Setup counter functionality
-        get increment_button {
-            on click {
-                let counter = counter + 1;
-                get counter_display {
-                    text content = counter;
-                }
-            }
-        }
+```razen
+type cli;
+
+# Using colors in output
+show(red) "This is a red error message";
+show(green) "This is a green success message";
+show(yellow) "This is a yellow warning message";
+show(blue) "This is a blue information message";
+show(purple) "This is a purple highlight message";
+show(cyan) "This is a cyan technical message";
+```
+
+### Function Definition and Usage
+
+```razen
+# Define a simple function to calculate factorial
+fun factorial(n) {
+    if (n <= 1) {
+        return 1;
     }
-</razen>
-<body>
-    <h1 id="greeting_element"></h1>
-    <p>Counter: <span id="counter_display">0</span></p>
-    <button id="increment_button">Increment</button>
-</body>
-</html>
+    return n * factorial(n - 1);
+}
+
+# Use the function
+let num = 5;
+show "Factorial of " + num + " is " + factorial(num);
+
+# Function with multiple parameters
+fun greet(name, age) {
+    show "Hello, " + name + "! You are " + age + " years old.";
+}
+
+greet("Alice", 30);
+```
+
+### Library System with Bracket Notation
+
+```razen
+# Import libraries
+lib arrlib;   # Array library
+lib strlib;   # String library
+lib mathlib;  # Math library
+lib random;   # Random library
+lib crypto;   # Crypto library for encryption and hashing
+
+# Using library functions with bracket notation
+show "Array operations:";
+show "Original array: " + [1, 2, 3];
+show "After push: " + ArrLib[push]([1, 2, 3], 4);
+show "Join with dash: " + ArrLib[join](["a", "b", "c"], "-");
+
+# String operations
+show "String operations:";
+show "Uppercase: " + StrLib[upper]("Hello, Razen!");
+show "Replace: " + StrLib[replace]("Hello, Razen!", "Razen", "World");
+
+# Math operations
+show "Math operations:";
+show "Square root: " + MathLib[sqrt](16);
+show "Power: " + MathLib[power](2, 3);
+
+# Random operations
+show "Random operations:";
+show "Random integer (1-10): " + Random[int](1, 10);
+show "Random choice: " + Random[choice](["apple", "banana", "cherry"]);
+
+# Crypto operations
+show "Crypto operations:";
+show "Hash of 'Hello, Razen!': " + Crypto[hash]("Hello, Razen!");
 ```
 
 Check the `examples` folder for more sample programs and tutorials.
@@ -226,18 +262,18 @@ A colorful, well-formatted help command that displays comprehensive information 
 ### razen new
 Creates a new Razen program with a template to help you get started quickly. Automatically adds the `.rzn` extension if not provided.
 
-### razen-web
-Creates a new Razen web application with HTML integration. This command sets up the basic structure for a web project using Razen for interactivity.
+### razen-debug
+Runs a Razen program in debug mode with detailed output, showing each step of execution.
 
 ```bash
-razen-web my-web-app
+razen-debug my-program.rzn
 ```
 
-### razen-run-web
-Runs a Razen web application and serves it on a local development server.
+### razen-test
+Runs a Razen program in test mode, useful for testing scripts and validating functionality.
 
 ```bash
-razen-run-web my-app.html.rzn
+razen-test my-program.rzn
 ```
 
 ### razen uninstall
@@ -248,7 +284,7 @@ Safely removes all Razen files and symbolic links from your system. Provides con
 - **Core files**: `/usr/local/lib/razen`
 - **Examples**: `/usr/local/lib/razen/examples`
 - **Scripts**: `/usr/local/lib/razen/scripts`
-- **Web Properties**: `/usr/local/lib/razen/properties/web-properties`
+- **Library Files**: `/usr/local/lib/razen/properties/libs`
 
 ## Variable Types
 
@@ -279,41 +315,59 @@ Razen supports different variable types with type enforcement:
   put anything = true
   ```
 
-## Web Development
+## Object-Oriented Programming
 
-Razen provides powerful web development capabilities through its web properties. These properties allow you to create interactive web applications using the familiar Razen syntax while seamlessly integrating with HTML.
+Razen supports class-based object-oriented programming with a clean and intuitive syntax.
 
-### Integration with HTML
+### Class Declaration
 
-Razen web code can be embedded in HTML files using the `<razen>` tag:
+```razen
+class Person {
+    # Constructor (implicitly called when creating new instances)
+    fun init(name, age) {
+        this.name = name;
+        this.age = age;
+    }
+    
+    # Method to display information
+    fun display() {
+        show "Name: " + this.name + ", Age: " + this.age;
+    }
+    
+    # Method to have a birthday
+    fun haveBirthday() {
+        this.age = this.age + 1;
+        show this.name + " is now " + this.age + " years old!";
+    }
+}
 
-```html
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Razen Web App</title>
-</head>
-<razen>
-    # Your Razen code here
-</razen>
-<body>
-    <!-- HTML content -->
-</body>
-</html>
+# Create a new Person instance
+put person = new Person("John", 30);
+
+# Call methods
+person.display();
+person.haveBirthday();
 ```
 
-### Web Variables
+### Inheritance
 
-Razen includes specialized variables for web development:
+Razen supports class inheritance using the `extends` keyword:
 
-- **Element Access**: `get`, `query`, `all`
-- **DOM Manipulation**: `html`, `text`, `attr`, `style`, `class`
-- **Event Handling**: `on`, `off`, `trigger`
-- **Form Handling**: `form`, `validate`, `submit`
-- **AJAX and Fetch**: `fetch`, `post`, `get_data`
-- **Storage**: `store_local`, `store_session`, `cookie`
+```razen
+class Employee extends Person {
+    fun init(name, age, position) {
+        super.init(name, age);
+        this.position = position;
+    }
+    
+    fun display() {
+        super.display();
+        show "Position: " + this.position;
+    }
+}
+```
 
-See the examples directory for complete web application examples.
+See the examples directory for complete object-oriented programming examples.
 
 ## License
 Razen is licensed under a custom license. See the [LICENSE](./LICENSE) file for details.
@@ -333,7 +387,7 @@ Powered by Razen - © 2025 Prathmesh Barot, Basai Corporation
 
 ## Contact
 For questions, support, or feedback about Razen, please contact:
-- Email: prathmesh.barot@example.com
+- Email: prathmeshbarot2009@gmail.com
 - GitHub: [https://github.com/BasaiCorp/razen-lang](https://github.com/BasaiCorp/razen-lang)
 
 **Official website coming soon!**
