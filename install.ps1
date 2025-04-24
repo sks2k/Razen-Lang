@@ -1,6 +1,6 @@
 # Razen Language Installer for Windows
 # Copyright 2025 Prathmesh Barot, Basai Corporation
-# Version: beta v0.1.658 (Enhanced GitHub cloning and installation process)
+# Version: beta v0.1.6589 (Libraries Update new libs added image and date and etc.)
 
 # Enable TLS 1.2 for all web requests
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12

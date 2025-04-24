@@ -21,6 +21,9 @@ lib boxlib;   # Box library for value boxing
 lib loglib;   # Logging utilities
 lib htlib;    # Head/Tails coin flip utilities
 lib netlib;   # Network library for HTTP requests
+lib audio;    # Audio library for playback and recording
+lib image;    # Image library for image processing
+lib date;     # Date library for date/time operations
 
 show "===== Razen Library System Test =====";
 
@@ -77,43 +80,82 @@ show "Random float (0-1): " + Random[float](0, 1);
 show "Random choice: " + Random[choice](["apple", "banana", "cherry"]);
 show "Shuffled array: " + Random[shuffle]([1, 2, 3, 4, 5]);
 
+# Test JSON library functions
+show "5. Testing JSON Library:";
+
+# Create simple objects directly instead of parsing
+let simple_obj = ["name", "John", "age", 30];
+show "Simple object: " + simple_obj;
+
+# Create arrays instead of objects for better display
+let person_info = ["John", 30];
+let address_info = ["New York", "10001"];
+show "Person info (name, age): " + person_info;
+show "Address info (city, zip): " + address_info;
+
+# Create a simple array
+let json_array = [1, 2, 3, "value"];
+show "Array: " + json_array;
+
+# Create a person record as an array of key-value pairs
+let person = [
+    "name", "John Doe",
+    "age", 30,
+    "skills", ["JavaScript", "Python", "Rust"],
+    "active", true,
+    "salary", 75000.50
+];
+
+# Test stringify on arrays
+show "Stringify simple array: " + JSON[stringify](simple_obj);
+show "Stringify person array: " + JSON[stringify](person);
+
+# Create users as arrays
+let users = [
+    [1, "Alice"],
+    [2, "Bob"]
+];
+show "Users data: " + users;
+show "First user ID: " + users[0][0];
+show "First user name: " + users[0][1];
+
 # Test seed library functions
-show "5. Testing Seed Library:";
+show "6. Testing Seed Library:";
 show "Generated seed: " + Seed[generate](10);
 show "2D map from seed: " + Seed[map]("razen123", 3, 3);
 
 # Test Color Library
-show "6. Testing Color Library:";
+show "7. Testing Color Library:";
 show "Hex to RGB: #3366ff => " + Color[hex_to_rgb]("#3366ff");
 show "RGB to Hex: [0, 204, 102] => " + Color[rgb_to_hex]([0, 204, 102]);
 show "Lighten #888888 by 20%: " + Color[lighten]("#888888", 20);
 show "Darken #888888 by 20%: " + Color[darken]("#888888", 20);
 
 # Test Crypto Library
-show "7. Testing Crypto Library:";
+show "8. Testing Crypto Library:";
 show "Hash of 'Hello, Razen!': " + Crypto[hash]("Hello, Razen!");
 show "Encrypted message test: " + Crypto[decrypt](Crypto[encrypt]("Hello, Razen!", "secret_key"), "secret_key");
 
 # Test Regex Library
-show "8. Testing Regex Library:";
+show "9. Testing Regex Library:";
 show "Match test: " + Regex[match]("abc123", "\\d+");
 show "Search test: " + Regex[search]("abc123", "\\d+");
 show "Replace test: " + Regex[replace]("abc123def", "\\d+", "X");
 
 # Test UUID Library
-show "9. Testing UUID Library:";
+show "10. Testing UUID Library:";
 show "UUID generate: " + UUID[generate]();
 show "UUID is_valid (valid): " + UUID[is_valid]("550e8400-e29b-41d4-a716-446655440000");
 show "UUID is_valid (invalid): " + UUID[is_valid]("not-a-uuid");
 
 # Test OS Library
-show "10. Testing OS Library:";
+show "11. Testing OS Library:";
 show "OS platform: " + OS[platform]();
 show "OS current directory: " + OS[cwd]();
 show "OS environment variable PATH: " + OS[env]("PATH");
 
 # Test Validation Library
-show "11. Testing Validation Library:";
+show "12. Testing Validation Library:";
 show "Email validation (valid): " + Validation[email]("user@example.com");
 show "Email validation (invalid): " + Validation[email]("not-an-email");
 show "Phone validation (valid): " + Validation[phone]("1234567890");
@@ -122,38 +164,72 @@ show "Required validation (non-empty): " + Validation[required]("value");
 show "Min length validation: " + Validation[min_length]("abcdef", 3);
 
 # Test System Library
-show "12. Testing System Library:";
+show "13. Testing System Library:";
 show "System uptime: " + System[uptime]();
 show "System info: " + System[info]();
 
 # Test bolt library functions (for intensive operations)
-show "13. Testing Bolt Library:";
+show "14. Testing Bolt Library:";
 show "Bolt run result: " + Bolt[run]("test");
 show "Bolt parallel result: " + Bolt[parallel]([1, 2, 3], "double");
 
 # Test Box Library
-show "14. Testing Box Library:";
+show "15. Testing Box Library:";
 # We'll implement more BoxLib tests in a separate file later
 
 # Test Log Library
-show "15. Testing Log Library:";
+show "16. Testing Log Library:";
 show "Info log: " + LogLib[info]("This is an info message");
 show "Warning log: " + LogLib[warn]("This is a warning message");
 show "Error log: " + LogLib[error]("This is an error message");
 show "Debug log: " + LogLib[debug]("This is a debug message");
 
 # Test HT (Head/Tails) Library
-show "16. Testing HT Library:";
+show "17. Testing HT Library:";
 show "Coin flip: " + HTLib[coin]();
 show "Random boolean: " + HTLib[bool]();
 show "Multiple coin flips: [" + HTLib[coin]() + ", " + HTLib[coin]() + ", " + HTLib[coin]() + "]";
 
 # Test Enhanced Net Library
-show "17. Testing Net Library:";
+show "18. Testing Net Library:";
 show "Ping test: " + NetLib[ping]("https://www.google.com");
 # Uncomment to test with actual network calls:
 # show "GET request: " + NetLib[get]("https://example.com");
 # show "POST request: " + NetLib[post]("https://httpbin.org/post", {test: "data"});
+
+# Test Audio Library
+show "19. Testing Audio Library:";
+show "Play audio: " + Audio[play]("sample.mp3");
+show "Pause audio: " + Audio[pause]();
+show "Stop audio: " + Audio[stop]();
+show "Record audio: " + Audio[record]("recording.wav");
+
+# Test Image Library
+show "20. Testing Image Library:";
+show "Load image: " + Image[load]("sample.png");
+let img = Image[load]("sample.png");
+show "Save image: " + Image[save](img, "output.png");
+show "Resize image: " + Image[resize](img, 100, 100);
+show "Crop image: " + Image[crop](img, 10, 10, 50, 50);
+
+# Test Date Library
+show "21. Testing Date Library:";
+show "Current timestamp: " + Date[now]();
+show "Current year: " + Date[year]();
+show "Current month: " + Date[month]();
+show "Current day: " + Date[day]();
+show "Format date: " + Date[format](Date[now](), "YYYY-MM-DD");
+show "Parse date: " + Date[parse]("2025-04-24", "YYYY-MM-DD");
+show "Add days: " + Date[format](Date[add_days](Date[now](), 7), "YYYY-MM-DD");
+show "Add months: " + Date[format](Date[add_months](Date[now](), 3), "YYYY-MM-DD");
+show "Add years: " + Date[format](Date[add_years](Date[now](), 1), "YYYY-MM-DD");
+show "Weekday (0-6): " + Date[weekday](Date[now]());
+show "Weekday name: " + Date[weekday_name](Date[now]());
+show "Days in month (Feb 2024): " + Date[days_in_month](2024, 2);
+show "Days in month (Feb 2025): " + Date[days_in_month](2025, 2);
+show "Is leap year (2024): " + Date[is_leap_year](2024);
+show "Is leap year (2025): " + Date[is_leap_year](2025);
+show "Diff days (1 week): " + Date[diff_days](Date[now](), Date[add_days](Date[now](), 7));
 
 show "===== All tests completed! =====";
 

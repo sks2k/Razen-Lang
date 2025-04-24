@@ -271,6 +271,41 @@ impl LibraryManager {
         ht_lib.register_function("bool", crate::functions::htlib::bool);
         self.register_library(ht_lib);
 
+        // Register Audio library functions
+        let mut audio_lib = Library::new("audio");
+        audio_lib.register_function("play", crate::functions::audiolib::play);
+        audio_lib.register_function("pause", crate::functions::audiolib::pause);
+        audio_lib.register_function("stop", crate::functions::audiolib::stop);
+        audio_lib.register_function("record", crate::functions::audiolib::record);
+        self.register_library(audio_lib);
+
+        // Register Image library functions
+        let mut image_lib = Library::new("image");
+        image_lib.register_function("load", crate::functions::imagelib::load);
+        image_lib.register_function("save", crate::functions::imagelib::save);
+        image_lib.register_function("resize", crate::functions::imagelib::resize);
+        image_lib.register_function("crop", crate::functions::imagelib::crop);
+        self.register_library(image_lib);
+
+        // Register Date library functions
+        let mut date_lib = Library::new("date");
+        // Use our own date functions for all operations
+        date_lib.register_function("now", crate::functions::datelib::now);
+        date_lib.register_function("year", crate::functions::datelib::year);
+        date_lib.register_function("month", crate::functions::datelib::month);
+        date_lib.register_function("day", crate::functions::datelib::day);
+        date_lib.register_function("format", crate::functions::datelib::format);
+        date_lib.register_function("parse", crate::functions::datelib::parse);
+        date_lib.register_function("add_days", crate::functions::datelib::add_days);
+        date_lib.register_function("add_months", crate::functions::datelib::add_months);
+        date_lib.register_function("add_years", crate::functions::datelib::add_years);
+        date_lib.register_function("weekday", crate::functions::datelib::weekday);
+        date_lib.register_function("weekday_name", crate::functions::datelib::weekday_name);
+        date_lib.register_function("days_in_month", crate::functions::datelib::days_in_month);
+        date_lib.register_function("is_leap_year", crate::functions::datelib::is_leap_year);
+        date_lib.register_function("diff_days", crate::functions::datelib::diff_days);
+        self.register_library(date_lib);
+
         // Register Net library functions
         let mut net_lib = Library::new("netlib");
         net_lib.register_function("ping", crate::functions::netlib::ping);

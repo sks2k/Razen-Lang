@@ -1,0 +1,20 @@
+type freestyle;
+
+# Lib Import
+lib arrlib;
+
+show(yellow) "Array Library Example:";
+show(bright_green) "Daily Code 3";
+
+# Test array library functions
+show(bright_magenta) "1. Testing Array Library:";
+show(bright_cyan) "Original array: " + [1, 2, 3];
+show "After push: " + ArrLib[push]([1, 2, 3], 4);
+show "Popped value: " + ArrLib[pop]([1, 2, 3, 4]);
+show "After pop: " + ArrLib[pop]([1, 2, 3, 4]);
+show "Join with dash: " + ArrLib[join](["a", "b", "c"], "-");
+show "Array length: " + ArrLib[length]([1, 2, 3]);
+
+# Show Test is successful
+show(green) "Test Done!"
+show(blue) "Daily code by Prathmesh </> (3/100)"

@@ -19,6 +19,9 @@ mod system;
 mod boxutil;
 mod log;
 mod ht;
+mod audio;
+mod image;
+mod date;
 
 // Re-export common utilities and types
 use crate::value::Value;
@@ -102,4 +105,16 @@ pub mod loglib {
 
 pub mod htlib {
     pub use super::ht::*;
+}
+
+pub mod audiolib {
+    pub use super::audio::*;
+}
+
+pub mod imagelib {
+    pub use super::image::*;
+}
+
+pub mod datelib {
+    pub use super::date::*;
 }
