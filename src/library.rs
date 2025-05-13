@@ -212,6 +212,7 @@ impl LibraryManager {
         memory_lib.register_function("buffer_write_string", crate::functions::memorylib::buffer_write_string);
         memory_lib.register_function("buffer_read_string", crate::functions::memorylib::buffer_read_string);
         memory_lib.register_function("buffer_copy", crate::functions::memorylib::buffer_copy);
+        memory_lib.register_function("stats", crate::functions::memorylib::stats);
         self.register_library(memory_lib);
 
         // Binary library for binary file operations
@@ -225,6 +226,7 @@ impl LibraryManager {
         binary_lib.register_function("tell", crate::functions::binarylib::tell);
         binary_lib.register_function("bytes_to_string", crate::functions::binarylib::bytes_to_string);
         binary_lib.register_function("string_to_bytes", crate::functions::binarylib::string_to_bytes);
+        binary_lib.register_function("stats", crate::functions::binarylib::stats);
         self.register_library(binary_lib);
 
         // Bitwise library for bit manipulation

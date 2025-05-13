@@ -135,6 +135,15 @@ impl Parser {
         parser.register_prefix(TokenType::Validation, Parser::parse_identifier);
         parser.register_prefix(TokenType::LogLib, Parser::parse_identifier);
         parser.register_prefix(TokenType::Uuid, Parser::parse_identifier);
+        
+        // Self-compilation library tokens
+        parser.register_prefix(TokenType::MemLib, Parser::parse_identifier);
+        parser.register_prefix(TokenType::BinLib, Parser::parse_identifier);
+        parser.register_prefix(TokenType::BitLib, Parser::parse_identifier);
+        parser.register_prefix(TokenType::SysLib, Parser::parse_identifier);
+        parser.register_prefix(TokenType::ProcLib, Parser::parse_identifier);
+        parser.register_prefix(TokenType::ThrLib, Parser::parse_identifier);
+        parser.register_prefix(TokenType::CompLib, Parser::parse_identifier);
         parser.register_prefix(TokenType::Read, Parser::parse_identifier);
         parser.register_prefix(TokenType::Debug, Parser::parse_identifier);
         parser.register_prefix(TokenType::Assert, Parser::parse_identifier);
@@ -896,7 +905,11 @@ impl Parser {
             TokenType::ArrLib | TokenType::Os | TokenType::Regex | TokenType::Crypto | 
             TokenType::Color | TokenType::System | TokenType::Ui | TokenType::Storage | 
             TokenType::Audio | TokenType::Image | TokenType::Validation | 
-            TokenType::LogLib | TokenType::Uuid => {
+            TokenType::LogLib | TokenType::Uuid |
+            // Self-compilation library tokens
+            TokenType::MemLib | TokenType::BinLib | TokenType::BitLib | 
+            TokenType::SysLib | TokenType::ProcLib | TokenType::ThrLib | 
+            TokenType::CompLib => {
                 self.current_token.literal.clone()
             },
             _ => self.current_token.literal.clone()

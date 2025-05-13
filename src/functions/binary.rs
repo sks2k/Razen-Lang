@@ -1,17 +1,83 @@
 use crate::value::Value;
 use std::fs::{File, OpenOptions};
-use std::io::{self, Read, Write, Seek, SeekFrom};
+use std::io::{self, Read, Write, Seek, SeekFrom, BufReader, BufWriter};
 use std::collections::HashMap;
-use std::sync::{Arc, Mutex};
+use std::sync::Arc;
+use parking_lot::Mutex;
+use std::path::{Path, PathBuf};
+use std::fmt;
+
+// Custom error type for binary file operations
+#[derive(Debug)]
+enum BinaryError {
+    FileNotFound(PathBuf),
+    PermissionDenied(PathBuf),
+    InvalidHandle(usize),
+    InvalidMode(String),
+    InvalidSeek { offset: i64, whence: String },
+    ReadError { handle: usize, source: io::Error },
+    WriteError { handle: usize, source: io::Error },
+    SeekError { handle: usize, source: io::Error },
+    InvalidArgument(String),
+    EndOfFile { handle: usize, requested: usize, read: usize },
+    Other(String),
+}
+
+impl fmt::Display for BinaryError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            BinaryError::FileNotFound(path) => write!(f, "File not found: {}", path.display()),
+            BinaryError::PermissionDenied(path) => write!(f, "Permission denied: {}", path.display()),
+            BinaryError::InvalidHandle(handle) => write!(f, "Invalid file handle: {}", handle),
+            BinaryError::InvalidMode(mode) => write!(f, "Invalid file mode: {}", mode),
+            BinaryError::InvalidSeek { offset, whence } => 
+                write!(f, "Invalid seek parameters: offset={}, whence={}", offset, whence),
+            BinaryError::ReadError { handle, source } => 
+                write!(f, "Failed to read from handle {}: {}", handle, source),
+            BinaryError::WriteError { handle, source } => 
+                write!(f, "Failed to write to handle {}: {}", handle, source),
+            BinaryError::SeekError { handle, source } => 
+                write!(f, "Failed to seek in handle {}: {}", handle, source),
+            BinaryError::InvalidArgument(msg) => write!(f, "Invalid argument: {}", msg),
+            BinaryError::EndOfFile { handle, requested, read } => 
+                write!(f, "End of file reached on handle {}: requested {} bytes, read {} bytes", handle, requested, read),
+            BinaryError::Other(msg) => write!(f, "Error: {}", msg),
+        }
+    }
+}
+
+// Convert BinaryError to String for the Razen API
+impl From<BinaryError> for String {
+    fn from(error: BinaryError) -> Self {
+        error.to_string()
+    }
+}
 
 // Global file handle manager to track open file handles
 lazy_static::lazy_static! {
     static ref FILE_MANAGER: Arc<Mutex<FileManager>> = Arc::new(Mutex::new(FileManager::new()));
 }
 
-// File manager to track open file handles
+// Enhanced file types for better performance
+enum FileType {
+    Raw(File),
+    Buffered(BufWriter<File>),
+    Readable(BufReader<File>),
+}
+
+// File statistics for tracking operations
+struct FileStats {
+    bytes_read: usize,
+    bytes_written: usize,
+    seek_operations: usize,
+    path: PathBuf,
+    mode: String,
+}
+
+// File manager to track open file handles with improved performance
 struct FileManager {
-    files: HashMap<usize, File>,
+    files: HashMap<usize, FileType>,
+    stats: HashMap<usize, FileStats>,
     next_file_id: usize,
 }
 
@@ -19,27 +85,136 @@ impl FileManager {
     fn new() -> Self {
         FileManager {
             files: HashMap::new(),
+            stats: HashMap::new(),
             next_file_id: 1,
         }
     }
+    
+    // Get global file statistics as a map for external use
+    fn get_global_stats(&self) -> HashMap<String, Value> {
+        let mut map = HashMap::new();
+        let mut total_files = 0;
+        let mut total_bytes_read = 0;
+        let mut total_bytes_written = 0;
+        let mut total_seek_operations = 0;
+        
+        for stats in self.stats.values() {
+            total_files += 1;
+            total_bytes_read += stats.bytes_read;
+            total_bytes_written += stats.bytes_written;
+            total_seek_operations += stats.seek_operations;
+        }
+        
+        map.insert("open_files".to_string(), Value::Int(total_files as i64));
+        map.insert("total_bytes_read".to_string(), Value::Int(total_bytes_read as i64));
+        map.insert("total_bytes_written".to_string(), Value::Int(total_bytes_written as i64));
+        map.insert("total_seek_operations".to_string(), Value::Int(total_seek_operations as i64));
+        
+        // Add list of open files
+        let mut open_files = Vec::new();
+        for (id, stats) in &self.stats {
+            let mut file_info = HashMap::new();
+            file_info.insert("id".to_string(), Value::Int(*id as i64));
+            file_info.insert("path".to_string(), Value::String(stats.path.to_string_lossy().to_string()));
+            file_info.insert("bytes_read".to_string(), Value::Int(stats.bytes_read as i64));
+            file_info.insert("bytes_written".to_string(), Value::Int(stats.bytes_written as i64));
+            open_files.push(Value::Map(file_info));
+        }
+        map.insert("files".to_string(), Value::Array(open_files));
+        
+        map
+    }
 
-    fn register_file(&mut self, file: File) -> usize {
+    // Register a file with appropriate buffering based on mode
+    fn register_file(&mut self, file: File, path: PathBuf, mode: String) -> usize {
         let id = self.next_file_id;
         self.next_file_id += 1;
-        self.files.insert(id, file);
+        
+        // Create appropriate file type based on mode
+        let file_type = match mode.as_str() {
+            // Read modes use BufReader for better performance
+            "rb" | "r+b" => FileType::Readable(BufReader::with_capacity(8192, file)),
+            
+            // Write/append modes use BufWriter for better performance
+            "wb" | "w+b" | "ab" | "a+b" => FileType::Buffered(BufWriter::with_capacity(8192, file)),
+            
+            // Fallback to raw file
+            _ => FileType::Raw(file),
+        };
+        
+        // Initialize statistics
+        let stats = FileStats {
+            bytes_read: 0,
+            bytes_written: 0,
+            seek_operations: 0,
+            path,
+            mode,
+        };
+        
+        self.files.insert(id, file_type);
+        self.stats.insert(id, stats);
         id
     }
 
-    fn get_file(&mut self, id: usize) -> Result<&mut File, String> {
+    // Get a file by handle with error handling
+    fn get_file(&mut self, id: usize) -> Result<&mut FileType, BinaryError> {
         self.files.get_mut(&id)
-            .ok_or_else(|| format!("Invalid file handle: {}", id))
+            .ok_or(BinaryError::InvalidHandle(id))
     }
 
-    fn close_file(&mut self, id: usize) -> Result<(), String> {
-        if self.files.remove(&id).is_some() {
+    // Close a file with proper cleanup
+    fn close_file(&mut self, id: usize) -> Result<(), BinaryError> {
+        // Get the file type
+        let file_type = self.files.remove(&id).ok_or(BinaryError::InvalidHandle(id))?;
+        
+        // Flush buffers if needed before closing
+        match file_type {
+            FileType::Buffered(mut writer) => {
+                if let Err(e) = writer.flush() {
+                    return Err(BinaryError::WriteError { handle: id, source: e });
+                }
+            },
+            _ => {},
+        }
+        
+        // Remove stats
+        self.stats.remove(&id);
+        Ok(())
+    }
+    
+    // Get file statistics
+    fn get_stats(&self, id: usize) -> Result<&FileStats, BinaryError> {
+        self.stats.get(&id)
+            .ok_or(BinaryError::InvalidHandle(id))
+    }
+    
+    // Update read statistics
+    fn update_read_stats(&mut self, id: usize, bytes: usize) -> Result<(), BinaryError> {
+        if let Some(stats) = self.stats.get_mut(&id) {
+            stats.bytes_read += bytes;
             Ok(())
         } else {
-            Err(format!("Invalid file handle: {}", id))
+            Err(BinaryError::InvalidHandle(id))
+        }
+    }
+    
+    // Update write statistics
+    fn update_write_stats(&mut self, id: usize, bytes: usize) -> Result<(), BinaryError> {
+        if let Some(stats) = self.stats.get_mut(&id) {
+            stats.bytes_written += bytes;
+            Ok(())
+        } else {
+            Err(BinaryError::InvalidHandle(id))
+        }
+    }
+    
+    // Update seek statistics
+    fn update_seek_stats(&mut self, id: usize) -> Result<(), BinaryError> {
+        if let Some(stats) = self.stats.get_mut(&id) {
+            stats.seek_operations += 1;
+            Ok(())
+        } else {
+            Err(BinaryError::InvalidHandle(id))
         }
     }
 }
@@ -48,14 +223,21 @@ impl FileManager {
 /// Example: create("test.bin") => true
 pub fn create(args: Vec<Value>) -> Result<Value, String> {
     if args.len() != 1 {
-        return Err("Binary.create requires exactly 1 argument: path".to_string());
+        return Err(BinaryError::InvalidArgument("Binary.create requires exactly 1 argument: path".to_string()).into());
     }
     
     let path = args[0].as_string()?;
+    let path_buf = PathBuf::from(&path);
     
     match File::create(&path) {
         Ok(_) => Ok(Value::Bool(true)),
-        Err(e) => Err(format!("Failed to create binary file '{}': {}", path, e)),
+        Err(e) => {
+            match e.kind() {
+                io::ErrorKind::NotFound => Err(BinaryError::FileNotFound(path_buf).into()),
+                io::ErrorKind::PermissionDenied => Err(BinaryError::PermissionDenied(path_buf).into()),
+                _ => Err(BinaryError::Other(format!("Failed to create binary file '{}': {}", path, e)).into()),
+            }
+        }
     }
 }
 
@@ -63,11 +245,17 @@ pub fn create(args: Vec<Value>) -> Result<Value, String> {
 /// Example: open("test.bin", "rb") => file_handle
 pub fn open(args: Vec<Value>) -> Result<Value, String> {
     if args.len() != 2 {
-        return Err("Binary.open requires exactly 2 arguments: path, mode".to_string());
+        return Err(BinaryError::InvalidArgument("Binary.open requires exactly 2 arguments: path, mode".to_string()).into());
     }
     
     let path = args[0].as_string()?;
     let mode = args[1].as_string()?;
+    let path_buf = PathBuf::from(&path);
+    
+    // Validate mode
+    if !matches!(mode.as_str(), "rb" | "wb" | "ab" | "r+b" | "w+b" | "a+b") {
+        return Err(BinaryError::InvalidMode(mode.clone()).into());
+    }
     
     let file = match mode.as_str() {
         "rb" => OpenOptions::new().read(true).open(&path),
@@ -76,15 +264,21 @@ pub fn open(args: Vec<Value>) -> Result<Value, String> {
         "r+b" => OpenOptions::new().read(true).write(true).open(&path),
         "w+b" => OpenOptions::new().read(true).write(true).create(true).truncate(true).open(&path),
         "a+b" => OpenOptions::new().read(true).write(true).append(true).create(true).open(&path),
-        _ => return Err(format!("Invalid file mode: {}. Use 'rb', 'wb', 'ab', 'r+b', 'w+b', or 'a+b'", mode)),
+        _ => unreachable!(), // We already validated the mode
     };
     
     match file {
         Ok(file) => {
-            let id = FILE_MANAGER.lock().unwrap().register_file(file);
+            let id = FILE_MANAGER.lock().register_file(file, path_buf, mode);
             Ok(Value::Int(id as i64))
         },
-        Err(e) => Err(format!("Failed to open binary file '{}': {}", path, e)),
+        Err(e) => {
+            match e.kind() {
+                io::ErrorKind::NotFound => Err(BinaryError::FileNotFound(path_buf).into()),
+                io::ErrorKind::PermissionDenied => Err(BinaryError::PermissionDenied(path_buf).into()),
+                _ => Err(BinaryError::Other(format!("Failed to open binary file '{}': {}", path, e)).into()),
+            }
+        }
     }
 }
 
@@ -92,26 +286,64 @@ pub fn open(args: Vec<Value>) -> Result<Value, String> {
 /// Example: close(file_handle) => true
 pub fn close(args: Vec<Value>) -> Result<Value, String> {
     if args.len() != 1 {
-        return Err("Binary.close requires exactly 1 argument: file_handle".to_string());
+        return Err(BinaryError::InvalidArgument("Binary.close requires exactly 1 argument: file_handle".to_string()).into());
     }
     
     let handle = args[0].as_int()? as usize;
     
-    match FILE_MANAGER.lock().unwrap().close_file(handle) {
-        Ok(_) => Ok(Value::Bool(true)),
-        Err(e) => Err(e),
+    // Get file manager and lock once to avoid temporary value being dropped while borrowed
+    let mut file_manager = FILE_MANAGER.lock();
+    
+    // Get file stats and clone them before closing to avoid borrowing conflicts
+    let stats_option = match file_manager.get_stats(handle) {
+        Ok(stats) => {
+            // Clone the relevant stats we need for logging
+            let path = stats.path.clone();
+            let bytes_read = stats.bytes_read;
+            let bytes_written = stats.bytes_written;
+            Some((path, bytes_read, bytes_written))
+        },
+        Err(_) => None,
+    };
+    
+    // Close the file with proper error handling
+    match file_manager.close_file(handle) {
+        Ok(_) => {
+            // Log file statistics if needed
+            if let Some((path, bytes_read, bytes_written)) = stats_option {
+                // We could log stats here if needed
+                // println!("Closed file: {}, Read: {} bytes, Written: {} bytes", 
+                //     path.display(), bytes_read, bytes_written);
+            }
+            Ok(Value::Bool(true))
+        },
+        Err(e) => Err(e.into()),
     }
+}
+
+/// Get file statistics
+/// Example: stats() => { open_files: 1, total_bytes_read: 100, ... }
+pub fn stats(args: Vec<Value>) -> Result<Value, String> {
+    if !args.is_empty() {
+        return Err(BinaryError::InvalidArgument("Binary.stats takes no arguments".to_string()).into());
+    }
+    
+    let file_manager = FILE_MANAGER.lock();
+    let stats_map = file_manager.get_global_stats();
+    
+    Ok(Value::Map(stats_map))
 }
 
 /// Write bytes to a binary file
 /// Example: write(file_handle, [65, 66, 67]) => 3
 pub fn write_bytes(args: Vec<Value>) -> Result<Value, String> {
     if args.len() != 2 {
-        return Err("Binary.write_bytes requires exactly 2 arguments: file_handle, bytes".to_string());
+        return Err(BinaryError::InvalidArgument("Binary.write_bytes requires exactly 2 arguments: file_handle, bytes".to_string()).into());
     }
     
     let handle = args[0].as_int()? as usize;
     
+    // Convert input to bytes
     let bytes = match &args[1] {
         Value::Array(arr) => {
             let mut bytes = Vec::with_capacity(arr.len());
@@ -121,16 +353,35 @@ pub fn write_bytes(args: Vec<Value>) -> Result<Value, String> {
             bytes
         },
         Value::String(s) => s.as_bytes().to_vec(),
-        _ => return Err("Second argument must be an array of bytes or a string".to_string()),
+        _ => return Err(BinaryError::InvalidArgument("Second argument must be an array of bytes or a string".to_string()).into()),
     };
     
-    // Write bytes to file
-    let mut file_manager = FILE_MANAGER.lock().unwrap();
-    let file = file_manager.get_file(handle)?;
+    // Get file manager and lock once
+    let mut file_manager = FILE_MANAGER.lock();
     
-    match file.write_all(&bytes) {
-        Ok(_) => Ok(Value::Int(bytes.len() as i64)),
-        Err(e) => Err(format!("Failed to write bytes: {}", e)),
+    // Get file and handle write based on file type
+    let result = match file_manager.get_file(handle) {
+        Ok(file_type) => {
+            match file_type {
+                FileType::Raw(file) => file.write_all(&bytes),
+                FileType::Buffered(writer) => writer.write_all(&bytes),
+                FileType::Readable(_reader) => {
+                    // Cannot write to a read-only file
+                    return Err(BinaryError::InvalidArgument("Cannot write to a read-only file".to_string()).into());
+                }
+            }
+        },
+        Err(e) => return Err(e.into()),
+    };
+    
+    // Handle write result
+    match result {
+        Ok(_) => {
+            // Update statistics
+            let _ = file_manager.update_write_stats(handle, bytes.len());
+            Ok(Value::Int(bytes.len() as i64))
+        },
+        Err(e) => Err(BinaryError::WriteError { handle, source: e }.into()),
     }
 }
 
@@ -138,23 +389,54 @@ pub fn write_bytes(args: Vec<Value>) -> Result<Value, String> {
 /// Example: read_bytes(file_handle, 5) => [65, 66, 67, 68, 69]
 pub fn read_bytes(args: Vec<Value>) -> Result<Value, String> {
     if args.len() != 2 {
-        return Err("Binary.read_bytes requires exactly 2 arguments: file_handle, count".to_string());
+        return Err(BinaryError::InvalidArgument("Binary.read_bytes requires exactly 2 arguments: file_handle, count".to_string()).into());
     }
     
     let handle = args[0].as_int()? as usize;
     let count = args[1].as_int()? as usize;
     
+    // Validate count
     if count == 0 {
         return Ok(Value::Array(Vec::new()));
     }
     
-    // Read bytes from file
-    let mut file_manager = FILE_MANAGER.lock().unwrap();
-    let file = file_manager.get_file(handle)?;
+    if count > 1024 * 1024 * 10 { // 10MB limit for safety
+        return Err(BinaryError::InvalidArgument(format!("Requested read size too large: {} bytes", count)).into());
+    }
     
+    // Get file manager and lock once
+    let mut file_manager = FILE_MANAGER.lock();
+    
+    // Get file and handle read based on file type
     let mut buffer = vec![0u8; count];
-    match file.read_exact(&mut buffer) {
+    let read_result = match file_manager.get_file(handle) {
+        Ok(file_type) => {
+            match file_type {
+                FileType::Raw(file) => file.read_exact(&mut buffer),
+                FileType::Buffered(writer) => {
+                    // Flush any pending writes before reading
+                    if let Err(e) = writer.flush() {
+                        return Err(BinaryError::WriteError { handle, source: e }.into());
+                    }
+                    // Then read from the underlying file
+                    let mut file_ref = writer.get_ref();
+                    file_ref.read_exact(&mut buffer)
+                },
+                FileType::Readable(reader) => {
+                    // Use the buffered reader
+                    reader.get_mut().read_exact(&mut buffer)
+                }
+            }
+        },
+        Err(e) => return Err(e.into()),
+    };
+    
+    // Handle read result
+    match read_result {
         Ok(_) => {
+            // Update statistics
+            let _ = file_manager.update_read_stats(handle, count);
+            
             // Convert bytes to array of values
             let values: Vec<Value> = buffer.into_iter()
                 .map(|b| Value::Int(b as i64))
@@ -164,9 +446,35 @@ pub fn read_bytes(args: Vec<Value>) -> Result<Value, String> {
         },
         Err(e) if e.kind() == io::ErrorKind::UnexpectedEof => {
             // Handle case where we hit EOF before reading 'count' bytes
-            Err(format!("End of file reached before reading {} bytes", count))
+            // Try to read as many bytes as possible
+            let mut partial_buffer = Vec::new();
+            if let Ok(file_type) = file_manager.get_file(handle) {
+                match file_type {
+                    FileType::Raw(file) => { let _ = file.read_to_end(&mut partial_buffer); },
+                    FileType::Buffered(writer) => { let _ = writer.get_ref().read_to_end(&mut partial_buffer); },
+                    FileType::Readable(reader) => { let _ = reader.get_mut().read_to_end(&mut partial_buffer); }
+                }
+            }
+            
+            // Update statistics with what we actually read
+            let _ = file_manager.update_read_stats(handle, partial_buffer.len());
+            
+            // Return what we could read
+            if !partial_buffer.is_empty() {
+                let values: Vec<Value> = partial_buffer.into_iter()
+                    .map(|b| Value::Int(b as i64))
+                    .collect();
+                
+                Ok(Value::Array(values))
+            } else {
+                Err(BinaryError::EndOfFile { 
+                    handle, 
+                    requested: count, 
+                    read: 0 
+                }.into())
+            }
         },
-        Err(e) => Err(format!("Failed to read bytes: {}", e)),
+        Err(e) => Err(BinaryError::ReadError { handle, source: e }.into()),
     }
 }
 
@@ -174,27 +482,60 @@ pub fn read_bytes(args: Vec<Value>) -> Result<Value, String> {
 /// Example: seek(file_handle, 10, "start") => true
 pub fn seek(args: Vec<Value>) -> Result<Value, String> {
     if args.len() != 3 {
-        return Err("Binary.seek requires exactly 3 arguments: file_handle, offset, whence".to_string());
+        return Err(BinaryError::InvalidArgument("Binary.seek requires exactly 3 arguments: file_handle, offset, whence".to_string()).into());
     }
     
     let handle = args[0].as_int()? as usize;
     let offset = args[1].as_int()? as i64;
     let whence = args[2].as_string()?;
     
+    // Validate whence parameter
     let seek_from = match whence.as_str() {
-        "start" => SeekFrom::Start(offset as u64),
+        "start" => {
+            if offset < 0 {
+                return Err(BinaryError::InvalidSeek { 
+                    offset, 
+                    whence: whence.clone() 
+                }.into());
+            }
+            SeekFrom::Start(offset as u64)
+        },
         "current" => SeekFrom::Current(offset),
         "end" => SeekFrom::End(offset),
-        _ => return Err(format!("Invalid seek whence: {}. Use 'start', 'current', or 'end'", whence)),
+        _ => return Err(BinaryError::InvalidSeek { 
+            offset, 
+            whence: whence.clone() 
+        }.into()),
     };
     
-    // Seek in file
-    let mut file_manager = FILE_MANAGER.lock().unwrap();
-    let file = file_manager.get_file(handle)?;
+    // Get file manager and lock once
+    let mut file_manager = FILE_MANAGER.lock();
     
-    match file.seek(seek_from) {
+    // Get file and handle seek based on file type
+    let seek_result = match file_manager.get_file(handle) {
+        Ok(file_type) => {
+            match file_type {
+                FileType::Raw(file) => file.seek(seek_from),
+                FileType::Buffered(writer) => {
+                    // Flush any pending writes before seeking
+                    if let Err(e) = writer.flush() {
+                        return Err(BinaryError::WriteError { handle, source: e }.into());
+                    }
+                    writer.get_mut().seek(seek_from)
+                },
+                FileType::Readable(reader) => reader.get_mut().seek(seek_from),
+            }
+        },
+        Err(e) => return Err(e.into()),
+    };
+    
+    // Update seek statistics
+    let _ = file_manager.update_seek_stats(handle);
+    
+    // Handle seek result
+    match seek_result {
         Ok(position) => Ok(Value::Int(position as i64)),
-        Err(e) => Err(format!("Failed to seek: {}", e)),
+        Err(e) => Err(BinaryError::SeekError { handle, source: e }.into()),
     }
 }
 
@@ -208,10 +549,23 @@ pub fn tell(args: Vec<Value>) -> Result<Value, String> {
     let handle = args[0].as_int()? as usize;
     
     // Get current position
-    let mut file_manager = FILE_MANAGER.lock().unwrap();
-    let file = file_manager.get_file(handle)?;
+    let mut file_manager = FILE_MANAGER.lock();
+    let file_type = file_manager.get_file(handle)?;
     
-    match file.stream_position() {
+    // Get position based on file type
+    let position_result = match file_type {
+        FileType::Raw(file) => file.stream_position(),
+        FileType::Buffered(writer) => {
+            // Flush any pending writes before getting position
+            if let Err(e) = writer.flush() {
+                return Err(BinaryError::WriteError { handle, source: e }.into());
+            }
+            writer.get_mut().stream_position()
+        },
+        FileType::Readable(reader) => reader.get_mut().stream_position(),
+    };
+    
+    match position_result {
         Ok(position) => Ok(Value::Int(position as i64)),
         Err(e) => Err(format!("Failed to get file position: {}", e)),
     }

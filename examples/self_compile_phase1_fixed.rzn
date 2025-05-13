@@ -1,0 +1,93 @@
+# Razen Self-Compilation Phase 1
+# This file demonstrates the essential features needed for self-compilation
+
+# Import libraries
+lib memlib;   # Memory management library
+lib binlib;   # Binary file operations library
+lib bitlib;   # Bit manipulation library
+lib syslib;   # System library
+lib complib;  # Compiler library
+lib thrlib;   # Threading library
+
+show "===== RAZEN SELF-COMPILATION PHASE 1 =====";
+
+# Memory Management Operations
+show(yellow) "1. Testing Memory Operations:";
+show(yellow) "Allocating memory: " + MemLib[alloc](1024);
+show(yellow) "Memory stats: " + MemLib[stats]();
+
+# Create two buffers for testing
+show(yellow) "Creating buffer 1: " + MemLib[create_buffer](100);
+show(yellow) "Creating buffer 2: " + MemLib[create_buffer](100);
+
+# Write to first buffer
+show(yellow) "Writing to buffer: " + MemLib[buffer_write_string](1, "Hello Razen");
+
+# Read from first buffer
+show(yellow) "Reading from buffer: " + MemLib[buffer_read_string](1, 0, 5);
+
+# Copy between buffers
+show(yellow) "Copying between buffers: " + MemLib[buffer_copy](1, 0, 2, 0, 5);
+
+# Binary File Operations
+show(blue) "2. Testing Binary File Operations:";
+
+# Create and open files with proper handles
+show(blue) "Creating binary file: " + BinLib[create]("test.bin");
+
+# Open file for writing
+show(blue) "Opening binary file for writing: " + BinLib[open]("test.bin", "w");
+let write_handle = 1; # First file handle
+
+# Write to the file
+show(blue) "Writing to binary file: " + BinLib[write_bytes](write_handle, "Hello Razen");
+
+# Close the write handle
+show(blue) "Closing write handle: " + BinLib[close](write_handle);
+
+# Open file for reading
+show(blue) "Opening binary file for reading: " + BinLib[open]("test.bin", "r");
+let read_handle = 2; # Second file handle
+
+# Seek in the file
+show(blue) "Seeking in binary file: " + BinLib[seek](read_handle, 0);
+
+# Read from the file
+show(blue) "Reading from binary file: " + BinLib[read_bytes](read_handle, 5);
+
+# Close the read handle
+show(blue) "Closing read handle: " + BinLib[close](read_handle);
+
+# Get file statistics
+show(blue) "File stats: " + BinLib[stats]();
+
+# Bit Operations
+show(red) "3. Testing Bit Operations:";
+show(red) "Bitwise AND: " + BitLib[and](5, 3);
+show(red) "Bitwise OR: " + BitLib[or](5, 3);
+show(red) "Bitwise XOR: " + BitLib[xor](5, 3);
+show(red) "Bitwise NOT: " + BitLib[not](5);
+show(red) "Left shift: " + BitLib[lshift](5, 2);
+show(red) "Right shift: " + BitLib[rshift](20, 2);
+
+# System Operations
+show(green) "4. Testing System Operations:";
+show(green) "Process ID: " + SysLib[getpid]();
+show(green) "Current time: " + SysLib[time]();
+show(green) "System name: " + SysLib[sysname]();
+
+# Compiler Operations
+show(cyan) "5. Testing Compiler Operations:";
+show(cyan) "Tokenizing code: " + CompLib[tokenize]("fun test() { return 42; }");
+show(cyan) "Parsing code: " + CompLib[parse]("fun test() { return 42; }");
+show(cyan) "Compiling code: " + CompLib[compile]("fun test() { return 42; }");
+
+# Threading Operations
+show(magenta) "6. Testing Threading Operations:";
+show(magenta) "Thread ID: " + ThrLib[current_thread_id]();
+show(magenta) "Thread count: " + ThrLib[thread_count]();
+show(magenta) "Creating mutex: " + ThrLib[create_mutex]();
+show(magenta) "Locking mutex: " + ThrLib[lock_mutex](ThrLib[create_mutex]());
+show(magenta) "Unlocking mutex: " + ThrLib[unlock_mutex](ThrLib[create_mutex]());
+
+show "===== SELF-COMPILATION TEST COMPLETE =====";

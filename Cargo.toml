@@ -50,6 +50,9 @@ num_cpus = "1.16"
 
 # For memory management
 libc = "0.2"
+memmap2 = "0.5.10"  # For memory-mapped file operations
+bytes = "1.4.0"    # For efficient byte buffer handling
+parking_lot = "0.12.1"  # For more efficient mutex implementations
 
 # Potentially for parsing syntax.rzn later (not used in this initial impl)
 # toml = "0.8"

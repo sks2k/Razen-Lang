@@ -1,0 +1,64 @@
+# Razen Self-Compilation Simple Test
+# This file tests the basic functionality needed for self-compilation
+
+# Import libraries
+lib bitlib;   # Bit manipulation library
+lib syslib;   # System library
+lib complib;  # Compiler library
+lib thrlib;   # Threading library
+lib mathlib;  # Math library for basic operations
+lib strlib;   # String library for text manipulation
+lib arrlib;   # Array library for data structures
+
+show "===== RAZEN SELF-COMPILATION SIMPLE TEST =====";
+
+# Test bit manipulation functions
+show "1. Testing Bit Operations:";
+show "Bitwise AND: " + BitLib[and](5, 3);      # Expected: 1 (001)
+show "Bitwise OR: " + BitLib[or](5, 3);        # Expected: 7 (111)
+show "Bitwise XOR: " + BitLib[xor](5, 3);      # Expected: 6 (110)
+show "Bitwise NOT of 5: " + BitLib[not](5);    # Depends on bit width
+show "Left shift 5 by 2: " + BitLib[lshift](5, 2);  # Expected: 20 (10100)
+show "Right shift 20 by 2: " + BitLib[rshift](20, 2);  # Expected: 5 (101)
+
+# Test system operations
+show "2. Testing System Operations:";
+show "Process ID: " + SysLib[getpid]();
+show "Current time: " + SysLib[time]();
+show "System name: " + SysLib[sysname]();
+
+# Test compiler operations
+show "3. Testing Compiler Operations:";
+show "Tokenizing code: " + CompLib[tokenize]("fun test() { return 42; }");
+show "AST generation: " + CompLib[parse]("fun test() { return 42; }");
+
+# Test threading operations
+show "4. Testing Threading Operations:";
+show "Thread ID: " + ThrLib[current_thread_id]();
+show "Thread count: " + ThrLib[thread_count]();
+
+# Test string operations
+show "5. Testing String Operations:";
+show "Original string: " + "Razen Language";
+show "Uppercase: " + StrLib[uppercase]("Razen Language");
+show "Lowercase: " + StrLib[lowercase]("Razen Language");
+show "Length: " + StrLib[length]("Razen Language");
+show "Contains 'Lang': " + StrLib[contains]("Razen Language", "Lang");
+
+# Test array operations
+show "6. Testing Array Operations:";
+show "Original array: " + [1, 2, 3, 4, 5];
+show "Length: " + ArrLib[length]([1, 2, 3, 4, 5]);
+show "Sum: " + ArrLib[sum]([1, 2, 3, 4, 5]);
+show "Join with '-': " + ArrLib[join]([1, 2, 3, 4, 5], "-");
+
+# Test math operations
+show "7. Testing Math Operations:";
+show "Add: " + MathLib[add](5, 3);
+show "Subtract: " + MathLib[subtract](10, 4);
+show "Multiply: " + MathLib[multiply](6, 7);
+show "Divide: " + MathLib[divide](20, 5);
+show "Power: " + MathLib[pow](2, 3);
+show "Square root of 16: " + MathLib[sqrt](16);
+
+show "===== TEST COMPLETE =====";

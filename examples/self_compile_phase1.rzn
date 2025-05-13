@@ -263,6 +263,7 @@ load (1) {
     show "Initializing..."
     show "Ready!"
 }
+show "Ready!"
 
 pointer_operations();
 show "";
