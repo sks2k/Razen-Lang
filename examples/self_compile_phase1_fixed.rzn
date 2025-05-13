@@ -30,36 +30,46 @@ show(yellow) "Reading from buffer: " + MemLib[buffer_read_string](1, 0, 5);
 show(yellow) "Copying between buffers: " + MemLib[buffer_copy](1, 0, 2, 0, 5);
 
 # Binary File Operations
-show(blue) "2. Testing Binary File Operations:";
+show "2. Testing Binary File Operations:";
 
-# Create and open files with proper handles
-show(blue) "Creating binary file: " + BinLib[create]("test.bin");
+# First, create a test file
+show "Creating binary file: " + BinLib[create]("test_binary.bin");
 
-# Open file for writing
-show(blue) "Opening binary file for writing: " + BinLib[open]("test.bin", "w");
-let write_handle = 1; # First file handle
+# Open the file for writing (simplified mode)
+show "Opening binary file for writing: " + BinLib[open]("test_binary.bin", "w");
 
-# Write to the file
-show(blue) "Writing to binary file: " + BinLib[write_bytes](write_handle, "Hello Razen");
+# Get the file handle from the open operation
+let write_handle = 1; # First file handle will be 1
+show "Write handle: " + write_handle;
 
-# Close the write handle
-show(blue) "Closing write handle: " + BinLib[close](write_handle);
+# Write data to the file
+show "Writing to binary file: " + BinLib[write_bytes](write_handle, "Hello Razen Binary World!");
 
-# Open file for reading
-show(blue) "Opening binary file for reading: " + BinLib[open]("test.bin", "r");
-let read_handle = 2; # Second file handle
+# Close the file after writing
+show "Closing write handle: " + BinLib[close](write_handle);
 
-# Seek in the file
-show(blue) "Seeking in binary file: " + BinLib[seek](read_handle, 0);
+# Open the file again for reading
+show "Opening binary file for reading: " + BinLib[open]("test_binary.bin", "r");
 
-# Read from the file
-show(blue) "Reading from binary file: " + BinLib[read_bytes](read_handle, 5);
+# Get the new file handle
+let read_handle = 2; # Second file handle will be 2
+show "Read handle: " + read_handle;
 
-# Close the read handle
-show(blue) "Closing read handle: " + BinLib[close](read_handle);
+# Seek to the beginning of the file
+show "Seeking to beginning of file: " + BinLib[seek](read_handle, 0);
+
+# Read the first 5 bytes
+show "Reading first 5 bytes: " + BinLib[read_bytes](read_handle, 5);
+
+# Seek to position 6 and read more
+show "Seeking to position 6: " + BinLib[seek](read_handle, 6);
+show "Reading next 5 bytes: " + BinLib[read_bytes](read_handle, 5);
+
+# Close the file after reading
+show "Closing read handle: " + BinLib[close](read_handle);
 
 # Get file statistics
-show(blue) "File stats: " + BinLib[stats]();
+show "File stats: " + BinLib[stats]();
 
 # Bit Operations
 show(red) "3. Testing Bit Operations:";

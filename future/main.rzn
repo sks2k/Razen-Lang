@@ -1,0 +1,400 @@
+type freestyle;
+
+# Library import
+lib os;
+lib date;
+lib time;
+lib json;
+lib log;
+lib async;
+lib str;
+
+# External Package/Library import
+@discordRZN;
+@uvloop;
+@orjson;
+@dotenv;
+
+# Import Modules/Functions/Classes/Variables from External Library/File
+import {commands} from discordRZN;
+import {Database} from {utils.db};
+import {initialize_database} from {utils.db_init};
+import {load_dotenv} from {dotenv};
+
+# Configure logging
+take log_directory = "logs";
+hold exist_ok = true;
+put dirs = OS[makedirs](log_directory, exist_ok);
+
+# Create a formatter that includes timestamps
+take log_formatter = LogLib[formatter]("%(asctime)s - %(levelname)s - %(message)s");
+
+# Configure file handler for logs
+let today = Date[format](Date[now](), "YYYY-MM-DD");
+put log_file = log_directory + "/protocol-u2-" + today + ".log";
+put file_handler = LogLib[file_handler](filename=log_file, encoding="utf-8", mode="a");
+put _ = LogLib[set_formatter](file_handler, log_formatter);
+
+# Configure console handler
+put console_handler = LogLib[stream_handler]();
+put _ = LogLib[set_formatter](console_handler, log_formatter);
+
+# Set up the logger
+put logger = LogLib[get_logger]("protocol-u2");
+put _ = LogLib[set_level](logger, LogLib[INFO]);
+put _ = LogLib[add_handler](logger, file_handler);
+put _ = LogLib[add_handler](logger, console_handler);
+
+# Enable uvloop for faster async operations
+put _ = Async[set_event_loop_policy](UVLoop[event_loop_policy]());
+
+# Configure discord.py to use orjson
+put _ = DiscordRZN[utils][set_json_loader](OrJSON[loads]);
+put _ = DiscordRZN[utils][set_json_dumper](OrJSON[dumps]);
+
+# Load environment variables
+put _ = DotEnv[load_dotenv]();
+put TOKEN = OS[getenv]("DISCORD_TOKEN");
+put CLIENT_ID = OS[getenv]("CLIENT_ID");
+put PREFIX = OS[getenv]("PREFIX", "&");
+
+# Set up intents
+put intents = DiscordRZN[intents][default]();
+put intents.message_content = true;  # Privileged intent
+put intents.members = true;         # Privileged intent
+put intents.presences = true;       # Privileged intent for status detection
+
+# Function to get prefix for each guild
+fun get_prefix(bot, message) {
+    # Use default prefix in DMs
+    if message.guild == null {
+        return PREFIX;
+    }
+    
+    try {
+        # Ensure guild ID is an integer
+        let guild_id = Int[parse](message.guild.id);
+        
+        # Check if the PrefixCommand cog is loaded and has custom prefixes in memory
+        let prefix_cog = bot.get_cog("PrefixCommand");
+        if prefix_cog != null && prefix_cog.has_custom_prefixes && Map[has_key](prefix_cog.custom_prefixes, guild_id) {
+            return Map[get](prefix_cog.custom_prefixes, guild_id);
+        }
+        
+        # Use the database to get the guild's prefix if available
+        if bot.has_db && bot.db != null {
+            try {
+                # Use the get_prefix method if available
+                if bot.db.has_method("get_prefix") {
+                    let custom_prefix = Async[await](bot.db.get_prefix(guild_id));
+                    # If we found a custom prefix, store it in the cog for future use
+                    if custom_prefix != PREFIX && prefix_cog != null && prefix_cog.has_custom_prefixes {
+                        put prefix_cog.custom_prefixes[guild_id] = custom_prefix;
+                    }
+                    return custom_prefix;
+                }
+                # Fall back to get_server_settings if get_prefix is not available
+                else {
+                    let settings = Async[await](bot.db.get_server_settings(guild_id));
+                    if settings != null && Map[has_key](settings, "prefix") && Map[get](settings, "prefix") != PREFIX {
+                        # If we found a custom prefix, store it in the cog for future use
+                        if prefix_cog != null && prefix_cog.has_custom_prefixes {
+                            put prefix_cog.custom_prefixes[guild_id] = Map[get](settings, "prefix");
+                        }
+                        return Map[get](settings, "prefix");
+                    }
+                }
+            } catch e {
+                # If there's an error, log it and fall back to the default prefix
+                if bot.has_logger {
+                    put _ = bot.logger.error("Error getting prefix for guild " + guild_id + ": " + e);
+                }
+            }
+        }
+    } catch e {
+        # If there's an error with the guild ID, log it and fall back to the default prefix
+        if bot.has_logger {
+            put _ = bot.logger.error("Error in get_prefix function: " + e);
+        }
+    }
+    
+    # Fall back to default prefix if no custom prefix is found or if there was an error
+    return PREFIX;
+}
+
+# Initialize bot with performance optimizations
+put bot = Commands[bot](
+    command_prefix=get_prefix,
+    intents=intents,
+    help_command=null,
+    application_id=CLIENT_ID != null ? Int[parse](CLIENT_ID) : null,
+    chunk_guilds_at_startup=false,  # Disable automatic guild chunking
+    max_messages=1000,  # Optimize message cache
+    assume_unsync_clock=true  # Better clock handling
+);
+
+# Database connection will be initialized after bot is created
+put db = null;
+
+# Cache for status updates
+put _status_cache = {
+    "guild_count": 0,
+    "user_count": 0,
+    "last_update": 0
+};
+
+# Status rotation task with caching
+fun change_status() {
+    put _ = Async[await](bot.wait_until_ready());
+    let statuses = [
+        [DiscordRZN[activity_type][listening], fun() { return "Use /help or " + PREFIX + "help"; }],
+        [DiscordRZN[activity_type][watching], fun() { return Map[get](_status_cache, "guild_count") + " Servers"; }],
+        [DiscordRZN[activity_type][watching], fun() { return Map[get](_status_cache, "user_count") + " Users"; }]
+    ];
+    
+    while !bot.is_closed() {
+        # Update cache every minute
+        let current_time = Async[get_event_loop]().time();
+        if current_time - Map[get](_status_cache, "last_update") >= 60 {
+            put _status_cache = {
+                "guild_count": List[length](bot.guilds),
+                "user_count": Set[size](bot.get_all_members()),
+                "last_update": current_time
+            };
+        }
+        
+        for [activity_type, name_func] in statuses {
+            put _ = Async[await](bot.change_presence(
+                activity=DiscordRZN[activity](
+                    type=activity_type,
+                    name=name_func()
+                )
+            ));
+            put _ = Async[await](Async[sleep](10));
+        }
+    }
+}
+
+# Bot event: on_ready
+fun on_ready() {
+    # Set the logger attribute on the bot for access from cogs
+    put bot.logger = logger;
+    
+    put _ = logger.info(bot.user.name + " has connected to Discord!");
+    put _ = logger.info("Bot is in " + List[length](bot.guilds) + " guilds.");
+    
+    # Log more detailed guild information
+    let guild_info = List[map](bot.guilds, fun(guild) {
+        return "  - " + guild.name + " (ID: " + guild.id + ", Members: " + List[length](guild.members) + ")";
+    });
+    put _ = logger.info("Guilds:");
+    for info in guild_info {
+        put _ = logger.info(info);
+    }
+    
+    # Initialize database tables
+    try {
+        put _ = logger.info("Initializing database tables...");
+        put _ = Async[await](initialize_database());
+        put _ = logger.info("Database tables initialized successfully");
+    } catch e {
+        put _ = logger.error("Error initializing database tables: " + e);
+        put _ = logger.error(Str[traceback](e));
+    }
+    
+    # Initialize database connection
+    if db == null {
+        put db = Database(bot);
+        put bot.db = db;  # Set the db attribute on the bot for access from cogs
+        put _ = logger.info("Database connection initialized");
+    }
+    
+    # Load custom prefixes from database to cache
+    try {
+        put _ = logger.info("Loading custom prefixes...");
+        # Log the default prefix
+        put _ = logger.info("Protocol U2 is ready to use with default prefix: " + PREFIX);
+    } catch e {
+        put _ = logger.error("Error loading custom prefixes: " + e);
+        put _ = logger.error(Str[traceback](e));
+    }
+    
+    # Initialize premium users set if not already done
+    if !bot.has_premium_users {
+        put bot.premium_users = Set[new]();
+        put _ = logger.info("Premium users cache initialized");
+        
+        # Load premium users from database
+        try {
+            let query = "SELECT user_id FROM premium_users WHERE expires_at > datetime('now')";
+            let results = Async[await](db.fetchall(query));
+            if results != null {
+                for row in results {
+                    put _ = Set[add](bot.premium_users, row[0]);
+                }
+                put _ = logger.info("Loaded " + Set[size](bot.premium_users) + " premium users from database");
+            }
+        } catch e {
+            put _ = logger.error("Error loading premium users: " + e);
+        }
+    }
+    
+    # Start status rotation task
+    put _ = bot.loop.create_task(change_status());
+    
+    # Sync slash commands with Discord
+    put _ = logger.info("Syncing slash commands...");
+    try {
+        let synced = Async[await](bot.tree.sync());
+        put _ = logger.info("Synced " + List[length](synced) + " command(s)");
+    } catch e {
+        put _ = logger.error("Failed to sync commands: " + e);
+    }
+    
+    put _ = logger.info("Protocol U2 is ready to use with prefix: " + PREFIX);
+}
+
+# Command logging events
+fun on_command(ctx) {
+    # Log basic command information
+    let command_args = List[length](ctx.args) > 2 ? Str[join](List[map](List[slice](ctx.args, 2), Str[to_string]), " ") : "";
+    let command_kwargs = Map[size](ctx.kwargs) > 0 ? Str[join](List[map](Map[entries](ctx.kwargs), fun(entry) { return entry[0] + "=" + entry[1]; }), " ") : "";
+    let arguments = Str[trim](command_args + " " + command_kwargs);
+    
+    # Format log message with detailed information
+    let log_message = 
+        "Command executed: " + ctx.command.qualified_name + " " +
+        "by " + ctx.author + " (ID: " + ctx.author.id + ") " +
+        "in " + (ctx.guild != null ? ctx.guild.name : "DM") + " " +
+        "(Guild ID: " + (ctx.guild != null ? ctx.guild.id : "N/A") + ")";
+    
+    if arguments != "" {
+        put log_message = log_message + " with arguments: " + arguments;
+    }
+    
+    put _ = logger.info(log_message);
+}
+
+fun on_command_completion(ctx) {
+    # Log successful command completion
+    let execution_time = ctx.has_start_time ? (Async[get_event_loop]().time() - ctx._start_time) : 0;
+    put _ = logger.info("Command " + ctx.command.qualified_name + " completed successfully in " + Str[format](execution_time, ".2f") + "s");
+}
+
+fun on_command_error(ctx, error) {
+    if error.type == Commands[command_not_found] {
+        return;
+    }
+    
+    # Set start time for error tracking if not already set
+    if !ctx.has_start_time {
+        put ctx._start_time = Async[get_event_loop]().time();
+    }
+    
+    # Calculate execution time until error
+    let execution_time = Async[get_event_loop]().time() - ctx._start_time;
+    
+    # Get command arguments for context
+    let command_args = List[length](ctx.args) > 2 ? Str[join](List[map](List[slice](ctx.args, 2), Str[to_string]), " ") : "";
+    let command_kwargs = Map[size](ctx.kwargs) > 0 ? Str[join](List[map](Map[entries](ctx.kwargs), fun(entry) { return entry[0] + "=" + entry[1]; }), " ") : "";
+    let arguments = Str[trim](command_args + " " + command_kwargs);
+    
+    # Process error type
+    let error_type = error.type;
+    if error.type == Commands[command_invoke_error] {
+        put error = error.original;
+        put error_type = "CommandInvokeError -> " + error.type;
+    }
+    
+    # Get full traceback
+    let error_traceback = Str[traceback](error);
+    
+    # Log detailed error information
+    put _ = logger.error("Command error in " + ctx.command.qualified_name + " after " + Str[format](execution_time, ".2f") + "s: " + error_type);
+    put _ = logger.error("User: " + ctx.author + " (ID: " + ctx.author.id + ") in " + (ctx.guild != null ? ctx.guild.name : "DM"));
+    
+    if arguments != "" {
+        put _ = logger.error("Arguments: " + arguments);
+    }
+    
+    put _ = logger.error("Details: " + error);
+    put _ = logger.error("Traceback: " + error_traceback);
+    
+    # Send error message to user if appropriate
+    try {
+        if error.type == Commands[missing_permissions] {
+            put _ = Async[await](ctx.send("❌ You don't have the required permissions to use this command."));
+        } else if error.type == Commands[bot_missing_permissions] {
+            put _ = Async[await](ctx.send("❌ I don't have the required permissions to execute this command."));
+        } else if error.type == Commands[missing_required_argument] {
+            put _ = Async[await](ctx.send("❌ Missing required argument: " + error.param.name));
+        } else if error.type == Commands[command_on_cooldown] {
+            put _ = Async[await](ctx.send("⏳ Command on cooldown. Try again in " + Str[format](error.retry_after, ".1f") + "s."));
+        }
+    } catch e {
+        put _ = logger.error("Failed to send error message to user: " + e);
+    }
+}
+
+# Load all cogs
+fun load_extensions() {
+    # Load top-level cogs
+    for filename in OS[listdir]("./cogs") {
+        if Str[ends_with](filename, ".py") && filename != "__init__.py" {
+            try {
+                put _ = Async[await](bot.load_extension("cogs." + Str[slice](filename, 0, -3)));
+                put _ = logger.info("Loaded extension: " + Str[slice](filename, 0, -3));
+            } catch e {
+                put _ = logger.error("Failed to load extension " + Str[slice](filename, 0, -3) + ": " + e);
+            }
+        }
+        
+        # Load cogs in subdirectories
+        else if OS[is_dir](OS[join]("./cogs", filename)) && !Str[starts_with](filename, "__") {
+            for subfile in OS[listdir](OS[join]("./cogs", filename)) {
+                if Str[ends_with](subfile, ".py") && subfile != "__init__.py" {
+                    try {
+                        put _ = Async[await](bot.load_extension("cogs." + filename + "." + Str[slice](subfile, 0, -3)));
+                        put _ = logger.info("Loaded extension: " + filename + "." + Str[slice](subfile, 0, -3));
+                    } catch e {
+                        put _ = logger.error("Failed to load extension " + filename + "." + Str[slice](subfile, 0, -3) + ": " + e);
+                    }
+                }
+            }
+        }
+    }
+}
+
+# Add middleware to track command execution time
+fun before_command_invoke(ctx) {
+    put ctx._start_time = Async[get_event_loop]().time();
+}
+
+# Main function to run the bot
+fun main() {
+    try {
+        put _ = logger.info("Starting Protocol U2 bot...");
+        put _ = Async[async_with](bot, fun(bot_context) {
+            put _ = Async[await](load_extensions());
+            put _ = logger.info("All extensions loaded successfully");
+            put _ = logger.info("Bot is starting with token: " + Str[slice](TOKEN, 0, 5) + "..." + Str[slice](TOKEN, -5));
+            put _ = Async[await](bot.start(TOKEN));
+        });
+    } catch e {
+        put _ = logger.critical("Fatal error starting bot: " + e);
+        put _ = logger.critical(Str[traceback](e));
+        throw e;
+    }
+}
+
+# Set up event handlers
+put _ = bot.event(on_ready);
+put _ = bot.event(on_command);
+put _ = bot.event(on_command_completion);
+put _ = bot.event(on_command_error);
+put _ = bot.before_invoke(before_command_invoke);
+
+# Run the bot
+if __name__ == "__main__" {
+    put _ = Async[run](main());
+}

@@ -156,10 +156,25 @@ impl FileManager {
         id
     }
 
-    // Get a file by handle with error handling
+    // Get a file by handle with error handling (deprecated, use get_file_mut instead)
     fn get_file(&mut self, id: usize) -> Result<&mut FileType, BinaryError> {
         self.files.get_mut(&id)
             .ok_or(BinaryError::InvalidHandle(id))
+    }
+    
+    // Get a file by handle with error handling (mutable access)
+    fn get_file_mut(&mut self, id: usize) -> Result<&mut FileType, BinaryError> {
+        // First collect the keys to avoid borrowing issues
+        let available_handles: Vec<usize> = self.files.keys().cloned().collect();
+        
+        match self.files.get_mut(&id) {
+            Some(file_type) => Ok(file_type),
+            None => {
+                println!("Invalid file handle: {}", id);
+                println!("Available handles: {:?}", available_handles);
+                Err(BinaryError::InvalidHandle(id))
+            }
+        }
     }
 
     // Close a file with proper cleanup
@@ -252,12 +267,23 @@ pub fn open(args: Vec<Value>) -> Result<Value, String> {
     let mode = args[1].as_string()?;
     let path_buf = PathBuf::from(&path);
     
+    // Simplify mode validation to handle simpler modes
+    let simplified_mode = match mode.as_str() {
+        "r" => "rb",
+        "w" => "wb",
+        "a" => "ab",
+        "r+" => "r+b",
+        "w+" => "w+b",
+        "a+" => "a+b",
+        other => other,
+    };
+    
     // Validate mode
-    if !matches!(mode.as_str(), "rb" | "wb" | "ab" | "r+b" | "w+b" | "a+b") {
+    if !matches!(simplified_mode, "rb" | "wb" | "ab" | "r+b" | "w+b" | "a+b") {
         return Err(BinaryError::InvalidMode(mode.clone()).into());
     }
     
-    let file = match mode.as_str() {
+    let file = match simplified_mode {
         "rb" => OpenOptions::new().read(true).open(&path),
         "wb" => OpenOptions::new().write(true).create(true).truncate(true).open(&path),
         "ab" => OpenOptions::new().write(true).append(true).create(true).open(&path),
@@ -269,7 +295,12 @@ pub fn open(args: Vec<Value>) -> Result<Value, String> {
     
     match file {
         Ok(file) => {
-            let id = FILE_MANAGER.lock().register_file(file, path_buf, mode);
+            // Register the file and get its handle
+            let id = FILE_MANAGER.lock().register_file(file, path_buf, mode.clone());
+            
+            // Log the file opening for debugging
+            println!("Opened file '{}' with mode '{}' and assigned handle {}", path, mode, id);
+            
             Ok(Value::Int(id as i64))
         },
         Err(e) => {
@@ -291,8 +322,15 @@ pub fn close(args: Vec<Value>) -> Result<Value, String> {
     
     let handle = args[0].as_int()? as usize;
     
+    // Log the operation for debugging
+    println!("Closing file handle {}", handle);
+    
     // Get file manager and lock once to avoid temporary value being dropped while borrowed
     let mut file_manager = FILE_MANAGER.lock();
+    
+    // Get available file handles for debugging (avoid borrowing issues)
+    let available_handles: Vec<usize> = file_manager.files.keys().cloned().collect();
+    println!("Available file handles before closing: {:?}", available_handles);
     
     // Get file stats and clone them before closing to avoid borrowing conflicts
     let stats_option = match file_manager.get_stats(handle) {
@@ -303,21 +341,31 @@ pub fn close(args: Vec<Value>) -> Result<Value, String> {
             let bytes_written = stats.bytes_written;
             Some((path, bytes_read, bytes_written))
         },
-        Err(_) => None,
+        Err(e) => {
+            println!("Error getting stats for handle {}: {:?}", handle, e);
+            None
+        },
     };
     
     // Close the file with proper error handling
     match file_manager.close_file(handle) {
         Ok(_) => {
-            // Log file statistics if needed
+            // Log file statistics
             if let Some((path, bytes_read, bytes_written)) = stats_option {
-                // We could log stats here if needed
-                // println!("Closed file: {}, Read: {} bytes, Written: {} bytes", 
-                //     path.display(), bytes_read, bytes_written);
+                println!("Closed file: {}, Read: {} bytes, Written: {} bytes", 
+                    path.display(), bytes_read, bytes_written);
             }
+            
+            // Get available file handles after closing for debugging (avoid borrowing issues)
+            let available_handles_after: Vec<usize> = file_manager.files.keys().cloned().collect();
+            println!("Available file handles after closing: {:?}", available_handles_after);
+            
             Ok(Value::Bool(true))
         },
-        Err(e) => Err(e.into()),
+        Err(e) => {
+            println!("Error closing file handle {}: {:?}", handle, e);
+            Err(e.into())
+        },
     }
 }
 
@@ -335,7 +383,7 @@ pub fn stats(args: Vec<Value>) -> Result<Value, String> {
 }
 
 /// Write bytes to a binary file
-/// Example: write(file_handle, [65, 66, 67]) => 3
+/// Example: write_bytes(file_handle, [65, 66, 67]) => 3
 pub fn write_bytes(args: Vec<Value>) -> Result<Value, String> {
     if args.len() != 2 {
         return Err(BinaryError::InvalidArgument("Binary.write_bytes requires exactly 2 arguments: file_handle, bytes".to_string()).into());
@@ -359,8 +407,11 @@ pub fn write_bytes(args: Vec<Value>) -> Result<Value, String> {
     // Get file manager and lock once
     let mut file_manager = FILE_MANAGER.lock();
     
+    // Log the operation for debugging
+    println!("Writing {} bytes to file handle {}", bytes.len(), handle);
+    
     // Get file and handle write based on file type
-    let result = match file_manager.get_file(handle) {
+    let result = match file_manager.get_file_mut(handle) {
         Ok(file_type) => {
             match file_type {
                 FileType::Raw(file) => file.write_all(&bytes),
@@ -379,6 +430,23 @@ pub fn write_bytes(args: Vec<Value>) -> Result<Value, String> {
         Ok(_) => {
             // Update statistics
             let _ = file_manager.update_write_stats(handle, bytes.len());
+            
+            // Flush the file to ensure data is written
+            let flush_result = match file_manager.get_file_mut(handle) {
+                Ok(file_type) => {
+                    match file_type {
+                        FileType::Raw(file) => file.flush(),
+                        FileType::Buffered(writer) => writer.flush(),
+                        FileType::Readable(_) => Ok(()),
+                    }
+                },
+                Err(_) => Ok(()), // Already handled above
+            };
+            
+            if let Err(e) = flush_result {
+                return Err(BinaryError::WriteError { handle, source: e }.into());
+            }
+            
             Ok(Value::Int(bytes.len() as i64))
         },
         Err(e) => Err(BinaryError::WriteError { handle, source: e }.into()),
@@ -403,6 +471,9 @@ pub fn read_bytes(args: Vec<Value>) -> Result<Value, String> {
     if count > 1024 * 1024 * 10 { // 10MB limit for safety
         return Err(BinaryError::InvalidArgument(format!("Requested read size too large: {} bytes", count)).into());
     }
+    
+    // Log the operation for debugging
+    println!("Reading {} bytes from file handle {}", count, handle);
     
     // Get file manager and lock once
     let mut file_manager = FILE_MANAGER.lock();
@@ -479,15 +550,26 @@ pub fn read_bytes(args: Vec<Value>) -> Result<Value, String> {
 }
 
 /// Seek to a position in a binary file
-/// Example: seek(file_handle, 10, "start") => true
+/// Example: seek(file_handle, offset) => new_position
 pub fn seek(args: Vec<Value>) -> Result<Value, String> {
-    if args.len() != 3 {
-        return Err(BinaryError::InvalidArgument("Binary.seek requires exactly 3 arguments: file_handle, offset, whence".to_string()).into());
+    // Simplify the interface to make it easier to use
+    // Just take file handle and offset, assume from start
+    if args.len() < 2 || args.len() > 3 {
+        return Err(BinaryError::InvalidArgument("Binary.seek requires 2 or 3 arguments: file_handle, offset, [whence]".to_string()).into());
     }
     
     let handle = args[0].as_int()? as usize;
     let offset = args[1].as_int()? as i64;
-    let whence = args[2].as_string()?;
+    
+    // Default whence to "start" if not provided
+    let whence = if args.len() == 3 {
+        args[2].as_string()?
+    } else {
+        "start".to_string()
+    };
+    
+    // Log the operation for debugging
+    println!("Seeking in file handle {} to offset {} from {}", handle, offset, whence);
     
     // Validate whence parameter
     let seek_from = match whence.as_str() {
@@ -511,8 +593,12 @@ pub fn seek(args: Vec<Value>) -> Result<Value, String> {
     // Get file manager and lock once
     let mut file_manager = FILE_MANAGER.lock();
     
+    // Get available file handles for debugging (avoid borrowing issues)
+    let available_handles: Vec<usize> = file_manager.files.keys().cloned().collect();
+    println!("Available file handles: {:?}", available_handles);
+    
     // Get file and handle seek based on file type
-    let seek_result = match file_manager.get_file(handle) {
+    let seek_result = match file_manager.get_file_mut(handle) {
         Ok(file_type) => {
             match file_type {
                 FileType::Raw(file) => file.seek(seek_from),
@@ -534,8 +620,14 @@ pub fn seek(args: Vec<Value>) -> Result<Value, String> {
     
     // Handle seek result
     match seek_result {
-        Ok(position) => Ok(Value::Int(position as i64)),
-        Err(e) => Err(BinaryError::SeekError { handle, source: e }.into()),
+        Ok(position) => {
+            println!("Successfully seeked to position {}", position);
+            Ok(Value::Int(position as i64))
+        },
+        Err(e) => {
+            println!("Error seeking: {}", e);
+            Err(BinaryError::SeekError { handle, source: e }.into())
+        },
     }
 }
 
