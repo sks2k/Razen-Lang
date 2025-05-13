@@ -1,0 +1,15 @@
+type freestyle;
+
+# Random Library Test
+# This file tests only the random library
+
+# Import libraries
+lib random;
+
+# Main program
+show "===== Random Library Test =====";
+
+# Test random library
+show "Random number between 1-100: " + Random.int(1, 100);
+
+show "===== Test Completed =====";

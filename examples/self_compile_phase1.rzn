@@ -1,0 +1,294 @@
+type freestyle;
+
+# Razen Self-Compilation Phase 1 Example
+# This file demonstrates the essential features needed for Phase 1 of making Razen self-compiling
+
+# ======================================================================
+# SECTION 1: MEMORY MANAGEMENT PRIMITIVES
+# ======================================================================
+
+# Memory management library import
+lib memlib;
+lib binlib;
+lib bitlib;
+lib syslib;
+lib complib;
+lib thrlib;
+
+# 1.1 Pointer Operations
+fun pointer_operations() {
+    show "=== Pointer Operations ===";
+    
+    # Variable declaration
+    let value = 42;
+    
+    # Get memory address of a variable
+    let ptr = MemLib[addressof](value);
+    show "Address of value: " + ptr;
+    
+    # Dereference a pointer to get the value
+    let retrieved = MemLib[deref](ptr);
+    show "Dereferenced value: " + retrieved;
+    
+    # Pointer arithmetic
+    let next_address = MemLib[add_offset](ptr, 1);
+    show "Next memory address: " + next_address;
+}
+
+# 1.2 Memory Allocation and Deallocation
+fun memory_allocation() {
+    show "=== Memory Allocation ===";
+    
+    # Allocate memory block (similar to malloc)
+    let size = 1024;  # bytes
+    let memory_block = MemLib[alloc](size);
+    show "Allocated " + size + " bytes at address: " + memory_block;
+    
+    # Write to memory
+    MemLib[write_byte](memory_block, 0, 65);  # Write 'A' to first byte
+    MemLib[write_byte](memory_block, 1, 66);  # Write 'B' to second byte
+    
+    # Read from memory
+    let byte1 = MemLib[read_byte](memory_block, 0);
+    let byte2 = MemLib[read_byte](memory_block, 1);
+    show "Read bytes: " + byte1 + " " + byte2;
+    
+    # Free allocated memory
+    MemLib[free](memory_block);
+    show "Memory freed";
+}
+
+# 1.3 Buffer Operations
+fun buffer_operations() {
+    show "=== Buffer Operations ===";
+    
+    # Create a buffer
+    let buffer = MemLib[create_buffer](10);
+    
+    # Write to buffer
+    MemLib[buffer_write_string](buffer, "Hello");
+    
+    # Read from buffer
+    let content = MemLib[buffer_read_string](buffer, 0, 5);
+    show "Buffer content: " + content;
+    
+    # Copy between buffers
+    let dest_buffer = MemLib[create_buffer](10);
+    MemLib[buffer_copy](buffer, 0, dest_buffer, 0, 5);
+    
+    # Read from destination buffer
+    let copied = MemLib[buffer_read_string](dest_buffer, 0, 5);
+    show "Copied content: " + copied;
+    
+    # Free buffers
+    MemLib[free_buffer](buffer);
+    MemLib[free_buffer](dest_buffer);
+}
+
+# ======================================================================
+# SECTION 2: BINARY FILE MANIPULATION
+# ======================================================================
+
+fun binary_file_operations() {
+    show "=== Binary File Operations ===";
+    
+    # Create a binary file
+    BinLib[create]("test.bin");
+    
+    # Open file in binary mode
+    let file = BinLib[open]("test.bin", "wb");
+    
+    # Write binary data
+    let data = [65, 66, 67, 68, 69];  # ASCII values for "ABCDE"
+    BinLib[write_bytes](file, data);
+    
+    # Close file
+    BinLib[close](file);
+    
+    # Read binary file
+    file = BinLib[open]("test.bin", "rb");
+    let read_data = BinLib[read_bytes](file, 5);
+    BinLib[close](file);
+    
+    # Display binary data
+    show "Read binary data (decimal): " + read_data;
+    
+    # Convert to string for display
+    let str_data = BinLib[bytes_to_string](read_data);
+    show "Read binary data (as string): " + str_data;
+}
+
+# ======================================================================
+# SECTION 3: BITWISE OPERATIONS
+# ======================================================================
+
+fun bitwise_operations() {
+    show "=== Bitwise Operations ===";
+    
+    let a = 5;  # 0101 in binary
+    let b = 3;  # 0011 in binary
+    
+    # Bitwise AND
+    let and_result = BitLib[and](a, b);  # 0001 = 1
+    show a + " AND " + b + " = " + and_result;
+    
+    # Bitwise OR
+    let or_result = BitLib[or](a, b);  # 0111 = 7
+    show a + " OR " + b + " = " + or_result;
+    
+    # Bitwise XOR
+    let xor_result = BitLib[xor](a, b);  # 0110 = 6
+    show a + " XOR " + b + " = " + xor_result;
+    
+    # Bitwise NOT (complement)
+    let not_result = BitLib[not](a, 8);  # 11111010 (8-bit complement) = 250
+    show "NOT " + a + " = " + not_result;
+    
+    # Bit shifting
+    let left_shift = BitLib[left_shift](a, 2);  # 0101 << 2 = 10100 = 20
+    let right_shift = BitLib[right_shift](a, 1);  # 0101 >> 1 = 0010 = 2
+    
+    show a + " << 2 = " + left_shift;
+    show a + " >> 1 = " + right_shift;
+}
+
+# ======================================================================
+# SECTION 4: SYSTEM CALLS
+# ======================================================================
+
+fun system_operations() {
+    show "=== System Operations ===";
+    
+    # Get process ID
+    let pid = SysLib[getpid]();
+    show "Current process ID: " + pid;
+    
+    # Get current working directory
+    let cwd = SysLib[getcwd]();
+    show "Current working directory: " + cwd;
+    
+    # Execute a system command
+    let result = SysLib[execute]("echo Hello from system call");
+    show "Command result: " + result;
+    
+    # Get environment variable
+    let path = SysLib[getenv]("PATH");
+    show "PATH environment variable: " + path;
+}
+
+# ======================================================================
+# SECTION 5: COMPILER INFRASTRUCTURE BASICS
+# ======================================================================
+
+fun compiler_basics() {
+    show "=== Compiler Infrastructure Basics ===";
+    
+    # Create a simple AST node
+    let ast_node = CompLib[create_node]("variable", "x", "integer");
+    show "Created AST node: " + CompLib[node_to_string](ast_node);
+    
+    # Create a simple symbol table
+    let symbol_table = CompLib[create_symbol_table]();
+    CompLib[add_symbol](symbol_table, "x", "integer", 0);
+    CompLib[add_symbol](symbol_table, "y", "string", 1);
+    
+    # Look up a symbol
+    let symbol = CompLib[lookup_symbol](symbol_table, "x");
+    show "Symbol 'x' info: " + symbol;
+    
+    # Generate simple IR code
+    let ir_code = CompLib[generate_ir]("x = 5 + 3");
+    show "Generated IR code: " + ir_code;
+}
+
+# ======================================================================
+# SECTION 6: PROCESS MANAGEMENT
+# ======================================================================
+
+fun process_management() {
+    show "=== Process Management ===";
+    
+    # Create a new process
+    let pid = ProcLib[create]("echo Child process created");
+    show "Created process with PID: " + pid;
+    
+    # Wait for a process to complete
+    let status = ProcLib[wait](pid);
+    show "Process exit status: " + status;
+    
+    # Get current process information
+    let proc_info = ProcLib[info]();
+    show "Current process info: " + proc_info;
+    
+    # Demonstrate signals (just showing the API, not actually sending signals)
+    show "Signal API example: ProcLib[signal](pid, 'SIGTERM')";
+}
+
+# ======================================================================
+# SECTION 7: THREADING SUPPORT
+# ======================================================================
+
+fun threading_operations() {
+    show "=== Threading Operations ===";
+    
+    # Define a simple thread function (in real implementation, this would be a separate function)
+    show "Thread function would be defined separately";
+    
+    # Create a thread
+    let thread_id = ThrLib[create]("thread_function");
+    show "Created thread with ID: " + thread_id;
+    
+    # Wait for thread completion
+    ThrLib[join](thread_id);
+    show "Thread joined";
+    
+    # Thread synchronization primitives
+    let mutex = ThrLib[mutex_create]();
+    ThrLib[mutex_lock](mutex);
+    show "Mutex locked";
+    ThrLib[mutex_unlock](mutex);
+    show "Mutex unlocked";
+}
+
+# ======================================================================
+# MAIN EXECUTION
+# ======================================================================
+
+# Run all the examples
+show "\n===== RAZEN SELF-COMPILATION PHASE 1 DEMO =====\n";
+
+# Run with a loading animation
+load (1) {
+    show "Starting demo..."
+    show "Initializing..."
+    show "Ready!"
+}
+
+pointer_operations();
+show "";
+
+memory_allocation();
+show "";
+
+buffer_operations();
+show "";
+
+binary_file_operations();
+show "";
+
+bitwise_operations();
+show "";
+
+system_operations();
+show "";
+
+process_management();
+show "";
+
+threading_operations();
+show "";
+
+compiler_basics();
+show "";
+
+show "===== DEMO COMPLETE =====";

@@ -1033,18 +1033,35 @@ impl Parser {
     fn parse_index_expression(&mut self, left: Expression) -> Option<Expression> {
         self.next_token();
         
-        let index = self.parse_expression(Precedence::Lowest)?;
+        // Handle function name inside brackets differently
+        // For MemLib[addressof], the function name needs to be treated as an identifier
+        let index = if self.current_token_is(TokenType::Identifier) {
+            // If the current token is an identifier, create an identifier expression
+            Expression::Identifier(self.current_token.literal.clone())
+        } else {
+            // Otherwise parse normally
+            self.parse_expression(Precedence::Lowest)?
+        };
         
         if !self.expect_peek(TokenType::RightBracket) {
             return None;
         }
         
-        // Check if this is a library function call (e.g., ArrLib[push](1, 2))
+        // Check if this is a library function call (e.g., MemLib[addressof](1, 2))
         if self.peek_token_is(TokenType::LeftParen) {
             // This is a library function call
             self.next_token(); // Consume the left paren
             
-            let arguments = self.parse_expression_list(TokenType::RightParen)?;
+            // Parse arguments or empty arguments list
+            let arguments = if self.peek_token_is(TokenType::RightParen) {
+                self.next_token(); // Consume right paren for empty args
+                vec![]
+            } else {
+                match self.parse_expression_list(TokenType::RightParen) {
+                    Some(args) => args,
+                    None => return None
+                }
+            };
             
             return Some(Expression::LibraryCall {
                 library: Box::new(left),
@@ -1075,7 +1092,11 @@ impl Parser {
                 TokenType::Read | TokenType::Debug | TokenType::Assert | TokenType::Trace |
                 TokenType::Show | TokenType::Exit | TokenType::Api | TokenType::Call |
                 TokenType::Connect | TokenType::To | TokenType::Import | TokenType::Export |
-                TokenType::From | TokenType::As => true,
+                TokenType::From | TokenType::As |
+                // Self-compilation library tokens
+                TokenType::MemLib | TokenType::BinLib | TokenType::BitLib | 
+                TokenType::SysLib | TokenType::ProcLib | TokenType::ThrLib | 
+                TokenType::CompLib => true,
                 _ => false
             };
             
@@ -1587,7 +1608,11 @@ impl Parser {
             TokenType::Audio | TokenType::Image | TokenType::Validation | 
             TokenType::LogLib | TokenType::Uuid | TokenType::BoxLib | TokenType::IOLib |
             TokenType::NumLib | TokenType::RefLib | TokenType::TimeLib | 
-            TokenType::TypeCheckLib | TokenType::TypeConvertLib => true,
+            TokenType::TypeCheckLib | TokenType::TypeConvertLib |
+            // Self-compilation library tokens
+            TokenType::MemLib | TokenType::BinLib | TokenType::BitLib | 
+            TokenType::SysLib | TokenType::ProcLib | TokenType::ThrLib | 
+            TokenType::CompLib => true,
             _ => false
         };
         

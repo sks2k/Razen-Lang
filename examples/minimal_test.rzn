@@ -1,0 +1,14 @@
+type freestyle;
+
+# Minimal Library Test
+# This file tests a minimal example with library imports
+
+# Import libraries
+lib random;   # Random library
+
+show "===== Minimal Library Test =====";
+
+# Test random library functions
+show "Random number between 1-100: " + Random[int](1, 100);
+
+show "===== Test Completed =====";

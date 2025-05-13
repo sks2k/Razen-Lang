@@ -1,0 +1,22 @@
+type freestyle;
+
+# Mixed Library Test
+# This file tests both a working library (random) and a self-compilation library (memory)
+
+# Import libraries
+lib random;
+lib memory;
+
+# Main program
+show "===== Mixed Library Test =====";
+
+# Test random library
+show "Random number between 1-100: " + Random.int(1, 100);
+
+# Test memory library
+let value = 42;
+# Uncomment the line below to test memory library
+# let ptr = Memory.addressof(value);
+# show "Address of value: " + ptr;
+
+show "===== Test Completed =====";

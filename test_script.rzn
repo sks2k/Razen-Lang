@@ -1,7 +1,0 @@
-take name = "John";
-let age = 30;
-take city = "New York";
-
-show name + " is " + age + " years old and living in the " + city;
-
-

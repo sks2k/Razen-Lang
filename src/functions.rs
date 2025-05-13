@@ -23,6 +23,15 @@ mod audio;
 mod image;
 mod date;
 
+// New modules for self-compilation
+mod memory;
+mod binary;
+mod bitwise;
+mod syscall;
+mod process;
+mod thread;
+mod compiler;
+
 // Re-export common utilities and types
 use crate::value::Value;
 
@@ -117,4 +126,33 @@ pub mod imagelib {
 
 pub mod datelib {
     pub use super::date::*;
+}
+
+// New library modules for self-compilation
+pub mod memorylib {
+    pub use super::memory::*;
+}
+
+pub mod binarylib {
+    pub use super::binary::*;
+}
+
+pub mod bitwiselib {
+    pub use super::bitwise::*;
+}
+
+pub mod syscalllib {
+    pub use super::syscall::*;
+}
+
+pub mod processlib {
+    pub use super::process::*;
+}
+
+pub mod threadlib {
+    pub use super::thread::*;
+}
+
+pub mod compilerlib {
+    pub use super::compiler::*;
 }

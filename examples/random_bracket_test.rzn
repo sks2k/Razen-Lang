@@ -1,0 +1,15 @@
+type freestyle;
+
+# Random Library Test with Bracket Notation
+# This file tests the random library using bracket notation
+
+# Import libraries
+lib random;
+
+# Main program
+show "===== Random Library Bracket Test =====";
+
+# Test random library with bracket notation
+show "Random number between 1-100: " + Random[int](1, 100);
+
+show "===== Test Completed =====";

@@ -1,0 +1,17 @@
+# Random Library Test
+# This file tests the random library functions
+
+# Import random library
+lib random;
+
+# Main program
+show "===== Random Library Test =====";
+
+# Test random number generation
+show "Random number between 1-100: " + Random[int](1, 100);
+
+# Test random choice from array
+let choices = ["apple", "banana", "orange", "grape", "mango"];
+show "Random fruit: " + Random[choice](choices);
+
+show "===== Random Library Test Completed =====";

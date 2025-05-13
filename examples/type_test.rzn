@@ -1,0 +1,8 @@
+type freestyle;
+
+# Simple Memory Library Test
+lib memorylib;
+# Test pointer operations
+    let value = 42;
+    let ptr = MemoryLib[addressof](value);
+    show "Address of value: " + ptr;

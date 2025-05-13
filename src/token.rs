@@ -164,6 +164,13 @@ pub enum TokenType {
     Color,         // color manipulation
     System,        // system information
     Ui,            // user interface
+    MemLib,        // memory management
+    BinLib,        // binary file operations
+    BitLib,        // bitwise operations
+    SysLib,        // system call operations
+    ProcLib,       // process management
+    ThrLib,        // thread management
+    CompLib,       // compiler operations
     Storage,       // persistent storage
     Audio,         // audio operations
     Image,         // image processing
@@ -372,6 +379,13 @@ impl fmt::Display for TokenType {
             TokenType::Audio => write!(f, "AUDIO"),
             TokenType::Image => write!(f, "IMAGE"),
             TokenType::Validation => write!(f, "VALIDATION"),
+            TokenType::MemLib => write!(f, "MEMLIB"),
+            TokenType::BinLib => write!(f, "BINLIB"),
+            TokenType::BitLib => write!(f, "BITLIB"),
+            TokenType::SysLib => write!(f, "SYSLIB"),
+            TokenType::ProcLib => write!(f, "PROCLIB"),
+            TokenType::ThrLib => write!(f, "THRLIB"),
+            TokenType::CompLib => write!(f, "COMPLIB"),
             TokenType::LogLib => write!(f, "LOGLIB"),
             TokenType::Uuid => write!(f, "UUID"),
             TokenType::BoxLib => write!(f, "BOX"),
@@ -569,6 +583,13 @@ pub fn lookup_identifier(identifier: &str) -> TokenType {
         "color" => TokenType::Color,
         "system" => TokenType::System,
         "ui" => TokenType::Ui,
+        "memlib" => TokenType::MemLib,
+        "binlib" => TokenType::BinLib,
+        "bitlib" => TokenType::BitLib,
+        "syslib" => TokenType::SysLib,
+        "proclib" => TokenType::ProcLib,
+        "thrlib" => TokenType::ThrLib,
+        "complib" => TokenType::CompLib,
         "storage" => TokenType::Storage,
         "audio" => TokenType::Audio,
         "image" => TokenType::Image,

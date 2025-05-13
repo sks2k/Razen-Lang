@@ -1,0 +1,12 @@
+type freestyle;
+
+# Memory Library Test
+lib memory;
+
+# Main program
+show "===== Memory Library Test =====";
+
+# Test pointer operations
+let value = 42;
+let ptr = Memory.addressof(value);
+show "Address of value: " + ptr;

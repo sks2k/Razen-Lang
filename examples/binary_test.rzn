@@ -1,0 +1,39 @@
+# Binary Library Test
+# This file tests the binary file operations
+
+# Import binary library
+lib binary;
+
+# Main program
+show "===== Binary Library Test =====";
+
+# Create a binary file
+Binary[create]("test.bin");
+show "Created binary file: test.bin";
+
+# Open file in binary mode
+let file = Binary[open]("test.bin", "wb");
+show "Opened file for writing";
+
+# Write binary data
+let data = [65, 66, 67, 68, 69];  # ASCII values for "ABCDE"
+Binary[write_bytes](file, data);
+show "Wrote data to file";
+
+# Close file
+Binary[close](file);
+show "Closed file";
+
+# Read binary file
+file = Binary[open]("test.bin", "rb");
+let read_data = Binary[read_bytes](file, 5);
+Binary[close](file);
+
+# Display binary data
+show "Read binary data (decimal): " + read_data;
+
+# Convert to string for display
+let str_data = Binary[bytes_to_string](read_data);
+show "Read binary data (as string): " + str_data;
+
+show "===== Binary Library Test Completed =====";

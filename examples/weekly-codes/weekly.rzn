@@ -1,0 +1,152 @@
+type freestyle;
+
+# Libraries import
+lib validation;
+lib uuid;
+lib timelib;
+
+# Models name declaration
+take product = "Claude API Key";
+take model1 = "Claude 3.7 Sonnet";
+take model2 = "Claude 3.7 Haiku";
+take model3 = "Claude 3.5 Sonnet";
+
+# Models price declaration
+let keyPrice = 40;
+let model1Price = 50;
+let model2Price = 35;
+let model3Price = 40;
+
+# Wallet
+let wallet = 0;
+
+show(blue) "Username:";
+take username = "test";
+read username;
+show(yellow) "First Name:";
+read first_name;
+show(magenta) "Last Name:";
+read last_name;
+show(green) "e-mail:";
+read email;
+show(red) "Password:";
+read password;
+
+show "Username: " + username;
+show "First Name: " + first_name;
+show "Last Name: " + last_name;
+show "e-mail: " + email;
+show "Password: " + password;
+show(cyan) "All are correct? (y/n)";
+read correct;
+
+if (correct == "y") {
+    if (Validation[email](email)) {
+        show "Success";
+    if (Validation[min_length](password, 8)) {
+        hold isNew = true;
+        show "Welcome " + first_name + last_name;
+    } else {
+        hold isNew = false;
+    }
+    } else {
+        hold isNew = false;
+    }
+} else {
+    exit;
+}
+
+if (isNew) {
+    sum wallet = wallet + 90;
+    show(green) "Surprise " + wallet + " Credits are credited to your wallet..!";
+} else {
+    show(yellow) "sorry you are old user!";
+}
+
+class MainMenu {
+    show(bright_cyan) "Main Menu";
+    show "0: exit"
+    show "1: " + product;
+    show "2: Models";
+}
+
+read choise;
+
+if (choise == 1) {
+    load (2) {
+        show(green) "Conecting to Server";
+        show(blue) "Conecting to Server.";
+        show(red) "Conecting to Server..";
+        show(yellow) "Conecting to Server...";
+        show(magenta) "Conecting to Server....";
+    }
+    show "Connected to Server!"
+    if (wallet >= keyPrice) {
+        show product + "'s Price is " + keyPrice + " Credits/Month";
+        show "Want to buy? (y/n)";
+        read confirm;
+        if (confirm == "y") {
+            load (3) {
+                show(green) "Loading";
+                show(blue) "Loading.";
+                show(red) "Loading..";
+                show(yellow) "Loading...";
+                show(magenta) "Loading....";
+            }
+            show "Purchase Successfull"
+            show "Your API Key UUID is " + UUID[generate]();
+            diff wallet = wallet - keyPrice;
+            show wallet;
+        } else {
+            show "Purchase Cancelled";
+        }
+    } else {
+        show "Not enough Credits";
+    }
+} else {
+    show wallet;
+}
+
+if (choise == 2) {
+    load (2) {
+        show(green) "Conecting to Server";
+        show(blue) "Conecting to Server.";
+        show(red) "Conecting to Server..";
+        show(yellow) "Conecting to Server...";
+        show(magenta) "Conecting to Server....";
+    }
+    show "Connected to Server!"
+    show "Models"
+    show "1: " model1;
+    show "2: " model2;
+    show "3: " model3;
+    if (wallet >= model1Price) {
+        show product + "'s Price is " + keyPrice + " Credits/Month";
+        show "Want to buy? (y/n)";
+        read confirm;
+        if (confirm == "y") {
+            load (3) {
+                show "Loading";
+                show "Loading.";
+                show "Loading..";
+                show "Loading...";
+                show "Loading....";
+            }
+            show "Purchase Successfull"
+            show model1 + "is now added to your account for a Month"
+            diff wallet = wallet - keyPrice;
+            show wallet;
+        } else {
+            show "Purchase Cancelled";
+        }
+    } else {
+        show "Not enough Credits";
+    }
+} else {
+    show wallet;
+}
+
+if (choise == 0) {
+    exit;
+}
+

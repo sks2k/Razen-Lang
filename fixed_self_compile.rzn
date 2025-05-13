@@ -1,0 +1,28 @@
+type freestyle;
+
+# Self-Compilation Test
+# This file tests the self-compilation libraries
+
+# Import libraries
+lib memory;
+lib binary;
+lib bitwise;
+
+# Main program
+show "===== Self-Compilation Test =====";
+
+# Simple operations
+let x = 42;
+show "Value of x: " + x;
+
+# Try to use memory functions indirectly
+fn get_address(value) {
+    # In a real implementation, we would call Memory.addressof(value) here
+    # But for now, we'll just return a placeholder
+    return 12345;
+}
+
+let addr = get_address(x);
+show "Address of x (simulated): " + addr;
+
+show "===== Test Completed =====";

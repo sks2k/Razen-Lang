@@ -1,0 +1,17 @@
+type freestyle;
+
+# Library import.
+lib mathlib;
+lib strlib;
+lib json;
+lib random;
+
+show(bright_yellow) "Calculator in Razen! Multiply anything with the 5";
+
+read input;
+
+if (input == "exit") {
+    exit;
+} else {
+    show MathLib[multiply](5, input);
+}

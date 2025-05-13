@@ -198,6 +198,111 @@ impl LibraryManager {
         seed_lib.register_function("map", crate::functions::seedlib::map);
         self.register_library(seed_lib);
 
+        // Memory library for memory management operations
+        let mut memory_lib = Library::new("memlib");
+        memory_lib.register_function("addressof", crate::functions::memorylib::addressof);
+        memory_lib.register_function("deref", crate::functions::memorylib::deref);
+        memory_lib.register_function("add_offset", crate::functions::memorylib::add_offset);
+        memory_lib.register_function("alloc", crate::functions::memorylib::alloc);
+        memory_lib.register_function("free", crate::functions::memorylib::free);
+        memory_lib.register_function("write_byte", crate::functions::memorylib::write_byte);
+        memory_lib.register_function("read_byte", crate::functions::memorylib::read_byte);
+        memory_lib.register_function("create_buffer", crate::functions::memorylib::create_buffer);
+        memory_lib.register_function("free_buffer", crate::functions::memorylib::free_buffer);
+        memory_lib.register_function("buffer_write_string", crate::functions::memorylib::buffer_write_string);
+        memory_lib.register_function("buffer_read_string", crate::functions::memorylib::buffer_read_string);
+        memory_lib.register_function("buffer_copy", crate::functions::memorylib::buffer_copy);
+        self.register_library(memory_lib);
+
+        // Binary library for binary file operations
+        let mut binary_lib = Library::new("binlib");
+        binary_lib.register_function("create", crate::functions::binarylib::create);
+        binary_lib.register_function("open", crate::functions::binarylib::open);
+        binary_lib.register_function("close", crate::functions::binarylib::close);
+        binary_lib.register_function("write_bytes", crate::functions::binarylib::write_bytes);
+        binary_lib.register_function("read_bytes", crate::functions::binarylib::read_bytes);
+        binary_lib.register_function("seek", crate::functions::binarylib::seek);
+        binary_lib.register_function("tell", crate::functions::binarylib::tell);
+        binary_lib.register_function("bytes_to_string", crate::functions::binarylib::bytes_to_string);
+        binary_lib.register_function("string_to_bytes", crate::functions::binarylib::string_to_bytes);
+        self.register_library(binary_lib);
+
+        // Bitwise library for bit manipulation
+        let mut bitwise_lib = Library::new("bitlib");
+        bitwise_lib.register_function("and", crate::functions::bitwiselib::and);
+        bitwise_lib.register_function("or", crate::functions::bitwiselib::or);
+        bitwise_lib.register_function("xor", crate::functions::bitwiselib::xor);
+        bitwise_lib.register_function("not", crate::functions::bitwiselib::not);
+        bitwise_lib.register_function("left_shift", crate::functions::bitwiselib::left_shift);
+        bitwise_lib.register_function("right_shift", crate::functions::bitwiselib::right_shift);
+        bitwise_lib.register_function("unsigned_right_shift", crate::functions::bitwiselib::unsigned_right_shift);
+        bitwise_lib.register_function("get_bit", crate::functions::bitwiselib::get_bit);
+        bitwise_lib.register_function("set_bit", crate::functions::bitwiselib::set_bit);
+        bitwise_lib.register_function("count_bits", crate::functions::bitwiselib::count_bits);
+        bitwise_lib.register_function("to_binary", crate::functions::bitwiselib::to_binary);
+        bitwise_lib.register_function("to_hex", crate::functions::bitwiselib::to_hex);
+        bitwise_lib.register_function("from_binary", crate::functions::bitwiselib::from_binary);
+        bitwise_lib.register_function("from_hex", crate::functions::bitwiselib::from_hex);
+        self.register_library(bitwise_lib);
+
+        // Syscall library for system operations
+        let mut syscall_lib = Library::new("syslib");
+        syscall_lib.register_function("getpid", crate::functions::syscalllib::getpid);
+        syscall_lib.register_function("getcwd", crate::functions::syscalllib::getcwd);
+        syscall_lib.register_function("execute", crate::functions::syscalllib::execute);
+        syscall_lib.register_function("getenv", crate::functions::syscalllib::getenv);
+        syscall_lib.register_function("setenv", crate::functions::syscalllib::setenv);
+        syscall_lib.register_function("environ", crate::functions::syscalllib::environ);
+        syscall_lib.register_function("args", crate::functions::syscalllib::args);
+        syscall_lib.register_function("path_exists", crate::functions::syscalllib::path_exists);
+        syscall_lib.register_function("realpath", crate::functions::syscalllib::realpath);
+        syscall_lib.register_function("exit", crate::functions::syscalllib::exit);
+        syscall_lib.register_function("sleep", crate::functions::syscalllib::sleep);
+        syscall_lib.register_function("hostname", crate::functions::syscalllib::hostname);
+        syscall_lib.register_function("username", crate::functions::syscalllib::username);
+        self.register_library(syscall_lib);
+
+        // Process library for process management
+        let mut process_lib = Library::new("proclib");
+        process_lib.register_function("create", crate::functions::processlib::create);
+        process_lib.register_function("wait", crate::functions::processlib::wait);
+        process_lib.register_function("is_running", crate::functions::processlib::is_running);
+        process_lib.register_function("kill", crate::functions::processlib::kill);
+        process_lib.register_function("signal", crate::functions::processlib::signal);
+        process_lib.register_function("info", crate::functions::processlib::info);
+        process_lib.register_function("read_stdout", crate::functions::processlib::read_stdout);
+        process_lib.register_function("read_stderr", crate::functions::processlib::read_stderr);
+        process_lib.register_function("write_stdin", crate::functions::processlib::write_stdin);
+        self.register_library(process_lib);
+
+        // Thread library for threading operations
+        let mut thread_lib = Library::new("thrlib");
+        thread_lib.register_function("create", crate::functions::threadlib::create);
+        thread_lib.register_function("join", crate::functions::threadlib::join);
+        thread_lib.register_function("is_running", crate::functions::threadlib::is_running);
+        thread_lib.register_function("sleep", crate::functions::threadlib::sleep);
+        thread_lib.register_function("mutex_create", crate::functions::threadlib::mutex_create);
+        thread_lib.register_function("mutex_lock", crate::functions::threadlib::mutex_lock);
+        thread_lib.register_function("mutex_unlock", crate::functions::threadlib::mutex_unlock);
+        thread_lib.register_function("mutex_destroy", crate::functions::threadlib::mutex_destroy);
+        thread_lib.register_function("current", crate::functions::threadlib::current);
+        thread_lib.register_function("cpu_count", crate::functions::threadlib::cpu_count);
+        self.register_library(thread_lib);
+
+        // Compiler library for compiler operations
+        let mut compiler_lib = Library::new("complib");
+        compiler_lib.register_function("create_node", crate::functions::compilerlib::create_node);
+        compiler_lib.register_function("add_child", crate::functions::compilerlib::add_child);
+        compiler_lib.register_function("node_to_string", crate::functions::compilerlib::node_to_string);
+        compiler_lib.register_function("create_symbol_table", crate::functions::compilerlib::create_symbol_table);
+        compiler_lib.register_function("add_symbol", crate::functions::compilerlib::add_symbol);
+        compiler_lib.register_function("lookup_symbol", crate::functions::compilerlib::lookup_symbol);
+        compiler_lib.register_function("generate_ir", crate::functions::compilerlib::generate_ir);
+        compiler_lib.register_function("optimize_ir", crate::functions::compilerlib::optimize_ir);
+        compiler_lib.register_function("generate_assembly", crate::functions::compilerlib::generate_assembly);
+        compiler_lib.register_function("parse", crate::functions::compilerlib::parse);
+        self.register_library(compiler_lib);
+
         // Register Color library functions
         let mut color_lib = Library::new("color");
         color_lib.register_function("hex_to_rgb", crate::functions::colorlib::hex_to_rgb);

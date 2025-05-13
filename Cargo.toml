@@ -45,5 +45,11 @@ tokio = { version = "1", features = ["full"] }
 log = "0.4"
 env_logger = "0.10"
 
+# For threading support
+num_cpus = "1.16"
+
+# For memory management
+libc = "0.2"
+
 # Potentially for parsing syntax.rzn later (not used in this initial impl)
 # toml = "0.8"

@@ -1,0 +1,5 @@
+# Simple Memory Library Test
+lib memory;
+
+# Just a simple show statement
+show "Hello, world!";
