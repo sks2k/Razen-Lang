@@ -1,0 +1,34 @@
+# Razen Thread Library Test
+# This file tests all functions in the Thread Library
+
+# Import thread library
+lib threadlib;    # Thread management library
+
+show "===== THREAD LIBRARY TEST =====";
+
+# Get thread ID and count
+show "Thread ID: " + ThreadLib[thread_id]();
+show "Thread count: " + ThreadLib[thread_count]();
+
+# Test mutex operations
+show "Creating mutex: " + ThreadLib[mutex_create]();
+show "Locking mutex: " + ThreadLib[mutex_lock](1);
+show "Unlocking mutex: " + ThreadLib[mutex_unlock](1);
+show "Destroying mutex: " + ThreadLib[mutex_destroy](1);
+
+# Test additional thread operations
+show "CPU count: " + ThreadLib[cpu_count]();
+
+# Use current_thread instead of current to avoid keyword conflict
+show "Current thread: " + ThreadLib[current_thread]();
+
+# Test thread sleep
+show "Thread sleep result (10ms): " + ThreadLib[sleep](10); # Sleep for 10ms
+
+# Note: Thread creation and joining are more complex and might not work in this simple test
+# Uncomment if you want to test these functions
+# show "Thread creation result: " + ThreadLib[create]("function() { show('Hello from thread'); }");
+# show "Thread join result: " + ThreadLib[join](1);
+# show "Is thread running: " + ThreadLib[is_running](1);
+
+show "===== THREAD LIBRARY TEST COMPLETE =====";

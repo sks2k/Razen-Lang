@@ -1,0 +1,51 @@
+# Razen System Library Test
+# This file tests all functions in the System Library
+
+# Import system library
+lib systemlib;    # System operations library
+
+show "===== SYSTEM LIBRARY TEST =====";
+
+# Test basic system functions
+show "Process ID: " + SystemLib[getpid]();
+
+show "Current working directory: " + SystemLib[getcwd]();
+
+show "Current time: " + SystemLib[current_time]();
+
+show "System name: " + SystemLib[system_name]();
+
+# Test environment variables
+show "PATH environment variable: " + SystemLib[getenv]("PATH");
+
+show "Setting TEST_VAR environment variable: " + SystemLib[setenv]("TEST_VAR", "test_value");
+
+show "TEST_VAR value: " + SystemLib[getenv]("TEST_VAR");
+
+# Test command execution
+show "Executing 'echo Hello from Razen System Library': " + SystemLib[execute]("echo Hello from Razen System Library");
+
+# Test environment and arguments
+let environ = SystemLib[environ]();
+show "Environment variables: " + environ;
+# We can't use .length directly, so we'll just show the environment variables
+
+let args = SystemLib[args]();
+show "Command line arguments: " + args;
+# We can't use .length directly, so we'll just show the arguments
+
+# Test file system operations
+show "Current path exists: " + SystemLib[path_exists](SystemLib[getcwd]());
+
+show "Real path of '.': " + SystemLib[realpath](".");
+
+# Test additional system functions
+show "Hostname: " + SystemLib[hostname]();
+
+show "User name: " + SystemLib[username]();
+
+show "Home directory: " + SystemLib[homedir]();
+
+show "Temporary directory: " + SystemLib[tempdir]();
+
+show "===== SYSTEM LIBRARY TEST COMPLETE =====";

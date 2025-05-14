@@ -1,0 +1,49 @@
+# Razen Compiler Library Test
+# This file tests all functions in the Compiler Library
+
+# Import compiler library
+lib compilerlib;
+
+show "===== COMPILER LIBRARY TEST =====";
+
+# Test AST node creation
+let ast_node = CompilerLib[create_node]("variable", "x", "integer");
+show "Created AST node: " + CompilerLib[node_to_string](ast_node);
+
+# Test adding child nodes
+let child_node = CompilerLib[create_node]("literal", "42", "integer");
+let add_child_result = CompilerLib[add_child](ast_node, child_node);
+show "Add child result: " + add_child_result;
+show "AST node with child: " + CompilerLib[node_to_string](ast_node);
+
+# Test symbol table operations
+let symbol_table = CompilerLib[create_symbol_table]();
+let add_symbol_result1 = CompilerLib[add_symbol](symbol_table, "x", "integer", 0);
+let add_symbol_result2 = CompilerLib[add_symbol](symbol_table, "y", "string", 1);
+show "Add symbol results: " + add_symbol_result1 + ", " + add_symbol_result2;
+
+let symbol = CompilerLib[lookup_symbol](symbol_table, "x");
+show "Symbol 'x' info: " + symbol;
+
+# Test code generation
+let ir_code = CompilerLib[generate_ir]("x = 5 + 3");
+show "IR code: " + ir_code;
+
+let optimized_ir = CompilerLib[optimize_ir](ir_code);
+show "Optimized IR: " + optimized_ir;
+
+let assembly = CompilerLib[generate_assembly](optimized_ir);
+show "Assembly code: " + assembly;
+
+# Test tokenizing, parsing, and compiling
+let test_code = "fun test() { return 42; }";
+let tokens = CompilerLib[tokenize](test_code);
+show "Tokenizing code: " + tokens;
+
+let ast = CompilerLib[parse](test_code);
+show "Parsing code: " + ast;
+
+let bytecode = CompilerLib[compile](test_code);
+show "Compiling code: " + bytecode;
+
+show "===== COMPILER LIBRARY TEST COMPLETE =====";

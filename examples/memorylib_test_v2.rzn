@@ -1,0 +1,73 @@
+# Razen Memory Library Test
+# This file tests all functions in the Memory Library
+
+# Import memory library
+lib memorylib;    # Memory management library
+
+show "===== MEMORY LIBRARY TEST =====";
+
+# Test pointer operations
+let vaue = 42;
+show "Original value: " + vaue;
+let ptr = MemoryLib[addressof](vaue);
+show "Pointer to value: " + ptr;
+let retrieved = MemoryLib[deref](ptr);
+show "Dereferenced value: " + retrieved;
+let next_address = MemoryLib[add_offset](ptr, 1);
+show "Next address: " + next_address;
+
+# Test memory allocation and byte operations
+let size = 1024;
+show "Allocating memory: " + MemoryLib[alloc](size);
+
+# Write and read bytes
+let memory_block = MemoryLib[alloc](size);
+show "Memory block address: " + memory_block;
+
+# Write bytes to memory
+hold write_result1 = MemoryLib[write_byte](memory_block, 0, 65);  # 'A'
+hold write_result2 = MemoryLib[write_byte](memory_block, 1, 66);  # 'B'
+hold write_result3 = MemoryLib[write_byte](memory_block, 2, 67);  # 'C'
+show "Write results: " + write_result1 + ", " + write_result2 + ", " + write_result3;
+
+# Read bytes from memory
+let byte1 = MemoryLib[read_byte](memory_block, 0);
+let byte2 = MemoryLib[read_byte](memory_block, 1);
+let byte3 = MemoryLib[read_byte](memory_block, 2);
+show "Read bytes: " + byte1 + ", " + byte2 + ", " + byte3;
+
+# Free memory
+hold free_result = MemoryLib[free](memory_block);
+show "Free result: " + free_result;
+
+# Test buffer operations
+let buffer1 = MemoryLib[create_buffer](100);
+let buffer2 = MemoryLib[create_buffer](100);
+show "Buffer 1 ID: " + buffer1 + ", Buffer 2 ID: " + buffer2;
+
+# Write to buffer
+hold write_buffer_result = MemoryLib[buffer_write_string](buffer1, "Hello Razen");
+show "Write to buffer result: " + write_buffer_result;
+
+# Read from buffer
+take buffer_content = MemoryLib[buffer_read_string](buffer1, 0, 5);
+show "Buffer content: " + buffer_content;
+
+# Copy between buffers
+hold copy_result = MemoryLib[buffer_copy](buffer1, 0, buffer2, 0, 5);
+show "Copy result: " + copy_result;
+
+# Read from second buffer after copy
+take buffer2_content = MemoryLib[buffer_read_string](buffer2, 0, 5);
+show "Buffer 2 content after copy: " + buffer2_content;
+
+# Free buffers
+hold free_buffer1 = MemoryLib[free_buffer](buffer1);
+hold free_buffer2 = MemoryLib[free_buffer](buffer2);
+show "Free buffer results: " + free_buffer1 + ", " + free_buffer2;
+
+# Get memory stats
+put stats = MemoryLib[stats]();
+show "Memory stats: " + stats;
+
+show "===== MEMORY LIBRARY TEST COMPLETE =====";

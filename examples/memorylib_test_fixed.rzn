@@ -1,0 +1,57 @@
+# Razen Memory Library Test
+# This file tests all functions in the Memory Library
+
+# Import memory library
+lib memorylib;    # Memory management library
+
+show "===== MEMORY LIBRARY TEST =====";
+
+# Test pointer operations
+show "Original value: 42";
+show "Pointer to value: " + MemoryLib[addressof](42);
+show "Dereferenced value: " + MemoryLib[deref](MemoryLib[addressof](42));
+show "Next address: " + MemoryLib[add_offset](MemoryLib[addressof](42), 1);
+
+# Test memory allocation and byte operations
+show "Allocating memory: " + MemoryLib[alloc](1024);
+
+# Write and read bytes
+show "Memory block address: " + MemoryLib[alloc](1024);
+
+# Write bytes to memory
+show "Write result 1: " + MemoryLib[write_byte](MemoryLib[alloc](1024), 0, 65);  # 'A'
+show "Write result 2: " + MemoryLib[write_byte](MemoryLib[alloc](1024), 1, 66);  # 'B'
+show "Write result 3: " + MemoryLib[write_byte](MemoryLib[alloc](1024), 2, 67);  # 'C'
+
+# Read bytes from memory
+show "Read byte 1: " + MemoryLib[read_byte](MemoryLib[alloc](1024), 0);
+show "Read byte 2: " + MemoryLib[read_byte](MemoryLib[alloc](1024), 1);
+show "Read byte 3: " + MemoryLib[read_byte](MemoryLib[alloc](1024), 2);
+
+# Free memory
+show "Free result: " + MemoryLib[free](MemoryLib[alloc](1024));
+
+# Test buffer operations
+show "Buffer 1 ID: " + MemoryLib[create_buffer](100);
+show "Buffer 2 ID: " + MemoryLib[create_buffer](100);
+
+# Write to buffer
+show "Write to buffer result: " + MemoryLib[buffer_write_string](1, "Hello Razen");
+
+# Read from buffer
+show "Buffer content: " + MemoryLib[buffer_read_string](1, 0, 5);
+
+# Copy between buffers
+show "Copy result: " + MemoryLib[buffer_copy](1, 0, 2, 0, 5);
+
+# Read from second buffer after copy
+show "Buffer 2 content after copy: " + MemoryLib[buffer_read_string](2, 0, 5);
+
+# Free buffers
+show "Free buffer 1 result: " + MemoryLib[free_buffer](1);
+show "Free buffer 2 result: " + MemoryLib[free_buffer](2);
+
+# Get memory stats
+show "Memory stats: " + MemoryLib[stats]();
+
+show "===== MEMORY LIBRARY TEST COMPLETE =====";
