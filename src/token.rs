@@ -164,13 +164,13 @@ pub enum TokenType {
     Color,         // color manipulation
     System,        // system information
     Ui,            // user interface
-    MemLib,        // memory management
-    BinLib,        // binary file operations
-    BitLib,        // bitwise operations
-    SysLib,        // system call operations
-    ProcLib,       // process management
-    ThrLib,        // thread management
-    CompLib,       // compiler operations
+    MemoryLib,     // memory management
+    BinaryLib,     // binary file operations
+    BitwiseLib,    // bitwise operations
+    SystemLib,     // system call operations
+    ProcessLib,    // process management
+    ThreadLib,     // thread management
+    CompilerLib,   // compiler operations
     Storage,       // persistent storage
     Audio,         // audio operations
     Image,         // image processing
@@ -379,13 +379,13 @@ impl fmt::Display for TokenType {
             TokenType::Audio => write!(f, "AUDIO"),
             TokenType::Image => write!(f, "IMAGE"),
             TokenType::Validation => write!(f, "VALIDATION"),
-            TokenType::MemLib => write!(f, "MEMLIB"),
-            TokenType::BinLib => write!(f, "BINLIB"),
-            TokenType::BitLib => write!(f, "BITLIB"),
-            TokenType::SysLib => write!(f, "SYSLIB"),
-            TokenType::ProcLib => write!(f, "PROCLIB"),
-            TokenType::ThrLib => write!(f, "THRLIB"),
-            TokenType::CompLib => write!(f, "COMPLIB"),
+            TokenType::MemoryLib => write!(f, "MEMORYLIB"),
+            TokenType::BinaryLib => write!(f, "BINARYLIB"),
+            TokenType::BitwiseLib => write!(f, "BITWISELIB"),
+            TokenType::SystemLib => write!(f, "SYSTEMLIB"),
+            TokenType::ProcessLib => write!(f, "PROCESSLIB"),
+            TokenType::ThreadLib => write!(f, "THREADLIB"),
+            TokenType::CompilerLib => write!(f, "COMPILERLIB"),
             TokenType::LogLib => write!(f, "LOGLIB"),
             TokenType::Uuid => write!(f, "UUID"),
             TokenType::BoxLib => write!(f, "BOX"),
@@ -583,13 +583,21 @@ pub fn lookup_identifier(identifier: &str) -> TokenType {
         "color" => TokenType::Color,
         "system" => TokenType::System,
         "ui" => TokenType::Ui,
-        "memlib" => TokenType::MemLib,
-        "binlib" => TokenType::BinLib,
-        "bitlib" => TokenType::BitLib,
-        "syslib" => TokenType::SysLib,
-        "proclib" => TokenType::ProcLib,
-        "thrlib" => TokenType::ThrLib,
-        "complib" => TokenType::CompLib,
+        "memorylib" => TokenType::MemoryLib,
+        "binarylib" => TokenType::BinaryLib,
+        "bitwiselib" => TokenType::BitwiseLib,
+        "systemlib" => TokenType::SystemLib,
+        "processlib" => TokenType::ProcessLib,
+        "threadlib" => TokenType::ThreadLib,
+        "compilerlib" => TokenType::CompilerLib,
+        // Keep backward compatibility with old names
+        "memlib" => TokenType::MemoryLib,
+        "binlib" => TokenType::BinaryLib,
+        "bitlib" => TokenType::BitwiseLib,
+        "syslib" => TokenType::SystemLib,
+        "proclib" => TokenType::ProcessLib,
+        "thrlib" => TokenType::ThreadLib,
+        "complib" => TokenType::CompilerLib,
         "storage" => TokenType::Storage,
         "audio" => TokenType::Audio,
         "image" => TokenType::Image,

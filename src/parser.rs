@@ -137,13 +137,14 @@ impl Parser {
         parser.register_prefix(TokenType::Uuid, Parser::parse_identifier);
         
         // Self-compilation library tokens
-        parser.register_prefix(TokenType::MemLib, Parser::parse_identifier);
-        parser.register_prefix(TokenType::BinLib, Parser::parse_identifier);
-        parser.register_prefix(TokenType::BitLib, Parser::parse_identifier);
-        parser.register_prefix(TokenType::SysLib, Parser::parse_identifier);
-        parser.register_prefix(TokenType::ProcLib, Parser::parse_identifier);
-        parser.register_prefix(TokenType::ThrLib, Parser::parse_identifier);
-        parser.register_prefix(TokenType::CompLib, Parser::parse_identifier);
+        parser.register_prefix(TokenType::MemoryLib, Parser::parse_identifier);    // Memory library
+        parser.register_prefix(TokenType::BinaryLib, Parser::parse_identifier);    // Binary file operations library
+        parser.register_prefix(TokenType::BitwiseLib, Parser::parse_identifier);   // Bitwise operations library
+        parser.register_prefix(TokenType::SystemLib, Parser::parse_identifier);    // System operations library
+        parser.register_prefix(TokenType::ProcessLib, Parser::parse_identifier);   // Process management library
+        parser.register_prefix(TokenType::ThreadLib, Parser::parse_identifier);    // Thread management library
+        parser.register_prefix(TokenType::CompilerLib, Parser::parse_identifier);  // Compiler operations library
+        
         parser.register_prefix(TokenType::Read, Parser::parse_identifier);
         parser.register_prefix(TokenType::Debug, Parser::parse_identifier);
         parser.register_prefix(TokenType::Assert, Parser::parse_identifier);
@@ -907,9 +908,9 @@ impl Parser {
             TokenType::Audio | TokenType::Image | TokenType::Validation | 
             TokenType::LogLib | TokenType::Uuid |
             // Self-compilation library tokens
-            TokenType::MemLib | TokenType::BinLib | TokenType::BitLib | 
-            TokenType::SysLib | TokenType::ProcLib | TokenType::ThrLib | 
-            TokenType::CompLib => {
+            TokenType::MemoryLib | TokenType::BinaryLib | TokenType::BitwiseLib | 
+            TokenType::SystemLib | TokenType::ProcessLib | TokenType::ThreadLib | 
+            TokenType::CompilerLib => {
                 self.current_token.literal.clone()
             },
             _ => self.current_token.literal.clone()
@@ -1047,7 +1048,7 @@ impl Parser {
         self.next_token();
         
         // Handle function name inside brackets differently
-        // For MemLib[addressof], the function name needs to be treated as an identifier
+        // For MemoryLib[addressof], the function name needs to be treated as an identifier
         let index = if self.current_token_is(TokenType::Identifier) {
             // If the current token is an identifier, create an identifier expression
             Expression::Identifier(self.current_token.literal.clone())
@@ -1060,7 +1061,7 @@ impl Parser {
             return None;
         }
         
-        // Check if this is a library function call (e.g., MemLib[addressof](1, 2))
+        // Check if this is a library function call (e.g., MemoryLib[addressof](1, 2))
         if self.peek_token_is(TokenType::LeftParen) {
             // This is a library function call
             self.next_token(); // Consume the left paren
@@ -1107,9 +1108,9 @@ impl Parser {
                 TokenType::Connect | TokenType::To | TokenType::Import | TokenType::Export |
                 TokenType::From | TokenType::As |
                 // Self-compilation library tokens
-                TokenType::MemLib | TokenType::BinLib | TokenType::BitLib | 
-                TokenType::SysLib | TokenType::ProcLib | TokenType::ThrLib | 
-                TokenType::CompLib => true,
+                TokenType::MemoryLib | TokenType::BinaryLib | TokenType::BitwiseLib | 
+                TokenType::SystemLib | TokenType::ProcessLib | TokenType::ThreadLib | 
+                TokenType::CompilerLib => true,
                 _ => false
             };
             
@@ -1623,9 +1624,9 @@ impl Parser {
             TokenType::NumLib | TokenType::RefLib | TokenType::TimeLib | 
             TokenType::TypeCheckLib | TokenType::TypeConvertLib |
             // Self-compilation library tokens
-            TokenType::MemLib | TokenType::BinLib | TokenType::BitLib | 
-            TokenType::SysLib | TokenType::ProcLib | TokenType::ThrLib | 
-            TokenType::CompLib => true,
+            TokenType::MemoryLib | TokenType::BinaryLib | TokenType::BitwiseLib | 
+            TokenType::SystemLib | TokenType::ProcessLib | TokenType::ThreadLib | 
+            TokenType::CompilerLib => true,
             _ => false
         };
         

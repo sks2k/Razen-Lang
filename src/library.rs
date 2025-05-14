@@ -199,7 +199,7 @@ impl LibraryManager {
         self.register_library(seed_lib);
 
         // Memory library for memory management operations
-        let mut memory_lib = Library::new("memlib");
+        let mut memory_lib = Library::new("memorylib");
         memory_lib.register_function("addressof", crate::functions::memorylib::addressof);
         memory_lib.register_function("deref", crate::functions::memorylib::deref);
         memory_lib.register_function("add_offset", crate::functions::memorylib::add_offset);
@@ -216,7 +216,7 @@ impl LibraryManager {
         self.register_library(memory_lib);
 
         // Binary library for binary file operations
-        let mut binary_lib = Library::new("binlib");
+        let mut binary_lib = Library::new("binarylib");
         binary_lib.register_function("create", crate::functions::binarylib::create);
         binary_lib.register_function("open", crate::functions::binarylib::open);
         binary_lib.register_function("close", crate::functions::binarylib::close);
@@ -230,7 +230,7 @@ impl LibraryManager {
         self.register_library(binary_lib);
 
         // Bitwise library for bit manipulation
-        let mut bitwise_lib = Library::new("bitlib");
+        let mut bitwise_lib = Library::new("bitwiselib");
         bitwise_lib.register_function("and", crate::functions::bitwiselib::and);
         bitwise_lib.register_function("or", crate::functions::bitwiselib::or);
         bitwise_lib.register_function("xor", crate::functions::bitwiselib::xor);
@@ -248,7 +248,7 @@ impl LibraryManager {
         self.register_library(bitwise_lib);
 
         // Syscall library for system operations
-        let mut syscall_lib = Library::new("syslib");
+        let mut syscall_lib = Library::new("systemlib");
         syscall_lib.register_function("getpid", crate::functions::syscalllib::getpid);
         syscall_lib.register_function("getcwd", crate::functions::syscalllib::getcwd);
         syscall_lib.register_function("execute", crate::functions::syscalllib::execute);
@@ -267,7 +267,7 @@ impl LibraryManager {
         self.register_library(syscall_lib);
 
         // Process library for process management
-        let mut process_lib = Library::new("proclib");
+        let mut process_lib = Library::new("processlib");
         process_lib.register_function("create", crate::functions::processlib::create);
         process_lib.register_function("wait", crate::functions::processlib::wait);
         process_lib.register_function("is_running", crate::functions::processlib::is_running);
@@ -280,7 +280,7 @@ impl LibraryManager {
         self.register_library(process_lib);
 
         // Thread library for threading operations
-        let mut thread_lib = Library::new("thrlib");
+        let mut thread_lib = Library::new("threadlib");
         thread_lib.register_function("create", crate::functions::threadlib::create);
         thread_lib.register_function("join", crate::functions::threadlib::join);
         thread_lib.register_function("is_running", crate::functions::threadlib::is_running);
@@ -296,7 +296,7 @@ impl LibraryManager {
         self.register_library(thread_lib);
 
         // Compiler library for compiler operations
-        let mut compiler_lib = Library::new("complib");
+        let mut compiler_lib = Library::new("compilerlib");
         compiler_lib.register_function("create_node", crate::functions::compilerlib::create_node);
         compiler_lib.register_function("add_child", crate::functions::compilerlib::add_child);
         compiler_lib.register_function("node_to_string", crate::functions::compilerlib::node_to_string);
