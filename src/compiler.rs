@@ -537,6 +537,52 @@ impl Compiler {
             Statement::LibStatement { name } => {
                 self.compile_lib_statement(name);
             },
+            // Compiler Construction (Section 17)
+            Statement::GrammarStatement { name, properties } => {
+                self.compile_grammar_statement(name, properties);
+            },
+            Statement::TokenStatement { name, pattern } => {
+                self.compile_token_statement(name, pattern);
+            },
+            Statement::LexerStatement { name, config } => {
+                self.compile_lexer_statement(name, config);
+            },
+            Statement::ParserStatement { name, config } => {
+                self.compile_parser_statement(name, config);
+            },
+            Statement::NodeStatement { name, properties } => {
+                self.compile_node_statement(name, properties);
+            },
+            Statement::RuleStatement { name, production, node_type } => {
+                self.compile_rule_statement(name, production, node_type);
+            },
+            Statement::VisitorStatement { name, methods } => {
+                self.compile_visitor_statement(name, methods);
+            },
+            Statement::SymbolStatement { name, attributes } => {
+                self.compile_symbol_statement(name, attributes);
+            },
+            Statement::ScopeStatement { name, parent } => {
+                self.compile_scope_statement(name, parent);
+            },
+            Statement::TypeStatement { name, operations } => {
+                self.compile_type_statement(name, operations);
+            },
+            Statement::IRStatement { name, opcode, operands } => {
+                self.compile_ir_statement(name, opcode, operands);
+            },
+            Statement::CodeGenStatement { name, target, instructions } => {
+                self.compile_codegen_statement(name, target, instructions);
+            },
+            Statement::OptimizeStatement { name, description, passes } => {
+                self.compile_optimize_statement(name, description, passes);
+            },
+            Statement::TargetStatement { name, properties } => {
+                self.compile_target_statement(name, properties);
+            },
+            Statement::AttributeStatement { name, values } => {
+                self.compile_attribute_statement(name, values);
+            },
         }
     }
     
@@ -2122,6 +2168,333 @@ impl Compiler {
         if !self.clean_output {
             println!("[Compiler] Registered library: {}", name);
         }
+    }
+    
+    // Compiler Construction Statement Compilation Functions
+    
+    fn compile_grammar_statement(&mut self, name: String, properties: Vec<(String, Expression)>) {
+        // Create an empty map for the grammar
+        self.emit(IR::CreateMap(0));
+        
+        // Add properties to the map
+        for (key, value) in properties {
+            // Push the key
+            self.emit(IR::PushString(key));
+            
+            // Push the value
+            self.compile_expression(value);
+            
+            // Set the key-value pair in the map
+            self.emit(IR::SetKey);
+        }
+        
+        // Store the grammar in a variable
+        self.emit(IR::StoreVar(name));
+    }
+    
+    fn compile_token_statement(&mut self, name: String, pattern: String) {
+        // Push the token pattern
+        self.emit(IR::PushString(pattern));
+        
+        // Store the token in a variable
+        self.emit(IR::StoreVar(name));
+    }
+    
+    fn compile_lexer_statement(&mut self, name: String, config: Vec<(String, Expression)>) {
+        // Create an empty map for the lexer config
+        self.emit(IR::CreateMap(0));
+        
+        // Add config properties to the map
+        for (key, value) in config {
+            // Push the key
+            self.emit(IR::PushString(key));
+            
+            // Push the value
+            self.compile_expression(value);
+            
+            // Set the key-value pair in the map
+            self.emit(IR::SetKey);
+        }
+        
+        // Store the lexer in a variable
+        self.emit(IR::StoreVar(name));
+    }
+    
+    fn compile_parser_statement(&mut self, name: String, config: Vec<(String, Expression)>) {
+        // Create an empty map for the parser config
+        self.emit(IR::CreateMap(0));
+        
+        // Add config properties to the map
+        for (key, value) in config {
+            // Push the key
+            self.emit(IR::PushString(key));
+            
+            // Push the value
+            self.compile_expression(value);
+            
+            // Set the key-value pair in the map
+            self.emit(IR::SetKey);
+        }
+        
+        // Store the parser in a variable
+        self.emit(IR::StoreVar(name));
+    }
+    
+    fn compile_node_statement(&mut self, name: String, properties: Vec<(String, Expression)>) {
+        // Create an empty map for the node properties
+        self.emit(IR::CreateMap(0));
+        
+        // Add properties to the map
+        for (key, value) in properties {
+            // Push the key
+            self.emit(IR::PushString(key));
+            
+            // Push the value
+            self.compile_expression(value);
+            
+            // Set the key-value pair in the map
+            self.emit(IR::SetKey);
+        }
+        
+        // Store the node in a variable
+        self.emit(IR::StoreVar(name));
+    }
+    
+    fn compile_rule_statement(&mut self, name: String, production: String, node_type: Option<String>) {
+        // Create an empty map for the rule
+        self.emit(IR::CreateMap(0));
+        
+        // Add production to the map
+        self.emit(IR::PushString("production".to_string()));
+        self.emit(IR::PushString(production));
+        self.emit(IR::SetKey);
+        
+        // Add node_type to the map if present
+        if let Some(node) = node_type {
+            self.emit(IR::PushString("astNode".to_string()));
+            self.emit(IR::PushString(node));
+            self.emit(IR::SetKey);
+        }
+        
+        // Store the rule in a variable
+        self.emit(IR::StoreVar(name));
+    }
+    
+    fn compile_visitor_statement(&mut self, name: String, methods: Vec<String>) {
+        // Create an empty map for the visitor
+        self.emit(IR::CreateMap(0));
+        
+        // Add methods array to the map
+        self.emit(IR::PushString("methods".to_string()));
+        
+        // Create an array for methods
+        self.emit(IR::CreateArray(methods.len()));
+        
+        // Add each method to the array
+        for (i, method) in methods.iter().enumerate() {
+            self.emit(IR::PushString(method.clone()));
+            // Use i as the index for the array
+            self.emit(IR::PushNumber(i as f64));
+            self.emit(IR::SetIndex);
+        }
+        
+        // Set the methods array in the map
+        self.emit(IR::SetKey);
+        
+        // Store the visitor in a variable
+        self.emit(IR::StoreVar(name));
+    }
+    
+    fn compile_symbol_statement(&mut self, name: String, attributes: Vec<String>) {
+        // Create an empty map for the symbol
+        self.emit(IR::CreateMap(0));
+        
+        // Add attributes array to the map
+        self.emit(IR::PushString("attributes".to_string()));
+        
+        // Create an array for attributes
+        self.emit(IR::CreateArray(attributes.len()));
+        
+        // Add each attribute to the array
+        for (i, attr) in attributes.iter().enumerate() {
+            self.emit(IR::PushString(attr.clone()));
+            // Use i as the index for the array
+            self.emit(IR::PushNumber(i as f64));
+            self.emit(IR::SetIndex);
+        }
+        
+        // Set the attributes array in the map
+        self.emit(IR::SetKey);
+        
+        // Store the symbol in a variable
+        self.emit(IR::StoreVar(name));
+    }
+    
+    fn compile_scope_statement(&mut self, name: String, parent: Option<String>) {
+        // Create an empty map for the scope
+        self.emit(IR::CreateMap(0));
+        
+        // Add parent to the map if present
+        self.emit(IR::PushString("parent".to_string()));
+        if let Some(p) = parent {
+            self.emit(IR::PushString(p));
+        } else {
+            self.emit(IR::PushNull);
+        }
+        self.emit(IR::SetKey);
+        
+        // Store the scope in a variable
+        self.emit(IR::StoreVar(name));
+    }
+    
+    fn compile_type_statement(&mut self, name: String, operations: Vec<String>) {
+        // Create an empty map for the type
+        self.emit(IR::CreateMap(0));
+        
+        // Add operations array to the map
+        self.emit(IR::PushString("operations".to_string()));
+        
+        // Create an array for operations
+        self.emit(IR::CreateArray(operations.len()));
+        
+        // Add each operation to the array
+        for (i, op) in operations.iter().enumerate() {
+            self.emit(IR::PushString(op.clone()));
+            // Use i as the index for the array
+            self.emit(IR::PushNumber(i as f64));
+            self.emit(IR::SetIndex);
+        }
+        
+        // Set the operations array in the map
+        self.emit(IR::SetKey);
+        
+        // Store the type in a variable
+        self.emit(IR::StoreVar(name));
+    }
+    
+    fn compile_ir_statement(&mut self, name: String, opcode: String, operands: Vec<String>) {
+        // Create an empty map for the IR
+        self.emit(IR::CreateMap(0));
+        
+        // Add opcode to the map
+        self.emit(IR::PushString("opcode".to_string()));
+        self.emit(IR::PushString(opcode));
+        self.emit(IR::SetKey);
+        
+        // Add operands array to the map
+        self.emit(IR::PushString("operands".to_string()));
+        
+        // Create an array for operands
+        self.emit(IR::CreateArray(operands.len()));
+        
+        // Add each operand to the array
+        for (i, operand) in operands.iter().enumerate() {
+            self.emit(IR::PushString(operand.clone()));
+            // Use i as the index for the array
+            self.emit(IR::PushNumber(i as f64));
+            self.emit(IR::SetIndex);
+        }
+        
+        // Set the operands array in the map
+        self.emit(IR::SetKey);
+        
+        // Store the IR in a variable
+        self.emit(IR::StoreVar(name));
+    }
+    
+    fn compile_codegen_statement(&mut self, name: String, target: String, instructions: Vec<(String, Expression)>) {
+        // Create an empty map for the codegen
+        self.emit(IR::CreateMap(0));
+        
+        // Add target to the map
+        self.emit(IR::PushString("architecture".to_string()));
+        self.emit(IR::PushString(target));
+        self.emit(IR::SetKey);
+        
+        // Add instructions to the map
+        for (key, value) in instructions {
+            // Push the key
+            self.emit(IR::PushString(key));
+            
+            // Push the value
+            self.compile_expression(value);
+            
+            // Set the key-value pair in the map
+            self.emit(IR::SetKey);
+        }
+        
+        // Store the codegen in a variable
+        self.emit(IR::StoreVar(name));
+    }
+    
+    fn compile_optimize_statement(&mut self, name: String, description: String, passes: Vec<String>) {
+        // Create an empty map for the optimize
+        self.emit(IR::CreateMap(0));
+        
+        // Add description to the map
+        self.emit(IR::PushString("description".to_string()));
+        self.emit(IR::PushString(description));
+        self.emit(IR::SetKey);
+        
+        // Add passes array to the map
+        self.emit(IR::PushString("passes".to_string()));
+        
+        // Create an array for passes
+        self.emit(IR::CreateArray(passes.len()));
+        
+        // Add each pass to the array
+        for (i, pass) in passes.iter().enumerate() {
+            self.emit(IR::PushString(pass.clone()));
+            // Use i as the index for the array
+            self.emit(IR::PushNumber(i as f64));
+            self.emit(IR::SetIndex);
+        }
+        
+        // Set the passes array in the map
+        self.emit(IR::SetKey);
+        
+        // Store the optimize in a variable
+        self.emit(IR::StoreVar(name));
+    }
+    
+    fn compile_target_statement(&mut self, name: String, properties: Vec<(String, Expression)>) {
+        // Create an empty map for the target
+        self.emit(IR::CreateMap(0));
+        
+        // Add properties to the map
+        for (key, value) in properties {
+            // Push the key
+            self.emit(IR::PushString(key));
+            
+            // Push the value
+            self.compile_expression(value);
+            
+            // Set the key-value pair in the map
+            self.emit(IR::SetKey);
+        }
+        
+        // Store the target in a variable
+        self.emit(IR::StoreVar(name));
+    }
+    
+    fn compile_attribute_statement(&mut self, name: String, values: Vec<(String, Expression)>) {
+        // Create an empty map for the attribute
+        self.emit(IR::CreateMap(0));
+        
+        // Add values to the map
+        for (key, value) in values {
+            // Push the key
+            self.emit(IR::PushString(key));
+            
+            // Push the value
+            self.compile_expression(value);
+            
+            // Set the key-value pair in the map
+            self.emit(IR::SetKey);
+        }
+        
+        // Store the attribute in a variable
+        self.emit(IR::StoreVar(name));
     }
     
     // Helper methods for library functions

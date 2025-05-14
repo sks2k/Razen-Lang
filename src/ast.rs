@@ -132,6 +132,71 @@ pub enum Statement {
         cycles: Expression,
         block: Vec<Statement>,
     },
+    // Compiler Construction (Section 17)
+    GrammarStatement {
+        name: String,
+        properties: Vec<(String, Expression)>,
+    },
+    TokenStatement {
+        name: String,
+        pattern: String,
+    },
+    LexerStatement {
+        name: String,
+        config: Vec<(String, Expression)>,
+    },
+    ParserStatement {
+        name: String,
+        config: Vec<(String, Expression)>,
+    },
+    NodeStatement {
+        name: String,
+        properties: Vec<(String, Expression)>,
+    },
+    RuleStatement {
+        name: String,
+        production: String,
+        node_type: Option<String>,
+    },
+    VisitorStatement {
+        name: String,
+        methods: Vec<String>,
+    },
+    SymbolStatement {
+        name: String,
+        attributes: Vec<String>,
+    },
+    ScopeStatement {
+        name: String,
+        parent: Option<String>,
+    },
+    TypeStatement {
+        name: String,
+        operations: Vec<String>,
+    },
+    IRStatement {
+        name: String,
+        opcode: String,
+        operands: Vec<String>,
+    },
+    CodeGenStatement {
+        name: String,
+        target: String,
+        instructions: Vec<(String, Expression)>,
+    },
+    OptimizeStatement {
+        name: String,
+        description: String,
+        passes: Vec<String>,
+    },
+    TargetStatement {
+        name: String,
+        properties: Vec<(String, Expression)>,
+    },
+    AttributeStatement {
+        name: String,
+        values: Vec<(String, Expression)>,
+    },
 }
 
 // Expression represents an expression in the program
@@ -195,6 +260,60 @@ impl fmt::Display for Node {
                         } else {
                             write!(f, "{} {};", var_type, name)
                         }
+                    },
+                    // Compiler Construction Statements
+                    Statement::GrammarStatement { name, properties } => {
+                        write!(f, "grammar {} = {{ ... }};", name)
+                    },
+                    Statement::TokenStatement { name, pattern } => {
+                        write!(f, "token {} = \"{}\";", name, pattern)
+                    },
+                    Statement::LexerStatement { name, config } => {
+                        write!(f, "lexer {} = {{ ... }};", name)
+                    },
+                    Statement::ParserStatement { name, config } => {
+                        write!(f, "parser {} = {{ ... }};", name)
+                    },
+                    Statement::NodeStatement { name, properties } => {
+                        write!(f, "node {} = {{ ... }};", name)
+                    },
+                    Statement::RuleStatement { name, production, node_type } => {
+                        if let Some(node) = node_type {
+                            write!(f, "rule {} = {{ production: \"{}\", astNode: {} }};", name, production, node)
+                        } else {
+                            write!(f, "rule {} = \"{}\";", name, production)
+                        }
+                    },
+                    Statement::VisitorStatement { name, methods } => {
+                        write!(f, "visitor {} = {{ methods: [...] }};", name)
+                    },
+                    Statement::SymbolStatement { name, attributes } => {
+                        write!(f, "symbol {} = {{ attributes: [...] }};", name)
+                    },
+                    Statement::ScopeStatement { name, parent } => {
+                        if let Some(p) = parent {
+                            write!(f, "scope {} = {{ parent: {} }};", name, p)
+                        } else {
+                            write!(f, "scope {} = {{ parent: null }};", name)
+                        }
+                    },
+                    Statement::TypeStatement { name, operations } => {
+                        write!(f, "typesys {} = {{ operations: [...] }};", name)
+                    },
+                    Statement::IRStatement { name, opcode, operands } => {
+                        write!(f, "ir {} = {{ opcode: \"{}\", operands: [...] }};", name, opcode)
+                    },
+                    Statement::CodeGenStatement { name, target, instructions } => {
+                        write!(f, "codegen {} = {{ architecture: \"{}\", ... }};", name, target)
+                    },
+                    Statement::OptimizeStatement { name, description, passes } => {
+                        write!(f, "optimize {} = {{ description: \"{}\", passes: [...] }};", name, description)
+                    },
+                    Statement::TargetStatement { name, properties } => {
+                        write!(f, "target {} = {{ ... }};", name)
+                    },
+                    Statement::AttributeStatement { name, values } => {
+                        write!(f, "attribute {} = {{ ... }};", name)
                     },
                     Statement::FunctionDeclaration { name, parameters, body } => {
                         let params = parameters.join(", ");

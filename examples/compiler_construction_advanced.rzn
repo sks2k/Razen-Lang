@@ -1,0 +1,370 @@
+# Razen Advanced Compiler Construction Framework
+# This file demonstrates the compiler construction tokens and libraries with comprehensive examples
+
+# 1. Import required libraries
+lib lexerlib;    # Lexical analysis library
+lib parserlib;   # Syntax analysis library
+lib astlib;      # Abstract syntax tree manipulation library
+lib symbollib;   # Symbol table management library
+lib typelib;     # Type checking and inference library
+lib irlib;       # Intermediate representation library
+lib codegenlib;  # Code generation library
+lib optimizelib; # Optimization library
+
+# Display header
+show "=== Razen Advanced Compiler Construction Demo ===";
+show "This example demonstrates building a simple expression compiler";
+
+# 2. Define a grammar for a simple expression language
+grammar expressionGrammar = {
+    "name": "ExpressionLanguage",
+    "version": "1.0",
+    "description": "A simple expression language with arithmetic operations",
+    "author": "Razen Team"
+};
+
+# 3. Define token types for our expression language
+token INTEGER = "[0-9]+";
+token FLOAT = "[0-9]+\\.[0-9]+";
+token PLUS = "\\+";
+token MINUS = "-";
+token MULTIPLY = "\\*";
+token DIVIDE = "/";
+token LPAREN = "\\(";
+token RPAREN = "\\)";
+token IDENTIFIER = "[a-zA-Z_][a-zA-Z0-9_]*";
+token EQUALS = "=";
+token SEMICOLON = ";";
+token WHITESPACE = "\\s+";
+token COMMENT = "#.*";
+
+# 4. Create a lexer configuration
+lexer expressionLexer = {
+    "tokens": [
+        INTEGER, FLOAT, PLUS, MINUS, MULTIPLY, DIVIDE, 
+        LPAREN, RPAREN, IDENTIFIER, EQUALS, SEMICOLON
+    ],
+    "ignore": [WHITESPACE, COMMENT],
+    "errorHandler": "skipInvalidToken",
+    "caseSensitive": true
+};
+
+# 5. Define AST node types
+node ExpressionNode = {
+    "type": "expression",
+    "evaluate": "required",
+    "description": "Base node for all expressions"
+};
+
+node BinaryOpNode = {
+    "type": "binaryOp",
+    "extends": ExpressionNode,
+    "fields": ["left", "operator", "right"],
+    "description": "Node for binary operations like +, -, *, /"
+};
+
+node NumberNode = {
+    "type": "number",
+    "extends": ExpressionNode,
+    "fields": ["value"],
+    "description": "Node for numeric literals"
+};
+
+node IdentifierNode = {
+    "type": "identifier",
+    "extends": ExpressionNode,
+    "fields": ["name"],
+    "description": "Node for variable references"
+};
+
+node AssignmentNode = {
+    "type": "assignment",
+    "fields": ["target", "value"],
+    "description": "Node for variable assignments"
+};
+
+node ProgramNode = {
+    "type": "program",
+    "fields": ["statements"],
+    "description": "Root node for the entire program"
+};
+
+# 6. Define grammar rules using EBNF-like syntax
+rule program = {
+    "production": "statement { statement }",
+    "astNode": ProgramNode,
+    "description": "A program is a sequence of statements"
+};
+
+rule statement = {
+    "production": "assignment_statement | expression_statement",
+    "description": "A statement can be an assignment or an expression"
+};
+
+rule assignment_statement = {
+    "production": "IDENTIFIER '=' expression ';'",
+    "astNode": AssignmentNode,
+    "description": "Assignment of a value to a variable"
+};
+
+rule expression_statement = {
+    "production": "expression ';'",
+    "description": "An expression used as a statement"
+};
+
+rule expression = {
+    "production": "term { ('+'|'-') term }",
+    "astNode": BinaryOpNode,
+    "description": "Addition and subtraction operations"
+};
+
+rule term = {
+    "production": "factor { ('*'|'/') factor }",
+    "astNode": BinaryOpNode,
+    "description": "Multiplication and division operations"
+};
+
+rule factor = {
+    "production": "INTEGER | FLOAT | IDENTIFIER | '(' expression ')'",
+    "astNode": ExpressionNode,
+    "description": "Basic factors in expressions"
+};
+
+# 7. Create a parser configuration
+parser expressionParser = {
+    "grammar": expressionGrammar,
+    "rules": [program, statement, assignment_statement, expression_statement, expression, term, factor],
+    "startSymbol": program,
+    "errorRecovery": true,
+    "traceEnabled": false
+};
+
+# 8. Define a visitor for AST traversal
+visitor evaluatorVisitor = {
+    "name": "ExpressionEvaluator",
+    "methods": [
+        "visitBinaryOpNode",
+        "visitNumberNode",
+        "visitIdentifierNode",
+        "visitAssignmentNode",
+        "visitProgramNode"
+    ],
+    "description": "Visitor that evaluates expressions"
+};
+
+# 9. Define symbol table for variable tracking
+symbol variableSymbol = {
+    "name": "Variable",
+    "attributes": ["name", "type", "value", "scope", "line", "column"],
+    "description": "Symbol for variables in the language"
+};
+
+# 10. Define a scope for variable visibility
+scope globalScope = {
+    "name": "global",
+    "parent": null,
+    "description": "Global scope for variables"
+};
+
+scope localScope = {
+    "name": "local",
+    "parent": globalScope,
+    "description": "Local scope for function variables"
+};
+
+# 11. Define type checking rules
+typesys numberType = {
+    "name": "Number",
+    "operations": ["+", "-", "*", "/"],
+    "description": "Numeric type for integers and floats"
+};
+
+typesys stringType = {
+    "name": "String",
+    "operations": ["+"],
+    "description": "String type for text values"
+};
+
+# 12. Define IR operations
+ir loadConstant = {
+    "opcode": "LOAD_CONST",
+    "operands": ["value"],
+    "description": "Load a constant value onto the stack"
+};
+
+ir loadVariable = {
+    "opcode": "LOAD_VAR",
+    "operands": ["name"],
+    "description": "Load a variable value onto the stack"
+};
+
+ir storeVariable = {
+    "opcode": "STORE_VAR",
+    "operands": ["name"],
+    "description": "Store the top stack value into a variable"
+};
+
+ir add = {
+    "opcode": "ADD",
+    "operands": [],
+    "description": "Add the top two values on the stack"
+};
+
+ir subtract = {
+    "opcode": "SUB",
+    "operands": [],
+    "description": "Subtract the top value from the second value on the stack"
+};
+
+ir multiply = {
+    "opcode": "MUL",
+    "operands": [],
+    "description": "Multiply the top two values on the stack"
+};
+
+ir divide = {
+    "opcode": "DIV",
+    "operands": [],
+    "description": "Divide the second value by the top value on the stack"
+};
+
+ir print = {
+    "opcode": "PRINT",
+    "operands": [],
+    "description": "Print the top value on the stack"
+};
+
+# 13. Define code generation templates
+codegen x86Template = {
+    "architecture": "x86",
+    "instructionSet": "basic",
+    "registerMapping": {
+        "eax": "accumulator",
+        "ebx": "base",
+        "ecx": "counter",
+        "edx": "data"
+    },
+    "description": "Template for generating x86 assembly code"
+};
+
+# 14. Define optimization passes
+optimize constantFolding = {
+    "name": "ConstantFolding",
+    "description": "Evaluates constant expressions at compile time",
+    "passes": ["foldArithmetic", "foldComparisons"]
+};
+
+optimize deadCodeElimination = {
+    "name": "DeadCodeElimination",
+    "description": "Removes code that has no effect on the program output",
+    "passes": ["removeUnusedVariables", "removeUnreachableCode"]
+};
+
+# 15. Define target platform
+target x86_64 = {
+    "name": "x86_64",
+    "wordSize": 64,
+    "endianness": "little",
+    "os": "linux",
+    "abi": "system_v",
+    "description": "64-bit x86 architecture"
+};
+
+# 16. Define semantic attributes
+attribute precedence = {
+    "name": "Precedence",
+    "values": {
+        "*": 2,
+        "/": 2,
+        "+": 1,
+        "-": 1
+    },
+    "description": "Operator precedence levels"
+};
+
+attribute associativity = {
+    "name": "Associativity",
+    "values": {
+        "*": "left",
+        "/": "left",
+        "+": "left",
+        "-": "left"
+    },
+    "description": "Operator associativity"
+};
+
+# 17. Demonstrate the compiler pipeline
+show "=== Compiler Pipeline Demonstration ===";
+
+# Sample expression to parse
+text input = "x = 2 + 3 * (4 - 1); y = x / 2; x + y;";
+show "Input program: " + input;
+
+# Step 1: Tokenize the input
+show "Step 1: Tokenizing input...";
+# Note: We're simulating the tokenization since we can't directly call the library functions yet
+show "Tokens: [INTEGER(2), PLUS, INTEGER(3), MULTIPLY, LPAREN, INTEGER(4), MINUS, INTEGER(1), RPAREN]";
+
+# Step 2: Parse the tokens into an AST
+show "Step 2: Parsing tokens into AST...";
+# Note: We're simulating the parsing since we can't directly call the library functions yet
+show "AST: Program(statements=[AssignmentNode(target='x', value=BinaryOpNode(left=2, op='+', right=BinaryOpNode(left=3, op='*', right=BinaryOpNode(left=4, op='-', right=1)))), AssignmentNode(target='y', value=BinaryOpNode(left=IdentifierNode('x'), op='/', right=2)), ExpressionNode(BinaryOpNode(left=IdentifierNode('x'), op='+', right=IdentifierNode('y')))])";
+
+# Step 3: Create a symbol table
+show "Step 3: Creating symbol table...";
+# Note: We're simulating the symbol table creation
+show "Symbol table: {name: 'program', symbols: {x: {type: 'Number', value: 11}, y: {type: 'Number', value: 5.5}}}";
+
+# Step 4: Type checking
+show "Step 4: Type checking...";
+# Note: We're simulating the type checking
+show "Expression type: Number";
+
+# Step 5: Generate IR code
+show "Step 5: Generating IR code...";
+# Note: We're simulating the IR code generation
+show "IR code:";
+show "LOAD_CONST 2";
+show "LOAD_CONST 3";
+show "LOAD_CONST 4";
+show "LOAD_CONST 1";
+show "SUB";
+show "MUL";
+show "ADD";
+show "STORE_VAR x";
+show "LOAD_VAR x";
+show "LOAD_CONST 2";
+show "DIV";
+show "STORE_VAR y";
+show "LOAD_VAR x";
+show "LOAD_VAR y";
+show "ADD";
+show "PRINT";
+
+# Step 6: Optimize the IR code
+show "Step 6: Optimizing IR code...";
+# Note: We're simulating the optimization
+show "Optimized IR:";
+show "LOAD_CONST 11";
+show "STORE_VAR x";
+show "LOAD_CONST 5.5";
+show "STORE_VAR y";
+show "LOAD_CONST 16.5";
+show "PRINT";
+
+# Step 7: Generate target code
+show "Step 7: Generating target code...";
+# Note: We're simulating the code generation
+show "Assembly code:";
+show "; Generated code for x86_64 architecture";
+show "    mov eax, 11";
+show "    mov [x], eax";
+show "    mov eax, 5.5";
+show "    mov [y], eax";
+show "    mov eax, [x]";
+show "    mov ebx, [y]";
+show "    add eax, ebx";
+show "    call print_int";
+
+show "=== Compiler Construction Demo Complete ===";
+show "Expected final result: 8.5";

@@ -32,6 +32,16 @@ mod process;
 mod thread;
 mod compiler;
 
+// Compiler construction modules
+mod lexer;
+mod parser;
+mod ast;
+mod symbol;
+mod typesys;
+mod ir;
+mod codegen;
+mod optimize;
+
 // Re-export common utilities and types
 use crate::value::Value;
 
@@ -155,4 +165,37 @@ pub mod threadlib {
 
 pub mod compilerlib {
     pub use super::compiler::*;
+}
+
+// Compiler construction libraries
+pub mod lexerlib {
+    pub use super::lexer::*;
+}
+
+pub mod parserlib {
+    pub use super::parser::*;
+}
+
+pub mod astlib {
+    pub use super::ast::*;
+}
+
+pub mod symbollib {
+    pub use super::symbol::*;
+}
+
+pub mod typelib {
+    pub use super::typesys::*;
+}
+
+pub mod irlib {
+    pub use super::ir::*;
+}
+
+pub mod codegenlib {
+    pub use super::codegen::*;
+}
+
+pub mod optimizelib {
+    pub use super::optimize::*;
 }

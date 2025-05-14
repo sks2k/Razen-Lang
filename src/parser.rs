@@ -145,6 +145,34 @@ impl Parser {
         parser.register_prefix(TokenType::ThreadLib, Parser::parse_identifier);    // Thread management library
         parser.register_prefix(TokenType::CompilerLib, Parser::parse_identifier);  // Compiler operations library
         
+        // 17 - Compiler Construction Keywords
+        parser.register_prefix(TokenType::Token, Parser::parse_identifier);        // Token representation
+        parser.register_prefix(TokenType::Lexer, Parser::parse_identifier);        // Lexical analyzer
+        parser.register_prefix(TokenType::Parser, Parser::parse_identifier);       // Syntax analyzer
+        parser.register_prefix(TokenType::AST, Parser::parse_identifier);          // Abstract syntax tree
+        parser.register_prefix(TokenType::Node, Parser::parse_identifier);         // AST node
+        parser.register_prefix(TokenType::Visitor, Parser::parse_identifier);      // AST visitor pattern
+        parser.register_prefix(TokenType::Symbol, Parser::parse_identifier);       // Symbol table entry
+        parser.register_prefix(TokenType::Scope, Parser::parse_identifier);        // Scope management
+        parser.register_prefix(TokenType::Type, Parser::parse_identifier);         // Type checking
+        parser.register_prefix(TokenType::IR, Parser::parse_identifier);           // Intermediate representation
+        parser.register_prefix(TokenType::CodeGen, Parser::parse_identifier);      // Code generation
+        parser.register_prefix(TokenType::Optimize, Parser::parse_identifier);     // Optimization
+        parser.register_prefix(TokenType::Target, Parser::parse_identifier);       // Target code
+        parser.register_prefix(TokenType::Grammar, Parser::parse_identifier);      // Grammar definition
+        parser.register_prefix(TokenType::Rule, Parser::parse_identifier);         // Grammar rule
+        parser.register_prefix(TokenType::Attribute, Parser::parse_identifier);    // Semantic attribute
+        
+        // 18 - Compiler Construction Libraries
+        parser.register_prefix(TokenType::LexerLib, Parser::parse_identifier);     // Lexical analysis library
+        parser.register_prefix(TokenType::ParserLib, Parser::parse_identifier);    // Syntax analysis library
+        parser.register_prefix(TokenType::ASTLib, Parser::parse_identifier);       // AST manipulation library
+        parser.register_prefix(TokenType::SymbolLib, Parser::parse_identifier);    // Symbol table library
+        parser.register_prefix(TokenType::TypeLib, Parser::parse_identifier);      // Type checking library
+        parser.register_prefix(TokenType::IRLib, Parser::parse_identifier);        // IR operations library
+        parser.register_prefix(TokenType::CodeGenLib, Parser::parse_identifier);   // Code generation library
+        parser.register_prefix(TokenType::OptimizeLib, Parser::parse_identifier);  // Optimization library
+        
         parser.register_prefix(TokenType::Read, Parser::parse_identifier);
         parser.register_prefix(TokenType::Debug, Parser::parse_identifier);
         parser.register_prefix(TokenType::Assert, Parser::parse_identifier);
@@ -267,7 +295,25 @@ impl Parser {
             TokenType::Map | TokenType::Key | TokenType::Value |
             TokenType::Current | TokenType::Now | TokenType::Year | TokenType::Month | 
             TokenType::Day | TokenType::Hour | TokenType::Minute | TokenType::Second |
-            TokenType::Store | TokenType::Box | TokenType::Ref => self.parse_variable_declaration(),
+            TokenType::Store | TokenType::Box | TokenType::Ref |
+            
+            // 17 - Compiler Construction Keywords
+            TokenType::Grammar => self.parse_grammar_statement(),
+            TokenType::Token => self.parse_token_statement(),
+            TokenType::Lexer => self.parse_lexer_statement(),
+            TokenType::Parser => self.parse_parser_statement(),
+            TokenType::AST => self.parse_ast_statement(),
+            TokenType::Node => self.parse_node_statement(),
+            TokenType::Visitor => self.parse_visitor_statement(),
+            TokenType::Symbol => self.parse_symbol_statement(),
+            TokenType::Scope => self.parse_scope_statement(),
+            TokenType::Type => self.parse_type_statement(),
+            TokenType::IR => self.parse_ir_statement(),
+            TokenType::CodeGen => self.parse_codegen_statement(),
+            TokenType::Optimize => self.parse_optimize_statement(),
+            TokenType::Target => self.parse_target_statement(),
+            TokenType::Rule => self.parse_rule_statement(),
+            TokenType::Attribute => self.parse_attribute_statement(),
             
             TokenType::Fun => self.parse_function_declaration(),
             TokenType::Return => self.parse_return_statement(),
@@ -633,6 +679,785 @@ impl Parser {
         }
         
         Some(Statement::ThrowStatement { value })
+    }
+    
+    // This is a placeholder to avoid duplicate function error
+    // The actual implementation is at line ~1650
+    
+    // Compiler Construction Parsing Functions
+    
+    fn parse_grammar_statement(&mut self) -> Option<Statement> {
+        // Expect identifier after 'grammar' keyword
+        if !self.expect_peek(TokenType::Identifier) {
+            return None;
+        }
+        
+        let name = self.current_token.literal.clone();
+        
+        // Expect assignment operator
+        if !self.expect_peek(TokenType::Assign) {
+            return None;
+        }
+        
+        self.next_token();
+        
+        // Parse the map literal that contains grammar properties
+        let expr = self.parse_expression(Precedence::Lowest)?;
+        
+        // Extract properties from the map literal
+        let properties = match expr {
+            Expression::MapLiteral { pairs } => {
+                // Convert the map pairs to (String, Expression) format
+                pairs.into_iter()
+                    .filter_map(|(key, value)| {
+                        if let Expression::StringLiteral(key_str) = key {
+                            Some((key_str, value))
+                        } else {
+                            None
+                        }
+                    })
+                    .collect()
+            },
+            _ => Vec::new(),
+        };
+        
+        // Optional semicolon
+        if self.peek_token_is(TokenType::Semicolon) {
+            self.next_token();
+        }
+        
+        Some(Statement::GrammarStatement {
+            name,
+            properties,
+        })
+    }
+    
+    fn parse_token_statement(&mut self) -> Option<Statement> {
+        // Expect identifier after 'token' keyword
+        if !self.expect_peek(TokenType::Identifier) {
+            return None;
+        }
+        
+        let name = self.current_token.literal.clone();
+        
+        // Expect assignment operator
+        if !self.expect_peek(TokenType::Assign) {
+            return None;
+        }
+        
+        self.next_token();
+        
+        // Parse the string literal that contains the token pattern
+        let pattern = match self.parse_expression(Precedence::Lowest)? {
+            Expression::StringLiteral(pattern) => pattern,
+            _ => String::new(),
+        };
+        
+        // Optional semicolon
+        if self.peek_token_is(TokenType::Semicolon) {
+            self.next_token();
+        }
+        
+        Some(Statement::TokenStatement {
+            name,
+            pattern,
+        })
+    }
+    
+    fn parse_lexer_statement(&mut self) -> Option<Statement> {
+        // Expect identifier after 'lexer' keyword
+        if !self.expect_peek(TokenType::Identifier) {
+            return None;
+        }
+        
+        let name = self.current_token.literal.clone();
+        
+        // Expect assignment operator
+        if !self.expect_peek(TokenType::Assign) {
+            return None;
+        }
+        
+        self.next_token();
+        
+        // Parse the map literal that contains lexer configuration
+        let expr = self.parse_expression(Precedence::Lowest)?;
+        
+        // Extract configuration from the map literal
+        let config = match expr {
+            Expression::MapLiteral { pairs } => {
+                // Convert the map pairs to (String, Expression) format
+                pairs.into_iter()
+                    .filter_map(|(key, value)| {
+                        if let Expression::StringLiteral(key_str) = key {
+                            Some((key_str, value))
+                        } else {
+                            None
+                        }
+                    })
+                    .collect()
+            },
+            _ => Vec::new(),
+        };
+        
+        // Optional semicolon
+        if self.peek_token_is(TokenType::Semicolon) {
+            self.next_token();
+        }
+        
+        Some(Statement::LexerStatement {
+            name,
+            config,
+        })
+    }
+    
+    fn parse_parser_statement(&mut self) -> Option<Statement> {
+        // Expect identifier after 'parser' keyword
+        if !self.expect_peek(TokenType::Identifier) {
+            return None;
+        }
+        
+        let name = self.current_token.literal.clone();
+        
+        // Expect assignment operator
+        if !self.expect_peek(TokenType::Assign) {
+            return None;
+        }
+        
+        self.next_token();
+        
+        // Parse the map literal that contains parser configuration
+        let expr = self.parse_expression(Precedence::Lowest)?;
+        
+        // Extract configuration from the map literal
+        let config = match expr {
+            Expression::MapLiteral { pairs } => {
+                // Convert the map pairs to (String, Expression) format
+                pairs.into_iter()
+                    .filter_map(|(key, value)| {
+                        if let Expression::StringLiteral(key_str) = key {
+                            Some((key_str, value))
+                        } else {
+                            None
+                        }
+                    })
+                    .collect()
+            },
+            _ => Vec::new(),
+        };
+        
+        // Optional semicolon
+        if self.peek_token_is(TokenType::Semicolon) {
+            self.next_token();
+        }
+        
+        Some(Statement::ParserStatement {
+            name,
+            config,
+        })
+    }
+    
+    fn parse_ast_statement(&mut self) -> Option<Statement> {
+        // For now, treat AST statements as variable declarations
+        self.parse_variable_declaration()
+    }
+    
+    fn parse_node_statement(&mut self) -> Option<Statement> {
+        // Expect identifier after 'node' keyword
+        if !self.expect_peek(TokenType::Identifier) {
+            return None;
+        }
+        
+        let name = self.current_token.literal.clone();
+        
+        // Expect assignment operator
+        if !self.expect_peek(TokenType::Assign) {
+            return None;
+        }
+        
+        self.next_token();
+        
+        // Parse the map literal that contains node properties
+        let expr = self.parse_expression(Precedence::Lowest)?;
+        
+        // Extract properties from the map literal
+        let properties = match expr {
+            Expression::MapLiteral { pairs } => {
+                // Convert the map pairs to (String, Expression) format
+                pairs.into_iter()
+                    .filter_map(|(key, value)| {
+                        if let Expression::StringLiteral(key_str) = key {
+                            Some((key_str, value))
+                        } else {
+                            None
+                        }
+                    })
+                    .collect()
+            },
+            _ => Vec::new(),
+        };
+        
+        // Optional semicolon
+        if self.peek_token_is(TokenType::Semicolon) {
+            self.next_token();
+        }
+        
+        Some(Statement::NodeStatement {
+            name,
+            properties,
+        })
+    }
+    
+    fn parse_rule_statement(&mut self) -> Option<Statement> {
+        // Expect identifier after 'rule' keyword
+        if !self.expect_peek(TokenType::Identifier) {
+            return None;
+        }
+        
+        let name = self.current_token.literal.clone();
+        
+        // Expect assignment operator
+        if !self.expect_peek(TokenType::Assign) {
+            return None;
+        }
+        
+        self.next_token();
+        
+        // Parse the map literal or string literal for the rule
+        let expr = self.parse_expression(Precedence::Lowest)?;
+        
+        let (production, node_type) = match expr {
+            Expression::MapLiteral { pairs } => {
+                // Extract production and node_type from the map
+                let mut production = String::new();
+                let mut node_type = None;
+                
+                for (key, value) in pairs {
+                    if let Expression::StringLiteral(key_str) = key {
+                        match key_str.as_str() {
+                            "production" => {
+                                if let Expression::StringLiteral(prod) = value {
+                                    production = prod;
+                                }
+                            },
+                            "astNode" => {
+                                if let Expression::Identifier(node) = value {
+                                    node_type = Some(node);
+                                }
+                            },
+                            _ => {}
+                        }
+                    }
+                }
+                
+                (production, node_type)
+            },
+            Expression::StringLiteral(prod) => {
+                // If it's just a string literal, use it as the production
+                (prod, None)
+            },
+            _ => (String::new(), None),
+        };
+        
+        // Optional semicolon
+        if self.peek_token_is(TokenType::Semicolon) {
+            self.next_token();
+        }
+        
+        Some(Statement::RuleStatement {
+            name,
+            production,
+            node_type,
+        })
+    }
+    
+    fn parse_visitor_statement(&mut self) -> Option<Statement> {
+        // Expect identifier after 'visitor' keyword
+        if !self.expect_peek(TokenType::Identifier) {
+            return None;
+        }
+        
+        let name = self.current_token.literal.clone();
+        
+        // Expect assignment operator
+        if !self.expect_peek(TokenType::Assign) {
+            return None;
+        }
+        
+        self.next_token();
+        
+        // Parse the map literal that contains visitor configuration
+        let expr = self.parse_expression(Precedence::Lowest)?;
+        
+        // Extract methods from the map literal
+        let methods = match expr {
+            Expression::MapLiteral { pairs } => {
+                let mut methods_vec = Vec::new();
+                
+                for (key, value) in pairs {
+                    if let Expression::StringLiteral(key_str) = key {
+                        if key_str == "methods" {
+                            if let Expression::ArrayLiteral { elements } = value {
+                                for elem in elements {
+                                    if let Expression::StringLiteral(method) = elem {
+                                        methods_vec.push(method);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                methods_vec
+            },
+            _ => Vec::new(),
+        };
+        
+        // Optional semicolon
+        if self.peek_token_is(TokenType::Semicolon) {
+            self.next_token();
+        }
+        
+        Some(Statement::VisitorStatement {
+            name,
+            methods,
+        })
+    }
+    
+    fn parse_symbol_statement(&mut self) -> Option<Statement> {
+        // Expect identifier after 'symbol' keyword
+        if !self.expect_peek(TokenType::Identifier) {
+            return None;
+        }
+        
+        let name = self.current_token.literal.clone();
+        
+        // Expect assignment operator
+        if !self.expect_peek(TokenType::Assign) {
+            return None;
+        }
+        
+        self.next_token();
+        
+        // Parse the map literal that contains symbol configuration
+        let expr = self.parse_expression(Precedence::Lowest)?;
+        
+        // Extract attributes from the map literal
+        let attributes = match expr {
+            Expression::MapLiteral { pairs } => {
+                let mut attrs_vec = Vec::new();
+                
+                for (key, value) in pairs {
+                    if let Expression::StringLiteral(key_str) = key {
+                        if key_str == "attributes" {
+                            if let Expression::ArrayLiteral { elements } = value {
+                                for elem in elements {
+                                    if let Expression::StringLiteral(attr) = elem {
+                                        attrs_vec.push(attr);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                attrs_vec
+            },
+            _ => Vec::new(),
+        };
+        
+        // Optional semicolon
+        if self.peek_token_is(TokenType::Semicolon) {
+            self.next_token();
+        }
+        
+        Some(Statement::SymbolStatement {
+            name,
+            attributes,
+        })
+    }
+    
+    fn parse_scope_statement(&mut self) -> Option<Statement> {
+        // Expect identifier after 'scope' keyword
+        if !self.expect_peek(TokenType::Identifier) {
+            return None;
+        }
+        
+        let name = self.current_token.literal.clone();
+        
+        // Expect assignment operator
+        if !self.expect_peek(TokenType::Assign) {
+            return None;
+        }
+        
+        self.next_token();
+        
+        // Parse the map literal that contains scope configuration
+        let expr = self.parse_expression(Precedence::Lowest)?;
+        
+        // Extract parent from the map literal
+        let parent = match expr {
+            Expression::MapLiteral { pairs } => {
+                let mut parent_opt = None;
+                
+                for (key, value) in pairs {
+                    if let Expression::StringLiteral(key_str) = key {
+                        if key_str == "parent" {
+                            match value {
+                                Expression::Identifier(parent_name) => {
+                                    parent_opt = Some(parent_name);
+                                },
+                                Expression::NullLiteral => {
+                                    // Parent is explicitly null
+                                    parent_opt = None;
+                                },
+                                _ => {}
+                            }
+                        }
+                    }
+                }
+                
+                parent_opt
+            },
+            _ => None,
+        };
+        
+        // Optional semicolon
+        if self.peek_token_is(TokenType::Semicolon) {
+            self.next_token();
+        }
+        
+        Some(Statement::ScopeStatement {
+            name,
+            parent,
+        })
+    }
+    
+    fn parse_type_statement(&mut self) -> Option<Statement> {
+        // Expect identifier after 'type' keyword
+        if !self.expect_peek(TokenType::Identifier) {
+            return None;
+        }
+        
+        let name = self.current_token.literal.clone();
+        
+        // Expect assignment operator
+        if !self.expect_peek(TokenType::Assign) {
+            return None;
+        }
+        
+        self.next_token();
+        
+        // Parse the map literal that contains type configuration
+        let expr = self.parse_expression(Precedence::Lowest)?;
+        
+        // Extract operations from the map literal
+        let operations = match expr {
+            Expression::MapLiteral { pairs } => {
+                let mut ops_vec = Vec::new();
+                
+                for (key, value) in pairs {
+                    if let Expression::StringLiteral(key_str) = key {
+                        if key_str == "operations" {
+                            if let Expression::ArrayLiteral { elements } = value {
+                                for elem in elements {
+                                    if let Expression::StringLiteral(op) = elem {
+                                        ops_vec.push(op);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                ops_vec
+            },
+            _ => Vec::new(),
+        };
+        
+        // Optional semicolon
+        if self.peek_token_is(TokenType::Semicolon) {
+            self.next_token();
+        }
+        
+        Some(Statement::TypeStatement {
+            name,
+            operations,
+        })
+    }
+    
+    fn parse_ir_statement(&mut self) -> Option<Statement> {
+        // Expect identifier after 'ir' keyword
+        if !self.expect_peek(TokenType::Identifier) {
+            return None;
+        }
+        
+        let name = self.current_token.literal.clone();
+        
+        // Expect assignment operator
+        if !self.expect_peek(TokenType::Assign) {
+            return None;
+        }
+        
+        self.next_token();
+        
+        // Parse the map literal that contains IR configuration
+        let expr = self.parse_expression(Precedence::Lowest)?;
+        
+        // Extract opcode and operands from the map literal
+        let (opcode, operands) = match expr {
+            Expression::MapLiteral { pairs } => {
+                let mut opcode_str = String::new();
+                let mut operands_vec = Vec::new();
+                
+                for (key, value) in pairs {
+                    if let Expression::StringLiteral(key_str) = key {
+                        match key_str.as_str() {
+                            "opcode" => {
+                                if let Expression::StringLiteral(op) = value {
+                                    opcode_str = op;
+                                }
+                            },
+                            "operands" => {
+                                if let Expression::ArrayLiteral { elements } = value {
+                                    for elem in elements {
+                                        if let Expression::StringLiteral(operand) = elem {
+                                            operands_vec.push(operand);
+                                        }
+                                    }
+                                }
+                            },
+                            _ => {}
+                        }
+                    }
+                }
+                
+                (opcode_str, operands_vec)
+            },
+            _ => (String::new(), Vec::new()),
+        };
+        
+        // Optional semicolon
+        if self.peek_token_is(TokenType::Semicolon) {
+            self.next_token();
+        }
+        
+        Some(Statement::IRStatement {
+            name,
+            opcode,
+            operands,
+        })
+    }
+    
+    fn parse_codegen_statement(&mut self) -> Option<Statement> {
+        // Expect identifier after 'codegen' keyword
+        if !self.expect_peek(TokenType::Identifier) {
+            return None;
+        }
+        
+        let name = self.current_token.literal.clone();
+        
+        // Expect assignment operator
+        if !self.expect_peek(TokenType::Assign) {
+            return None;
+        }
+        
+        self.next_token();
+        
+        // Parse the map literal that contains codegen configuration
+        let expr = self.parse_expression(Precedence::Lowest)?;
+        
+        // Extract target and instructions from the map literal
+        let (target, instructions) = match expr {
+            Expression::MapLiteral { pairs } => {
+                let mut target_str = String::new();
+                let mut instructions_pairs = Vec::new();
+                
+                for (key, value) in pairs {
+                    if let Expression::StringLiteral(key_str) = key {
+                        match key_str.as_str() {
+                            "architecture" => {
+                                if let Expression::StringLiteral(arch) = value {
+                                    target_str = arch;
+                                }
+                            },
+                            _ => {
+                                // Add all other key-value pairs to instructions
+                                instructions_pairs.push((key_str, value));
+                            }
+                        }
+                    }
+                }
+                
+                (target_str, instructions_pairs)
+            },
+            _ => (String::new(), Vec::new()),
+        };
+        
+        // Optional semicolon
+        if self.peek_token_is(TokenType::Semicolon) {
+            self.next_token();
+        }
+        
+        Some(Statement::CodeGenStatement {
+            name,
+            target,
+            instructions,
+        })
+    }
+    
+    fn parse_optimize_statement(&mut self) -> Option<Statement> {
+        // Expect identifier after 'optimize' keyword
+        if !self.expect_peek(TokenType::Identifier) {
+            return None;
+        }
+        
+        let name = self.current_token.literal.clone();
+        
+        // Expect assignment operator
+        if !self.expect_peek(TokenType::Assign) {
+            return None;
+        }
+        
+        self.next_token();
+        
+        // Parse the map literal that contains optimize configuration
+        let expr = self.parse_expression(Precedence::Lowest)?;
+        
+        // Extract description and passes from the map literal
+        let (description, passes) = match expr {
+            Expression::MapLiteral { pairs } => {
+                let mut desc_str = String::new();
+                let mut passes_vec = Vec::new();
+                
+                for (key, value) in pairs {
+                    if let Expression::StringLiteral(key_str) = key {
+                        match key_str.as_str() {
+                            "description" => {
+                                if let Expression::StringLiteral(desc) = value {
+                                    desc_str = desc;
+                                }
+                            },
+                            "passes" => {
+                                if let Expression::ArrayLiteral { elements } = value {
+                                    for elem in elements {
+                                        if let Expression::StringLiteral(pass) = elem {
+                                            passes_vec.push(pass);
+                                        }
+                                    }
+                                }
+                            },
+                            _ => {}
+                        }
+                    }
+                }
+                
+                (desc_str, passes_vec)
+            },
+            _ => (String::new(), Vec::new()),
+        };
+        
+        // Optional semicolon
+        if self.peek_token_is(TokenType::Semicolon) {
+            self.next_token();
+        }
+        
+        Some(Statement::OptimizeStatement {
+            name,
+            description,
+            passes,
+        })
+    }
+    
+    fn parse_target_statement(&mut self) -> Option<Statement> {
+        // Expect identifier after 'target' keyword
+        if !self.expect_peek(TokenType::Identifier) {
+            return None;
+        }
+        
+        let name = self.current_token.literal.clone();
+        
+        // Expect assignment operator
+        if !self.expect_peek(TokenType::Assign) {
+            return None;
+        }
+        
+        self.next_token();
+        
+        // Parse the map literal that contains target configuration
+        let expr = self.parse_expression(Precedence::Lowest)?;
+        
+        // Extract properties from the map literal
+        let properties = match expr {
+            Expression::MapLiteral { pairs } => {
+                // Convert the map pairs to (String, Expression) format
+                pairs.into_iter()
+                    .filter_map(|(key, value)| {
+                        if let Expression::StringLiteral(key_str) = key {
+                            Some((key_str, value))
+                        } else {
+                            None
+                        }
+                    })
+                    .collect()
+            },
+            _ => Vec::new(),
+        };
+        
+        // Optional semicolon
+        if self.peek_token_is(TokenType::Semicolon) {
+            self.next_token();
+        }
+        
+        Some(Statement::TargetStatement {
+            name,
+            properties,
+        })
+    }
+    
+    fn parse_attribute_statement(&mut self) -> Option<Statement> {
+        // Expect identifier after 'attribute' keyword
+        if !self.expect_peek(TokenType::Identifier) {
+            return None;
+        }
+        
+        let name = self.current_token.literal.clone();
+        
+        // Expect assignment operator
+        if !self.expect_peek(TokenType::Assign) {
+            return None;
+        }
+        
+        self.next_token();
+        
+        // Parse the map literal that contains attribute values
+        let expr = self.parse_expression(Precedence::Lowest)?;
+        
+        // Extract values from the map literal
+        let values = match expr {
+            Expression::MapLiteral { pairs } => {
+                // Convert the map pairs to (String, Expression) format
+                pairs.into_iter()
+                    .filter_map(|(key, value)| {
+                        if let Expression::StringLiteral(key_str) = key {
+                            Some((key_str, value))
+                        } else {
+                            None
+                        }
+                    })
+                    .collect()
+            },
+            _ => Vec::new(),
+        };
+        
+        // Optional semicolon
+        if self.peek_token_is(TokenType::Semicolon) {
+            self.next_token();
+        }
+        
+        Some(Statement::AttributeStatement {
+            name,
+            values,
+        })
     }
     
     fn parse_read_statement(&mut self) -> Option<Statement> {
@@ -1626,7 +2451,11 @@ impl Parser {
             // Self-compilation library tokens
             TokenType::MemoryLib | TokenType::BinaryLib | TokenType::BitwiseLib | 
             TokenType::SystemLib | TokenType::ProcessLib | TokenType::ThreadLib | 
-            TokenType::CompilerLib => true,
+            TokenType::CompilerLib |
+            // 18 - Compiler Construction Libraries
+            TokenType::LexerLib | TokenType::ParserLib | TokenType::ASTLib |
+            TokenType::SymbolLib | TokenType::TypeLib | TokenType::IRLib |
+            TokenType::CodeGenLib | TokenType::OptimizeLib => true,
             _ => false
         };
         

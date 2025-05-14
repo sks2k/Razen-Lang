@@ -122,3 +122,31 @@ image => image processing (resize, crop, convert, etc.)
 validation => data validation helpers (email, phone, etc.)
 log => logging utilities (info, warn, error, debug, etc.)
 uuid => UUID generation and parsing.
+
+# 17 Compiler Construction Variables:
+token => for token representation in lexical analysis. Use for defining and manipulating tokens in a compiler.
+lexer => for lexical analyzer components. Use for breaking source code into tokens.
+parser => for syntax analyzer components. Use for building parse trees from tokens.
+ast => for abstract syntax tree representation. Use for structured code representation.
+node => for AST node manipulation. Use for working with individual elements in an AST.
+visitor => for implementing the visitor pattern on ASTs. Use for traversing and transforming ASTs.
+symbol => for symbol table entries. Use for tracking identifiers and their properties.
+scope => for scope management. Use for handling variable visibility and lifetime.
+typesys => for type checking and representation. Use for ensuring type safety.
+ir => for intermediate representation. Use for code between parsing and code generation.
+codegen => for code generation. Use for producing target code from IR.
+optimize => for optimization passes. Use for improving generated code efficiency.
+target => for target code specification. Use for defining output code characteristics.
+grammar => for grammar definition. Use for specifying language syntax rules.
+rule => for grammar rules. Use for individual syntax rules in a grammar.
+attribute => for semantic attributes. Use for attaching information to AST nodes.
+
+# 18 Compiler Construction Libraries:
+lexerlib => for lexical analysis operations. Use for tokenizing source code.
+parserlib => for syntax analysis operations. Use for parsing tokens into AST.
+astlib => for abstract syntax tree operations. Use for manipulating and traversing ASTs.
+symbollib => for symbol table operations. Use for managing identifiers and scopes.
+typelib => for type checking operations. Use for verifying type correctness.
+irlib => for intermediate representation operations. Use for working with IR code.
+codegenlib => for code generation operations. Use for producing target code.
+optimizelib => for optimization operations. Use for improving code efficiency.

@@ -311,6 +311,69 @@ impl LibraryManager {
         compiler_lib.register_function("compile", crate::functions::compilerlib::compile);
         self.register_library(compiler_lib);
 
+        // Register Lexer library functions
+        let mut lexer_lib = Library::new("lexerlib");
+        lexer_lib.register_function("create_lexer", crate::functions::lexerlib::create_lexer);
+        lexer_lib.register_function("tokenize", crate::functions::lexerlib::tokenize);
+        lexer_lib.register_function("define_token", crate::functions::lexerlib::define_token);
+        self.register_library(lexer_lib);
+
+        // Register Parser library functions
+        let mut parser_lib = Library::new("parserlib");
+        parser_lib.register_function("create_parser", crate::functions::parserlib::create_parser);
+        parser_lib.register_function("parse", crate::functions::parserlib::parse);
+        parser_lib.register_function("define_rule", crate::functions::parserlib::define_rule);
+        parser_lib.register_function("create_grammar", crate::functions::parserlib::create_grammar);
+        self.register_library(parser_lib);
+
+        // Register AST library functions
+        let mut ast_lib = Library::new("astlib");
+        ast_lib.register_function("create_node", crate::functions::astlib::create_node);
+        ast_lib.register_function("define_node_type", crate::functions::astlib::define_node_type);
+        ast_lib.register_function("traverse", crate::functions::astlib::traverse);
+        ast_lib.register_function("create_visitor", crate::functions::astlib::create_visitor);
+        self.register_library(ast_lib);
+
+        // Register Symbol library functions
+        let mut symbol_lib = Library::new("symbollib");
+        symbol_lib.register_function("create_symbol_table", crate::functions::symbollib::create_symbol_table);
+        symbol_lib.register_function("define_symbol", crate::functions::symbollib::define_symbol);
+        symbol_lib.register_function("add_symbol", crate::functions::symbollib::add_symbol);
+        symbol_lib.register_function("lookup_symbol", crate::functions::symbollib::lookup_symbol);
+        self.register_library(symbol_lib);
+
+        // Register Type library functions
+        let mut type_lib = Library::new("typelib");
+        type_lib.register_function("define_type", crate::functions::typelib::define_type);
+        type_lib.register_function("check_type", crate::functions::typelib::check_type);
+        type_lib.register_function("create_type_system", crate::functions::typelib::create_type_system);
+        type_lib.register_function("infer_type", crate::functions::typelib::infer_type);
+        self.register_library(type_lib);
+
+        // Register IR library functions
+        let mut ir_lib = Library::new("irlib");
+        ir_lib.register_function("create_instruction", crate::functions::irlib::create_instruction);
+        ir_lib.register_function("generate", crate::functions::irlib::generate);
+        ir_lib.register_function("optimize", crate::functions::irlib::optimize);
+        ir_lib.register_function("to_string", crate::functions::irlib::to_string);
+        self.register_library(ir_lib);
+
+        // Register CodeGen library functions
+        let mut codegen_lib = Library::new("codegenlib");
+        codegen_lib.register_function("create_generator", crate::functions::codegenlib::create_generator);
+        codegen_lib.register_function("generate", crate::functions::codegenlib::generate);
+        codegen_lib.register_function("define_target", crate::functions::codegenlib::define_target);
+        codegen_lib.register_function("emit_code", crate::functions::codegenlib::emit_code);
+        self.register_library(codegen_lib);
+
+        // Register Optimize library functions
+        let mut optimize_lib = Library::new("optimizelib");
+        optimize_lib.register_function("create_pass", crate::functions::optimizelib::create_pass);
+        optimize_lib.register_function("apply", crate::functions::optimizelib::apply);
+        optimize_lib.register_function("analyze", crate::functions::optimizelib::analyze);
+        optimize_lib.register_function("create_pipeline", crate::functions::optimizelib::create_pipeline);
+        self.register_library(optimize_lib);
+
         // Register Color library functions
         let mut color_lib = Library::new("color");
         color_lib.register_function("hex_to_rgb", crate::functions::colorlib::hex_to_rgb);

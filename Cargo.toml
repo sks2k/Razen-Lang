@@ -56,3 +56,12 @@ parking_lot = "0.12.1"  # For more efficient mutex implementations
 
 # Potentially for parsing syntax.rzn later (not used in this initial impl)
 # toml = "0.8"
+
+# For compiler construction framework
+pest = "2.7"         # Parser generator library
+pest_derive = "2.7"  # Procedural macros for pest
+lalrpop = "0.20"     # Parser generator framework
+serde = { version = "1.0", features = ["derive"] } # For serialization/deserialization
+proc-macro2 = "1.0"  # For procedural macros
+syn = { version = "2.0", features = ["full", "extra-traits"] } # For syntax parsing
+quote = "1.0"        # For code generation

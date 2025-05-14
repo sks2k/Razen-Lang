@@ -208,6 +208,34 @@ pub enum TokenType {
     // Special
     EOF,            // End of file
     Illegal,        // Invalid token
+
+    // 17 - Compiler Construction Keywords
+    Token,          // Token representation
+    Lexer,          // Lexical analyzer
+    Parser,         // Syntax analyzer
+    AST,            // Abstract syntax tree
+    Node,           // AST node
+    Visitor,        // AST visitor pattern
+    Symbol,         // Symbol table entry
+    Scope,          // Scope management
+    Type,           // Type checking
+    IR,             // Intermediate representation
+    CodeGen,        // Code generation
+    Optimize,       // Optimization
+    Target,         // Target code
+    Grammar,        // Grammar definition
+    Rule,           // Grammar rule
+    Attribute,      // Semantic attribute
+
+    // 18 - Compiler Construction Libraries
+    LexerLib,       // Lexical analysis library
+    ParserLib,      // Syntax analysis library
+    ASTLib,         // AST manipulation library
+    SymbolLib,      // Symbol table library
+    TypeLib,        // Type checking library
+    IRLib,          // IR operations library
+    CodeGenLib,     // Code generation library
+    OptimizeLib,    // Optimization library
 }
 
 impl fmt::Display for TokenType {
@@ -419,6 +447,34 @@ impl fmt::Display for TokenType {
             // Special
             TokenType::EOF => write!(f, "EOF"),
             TokenType::Illegal => write!(f, "ILLEGAL"),
+            
+            // 17 - Compiler Construction Keywords
+            TokenType::Token => write!(f, "TOKEN"),
+            TokenType::Lexer => write!(f, "LEXER"),
+            TokenType::Parser => write!(f, "PARSER"),
+            TokenType::AST => write!(f, "AST"),
+            TokenType::Node => write!(f, "NODE"),
+            TokenType::Visitor => write!(f, "VISITOR"),
+            TokenType::Symbol => write!(f, "SYMBOL"),
+            TokenType::Scope => write!(f, "SCOPE"),
+            TokenType::Type => write!(f, "TYPE"),
+            TokenType::IR => write!(f, "IR"),
+            TokenType::CodeGen => write!(f, "CODEGEN"),
+            TokenType::Optimize => write!(f, "OPTIMIZE"),
+            TokenType::Target => write!(f, "TARGET"),
+            TokenType::Grammar => write!(f, "GRAMMAR"),
+            TokenType::Rule => write!(f, "RULE"),
+            TokenType::Attribute => write!(f, "ATTRIBUTE"),
+            
+            // 18 - Compiler Construction Libraries
+            TokenType::LexerLib => write!(f, "LEXERLIB"),
+            TokenType::ParserLib => write!(f, "PARSERLIB"),
+            TokenType::ASTLib => write!(f, "ASTLIB"),
+            TokenType::SymbolLib => write!(f, "SYMBOLLIB"),
+            TokenType::TypeLib => write!(f, "TYPELIB"),
+            TokenType::IRLib => write!(f, "IRLIB"),
+            TokenType::CodeGenLib => write!(f, "CODEGENLIB"),
+            TokenType::OptimizeLib => write!(f, "OPTIMIZELIB"),
         }
     }
 }
@@ -611,6 +667,34 @@ pub fn lookup_identifier(identifier: &str) -> TokenType {
         "timelib" => TokenType::TimeLib,
         "typechecklib" => TokenType::TypeCheckLib,
         "typeconvertlib" => TokenType::TypeConvertLib,
+        
+        // 17 - Compiler Construction Keywords
+        "token" => TokenType::Token,
+        "lexer" => TokenType::Lexer,
+        "parser" => TokenType::Parser,
+        "ast" => TokenType::AST,
+        "node" => TokenType::Node,
+        "visitor" => TokenType::Visitor,
+        "symbol" => TokenType::Symbol,
+        "scope" => TokenType::Scope,
+        "typesys" => TokenType::Type,
+        "ir" => TokenType::IR,
+        "codegen" => TokenType::CodeGen,
+        "optimize" => TokenType::Optimize,
+        "target" => TokenType::Target,
+        "grammar" => TokenType::Grammar,
+        "rule" => TokenType::Rule,
+        "attribute" => TokenType::Attribute,
+        
+        // 18 - Compiler Construction Libraries
+        "lexerlib" => TokenType::LexerLib,
+        "parserlib" => TokenType::ParserLib,
+        "astlib" => TokenType::ASTLib,
+        "symbollib" => TokenType::SymbolLib,
+        "typelib" => TokenType::TypeLib,
+        "irlib" => TokenType::IRLib,
+        "codegenlib" => TokenType::CodeGenLib,
+        "optimizelib" => TokenType::OptimizeLib,
         
         // If not a keyword, it's an identifier
         _ => TokenType::Identifier,

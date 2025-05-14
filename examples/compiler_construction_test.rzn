@@ -1,0 +1,176 @@
+# Razen Compiler Construction Framework
+# This file demonstrates the compiler construction tokens and libraries with proper syntax and grammar
+
+# 1. Import required libraries
+lib lexerlib;    # Lexical analysis library
+lib parserlib;   # Syntax analysis library
+lib astlib;      # Abstract syntax tree manipulation library
+lib symbollib;   # Symbol table management library
+lib typelib;     # Type checking and inference library
+lib irlib;       # Intermediate representation library
+lib codegenlib;  # Code generation library
+lib optimizelib; # Optimization library
+
+# 2. Define a simple grammar for a calculator language
+grammar calculatorGrammar = {
+    "name": "SimpleCalculator",
+    "version": "1.0",
+    "description": "A simple calculator language grammar"
+};
+
+# 3. Define token types for our calculator language
+token INTEGER = "[0-9]+";
+token PLUS = "\\+";
+token MINUS = "-";
+token MULTIPLY = "\\*";
+token DIVIDE = "/";
+token LPAREN = "\\(";
+token RPAREN = "\\)";
+token WHITESPACE = "\\s+";
+
+# 4. Create a lexer configuration
+lexer calculatorLexer = {
+    "tokens": [INTEGER, PLUS, MINUS, MULTIPLY, DIVIDE, LPAREN, RPAREN],
+    "ignore": [WHITESPACE],
+    "errorHandler": "skipInvalidToken"
+};
+
+# 5. Define AST node types
+node ExpressionNode = {
+    "type": "expression",
+    "evaluate": "required"
+};
+
+node BinaryOpNode = {
+    "type": "binaryOp",
+    "extends": ExpressionNode,
+    "fields": ["left", "operator", "right"]
+};
+
+node NumberNode = {
+    "type": "number",
+    "extends": ExpressionNode,
+    "fields": ["value"]
+};
+
+# 6. Define grammar rules using EBNF-like syntax
+rule expression = {
+    "production": "term { ('+'|'-') term }",
+    "astNode": ExpressionNode
+};
+
+rule term = {
+    "production": "factor { ('*'|'/') factor }",
+    "astNode": ExpressionNode
+};
+
+rule factor = {
+    "production": "INTEGER | '(' expression ')'",
+    "astNode": ExpressionNode
+};
+
+# 7. Create a parser configuration
+parser calculatorParser = {
+    "grammar": calculatorGrammar,
+    "rules": [expression, term, factor],
+    "startSymbol": expression,
+    "errorRecovery": true
+};
+
+# 8. Define a visitor for AST traversal
+visitor evaluatorVisitor = {
+    "name": "ExpressionEvaluator",
+    "methods": [
+        "visitBinaryOpNode",
+        "visitNumberNode"
+    ]
+};
+
+# 9. Define symbol table for variable tracking
+symbol variableSymbol = {
+    "name": "Variable",
+    "attributes": ["name", "type", "value", "scope"]
+};
+
+# 10. Define a scope for variable visibility
+scope globalScope = {
+    "name": "global",
+    "parent": null
+};
+
+# 11. Define type checking rules
+typesys numberType = {
+    "name": "Number",
+    "operations": ["+", "-", "*", "/"]
+};
+
+# 12. Define IR operations
+ir loadConstant = {
+    "opcode": "LOAD_CONST",
+    "operands": ["value"]
+};
+
+ir add = {
+    "opcode": "ADD",
+    "operands": []
+};
+
+ir subtract = {
+    "opcode": "SUB",
+    "operands": []
+};
+
+ir multiply = {
+    "opcode": "MUL",
+    "operands": []
+};
+
+ir divide = {
+    "opcode": "DIV",
+    "operands": []
+};
+
+# 13. Define code generation templates
+codegen x86Template = {
+    "architecture": "x86",
+    "instructionSet": "basic"
+};
+
+# 14. Define optimization passes
+optimize constantFolding = {
+    "name": "ConstantFolding",
+    "description": "Evaluates constant expressions at compile time"
+};
+
+# 15. Define target platform
+target x86_64 = {
+    "name": "x86_64",
+    "wordSize": 64,
+    "endianness": "little"
+};
+
+# 16. Define semantic attributes
+attribute precedence = {
+    "name": "Precedence",
+    "values": {
+        "*": 2,
+        "/": 2,
+        "+": 1,
+        "-": 1
+    }
+};
+
+# 17. Demonstrate a simple compiler pipeline
+show "=== Razen Compiler Construction Demo ===";
+show "Grammar: SimpleCalculator";
+show "Tokens: INTEGER, PLUS, MINUS, MULTIPLY, DIVIDE, LPAREN, RPAREN";
+show "Parser: SimpleCalculator";
+show "Target: x86_64";
+
+# 18. Sample expression to parse
+text input = "2 + 3 * (4 - 1)";
+show "Input: " + input;
+show "Expected output: 11";
+
+# This is a demonstration of the syntax and grammar for compiler construction
+# In a real implementation, the libraries would process this input and generate code

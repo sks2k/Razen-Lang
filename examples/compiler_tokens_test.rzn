@@ -1,0 +1,37 @@
+# Test file for compiler construction tokens
+# This file tests the recognition of the new compiler construction tokens
+
+# Import compiler library
+lib compilerlib;
+
+show "===== COMPILER CONSTRUCTION TOKENS TEST =====";
+
+# Test compiler construction keywords
+token my_token = "example";
+lexer my_lexer = "tokenize";
+parser my_parser = "parse";
+ast my_ast = "tree";
+node my_node = "leaf";
+visitor my_visitor = "traverse";
+symbol my_symbol = "identifier";
+scope my_scope = "global";
+type my_type = "integer";
+ir my_ir = "intermediate";
+codegen my_codegen = "generate";
+optimize my_optimize = "improve";
+target my_target = "x86";
+grammar my_grammar = "syntax";
+rule my_rule = "production";
+attribute my_attribute = "semantic";
+
+# Test compiler construction libraries
+lib lexerlib;
+lib parserlib;
+lib astlib;
+lib symbollib;
+lib typelib;
+lib irlib;
+lib codegenlib;
+lib optimizelib;
+
+show "===== COMPILER CONSTRUCTION TOKENS TEST COMPLETE =====";
