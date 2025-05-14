@@ -76,15 +76,15 @@ show(red) "3. Testing Bit Operations:";
 show(red) "Bitwise AND: " + BitLib[and](5, 3);
 show(red) "Bitwise OR: " + BitLib[or](5, 3);
 show(red) "Bitwise XOR: " + BitLib[xor](5, 3);
-show(red) "Bitwise NOT: " + BitLib[not](5);
-show(red) "Left shift: " + BitLib[lshift](5, 2);
-show(red) "Right shift: " + BitLib[rshift](20, 2);
+show(red) "Bitwise NOT: " + BitLib[not](5, 8);
+show(red) "Left shift: " + BitLib[left_shift](5, 2);
+show(red) "Right shift: " + BitLib[right_shift](20, 2);
 
 # System Operations
 show(green) "4. Testing System Operations:";
 show(green) "Process ID: " + SysLib[getpid]();
-show(green) "Current time: " + SysLib[time]();
-show(green) "System name: " + SysLib[sysname]();
+show(green) "Current time: " + SysLib[current_time]();
+show(green) "System name: " + SysLib[system_name]();
 
 # Compiler Operations
 show(cyan) "5. Testing Compiler Operations:";
@@ -94,10 +94,10 @@ show(cyan) "Compiling code: " + CompLib[compile]("fun test() { return 42; }");
 
 # Threading Operations
 show(magenta) "6. Testing Threading Operations:";
-show(magenta) "Thread ID: " + ThrLib[current_thread_id]();
+show(magenta) "Thread ID: " + ThrLib[thread_id]();
 show(magenta) "Thread count: " + ThrLib[thread_count]();
-show(magenta) "Creating mutex: " + ThrLib[create_mutex]();
-show(magenta) "Locking mutex: " + ThrLib[lock_mutex](ThrLib[create_mutex]());
-show(magenta) "Unlocking mutex: " + ThrLib[unlock_mutex](ThrLib[create_mutex]());
+show(magenta) "Creating mutex: " + ThrLib[mutex_create]();
+show(magenta) "Locking mutex: " + ThrLib[mutex_lock](ThrLib[mutex_create]());
+show(magenta) "Unlocking mutex: " + ThrLib[mutex_unlock](ThrLib[mutex_create]());
 
 show "===== SELF-COMPILATION TEST COMPLETE =====";

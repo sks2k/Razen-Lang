@@ -1,7 +1,8 @@
 use crate::value::Value;
 use std::process::Command;
 use std::collections::HashMap;
-use std::time::SystemTime;
+use std::time::{SystemTime, UNIX_EPOCH};
+use std::env;
 
 /// Executes a system command and returns the output
 /// Example: exec("ls") => "file1\nfile2"
@@ -85,4 +86,42 @@ pub fn info(args: Vec<Value>) -> Result<Value, String> {
     info_map.insert("hostname".to_string(), Value::String("unknown".to_string()));
     
     Ok(Value::Map(info_map))
+}
+
+/// Returns the current system time in milliseconds since epoch
+/// Example: current_time() => 1621234567890
+pub fn current_time(args: Vec<Value>) -> Result<Value, String> {
+    if !args.is_empty() {
+        return Err("System.current_time takes no arguments".to_string());
+    }
+    
+    match SystemTime::now().duration_since(UNIX_EPOCH) {
+        Ok(duration) => {
+            let millis = duration.as_secs() * 1000 + duration.subsec_millis() as u64;
+            Ok(Value::Int(millis as i64))
+        },
+        Err(e) => Err(format!("Failed to get system time: {}", e)),
+    }
+}
+
+/// Returns the system name (hostname)
+/// Example: system_name() => "hostname"
+pub fn system_name(args: Vec<Value>) -> Result<Value, String> {
+    if !args.is_empty() {
+        return Err("System.system_name takes no arguments".to_string());
+    }
+    
+    match env::var("HOSTNAME").or_else(|_| env::var("COMPUTERNAME")) {
+        Ok(hostname) => Ok(Value::String(hostname)),
+        Err(_) => {
+            // Try to get hostname using the hostname command
+            match Command::new("hostname").output() {
+                Ok(output) if output.status.success() => {
+                    let hostname = String::from_utf8_lossy(&output.stdout).trim().to_string();
+                    Ok(Value::String(hostname))
+                },
+                _ => Ok(Value::String("unknown".to_string())),
+            }
+        },
+    }
 }

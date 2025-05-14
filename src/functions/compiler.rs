@@ -400,3 +400,104 @@ pub fn parse(args: Vec<Value>) -> Result<Value, String> {
     
     Ok(Value::Int(program_id as i64))
 }
+
+/// Tokenize source code into tokens
+/// Example: tokenize("let x = 5 + 3;") => ["let", "x", "=", "5", "+", "3", ";"]
+pub fn tokenize(args: Vec<Value>) -> Result<Value, String> {
+    if args.len() != 1 {
+        return Err("Compiler.tokenize requires exactly 1 argument: source_code".to_string());
+    }
+    
+    let source_code = args[0].as_string()?;
+    
+    // This is a simplified tokenizer that splits on whitespace and special characters
+    let mut tokens = Vec::new();
+    let mut current_token = String::new();
+    
+    // Define special characters that should be separate tokens
+    let special_chars = vec!['=', '+', '-', '*', '/', '(', ')', '{', '}', '[', ']', ';', ',', '.'];
+    
+    for c in source_code.chars() {
+        if c.is_whitespace() {
+            // End the current token on whitespace
+            if !current_token.is_empty() {
+                tokens.push(Value::String(current_token.clone()));
+                current_token.clear();
+            }
+        } else if special_chars.contains(&c) {
+            // End the current token and add the special character as a separate token
+            if !current_token.is_empty() {
+                tokens.push(Value::String(current_token.clone()));
+                current_token.clear();
+            }
+            tokens.push(Value::String(c.to_string()));
+        } else {
+            // Add to the current token
+            current_token.push(c);
+        }
+    }
+    
+    // Add the final token if there is one
+    if !current_token.is_empty() {
+        tokens.push(Value::String(current_token));
+    }
+    
+    Ok(Value::Array(tokens))
+}
+
+/// Compile source code to bytecode
+/// Example: compile("let x = 5 + 3;") => [1, 5, 3, 2, 0]
+pub fn compile(args: Vec<Value>) -> Result<Value, String> {
+    if args.len() != 1 {
+        return Err("Compiler.compile requires exactly 1 argument: source_code".to_string());
+    }
+    
+    let source_code = args[0].as_string()?;
+    
+    // This is a simplified compiler that generates a very basic bytecode
+    // In a real implementation, we would tokenize, parse, and generate proper bytecode
+    
+    // For this simple example, we'll just generate some dummy bytecode
+    // 1 = DECLARE_VAR, 2 = ADD, 0 = END
+    let mut bytecode = Vec::new();
+    
+    if source_code.contains("let") && source_code.contains('=') {
+        bytecode.push(Value::Int(1)); // DECLARE_VAR
+        
+        // Extract the numeric values from the source code
+        let mut numbers = Vec::new();
+        let mut current_number = String::new();
+        
+        for c in source_code.chars() {
+            if c.is_digit(10) {
+                current_number.push(c);
+            } else if !current_number.is_empty() {
+                if let Ok(num) = current_number.parse::<i64>() {
+                    numbers.push(num);
+                }
+                current_number.clear();
+            }
+        }
+        
+        // Add any remaining number
+        if !current_number.is_empty() {
+            if let Ok(num) = current_number.parse::<i64>() {
+                numbers.push(num);
+            }
+        }
+        
+        // Add the numbers to the bytecode
+        for num in numbers {
+            bytecode.push(Value::Int(num));
+        }
+        
+        // If the source code contains addition, add the ADD instruction
+        if source_code.contains('+') {
+            bytecode.push(Value::Int(2)); // ADD
+        }
+    }
+    
+    bytecode.push(Value::Int(0)); // END
+    
+    Ok(Value::Array(bytecode))
+}

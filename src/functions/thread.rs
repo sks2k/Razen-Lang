@@ -3,6 +3,8 @@ use std::thread;
 use std::sync::{Arc, Mutex};
 use std::collections::HashMap;
 use std::time::Duration;
+use std::sync::atomic::{AtomicUsize, Ordering};
+use std::thread::ThreadId;
 
 // Global thread manager to track threads
 lazy_static::lazy_static! {
@@ -15,6 +17,7 @@ struct ThreadManager {
     next_thread_id: usize,
     mutexes: HashMap<usize, Arc<Mutex<()>>>,
     next_mutex_id: usize,
+    thread_count: AtomicUsize,
 }
 
 impl ThreadManager {
@@ -24,6 +27,7 @@ impl ThreadManager {
             next_thread_id: 1,
             mutexes: HashMap::new(),
             next_mutex_id: 1,
+            thread_count: AtomicUsize::new(1), // Start with 1 for the main thread
         }
     }
 
@@ -31,6 +35,7 @@ impl ThreadManager {
         let id = self.next_thread_id;
         self.next_thread_id += 1;
         self.threads.insert(id, handle);
+        self.thread_count.fetch_add(1, Ordering::SeqCst);
         id
     }
 
@@ -43,8 +48,10 @@ impl ThreadManager {
     }
 
     fn remove_thread(&mut self, id: usize) -> Result<thread::JoinHandle<()>, String> {
-        self.threads.remove(&id)
-            .ok_or_else(|| format!("Invalid thread ID: {}", id))
+        let handle = self.threads.remove(&id)
+            .ok_or_else(|| format!("Invalid thread ID: {}", id))?;
+        self.thread_count.fetch_sub(1, Ordering::SeqCst);
+        Ok(handle)
     }
 
     fn create_mutex(&mut self) -> usize {
@@ -216,14 +223,45 @@ pub fn mutex_destroy(args: Vec<Value>) -> Result<Value, String> {
 /// Example: current() => 1
 pub fn current(args: Vec<Value>) -> Result<Value, String> {
     if !args.is_empty() {
-        return Err("Thread.current takes no arguments".to_string());
+        return Err("Thread.current requires no arguments".to_string());
     }
     
-    // This is a simplified implementation
-    // In a real implementation, we would need to track thread IDs
+    // In a real implementation, we would return the actual thread ID
+    // For now, just return 1 (main thread)
+    Ok(Value::Int(1))
+}
+
+/// Get the current thread ID as a unique identifier
+/// Example: thread_id() => 1
+pub fn thread_id(args: Vec<Value>) -> Result<Value, String> {
+    if !args.is_empty() {
+        return Err("Thread.thread_id requires no arguments".to_string());
+    }
     
-    // For now, just return a dummy ID
-    Ok(Value::Int(0))
+    // Get the current thread's ID as a formatted string
+    let thread_id = format!("{:?}", thread::current().id());
+    
+    // Convert the thread ID string to a simple integer for easier use
+    // Just use the hash of the string as a unique identifier
+    use std::collections::hash_map::DefaultHasher;
+    use std::hash::{Hash, Hasher};
+    
+    let mut hasher = DefaultHasher::new();
+    thread_id.hash(&mut hasher);
+    let id = hasher.finish() as i64;
+    
+    Ok(Value::Int(id))
+}
+
+/// Get the number of active threads
+/// Example: thread_count() => 2
+pub fn thread_count(args: Vec<Value>) -> Result<Value, String> {
+    if !args.is_empty() {
+        return Err("Thread.thread_count requires no arguments".to_string());
+    }
+    
+    let count = THREAD_MANAGER.lock().unwrap().thread_count.load(Ordering::SeqCst);
+    Ok(Value::Int(count as i64))
 }
 
 /// Get the Int of available CPU cores

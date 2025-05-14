@@ -262,6 +262,8 @@ impl LibraryManager {
         syscall_lib.register_function("sleep", crate::functions::syscalllib::sleep);
         syscall_lib.register_function("hostname", crate::functions::syscalllib::hostname);
         syscall_lib.register_function("username", crate::functions::syscalllib::username);
+        syscall_lib.register_function("current_time", crate::functions::systemlib::current_time);
+        syscall_lib.register_function("system_name", crate::functions::systemlib::system_name);
         self.register_library(syscall_lib);
 
         // Process library for process management
@@ -289,6 +291,8 @@ impl LibraryManager {
         thread_lib.register_function("mutex_destroy", crate::functions::threadlib::mutex_destroy);
         thread_lib.register_function("current", crate::functions::threadlib::current);
         thread_lib.register_function("cpu_count", crate::functions::threadlib::cpu_count);
+        thread_lib.register_function("thread_id", crate::functions::threadlib::thread_id);
+        thread_lib.register_function("thread_count", crate::functions::threadlib::thread_count);
         self.register_library(thread_lib);
 
         // Compiler library for compiler operations
@@ -303,6 +307,8 @@ impl LibraryManager {
         compiler_lib.register_function("optimize_ir", crate::functions::compilerlib::optimize_ir);
         compiler_lib.register_function("generate_assembly", crate::functions::compilerlib::generate_assembly);
         compiler_lib.register_function("parse", crate::functions::compilerlib::parse);
+        compiler_lib.register_function("tokenize", crate::functions::compilerlib::tokenize);
+        compiler_lib.register_function("compile", crate::functions::compilerlib::compile);
         self.register_library(compiler_lib);
 
         // Register Color library functions
@@ -355,6 +361,8 @@ impl LibraryManager {
         system_lib.register_function("exec", crate::functions::systemlib::exec);
         system_lib.register_function("uptime", crate::functions::systemlib::uptime);
         system_lib.register_function("info", crate::functions::systemlib::info);
+        system_lib.register_function("current_time", crate::functions::systemlib::current_time);
+        system_lib.register_function("system_name", crate::functions::systemlib::system_name);
         self.register_library(system_lib);
 
         // Register Box library functions
