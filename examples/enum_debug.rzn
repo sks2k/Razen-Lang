@@ -1,0 +1,16 @@
+# Special debug test to isolate enum assignment issue
+
+enum Color {
+    RED,
+    GREEN,
+    BLUE
+}
+
+# This statement works correctly
+show "Direct access:";
+show Color[RED];
+
+# But this statement has an issue
+show "Variable assignment:";
+let red = Color[RED];
+show red;

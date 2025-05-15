@@ -1,0 +1,21 @@
+# Simple enum test to isolate the issue
+
+# Define a simple enum
+enum Color {
+    RED,
+    GREEN,
+    BLUE
+}
+
+# Direct access and display
+show "Direct enum value:";
+show Color[RED];
+
+# Store in variable and display
+let red = Color[RED];
+show "Variable containing enum value:";
+show red;
+
+# Use in string concatenation
+show "String concatenation with enum value:";
+show "The color is: " + Color[RED];

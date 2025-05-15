@@ -1167,13 +1167,23 @@ impl Compiler {
     }
     
     fn compile_index_expression(&mut self, left: Expression, index: Expression) {
-        // Compile the array
+        // First compile the indexed expression (array, map, string, enum, etc.)
         self.compile_expression(left);
         
-        // Compile the index
-        self.compile_expression(index);
+        // Special handling for enum access with a direct identifier
+        match index {
+            Expression::Identifier(name) => {
+                // When accessing an enum value like Color[RED], we need to handle it specially
+                // Just push the identifier name as a string
+                self.emit(IR::PushString(name.clone()));
+            },
+            _ => {
+                // For other index expressions (number literals, computed expressions, etc.)
+                self.compile_expression(index);
+            }
+        }
         
-        // Get the element at the given index
+        // Generate IR instruction for indexing
         self.emit(IR::GetIndex);
     }
     
@@ -1698,6 +1708,90 @@ impl Compiler {
                                 stack.push("undefined".to_string());
                             }
                         }
+                    }
+                },
+                IR::GetIndex => {
+                    if let (Some(index), Some(container)) = (stack.pop(), stack.pop()) {
+                        if !self.clean_output {
+                            println!("[Interpreter] GetIndex: {} from {}", index, container);
+                        }
+                        
+                        let mut found = false; // Track if we've found the value
+                        
+                        // Check for enums which are stored as maps with a specific format
+                        if container.contains(format!("{}", index).as_str()) {
+                            // Check if it's in the format RED:0,GREEN:1,BLUE:2
+                            if let Some(start_pos) = container.find(&format!("{0}:", index)) {
+                                let after_key = &container[start_pos + index.len() + 1..];
+                                
+                                // Find the value part (until comma or end)
+                                let end_pos = after_key.find(',').unwrap_or(after_key.len());
+                                let value = &after_key[0..end_pos];
+                                
+                                if !self.clean_output {
+                                    println!("[Interpreter] Found enum value: {} = {}", index, value);
+                                }
+                                
+                                // Push the value to the stack and mark as found
+                                stack.push(value.to_string());
+                                found = true;
+                            }
+                        }
+                        
+                        // If we haven't found the value yet, try to parse as a formal map structure
+                        if !found && container.starts_with('{') && container.ends_with('}') {
+                            let content = &container[1..container.len()-1];
+                            let pairs: Vec<&str> = content.split(',').collect();
+                            
+                            for pair in pairs {
+                                if pair.is_empty() {
+                                    continue;
+                                }
+                                
+                                let kv: Vec<&str> = pair.split(':').collect();
+                                if kv.len() == 2 && kv[0] == index {
+                                    stack.push(kv[1].to_string());
+                                    found = true;
+                                    break;
+                                }
+                            }
+                        }
+                        
+                        // If still not found and could be an enum variant, try to load it from variables
+                        if !found {
+                            if let Some(enum_value) = variables.get(&index) {
+                                if !self.clean_output {
+                                    println!("[Interpreter] Found enum value in variables: {} = {}", index, enum_value);
+                                }
+                                stack.push(enum_value.clone());
+                                found = true;
+                            }
+                        }
+                        
+                        // If not found yet, try array indexing (if this is an array)
+                        if !found && container.starts_with('[') && container.ends_with(']') {
+                            let content = &container[1..container.len()-1];
+                            let elements: Vec<&str> = content.split(',').collect();
+                            
+                            if let Ok(idx) = index.parse::<usize>() {
+                                if idx < elements.len() {
+                                    stack.push(elements[idx].to_string());
+                                    found = true;
+                                } else {
+                                    // Invalid array index
+                                    if !self.clean_output {
+                                        println!("[Interpreter] Array index out of bounds: {} >= {}", idx, elements.len());
+                                    }
+                                }
+                            }
+                        }
+                        
+                        // If we still haven't found anything, push 'undefined'
+                        if !found {
+                            stack.push("undefined".to_string());
+                        }
+                    } else {
+                        stack.push("undefined".to_string());
                     }
                 },
                 IR::Print => {

@@ -1,0 +1,30 @@
+# Testing enum implementation with bracket notation
+
+# Define the enums
+enum Color {
+    RED,
+    GREEN,
+    BLUE,
+    YELLOW
+}
+
+enum Status {
+    PENDING = 0,
+    ACTIVE = 1,
+    INACTIVE = 2,
+    DELETED = 3
+}
+
+# Using bracket notation to access enum values
+let selectedColor = Color[BLUE];
+let currentStatus = Status[ACTIVE];
+
+# Display the results
+show "Enums with bracket notation:";
+show "Selected color: " + selectedColor;
+show "Current status: " + currentStatus;
+
+# Try direct string conversion
+show "Direct enum values:";
+show Color[RED];
+show Status[PENDING];

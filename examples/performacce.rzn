@@ -1,0 +1,89 @@
+hold isTrue = true;               # Boolean true
+hold isFalse = false;             # Boolean false
+hold comparison = 5 > 3;          # Comparison (true)
+hold logicalAnd = true && false;  # Logical AND (false)
+hold logicalOr = true || false;   # Logical OR (true)
+hold logicalNot = !true;  
+
+show "Boolean variables with 'hold':";
+if (isTrue) {
+    show "isTrue is true";
+} else {
+    show "isTrue is false";
+}
+if (isFalse) {
+    show "isFalse is false";
+} else {
+    show "isFalse is true";
+}
+if (comparison) {
+    show "comparison is true";
+} else {
+    show "comparison is false";
+}
+if (logicalAnd) {
+    show "logicalAnd is true";
+} else {
+    show "logicalAnd is false";
+}
+if (logicalOr) {
+    show "logicalOr is true";
+} else {
+    show "logicalOr is false";
+}
+if (logicalNot) {
+    show "logicalNot is true";
+} else {
+    show "logicalNot is false";
+}
+
+show "mixed variables with 'put':";
+
+put anything = 42;                # Number
+put anything = "text";            # Reassign to string
+put anything = true;              # Reassign to boolean
+put mixed = [1, "two", true];    # Array with mixed types
+
+show "Mixed type variables with 'put':";
+show "anything: " + anything;
+show "mixed array: " + mixed;
+
+let i = 0;
+while (i < 5) {
+    arraySum = arraySum + numbers[i];
+    i = i + 1;
+}
+
+show "arraySum: " + arraySum;
+
+const PI = 3.14159265359;         # Mathematical constant
+const MAX_USERS = 100;            # Application limit
+const APP_NAME = "Razen Demo";    # Application name
+const DEBUG_MODE = true;          # Configuration flag
+
+show "Constants:";
+show "PI: " + PI;
+show "MAX_USERS: " + MAX_USERS;
+show "APP_NAME: " + APP_NAME;
+show "DEBUG_MODE: " + DEBUG_MODE;
+
+enum Color {
+    RED,
+    GREEN,
+    BLUE,
+    YELLOW
+}
+
+enum Status {
+    PENDING = 0,
+    ACTIVE = 1,
+    INACTIVE = 2,
+    DELETED = 3
+}
+
+let selectedColor = Color[BLUE];
+let currentStatus = Status[ACTIVE];
+
+show "Enums:";
+show "Selected color: " + selectedColor;
+show "Current status: " + Status[ACTIVE];
