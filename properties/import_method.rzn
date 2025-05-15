@@ -1,0 +1,25 @@
+# here is a example of a import function/module/variable from a file of razen
+import example from {example};
+
+# hero is a example of the import function/module/variable from the other files that are not razen
+import main from {index.json};
+
+# multiple import in razen files
+import {main, secondary} from {example};
+
+# here is the example of import from the other files that are not razen
+import {main, secondary} from {index.json};
+
+# here is in-built library import method
+lib random;
+
+# here is the downloaded library import method
+require @discordRZN; # not use now (add later)
+
+# here is the example of laod entire razen file
+get {index}; # make sure that the razen files are used with out .rzn file type but for laod other use proper name.
+
+# here is the example of laod entire file like json and other
+get {users.json};
+
+

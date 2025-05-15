@@ -197,6 +197,29 @@ pub enum Statement {
         name: String,
         values: Vec<(String, Expression)>,
     },
+    // Performance and Type Safety Keywords
+    ConstDeclaration {
+        name: String,
+        value: Expression,
+    },
+    EnumDeclaration {
+        name: String,
+        variants: Vec<(String, Option<Expression>)>,
+    },
+    InlineFunctionDeclaration {
+        name: String,
+        parameters: Vec<String>,
+        body: Vec<Statement>,
+    },
+    FinalClassDeclaration {
+        name: String,
+        body: Vec<Statement>,
+    },
+    VolatileDeclaration {
+        var_type: String,     // let, hold, etc.
+        name: String,
+        value: Option<Expression>,
+    },
 }
 
 // Expression represents an expression in the program
@@ -507,6 +530,46 @@ impl fmt::Display for Node {
                         }
                         result.push_str("\n}");
                         write!(f, "{}", result)
+                    },
+                    // Performance and Type Safety Keywords
+                    Statement::ConstDeclaration { name, value } => {
+                        write!(f, "const {} = {};", name, Node::Expression(value.clone()))
+                    },
+                    Statement::EnumDeclaration { name, variants } => {
+                        let mut result = format!("enum {} {{\n", name);
+                        for (variant_name, variant_value) in variants {
+                            if let Some(value) = variant_value {
+                                result.push_str(&format!("    {} = {},\n", variant_name, Node::Expression(value.clone())));
+                            } else {
+                                result.push_str(&format!("    {},\n", variant_name));
+                            }
+                        }
+                        result.push_str("}");
+                        write!(f, "{}", result)
+                    },
+                    Statement::InlineFunctionDeclaration { name, parameters, body } => {
+                        let params = parameters.join(", ");
+                        let mut result = format!("inline fun {}({}) {{\n", name, params);
+                        for stmt in body {
+                            result.push_str(&format!("    {}", Node::Statement(stmt.clone())));
+                        }
+                        result.push_str("\n}");
+                        write!(f, "{}", result)
+                    },
+                    Statement::FinalClassDeclaration { name, body } => {
+                        let mut result = format!("final class {} {{\n", name);
+                        for stmt in body {
+                            result.push_str(&format!("    {}", Node::Statement(stmt.clone())));
+                        }
+                        result.push_str("\n}");
+                        write!(f, "{}", result)
+                    },
+                    Statement::VolatileDeclaration { var_type, name, value } => {
+                        if let Some(val) = value {
+                            write!(f, "volatile {} {} = {};", var_type, name, Node::Expression(val.clone()))
+                        } else {
+                            write!(f, "volatile {} {};", var_type, name)
+                        }
                     },
                 }
             },

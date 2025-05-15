@@ -345,6 +345,13 @@ impl Parser {
             
             // OOP Keywords
             TokenType::Class => self.parse_class_declaration(),
+            TokenType::Final => self.parse_final_class_declaration(),
+            
+            // Performance and Type Safety Keywords
+            TokenType::Const => self.parse_const_declaration(),
+            TokenType::Enum => self.parse_enum_declaration(),
+            TokenType::Inline => self.parse_inline_function_declaration(),
+            TokenType::Volatile => self.parse_volatile_declaration(),
             
             // API Keywords
             TokenType::Api => self.parse_api_declaration(),
@@ -2632,6 +2639,262 @@ impl Parser {
         self.errors.push(format!("Unexpected 'else' statement without matching 'if' at line {}, column {}",
             self.current_token.line, self.current_token.column));
         None
+    }
+    
+    // Parse const declaration (const NAME = value;)
+    fn parse_const_declaration(&mut self) -> Option<Statement> {
+        // Skip 'const' token
+        self.next_token();
+        
+        // Expect identifier (constant name)
+        if !self.current_token_is(TokenType::Identifier) {
+            self.errors.push(format!(
+                "Expected identifier after 'const' keyword at line {}, column {}",
+                self.current_token.line, self.current_token.column
+            ));
+            return None;
+        }
+        
+        let name = self.current_token.literal.clone();
+        
+        // Expect assignment operator
+        if !self.expect_peek(TokenType::Assign) {
+            return None;
+        }
+        
+        // Skip '=' token
+        self.next_token();
+        
+        // Parse the value expression
+        let value = self.parse_expression(Precedence::Lowest)?;
+        
+        // Optional semicolon
+        if self.peek_token_is(TokenType::Semicolon) {
+            self.next_token();
+        }
+        
+        Some(Statement::ConstDeclaration {
+            name,
+            value,
+        })
+    }
+    
+    // Parse enum declaration (enum NAME { VARIANT1, VARIANT2 = value, ... })
+    fn parse_enum_declaration(&mut self) -> Option<Statement> {
+        // Skip 'enum' token
+        self.next_token();
+        
+        // Expect identifier (enum name)
+        if !self.current_token_is(TokenType::Identifier) {
+            self.errors.push(format!(
+                "Expected identifier after 'enum' keyword at line {}, column {}",
+                self.current_token.line, self.current_token.column
+            ));
+            return None;
+        }
+        
+        let name = self.current_token.literal.clone();
+        
+        // Expect opening brace
+        if !self.expect_peek(TokenType::LeftBrace) {
+            return None;
+        }
+        
+        // Skip '{' token
+        self.next_token();
+        
+        // Parse enum variants
+        let mut variants = Vec::new();
+        
+        // Continue until we reach the closing brace
+        while !self.current_token_is(TokenType::RightBrace) && !self.current_token_is(TokenType::EOF) {
+            // Expect identifier (variant name)
+            if !self.current_token_is(TokenType::Identifier) {
+                self.errors.push(format!(
+                    "Expected identifier for enum variant at line {}, column {}",
+                    self.current_token.line, self.current_token.column
+                ));
+                return None;
+            }
+            
+            let variant_name = self.current_token.literal.clone();
+            let mut variant_value = None;
+            
+            // Check if this variant has an assigned value
+            if self.peek_token_is(TokenType::Assign) {
+                // Skip '=' token
+                self.next_token();
+                self.next_token();
+                
+                // Parse the value expression
+                variant_value = Some(self.parse_expression(Precedence::Lowest)?);
+            }
+            
+            // Add the variant to our list
+            variants.push((variant_name, variant_value));
+            
+            // Skip comma if present
+            if self.peek_token_is(TokenType::Comma) {
+                self.next_token();
+            }
+            
+            // Move to the next token
+            self.next_token();
+        }
+        
+        Some(Statement::EnumDeclaration {
+            name,
+            variants,
+        })
+    }
+    
+    // Parse inline function declaration (inline fun name(params) { body })
+    fn parse_inline_function_declaration(&mut self) -> Option<Statement> {
+        // Skip 'inline' token
+        self.next_token();
+        
+        // Expect 'fun' keyword
+        if !self.current_token_is(TokenType::Fun) {
+            self.errors.push(format!(
+                "Expected 'fun' keyword after 'inline' at line {}, column {}",
+                self.current_token.line, self.current_token.column
+            ));
+            return None;
+        }
+        
+        // Skip 'fun' token
+        self.next_token();
+        
+        // Expect identifier (function name)
+        if !self.current_token_is(TokenType::Identifier) {
+            self.errors.push(format!(
+                "Expected function name after 'inline fun' at line {}, column {}",
+                self.current_token.line, self.current_token.column
+            ));
+            return None;
+        }
+        
+        let name = self.current_token.literal.clone();
+        
+        // Expect opening parenthesis
+        if !self.expect_peek(TokenType::LeftParen) {
+            return None;
+        }
+        
+        // Parse function parameters
+        let parameters = self.parse_function_parameters();
+        
+        // Expect opening brace
+        if !self.expect_peek(TokenType::LeftBrace) {
+            return None;
+        }
+        
+        // Parse function body
+        let body = self.parse_block_statement();
+        
+        Some(Statement::InlineFunctionDeclaration {
+            name,
+            parameters,
+            body,
+        })
+    }
+    
+    // Parse final class declaration (final class Name { ... })
+    fn parse_final_class_declaration(&mut self) -> Option<Statement> {
+        // Skip 'final' token
+        self.next_token();
+        
+        // Expect 'class' keyword
+        if !self.current_token_is(TokenType::Class) {
+            self.errors.push(format!(
+                "Expected 'class' keyword after 'final' at line {}, column {}",
+                self.current_token.line, self.current_token.column
+            ));
+            return None;
+        }
+        
+        // Skip 'class' token
+        self.next_token();
+        
+        // Expect identifier (class name)
+        if !self.current_token_is(TokenType::Identifier) {
+            self.errors.push(format!(
+                "Expected class name after 'final class' at line {}, column {}",
+                self.current_token.line, self.current_token.column
+            ));
+            return None;
+        }
+        
+        let name = self.current_token.literal.clone();
+        
+        // Expect opening brace
+        if !self.expect_peek(TokenType::LeftBrace) {
+            return None;
+        }
+        
+        // Parse class body
+        let body = self.parse_block_statement();
+        
+        Some(Statement::FinalClassDeclaration {
+            name,
+            body,
+        })
+    }
+    
+    // Parse volatile variable declaration (volatile let/hold/etc name = value;)
+    fn parse_volatile_declaration(&mut self) -> Option<Statement> {
+        // Skip 'volatile' token
+        self.next_token();
+        
+        // Expect a variable type keyword (let, hold, etc.)
+        let var_type = match self.current_token.token_type {
+            TokenType::Let | TokenType::Take | TokenType::Hold | TokenType::Put => {
+                self.current_token.literal.clone()
+            },
+            _ => {
+                self.errors.push(format!(
+                    "Expected variable type keyword after 'volatile' at line {}, column {}",
+                    self.current_token.line, self.current_token.column
+                ));
+                return None;
+            }
+        };
+        
+        // Skip variable type token
+        self.next_token();
+        
+        // Expect identifier (variable name)
+        if !self.current_token_is(TokenType::Identifier) {
+            self.errors.push(format!(
+                "Expected variable name after 'volatile {}' at line {}, column {}",
+                var_type, self.current_token.line, self.current_token.column
+            ));
+            return None;
+        }
+        
+        let name = self.current_token.literal.clone();
+        
+        // Expect assignment operator
+        if !self.expect_peek(TokenType::Assign) {
+            return None;
+        }
+        
+        // Skip '=' token
+        self.next_token();
+        
+        // Parse the value expression
+        let value = self.parse_expression(Precedence::Lowest)?;
+        
+        // Optional semicolon
+        if self.peek_token_is(TokenType::Semicolon) {
+            self.next_token();
+        }
+        
+        Some(Statement::VolatileDeclaration {
+            var_type,
+            name,
+            value: Some(value),
+        })
     }
 }
 

@@ -150,3 +150,10 @@ typelib => for type checking operations. Use for verifying type correctness.
 irlib => for intermediate representation operations. Use for working with IR code.
 codegenlib => for code generation operations. Use for producing target code.
 optimizelib => for optimization operations. Use for improving code efficiency.
+
+# 19 Performance and Type Safety Keywords:
+const => for declaring constant values. Use for values that should never change after initialization.
+enum => for defining enumerated types. Use for a fixed set of related values.
+inline => for suggesting function inlining. Use for performance-critical functions that should be inlined.
+final => for declaring classes that cannot be extended. Use for preventing inheritance of certain classes.
+volatile => for declaring variables that might change externally. Use for variables modified by external processes.

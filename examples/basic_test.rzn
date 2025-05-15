@@ -1,0 +1,32 @@
+# Basic test for Razen language performance keywords
+
+# Testing const declaration
+const PI = 3.14159;
+show "PI: " + PI;
+
+# Testing enum declaration
+enum Color {
+    RED,
+    GREEN,
+    BLUE
+}
+show "Enum test";
+
+# Testing inline function
+inline fun add(a, b) {
+    return a + b;
+}
+show "add(5, 3): " + add(5, 3);
+
+# Testing final class
+final class Config {
+    fun getValue() {
+        return 42;
+    }
+}
+show "Final class test";
+
+# Testing volatile variable
+volatile let counter = 0;
+counter = counter + 1;
+show "Counter: " + counter;

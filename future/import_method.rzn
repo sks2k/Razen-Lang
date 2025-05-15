@@ -1,0 +1,10 @@
+
+# here is a example of a import function/module/variable from a file of razen
+import {example} from {example};
+
+# here is in-built library import method
+lib random; # Already added
+
+# here is the downloaded library import method
+@discordRZN;
+

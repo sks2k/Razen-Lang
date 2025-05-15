@@ -1,0 +1,79 @@
+# Razen Import Methods Example
+# This file demonstrates all the different import methods in Razen
+
+type freestyle;
+
+# 1. Import from Razen files
+# Import a single item from a Razen file (without .rzn extension)
+import example from "example";
+
+# 2. Import from non-Razen files
+# Import a single item from a non-Razen file (with extension)
+import main from "index.json";
+
+# 3. Multiple imports from Razen files
+# Import multiple items from a Razen file
+import {main, secondary} from "example";
+
+# 4. Multiple imports from non-Razen files
+# Import multiple items from a non-Razen file
+import {main, secondary} from "index.json";
+
+# 5. Built-in library import
+# Import a built-in library
+lib random;
+lib mathlib;
+lib strlib;
+
+# 6. Downloaded library import
+# Import a downloaded third-party library
+require @discordRZN;
+require @weatherAPI;
+
+# 7. Load entire Razen file
+# Load an entire Razen file (without .rzn extension)
+get "index";
+
+# 8. Load entire non-Razen file
+# Load an entire non-Razen file (with extension)
+get "users.json";
+
+# 9. Strict mode for enforcing library imports
+# When strict mode is enabled, all libraries must be imported before use
+# This must be placed at the beginning of the file to be most effective
+strict;
+
+# Using the imported items
+show "===== Razen Import Methods Demo =====";
+
+# Using imported items from Razen files
+show "Using example from example.rzn: " + example[greet]("User");
+show "Using main from example.rzn: " + main[process]();
+show "Using secondary from example.rzn: " + secondary[getData]();
+
+# Using imported items from non-Razen files
+show "Data from index.json: " + main[title];
+show "Secondary data from index.json: " + secondary[description];
+
+# Using built-in libraries
+show "Random number: " + Random[int](1, 100);
+show "Math calculation: " + MathLib[sqrt](16);
+show "String operation: " + StrLib[upper]("hello");
+
+# Using downloaded libraries
+show "Discord message: " + DiscordRZN[formatMessage]("Hello, Discord!");
+show "Weather data: " + WeatherAPI[getTemperature]("New York");
+
+# Using data from loaded files
+show "Data from index.rzn: " + IndexData[version];
+show "Data from users.json: " + Users[0][name];
+
+# Using validation library (must be imported first due to strict mode)
+lib validation;
+show "Email validation: " + Validation[email]("user@example.com");
+
+# Using UUID library (must be imported first due to strict mode)
+lib uuid;
+show "UUID generation: " + UUID[generate]();
+
+show "Import methods demonstration completed!";

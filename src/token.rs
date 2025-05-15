@@ -236,6 +236,13 @@ pub enum TokenType {
     IRLib,          // IR operations library
     CodeGenLib,     // Code generation library
     OptimizeLib,    // Optimization library
+    
+    // 19 - Performance and Type Safety Keywords
+    Const,          // For declaring constant values
+    Enum,           // For defining enumerated types
+    Inline,         // For suggesting function inlining
+    Final,          // For declaring classes that cannot be extended
+    Volatile,       // For declaring variables that might change externally
 }
 
 impl fmt::Display for TokenType {
@@ -475,6 +482,13 @@ impl fmt::Display for TokenType {
             TokenType::IRLib => write!(f, "IRLIB"),
             TokenType::CodeGenLib => write!(f, "CODEGENLIB"),
             TokenType::OptimizeLib => write!(f, "OPTIMIZELIB"),
+            
+            // 19 - Performance and Type Safety Keywords
+            TokenType::Const => write!(f, "CONST"),
+            TokenType::Enum => write!(f, "ENUM"),
+            TokenType::Inline => write!(f, "INLINE"),
+            TokenType::Final => write!(f, "FINAL"),
+            TokenType::Volatile => write!(f, "VOLATILE"),
         }
     }
 }
@@ -695,6 +709,13 @@ pub fn lookup_identifier(identifier: &str) -> TokenType {
         "irlib" => TokenType::IRLib,
         "codegenlib" => TokenType::CodeGenLib,
         "optimizelib" => TokenType::OptimizeLib,
+        
+        // 19 - Performance and Type Safety Keywords
+        "const" => TokenType::Const,
+        "enum" => TokenType::Enum,
+        "inline" => TokenType::Inline,
+        "final" => TokenType::Final,
+        "volatile" => TokenType::Volatile,
         
         // If not a keyword, it's an identifier
         _ => TokenType::Identifier,

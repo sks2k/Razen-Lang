@@ -1,0 +1,43 @@
+# Simple test for Razen language
+
+# Testing const declaration
+const PI = 3.14159;
+const MAX_USERS = 100;
+
+# Testing enum declaration
+enum Color {
+    RED,
+    GREEN,
+    BLUE
+}
+
+# Testing inline function
+inline fun add(a, b) {
+    return a + b;
+}
+
+# Testing final class
+final class Config {
+    constructor(name, value) {
+        this.name = name;
+        this.value = value;
+    }
+    
+    getValue() {
+        return this.value;
+    }
+}
+
+# Testing volatile variable
+volatile let counter = 0;
+
+# Display results
+show "PI: " + PI;
+show "MAX_USERS: " + MAX_USERS;
+show "add(5, 3): " + add(5, 3);
+
+let config = new Config("timeout", 30);
+show "Config value: " + config.getValue();
+
+counter = counter + 1;
+show "Counter: " + counter;

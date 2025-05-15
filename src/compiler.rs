@@ -518,6 +518,22 @@ impl Compiler {
             Statement::ClassDeclaration { name, body } => {
                 self.compile_class_declaration(name, body);
             },
+            Statement::FinalClassDeclaration { name, body } => {
+                self.compile_final_class_declaration(name, body);
+            },
+            // Performance and Type Safety
+            Statement::ConstDeclaration { name, value } => {
+                self.compile_const_declaration(name, value);
+            },
+            Statement::EnumDeclaration { name, variants } => {
+                self.compile_enum_declaration(name, variants);
+            },
+            Statement::InlineFunctionDeclaration { name, parameters, body } => {
+                self.compile_inline_function_declaration(name, parameters, body);
+            },
+            Statement::VolatileDeclaration { var_type, name, value } => {
+                self.compile_volatile_declaration(var_type, name, value);
+            },
             // API Integration (Section 13)
             Statement::ApiDeclaration { name, url } => {
                 self.compile_api_declaration(name, url);
@@ -2545,4 +2561,203 @@ impl Compiler {
 
     // All library functions are now dynamically registered from the .rzn files
     // No need for individual define_*_lib_functions methods
+    
+    // Performance and Type Safety Compilation Functions
+    
+    // Compile const declaration
+    fn compile_const_declaration(&mut self, name: String, value: Expression) {
+        if !self.clean_output {
+            println!("[Compiler] Constant declaration: {}", name);
+        }
+        
+        // Define the constant in the symbol table
+        self.symbol_table.define(&name);
+        
+        // Store the variable type for future type checking
+        self.variable_types.insert(name.clone(), "const".to_string());
+        
+        // Compile the initializer expression
+        self.compile_expression(value);
+        
+        // Store the value in the constant
+        self.emit(IR::StoreVar(name.clone()));
+        
+        // For now, constants are just regular variables
+        // In a full implementation, we would add runtime checks to prevent modification
+    }
+    
+    // Compile enum declaration
+    fn compile_enum_declaration(&mut self, name: String, variants: Vec<(String, Option<Expression>)>) {
+        if !self.clean_output {
+            println!("[Compiler] Enum declaration: {}", name);
+        }
+        
+        // Define the enum in the symbol table
+        self.symbol_table.define(&name);
+        
+        // Create a map to store the enum variants
+        self.emit(IR::CreateMap(variants.len()));
+        
+        // Add each variant to the map
+        let mut variant_index = 0;
+        for (variant_name, variant_value) in variants {
+            // Push the map
+            self.emit(IR::Dup);
+            
+            // Push the variant name as key
+            self.emit(IR::PushString(variant_name.clone()));
+            
+            // Push the variant value or its index if not specified
+            if let Some(value) = variant_value {
+                self.compile_expression(value);
+            } else {
+                self.emit(IR::PushNumber(variant_index as f64));
+                variant_index += 1;
+            }
+            
+            // Set the key-value pair in the map
+            self.emit(IR::SetKey);
+        }
+        
+        // Store the enum in a variable
+        self.emit(IR::StoreVar(name));
+    }
+    
+    // Compile inline function declaration
+    fn compile_inline_function_declaration(&mut self, name: String, parameters: Vec<String>, body: Vec<Statement>) {
+        if !self.clean_output {
+            println!("[Compiler] Inline function declaration: {}", name);
+        }
+        
+        // For now, inline functions are compiled the same way as regular functions
+        // In a full implementation, the compiler would perform inlining optimizations
+        
+        // Generate a label for the function
+        let function_label = self.generate_label("function");
+        let end_label = self.generate_label("end");
+        
+        // Skip over the function body during normal execution
+        // We need to add a placeholder jump that we'll fix later
+        let jump_pos = self.emit(IR::Jump(0));
+        
+        // Define the function in the function table
+        let function_address = self.emit_label(&function_label);
+        self.function_table.define(&name, function_address);
+        
+        // Create a new scope for the function
+        self.enter_scope();
+        
+        // Define parameters in the symbol table
+        for param in &parameters {
+            self.symbol_table.define(param);
+        }
+        
+        // Compile function body
+        for stmt in body {
+            self.compile_statement(stmt);
+        }
+        
+        // If no explicit return, return null
+        self.emit(IR::PushNull);
+        self.emit(IR::Return);
+        
+        // Leave function scope
+        self.leave_scope();
+        
+        // Mark the end of the function
+        let end_pos = self.emit_label(&end_label);
+        
+        // Fix the jump instruction to point to the end label position
+        self.replace_instruction(jump_pos, IR::Jump(end_pos));
+    }
+    
+    // Compile final class declaration
+    fn compile_final_class_declaration(&mut self, name: String, body: Vec<Statement>) {
+        if !self.clean_output {
+            println!("[Compiler] Final class declaration: {}", name);
+        }
+        
+        // For now, final classes are compiled the same way as regular classes
+        // In a full implementation, the compiler would add checks to prevent inheritance
+        
+        // Create a new scope for the class
+        self.enter_scope();
+        
+        // Store class name in symbol table
+        self.symbol_table.define(&name);
+        
+        // Emit class definition
+        self.emit(IR::PushString(name.clone()));
+        
+        // Compile class body
+        for stmt in body {
+            self.compile_statement(stmt);
+        }
+        
+        // Leave class scope
+        self.leave_scope();
+        
+        // Call class definition function
+        self.emit(IR::Call("__define_class".to_string(), 1));
+    }
+    
+    // Compile volatile variable declaration
+    fn compile_volatile_declaration(&mut self, var_type: String, name: String, value: Option<Expression>) {
+        if !self.clean_output {
+            println!("[Compiler] Volatile variable declaration: {}", name);
+        }
+        
+        // For now, volatile variables are compiled the same way as regular variables
+        // In a full implementation, the compiler would add memory barriers or other synchronization
+        
+        // Define the variable in the symbol table
+        self.symbol_table.define(&name);
+        
+        // Store the variable type for future type checking
+        self.variable_types.insert(name.clone(), format!("volatile_{}", var_type));
+        
+        // Compile the initializer expression if it exists
+        if let Some(expr) = value {
+            // Type checking based on variable type
+            match var_type.as_str() {
+                // Numeric types
+                "let" | "sum" | "diff" | "prod" | "div" | "mod" => {
+                    // Check that the value is a number
+                    if !self.is_number_expression(&expr) {
+                        self.errors.push(format!("Type error: 'volatile {}' variables can only be used with numeric values, but '{}' was assigned a non-numeric value", var_type, name));
+                    }
+                },
+                // String types
+                "take" | "text" | "concat" | "slice" => {
+                    // Check that the value is a string
+                    if !self.is_string_expression(&expr) {
+                        self.errors.push(format!("Type error: 'volatile {}' variables can only be used with string values, but '{}' was assigned a non-string value", var_type, name));
+                    }
+                },
+                // Boolean types
+                "hold" => {
+                    // Check that the value is a boolean
+                    if !self.is_boolean_expression(&expr) {
+                        self.errors.push(format!("Type error: 'volatile {}' variables can only be used with boolean values, but '{}' was assigned a non-boolean value", var_type, name));
+                    }
+                },
+                // Generic types - no type checking needed
+                "put" | "list" | "arr" | "map" | "store" | "box" | "ref" => {
+                    // These can hold any type, so no type checking needed
+                },
+                _ => {
+                    // For new variable types not explicitly handled
+                    // For now, we don't do type checking on these
+                }
+            }
+            
+            self.compile_expression(expr);
+        } else {
+            // If no initializer, push null as the default value
+            self.emit(IR::PushNull);
+        }
+        
+        // Store the value in the variable
+        self.emit(IR::StoreVar(name));
+    }
 }

@@ -1,0 +1,280 @@
+type freestyle;
+
+# Razen Language Keywords and Tokens Usage Guide
+# This file demonstrates the proper usage of various keywords and tokens in Razen
+
+# ========================================================================
+# 1️⃣ General Purpose Variables for basic data types
+# ========================================================================
+
+# 'let' - for declaring numeric variables and calculations
+# Use for integers, floats, and mathematical operations
+let integer = 42;                  # Integer value
+let float = 3.14159;              # Float value
+let calculation = 10 + 5 * 2;      # Mathematical operation
+let negative = -10;               # Negative number
+let hex = 0xFF;                   # Hexadecimal number
+let binary = 0b1010;              # Binary number
+let scientific = 1.2e3;           # Scientific notation (1200)
+
+show "Numeric variables with 'let':";
+show "integer: " + integer;
+show "float: " + float;
+show "calculation: " + calculation;
+
+# 'take' - for declaring string variables and text manipulation
+# Use for text data, string operations, and string interpolation
+take greeting = "Hello, World!";   # Basic string
+take name = "Razen";              # Another string
+take multiline = "This is a\nmultiline string";  # String with newline
+take concatenated = greeting + " Welcome to " + name;  # String concatenation
+take escaped = "Quotes: \"example\"";  # Escaped quotes
+
+show "String variables with 'take':";
+show greeting;
+show "Concatenated: " + concatenated;
+show multiline;
+
+# 'hold' - for declaring boolean variables and logical conditions
+# Use for true/false values and control flow
+hold isTrue = true;               # Boolean true
+hold isFalse = false;             # Boolean false
+hold comparison = 5 > 3;          # Comparison (true)
+hold logicalAnd = true && false;  # Logical AND (false)
+hold logicalOr = true || false;   # Logical OR (true)
+hold logicalNot = !true;          # Logical NOT (false)
+
+show "Boolean variables with 'hold':";
+show "isTrue: " + isTrue;
+show "comparison (5 > 3): " + comparison;
+show "logicalAnd (true && false): " + logicalAnd;
+
+# 'put' - for declaring variables of any type
+# Use when type is unknown or mixed types are needed
+put anything = 42;                # Number
+put anything = "text";            # Reassign to string
+put anything = true;              # Reassign to boolean
+put mixed = [1, "two", true];    # Array with mixed types
+
+show "Mixed type variables with 'put':";
+show "anything: " + anything;
+show "mixed array: " + mixed;
+
+# ========================================================================
+# 2️⃣ Mathematical Variables for calculations & math operations
+# ========================================================================
+
+# 'sum' - for calculating total or sum of values
+# Use in addition operations and running totals
+sum total = 0;                    # Initialize sum
+total = total + 10;               # Add to sum
+total = total + 20;               # Add more to sum
+sum arraySum = 0;                 # For summing array elements
+let numbers = [1, 2, 3, 4, 5];
+
+# Summing array elements
+let i = 0;
+while (i < 5) {
+    arraySum = arraySum + numbers[i];
+    i = i + 1;
+}
+
+show "Sum operations:";
+show "total: " + total;
+show "sum of array elements: " + arraySum;
+
+# 'diff' - for calculating difference between values
+# Use in subtraction operations and comparisons
+diff result = 100;
+
+result = result - 20;             # Subtract from diff
+result = result - 30;             # Subtract more
+
+diff absoluteDiff = 0;            # For absolute difference
+let num1 = 10;
+let num2 = 25;
+
+# Calculate absolute difference
+if (num1 > num2) {
+    absoluteDiff = num1 - num2;
+} else {
+    absoluteDiff = num2 - num1;
+}
+
+show "Difference operations:";
+show "result: " + result;
+show "absolute difference between " + num1 + " and " + num2 + ": " + absoluteDiff;
+
+# 'prod' - for calculating product of values
+# Use in multiplication operations and scaling
+prod product = 1;                 # Initialize product
+product = product * 5;            # Multiply by 5
+product = product * 2;            # Multiply by 2
+
+prod factorial = 1;               # For calculating factorial
+let n = 5;
+i = 1;
+while (i <= n) {
+    factorial = factorial * i;
+    i = i + 1;
+}
+
+show "Product operations:";
+show "product: " + product;
+show "factorial of " + n + ": " + factorial;
+
+# 'div' - for calculating division of values
+# Use in division operations and ratios
+div quotient = 100;               # Initialize dividend
+quotient = quotient / 4;          # Divide by 4
+quotient = quotient / 5;          # Divide by 5
+
+div average = 0;                  # For calculating average
+average = arraySum / 5;           # Average of array elements
+
+show "Division operations:";
+show "quotient: " + quotient;
+show "average of array elements: " + average;
+
+# 'mod' - for calculating modulus/remainder
+# Use in cyclic operations and value wrapping
+mod remainder = 17 % 5;           # 17 mod 5 = 2
+
+# Using mod for cyclic values (e.g., clock hours)
+let hour = 14;
+mod clockHour = hour % 12;        # Convert 24h to 12h format
+if (clockHour == 0) {
+    clockHour = 12;               # Handle 0 as 12
+}
+
+show "Modulus operations:";
+show "17 % 5 = " + remainder;
+show "Hour " + hour + " in 12-hour format: " + clockHour;
+
+# ========================================================================
+# 3️⃣ Performance and Type Safety Keywords
+# ========================================================================
+
+# 'const' - for declaring constant values
+# Use for values that should never change after initialization
+const PI = 3.14159265359;         # Mathematical constant
+const MAX_USERS = 100;            # Application limit
+const APP_NAME = "Razen Demo";    # Application name
+const DEBUG_MODE = true;          # Configuration flag
+
+show "Constants:";
+show "PI: " + PI;
+show "MAX_USERS: " + MAX_USERS;
+show "APP_NAME: " + APP_NAME;
+
+# 'enum' - for defining enumerated types
+# Use for a fixed set of related values
+enum Color {
+    RED,
+    GREEN,
+    BLUE,
+    YELLOW
+}
+
+enum Status {
+    PENDING = 0,
+    ACTIVE = 1,
+    INACTIVE = 2,
+    DELETED = 3
+}
+
+let selectedColor = Color.BLUE;
+let currentStatus = Status.ACTIVE;
+
+show "Enums:";
+show "Selected color: " + selectedColor;
+show "Current status: " + currentStatus;
+
+# 'inline' - for suggesting function inlining
+# Use for performance-critical functions that should be inlined
+inline fun add(a, b) {
+    return a + b;
+}
+
+inline fun square(x) {
+    return x * x;
+}
+
+show "Inline functions:";
+show "add(5, 3): " + add(5, 3);
+show "square(4): " + square(4);
+
+# 'final' - for declaring classes that cannot be extended
+# Use for preventing inheritance of certain classes
+final class Configuration {
+    constructor(name, value) {
+        this.name = name;
+        this.value = value;
+    }
+    
+    getValue() {
+        return this.value;
+    }
+}
+
+let config = new Configuration("timeout", 30);
+show "Final class:";
+show "Config value: " + config.getValue();
+
+# 'volatile' - for declaring variables that might change externally
+# Use for variables modified by external processes
+volatile let sharedCounter = 0;   # Could be modified by another thread
+volatile hold isRunning = true;   # Flag that might be changed externally
+
+# Simulating external changes
+sharedCounter = sharedCounter + 1;
+isRunning = false;
+
+show "Volatile variables:";
+show "sharedCounter: " + sharedCounter;
+show "isRunning: " + isRunning;
+
+# ========================================================================
+# Example of combining multiple concepts
+# ========================================================================
+
+show "\nCombined example - Temperature converter:";
+
+# Constants
+const FREEZING_F = 32;
+const FREEZING_C = 0;
+
+# Inline conversion functions
+inline fun celsiusToFahrenheit(c) {
+    return (c * 9/5) + FREEZING_F;
+}
+
+inline fun fahrenheitToCelsius(f) {
+    return (f - FREEZING_F) * 5/9;
+}
+
+# Example temperatures
+let tempC = 25;
+let tempF = celsiusToFahrenheit(tempC);
+
+show tempC + "°C = " + tempF + "°F";
+show tempF + "°F = " + fahrenheitToCelsius(tempF) + "°C";
+
+# Enum for temperature scales
+enum TempScale {
+    CELSIUS,
+    FAHRENHEIT,
+    KELVIN
+}
+
+# Using different variable types together
+let temperature = 20;
+take unit = "Celsius";
+hold isMetric = true;
+prod factor = 1.8;  # For C to F conversion
+sum offset = 32;    # For C to F conversion
+
+show "Temperature is " + temperature + " " + unit;
+if (isMetric) {
+    show "This is a metric temperature value";
+}
