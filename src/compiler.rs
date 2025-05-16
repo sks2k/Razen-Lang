@@ -1959,6 +1959,106 @@ impl Compiler {
                     }
                     stack.push(format!("{{{}}}", map_entries.join(", ")));
                 },
+                IR::SetIndex => {
+                    // SetIndex instruction implementation
+                    // This instruction expects three values on the stack:
+                    // 1. Value to set
+                    // 2. Index/key
+                    // 3. Container (array or map)
+                    if let (Some(value), Some(index), Some(mut container)) = (stack.pop(), stack.pop(), stack.pop()) {
+                        if !self.clean_output {
+                            println!("[Interpreter] SetIndex: {} at {} in {}", value, index, container);
+                        }
+                        
+                        // Handle different container types
+                        if container.starts_with('{') && container.ends_with('}') {
+                            // It's a map-like container
+                            let content = container.trim_start_matches('{').trim_end_matches('}').trim();
+                            
+                            // Create a new map representation with the updated value
+                            let mut pairs: Vec<String> = Vec::new();
+                            let mut found = false;
+                            
+                            // Process existing key-value pairs
+                            if !content.is_empty() {
+                                for pair in content.split(',') {
+                                    let pair = pair.trim();
+                                    if pair.is_empty() {
+                                        continue;
+                                    }
+                                    
+                                    let kv: Vec<&str> = pair.split(':').collect();
+                                    if kv.len() == 2 {
+                                        let key = kv[0].trim();
+                                        
+                                        // If this is the key we're updating, use the new value
+                                        if key == index {
+                                            pairs.push(format!("{}: {}", key, value));
+                                            found = true;
+                                        } else {
+                                            pairs.push(pair.to_string());
+                                        }
+                                    } else {
+                                        // Keep any malformed pairs as-is
+                                        pairs.push(pair.to_string());
+                                    }
+                                }
+                            }
+                            
+                            // If the key wasn't found, add it as a new key-value pair
+                            if !found {
+                                pairs.push(format!("{}: {}", index, value));
+                            }
+                            
+                            // Reconstruct the map
+                            let new_container = format!("{{{}}}", pairs.join(", "));
+                            stack.push(new_container);
+                            
+                        } else if container.starts_with('[') && container.ends_with(']') {
+                            // It's an array-like container
+                            let content = container.trim_start_matches('[').trim_end_matches(']').trim();
+                            let mut elements: Vec<String> = Vec::new();
+                            
+                            // Process existing elements
+                            if !content.is_empty() {
+                                elements = content.split(',').map(|s| s.trim().to_string()).collect();
+                            }
+                            
+                            // Try to parse the index as a number
+                            if let Ok(idx) = index.parse::<usize>() {
+                                // Ensure the array is big enough
+                                while elements.len() <= idx {
+                                    elements.push("null".to_string());
+                                }
+                                
+                                // Set the value at the specified index
+                                elements[idx] = value;
+                                
+                                // Reconstruct the array
+                                let new_container = format!("[{}]", elements.join(", "));
+                                stack.push(new_container);
+                            } else {
+                                // If index is not a number, we can't modify the array
+                                if !self.clean_output {
+                                    println!("[Interpreter] Cannot use non-numeric index '{}' with array", index);
+                                }
+                                stack.push(container); // Push back the original container
+                            }
+                        } else {
+                            // For other container types, we don't know how to handle them yet
+                            if !self.clean_output {
+                                println!("[Interpreter] Unknown container type for SetIndex: {}", container);
+                            }
+                            stack.push(container); // Push back the original container
+                        }
+                    } else {
+                        // Not enough values on the stack
+                        if !self.clean_output {
+                            println!("[Interpreter] SetIndex: Not enough values on stack");
+                        }
+                        stack.push("undefined".to_string());
+                    }
+                },
                 _ => {
                     // For instructions not yet implemented, just log if in debug mode
                     if !self.clean_output {

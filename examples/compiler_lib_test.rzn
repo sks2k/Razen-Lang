@@ -1,0 +1,288 @@
+# Razen Compiler Construction Libraries Test
+# This file demonstrates the compiler construction tokens and their usage
+
+# Import required libraries
+lib lexerlib;    # Lexical analysis library
+lib parserlib;   # Syntax analysis library
+lib astlib;      # Abstract syntax tree manipulation library
+lib symbollib;   # Symbol table management library
+lib typelib;     # Type checking and inference library
+lib irlib;       # Intermediate representation library
+lib codegenlib;  # Code generation library
+lib optimizelib; # Optimization library
+
+show "===== RAZEN COMPILER CONSTRUCTION TOKENS TEST =====";
+
+# Define token types for our expression language
+token INTEGER = "[0-9]+";
+token FLOAT = "[0-9]+\\.[0-9]+";
+token PLUS = "\\+";
+token MINUS = "-";
+token MULTIPLY = "\\*";
+token DIVIDE = "/";
+token LPAREN = "\\(";
+token RPAREN = "\\)";
+token IDENTIFIER = "[a-zA-Z_][a-zA-Z0-9_]*";
+token EQUALS = "=";
+token SEMICOLON = ";";
+token WHITESPACE = "\\s+";
+token COMMENT = "#.*";
+
+# Create a lexer configuration
+lexer expressionLexer = {
+    "tokens": [
+        INTEGER, FLOAT, PLUS, MINUS, MULTIPLY, DIVIDE, 
+        LPAREN, RPAREN, IDENTIFIER, EQUALS, SEMICOLON
+    ],
+    "ignore": [WHITESPACE, COMMENT],
+    "errorHandler": "skipInvalidToken",
+    "caseSensitive": true
+};
+
+# 1. Lexer Tests
+show(cyan) "1. Testing Lexer Tokens:";
+show(cyan) "INTEGER token = " + INTEGER;
+show(cyan) "FLOAT token = " + FLOAT;
+show(cyan) "PLUS token = " + PLUS;
+show(cyan) "MINUS token = " + MINUS;
+show(cyan) "MULTIPLY token = " + MULTIPLY;
+show(cyan) "DIVIDE token = " + DIVIDE;
+show(cyan) "IDENTIFIER token = " + IDENTIFIER;
+show(cyan) "EQUALS token = " + EQUALS;
+show(cyan) "SEMICOLON token = " + SEMICOLON;
+show(cyan) "WHITESPACE token = " + WHITESPACE;
+show(cyan) "COMMENT token = " + COMMENT;
+show(cyan) "expressionLexer = " + expressionLexer;
+
+# 2. Parser Tests
+show(green) "2. Testing Parser Tokens:";
+
+# Define a grammar for our expression language
+grammar expressionGrammar = {
+    "name": "ExpressionLanguage",
+    "version": "1.0",
+    "description": "A simple expression language with arithmetic operations",
+    "author": "Razen Team"
+};
+
+# Define AST node types
+node ExpressionNode = {
+    "type": "expression",
+    "evaluate": "required",
+    "description": "Base node for all expressions"
+};
+
+node BinaryOpNode = {
+    "type": "binaryOp",
+    "extends": ExpressionNode,
+    "fields": ["left", "operator", "right"],
+    "description": "Node for binary operations like +, -, *, /"
+};
+
+node NumberNode = {
+    "type": "number",
+    "extends": ExpressionNode,
+    "fields": ["value"],
+    "description": "Node for numeric literals"
+};
+
+# Define grammar rules
+rule expression = {
+    "production": "term { ('+'|'-') term }",
+    "astNode": BinaryOpNode,
+    "description": "Addition and subtraction operations"
+};
+
+rule term = {
+    "production": "factor { ('*'|'/') factor }",
+    "astNode": BinaryOpNode,
+    "description": "Multiplication and division operations"
+};
+
+rule factor = {
+    "production": "INTEGER | FLOAT | IDENTIFIER | '(' expression ')'",
+    "astNode": ExpressionNode,
+    "description": "Basic factors in expressions"
+};
+
+# Create a parser configuration
+parser expressionParser = {
+    "grammar": expressionGrammar,
+    "rules": [expression, term, factor],
+    "startSymbol": expression,
+    "errorRecovery": true,
+    "traceEnabled": false
+};
+
+show(green) "expressionGrammar = " + expressionGrammar;
+show(green) "ExpressionNode = " + ExpressionNode;
+show(green) "BinaryOpNode = " + BinaryOpNode;
+show(green) "NumberNode = " + NumberNode;
+show(green) "expression rule = " + expression;
+show(green) "term rule = " + term;
+show(green) "factor rule = " + factor;
+show(green) "expressionParser = " + expressionParser;
+
+# 3. AST Tests
+show(yellow) "3. Testing AST Tokens:";
+
+# Define a visitor for AST traversal
+visitor evaluatorVisitor = {
+    "name": "ExpressionEvaluator",
+    "methods": [
+        "visitBinaryOpNode",
+        "visitNumberNode",
+        "visitIdentifierNode"
+    ],
+    "description": "Visitor that evaluates expressions"
+};
+
+show(yellow) "evaluatorVisitor = " + evaluatorVisitor;
+show(yellow) "evaluatorVisitor.name = " + evaluatorVisitor["name"];
+show(yellow) "evaluatorVisitor.methods = " + evaluatorVisitor["methods"];
+show(yellow) "evaluatorVisitor.description = " + evaluatorVisitor["description"];
+
+# 4. Symbol Table Tests
+show(magenta) "4. Testing Symbol Table Tokens:";
+
+# Define symbol table for variable tracking
+symbol variableSymbol = {
+    "name": "Variable",
+    "attributes": ["name", "type", "value", "scope", "line", "column"],
+    "description": "Symbol for variables in the language"
+};
+
+# Define a scope for variable visibility
+scope globalScope = {
+    "name": "global",
+    "parent": null,
+    "description": "Global scope for variables"
+};
+
+scope localScope = {
+    "name": "local",
+    "parent": globalScope,
+    "description": "Local scope for function variables"
+};
+
+show(magenta) "variableSymbol = " + variableSymbol;
+show(magenta) "variableSymbol.name = " + variableSymbol["name"];
+show(magenta) "variableSymbol.attributes = " + variableSymbol["attributes"];
+show(magenta) "variableSymbol.description = " + variableSymbol["description"];
+show(magenta) "globalScope = " + globalScope;
+show(magenta) "globalScope.name = " + globalScope["name"];
+show(magenta) "globalScope.parent = " + globalScope["parent"];
+show(magenta) "localScope = " + localScope;
+show(magenta) "localScope.parent = " + localScope["parent"];
+
+# 5. Type System Tests
+show(blue) "5. Testing Type System Tokens:";
+
+# Define type checking rules
+typesys numberType = {
+    "name": "Number",
+    "operations": ["+", "-", "*", "/"],
+    "description": "Numeric type for integers and floats"
+};
+
+typesys stringType = {
+    "name": "String",
+    "operations": ["+"],
+    "description": "String type for text values"
+};
+
+show(blue) "numberType = " + numberType;
+show(blue) "numberType.name = " + numberType["name"];
+show(blue) "numberType.operations = " + numberType["operations"];
+show(blue) "numberType.description = " + numberType["description"];
+show(blue) "stringType = " + stringType;
+show(blue) "stringType.name = " + stringType["name"];
+show(blue) "stringType.operations = " + stringType["operations"];
+
+# 6. IR Tests
+show(red) "6. Testing IR Tokens:";
+
+# Define IR operations
+ir loadConstant = {
+    "opcode": "LOAD_CONST",
+    "operands": ["value"],
+    "description": "Load a constant value onto the stack"
+};
+
+ir loadVariable = {
+    "opcode": "LOAD_VAR",
+    "operands": ["name"],
+    "description": "Load a variable value onto the stack"
+};
+
+ir storeVariable = {
+    "opcode": "STORE_VAR",
+    "operands": ["name"],
+    "description": "Store the top stack value into a variable"
+};
+
+ir add = {
+    "opcode": "ADD",
+    "operands": [],
+    "description": "Add the top two stack values"
+};
+
+show(red) "loadConstant = " + loadConstant;
+show(red) "loadConstant.opcode = " + loadConstant["opcode"];
+show(red) "loadConstant.operands = " + loadConstant["operands"];
+show(red) "loadConstant.description = " + loadConstant["description"];
+show(red) "loadVariable = " + loadVariable;
+show(red) "storeVariable = " + storeVariable;
+show(red) "add = " + add;
+
+# 7. Code Generation Tests
+show(white) "7. Testing Code Generation Tokens:";
+
+# Define code generation target
+codegen x86Target = {
+    "name": "x86_64",
+    "wordSize": 8,
+    "endianness": "little",
+    "registers": ["rax", "rbx", "rcx", "rdx"],
+    "description": "x86-64 architecture target"
+};
+
+show(white) "x86Target = " + x86Target;
+show(white) "x86Target.name = " + x86Target["name"];
+show(white) "x86Target.wordSize = " + x86Target["wordSize"];
+show(white) "x86Target.endianness = " + x86Target["endianness"];
+show(white) "x86Target.registers = " + x86Target["registers"];
+show(white) "x86Target.description = " + x86Target["description"];
+
+# 8. Optimization Tests
+show(gray) "8. Testing Optimization Tokens:";
+
+# Define optimization pass
+optimize constantFolding = {
+    "name": "ConstantFolding",
+    "description": "Folds constant expressions at compile time",
+    "enabled": true
+};
+
+optimize deadCodeElimination = {
+    "name": "DeadCodeElimination",
+    "description": "Removes unreachable code",
+    "enabled": true
+};
+
+# Create optimization pipeline
+optimize optimizationPipeline = {
+    "name": "DefaultPipeline",
+    "passes": [constantFolding, deadCodeElimination],
+    "description": "Default optimization pipeline"
+};
+
+show(gray) "constantFolding = " + constantFolding;
+show(gray) "constantFolding.name = " + constantFolding["name"];
+show(gray) "constantFolding.description = " + constantFolding["description"];
+show(gray) "constantFolding.enabled = " + constantFolding["enabled"];
+show(gray) "deadCodeElimination = " + deadCodeElimination;
+show(gray) "optimizationPipeline = " + optimizationPipeline;
+show(gray) "optimizationPipeline.passes = " + optimizationPipeline["passes"];
+
+show "===== COMPILER CONSTRUCTION TOKENS TEST COMPLETE =====";

@@ -1,0 +1,48 @@
+# Simple test file to verify compiler construction tokens
+# This will test if the tokens are properly registered and working
+
+# Define some tokens
+token NUMBER = "[0-9]+";
+token PLUS = "\\+";
+token MINUS = "-";
+
+# Create a lexer
+lexer simpleLexer = {
+    "tokens": [NUMBER, PLUS, MINUS],
+    "ignore": []
+};
+
+# Define a simple grammar
+grammar simpleGrammar = {
+    "name": "SimpleExpression",
+    "version": "1.0"
+};
+
+# Define a simple node
+node ExpressionNode = {
+    "type": "expression",
+    "fields": ["value"]
+};
+
+# Define a simple rule
+rule expression = {
+    "production": "NUMBER (PLUS|MINUS) NUMBER",
+    "astNode": ExpressionNode
+};
+
+# Create a parser
+parser simpleParser = {
+    "grammar": simpleGrammar,
+    "rules": [expression],
+    "startSymbol": expression
+};
+
+# Show that we've defined these tokens
+show "=== Token Test Results ===";
+show "Defined tokens: NUMBER, PLUS, MINUS";
+show "Created lexer: simpleLexer";
+show "Created grammar: simpleGrammar";
+show "Created node: ExpressionNode";
+show "Created rule: expression";
+show "Created parser: simpleParser";
+show "=== Test Complete ===";
