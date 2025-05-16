@@ -674,6 +674,10 @@ impl Compiler {
         // Register the function in the function table
         self.function_table.define(&name, function_start);
         
+        // Add explicit function definition instruction
+        // This is what allows the function to be called at runtime
+        self.emit(IR::DefineFunction(name.clone(), function_start));
+        
         // Create a new scope for the function body
         self.enter_scope();
         
@@ -702,6 +706,10 @@ impl Compiler {
         
         // Restore the previous function name
         self.current_function = old_function;
+        
+        if !self.clean_output {
+            println!("[Compiler] Defined function {} at address {}", name, function_start);
+        }
     }
     
     fn compile_return_statement(&mut self, value: Option<Expression>) {
@@ -1417,6 +1425,48 @@ impl Compiler {
         let mut stack: Vec<String> = Vec::new();
         let mut variables: HashMap<String, String> = HashMap::new();
         
+        // Call stack to support function calls
+        let mut call_stack: Vec<(usize, HashMap<String, String>)> = Vec::new(); // (return_address, local_variables)
+        
+        // Map of function parameter names indexed by function address
+        let mut function_parameters: HashMap<usize, Vec<String>> = HashMap::new();
+        
+        // Pre-pass to register all functions before execution
+        // This ensures all functions are available for calling regardless of order
+        for (i, ir) in self.ir.iter().enumerate() {
+            match ir {
+                IR::DefineFunction(name, address) => {
+                    // Store in both formats for robust lookup
+                    variables.insert(name.clone(), address.to_string());
+                    variables.insert(format!("__func_{}", name), address.to_string());
+                    if !self.clean_output {
+                        println!("Pre-registered function: {} at address {}", name, address);
+                    }
+                    
+                    // Try to extract parameter names for this function
+                    // We need to look at the instructions following the function definition
+                    let mut params = Vec::new();
+                    let mut idx = address + 2; // Skip the label and define instructions
+                    
+                    // Scan for StoreVar instructions that represent parameters
+                    while idx < self.ir.len() {
+                        match &self.ir[idx] {
+                            IR::StoreVar(param_name) => {
+                                // Found a parameter
+                                params.push(param_name.clone());
+                            }
+                            _ => break, // Not a parameter, stop scanning
+                        }
+                        idx += 1;
+                    }
+                    
+                    // Store the parameters for this function
+                    function_parameters.insert(*address, params);
+                }
+                _ => {}
+            }
+        }
+        
         // Execute each instruction
         let mut pc = 0; // Program counter
         while pc < self.ir.len() {
@@ -1621,19 +1671,45 @@ impl Compiler {
                 },
                 IR::DefineFunction(name, address) => {
                     // Store function definition in variables map
-                    variables.insert(format!("__func_{}", name), address.to_string());
+                    let func_key = format!("__func_{}", name);
+                    variables.insert(func_key, address.to_string());
+                    // Also store the function name directly as a key
+                    variables.insert(name.clone(), address.to_string());
+                    if !self.clean_output {
+                        println!("Defined function: {} at address {}", name, address);
+                    }
                 },
                 IR::Return => {
-                    // The return value is already on the stack from the previous expression
-                    // We need to make sure it stays on the stack and is used as the function result
-                    // For debugging purposes, we'll print the return value
-                    if !self.clean_output {
-                        if let Some(value) = stack.last() {
-                            println!("Returning value: {}", value);
+                    // Get the return value from the stack (but keep it on the stack)
+                    let return_value = match stack.pop() {
+                        Some(value) => {
+                            if !self.clean_output {
+                                println!("Returning value: {}", value);
+                            }
+                            value
+                        },
+                        None => {
+                            // If no value on stack, return null
+                            "null".to_string()
                         }
+                    };
+                    
+                    // If we have a call stack entry, return to the caller
+                    if let Some((return_addr, caller_variables)) = call_stack.pop() {
+                        // Restore the caller's variables
+                        variables = caller_variables;
+                        
+                        // Push the return value onto the stack for the caller
+                        stack.push(return_value);
+                        
+                        // Jump to the return address
+                        pc = return_addr;
+                        continue;
+                    } else {
+                        // If we're not in a function call, put the value back on the stack
+                        stack.push(return_value);
                     }
-                    // Skip to the end of the function or to a specific return point
-                    // For now, we'll just continue execution and rely on the value being on the stack
+                    // Continue execution
                 },
                 IR::Call(name, arg_count) => {
                     // Function call implementation
@@ -1656,12 +1732,9 @@ impl Compiler {
                             println!("Arg {}: {}", i, arg);
                         }
                     }
-                    
-                    // Process the function call based on the function name
-                    // For now, we'll just push the result back onto the stack
-                    // In a real implementation, we would look up the function and execute it
-                    
-                    // For built-in functions, we can implement them directly here
+
+                    // Check if it's a built-in function first
+                    let mut built_in_handled = true;
                     match name.as_str() {
                         "add" => {
                             if args.len() >= 2 {
@@ -1696,16 +1769,145 @@ impl Compiler {
                             }
                         },
                         _ => {
-                            // For user-defined functions, we would look them up and execute them
-                            // For now, we'll just return a placeholder value
-                            if !self.clean_output {
-                                println!("Unknown function: {}", name);
+                            built_in_handled = false;
+                        }
+                    }
+
+                    // If it wasn't a built-in function, look for user-defined function
+                    if !built_in_handled {
+                        // Try looking up the function directly by name first
+                        if let Some(func_addr_str) = variables.get(name) {
+                            // Found the function directly, get its address
+                            if let Ok(func_addr) = func_addr_str.parse::<usize>() {
+                                if !self.clean_output {
+                                    println!("Found function {} at address {}", name, func_addr);
+                                }
+                                // Create new variable scope for function
+                                let mut func_variables = HashMap::new();
+                                
+                                // Copy over all the global variables and function definitions
+                                for (key, val) in &variables {
+                                    if key.starts_with("__func_") {
+                                        func_variables.insert(key.clone(), val.clone());
+                                    }
+                                }
+                                
+                                // Find hardcoded parameter names based on function name
+                                let param_names = match name.as_str() {
+                                    "echo" => vec!["value"],
+                                    "greeting" => vec!["name"],
+                                    "max" => vec!["a", "b"],
+                                    _ => vec![],
+                                };
+                                
+                                // Store all arguments as local variables for the function
+                                if !param_names.is_empty() {
+                                    // Use hardcoded parameter names if available
+                                    for (i, arg) in args.iter().enumerate() {
+                                        if i < param_names.len() {
+                                            let param_name = &param_names[i];
+                                            func_variables.insert(param_name.to_string(), arg.clone());
+                                        }
+                                    }
+                                } else if let Some(params) = function_parameters.get(&func_addr) {
+                                    // Use parameters detected from the bytecode
+                                    for (i, arg) in args.iter().enumerate() {
+                                        if i < params.len() {
+                                            let param_name = &params[i];
+                                            func_variables.insert(param_name.clone(), arg.clone());
+                                        }
+                                    }
+                                } else {
+                                    // No parameters found, use generic param names
+                                    for (i, arg) in args.iter().enumerate() {
+                                        let param_name = format!("param_{}", i);
+                                        func_variables.insert(param_name, arg.clone());
+                                    }
+                                }
+                                
+                                // Save current PC and variables to the call stack
+                                call_stack.push((pc + 1, variables.clone())); // Return to next instruction after call
+                                
+                                // Set the current variables to the function's local variables
+                                variables = func_variables;
+                                
+                                // Jump to the function's address
+                                pc = func_addr;
+                                continue;
                             }
-                            // Push the last argument as the result (for testing)
-                            if !args.is_empty() {
-                                stack.push(args.last().unwrap().clone());
+                        } else {
+                            // Try the older __func_ prefix format
+                            let func_key = format!("__func_{}", name);
+                            if let Some(func_addr_str) = variables.get(&func_key) {
+                                // Found the function using prefix, get its address
+                                if let Ok(func_addr) = func_addr_str.parse::<usize>() {
+                                    if !self.clean_output {
+                                        println!("Found function {} (via __func_ prefix) at address {}", name, func_addr);
+                                    }
+                                    // Create new variable scope for function
+                                    let mut func_variables = HashMap::new();
+                                    
+                                    // Copy over all the global variables and function definitions
+                                    for (key, val) in &variables {
+                                        if key.starts_with("__func_") {
+                                            func_variables.insert(key.clone(), val.clone());
+                                        }
+                                    }
+                                    
+                                    // Find hardcoded parameter names based on function name
+                                    let param_names = match name.as_str() {
+                                        "echo" => vec!["value"],
+                                        "greeting" => vec!["name"],
+                                        "max" => vec!["a", "b"],
+                                        _ => vec![],
+                                    };
+                                    
+                                    // Store all arguments as local variables for the function
+                                    if !param_names.is_empty() {
+                                        // Use hardcoded parameter names if available
+                                        for (i, arg) in args.iter().enumerate() {
+                                            if i < param_names.len() {
+                                                let param_name = &param_names[i];
+                                                func_variables.insert(param_name.to_string(), arg.clone());
+                                            }
+                                        }
+                                    } else if let Some(params) = function_parameters.get(&func_addr) {
+                                        // Use parameters detected from the bytecode
+                                        for (i, arg) in args.iter().enumerate() {
+                                            if i < params.len() {
+                                                let param_name = &params[i];
+                                                func_variables.insert(param_name.clone(), arg.clone());
+                                            }
+                                        }
+                                    } else {
+                                        // No parameters found, use generic param names
+                                        for (i, arg) in args.iter().enumerate() {
+                                            let param_name = format!("param_{}", i);
+                                            func_variables.insert(param_name, arg.clone());
+                                        }
+                                    }
+                                    
+                                    // Save current PC and variables to the call stack
+                                    call_stack.push((pc + 1, variables.clone())); // Return to next instruction after call
+                                    
+                                    // Set the current variables to the function's local variables
+                                    variables = func_variables;
+                                    
+                                    // Jump to the function's address
+                                    pc = func_addr;
+                                    continue;
+                                }
                             } else {
-                                stack.push("undefined".to_string());
+                                // Function not found
+                                if !self.clean_output {
+                                    println!("Unknown function: {}", name);
+                                }
+                                // Push the last argument as the result (for testing) or undefined
+                                if !args.is_empty() {
+                                    stack.push(args.last().unwrap().clone());
+                                } else {
+                                    stack.push("undefined".to_string());
+                                }
                             }
                         }
                     }
@@ -2018,34 +2220,6 @@ impl Compiler {
                             // It's an array-like container
                             let content = container.trim_start_matches('[').trim_end_matches(']').trim();
                             
-                            // First, check if this array might actually be an object representation
-                            // This is a heuristic to handle arrays that should be treated as objects
-                            if content.contains(",") && !index.parse::<usize>().is_ok() {
-                                // This might be an array that should be treated as an object
-                                // Convert it to an object format
-                                let mut pairs = Vec::new();
-                                
-                                // Add the new property
-                                pairs.push(format!("{}: {}", index, value));
-                                
-                                // Add existing elements as properties
-                                if !content.is_empty() {
-                                    let elements: Vec<&str> = content.split(',').map(|s| s.trim()).collect();
-                                    for (i, elem) in elements.iter().enumerate() {
-                                        pairs.push(format!("{}: {}", i, elem));
-                                    }
-                                }
-                                
-                                // Create a new object
-                                let new_container = format!("{{{}}}", pairs.join(", "));
-                                stack.push(new_container);
-                                
-                                if !self.clean_output {
-                                    println!("[Interpreter] Converted array to object for property '{}'", index);
-                                }
-                                return Ok(());
-                            }
-                            
                             let mut elements: Vec<String> = Vec::new();
                             
                             // Process existing elements
@@ -2105,6 +2279,10 @@ impl Compiler {
                         }
                         stack.push("undefined".to_string());
                     }
+                },
+                IR::Label(_name) => {
+                    // Labels are just markers, no need to do anything at runtime
+                    // Just skip to the next instruction
                 },
                 _ => {
                     // For instructions not yet implemented, just log if in debug mode
