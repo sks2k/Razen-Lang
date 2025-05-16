@@ -1,0 +1,54 @@
+# Function Return Test
+# This file tests various function return scenarios
+
+# Basic function with direct return
+fun get_number() {
+    return 42
+}
+
+# Function with string return
+fun get_message() {
+    return "Hello, Razen!"
+}
+
+# Function with variable return
+fun get_variable() {
+    let x = 100
+    return x
+}
+
+# Function with calculation in return
+fun calculate() {
+    return 10 + 5 * 2
+}
+
+# Function with parameter
+fun echo(value) {
+    return value
+}
+
+# Function with string concatenation
+fun greeting(name) {
+    return "Hello, " + name + "!"
+}
+
+# Function with conditional return
+fun max(a, b) {
+    if a > b {
+        return a
+    } else {
+        return b
+    }
+}
+
+# Test all functions
+show "Testing function returns:"
+show "get_number(): " + get_number()
+show "get_message(): " + get_message()
+show "get_variable(): " + get_variable()
+show "calculate(): " + calculate()
+show "echo(123): " + echo(123)
+show "echo('test'): " + echo("test")
+show "greeting('Razen'): " + greeting("Razen")
+show "max(5, 10): " + max(5, 10)
+show "max(15, 7): " + max(15, 7)

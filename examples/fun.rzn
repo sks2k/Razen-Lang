@@ -1,0 +1,67 @@
+# Testing function execution
+show "===== FUNCTION TEST =====";
+
+# Test 1: Simple function returning a string
+fun get_message() {
+    return "Hello from function";
+}
+
+show "Test 1: Function returning a string";
+show "Direct call: " + get_message();
+
+# Test 2: Function with parameters
+fun add(a, b) {
+    return a + b;
+}
+
+show "\nTest 2: Function with parameters";
+show "add(5, 3) = " + add(5, 3);
+show "add(10, 20) = " + add(10, 20);
+
+# Test 3: Function returning a number
+fun get_number() {
+    return 42;
+}
+
+show "\nTest 3: Function returning a number";
+show "get_number() = " + get_number();
+
+# Test 4: Function with string manipulation
+fun greet(name) {
+    return "Hello, " + name + "!";
+}
+
+show "\nTest 4: Function with string manipulation";
+show "greet('World') = " + greet("World");
+
+# Test 5: Function with conditional logic
+fun is_even(num) {
+    if (num % 2 == 0) {
+        return "Even";
+    } else {
+        return "Odd";
+    }
+}
+
+show "\nTest 5: Function with conditional logic";
+show "is_even(4) = " + is_even(4);
+show "is_even(7) = " + is_even(7);
+
+# Test 6: Function with no explicit return
+fun no_return() {
+    let x = 10;
+    x + 5; # No explicit return
+}
+
+show "\nTest 6: Function with no explicit return";
+show "no_return() = " + no_return();
+
+# Test 7: Function that calls another function
+fun compound() {
+    return get_message() + " from compound function";
+}
+
+show "\nTest 7: Function that calls another function";
+show "compound() = " + compound();
+
+show "\n===== FUNCTION TEST COMPLETE =====";

@@ -1,0 +1,63 @@
+# Function Debug Test
+# This file tests specific function behaviors to isolate issues
+
+show "===== FUNCTION DEBUG TEST =====";
+
+# Test 1: Basic function with direct string return
+fun test1() {
+    return "test1 result";
+}
+
+# Test 2: Function with numeric operation
+fun test2() {
+    return 2 + 2;
+}
+
+# Test 3: Function with string concatenation
+fun test3() {
+    let a = "Hello";
+    let b = "World";
+    return a + " " + b;
+}
+
+# Test 4: Function with variable return
+fun test4() {
+    let result = "test4 result";
+    return result;
+}
+
+# Test 5: Function with parameter
+fun test5(param) {
+    return param;
+}
+
+# Test 6: Function with parameter and operation
+fun test6(param) {
+    return param + 10;
+}
+
+# Test 7: Function with string parameter and concatenation
+fun test7(name) {
+    return "Hello, " + name;
+}
+
+# Run the tests
+show "Test 1 (direct string return): " + test1();
+show "Test 2 (numeric operation): " + test2();
+show "Test 3 (string concatenation): " + test3();
+show "Test 4 (variable return): " + test4();
+show "Test 5 (parameter return): " + test5("test5 param");
+show "Test 6 (parameter + operation): " + test6(5);
+show "Test 7 (string param + concat): " + test7("World");
+
+# Test storing function results
+let result1 = test1();
+let result2 = test2();
+let result3 = test3();
+
+show "\nStored results:";
+show "Result 1: " + result1;
+show "Result 2: " + result2;
+show "Result 3: " + result3;
+
+show "===== FUNCTION DEBUG TEST COMPLETE =====";

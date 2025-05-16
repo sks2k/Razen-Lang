@@ -456,10 +456,12 @@ impl Parser {
         let value = if self.current_token_is(TokenType::Semicolon) {
             None
         } else {
+            // Parse the expression for the return value
             let expr = self.parse_expression(Precedence::Lowest)?;
             Some(expr)
         };
         
+        // Optional semicolon - consume if present but don't require it
         if self.peek_token_is(TokenType::Semicolon) {
             self.next_token();
         }
@@ -470,6 +472,7 @@ impl Parser {
     fn parse_expression_statement(&mut self) -> Option<Statement> {
         let expr = self.parse_expression(Precedence::Lowest)?;
         
+        // Optional semicolon - consume if present but don't require it
         if self.peek_token_is(TokenType::Semicolon) {
             self.next_token();
         }
@@ -480,43 +483,47 @@ impl Parser {
     fn parse_block_statement(&mut self) -> Vec<Statement> {
         let mut statements = Vec::new();
         
+        // Consume the opening brace
         self.next_token();
         
+        // Parse statements until we reach the closing brace or EOF
         while !self.current_token_is(TokenType::RightBrace) && !self.current_token_is(TokenType::EOF) {
             if let Some(stmt) = self.parse_statement() {
                 statements.push(stmt);
             }
-            self.next_token();
+            
+            // Only advance if we're not at the end of the block
+            // This helps prevent skipping over the closing brace
+            if !self.peek_token_is(TokenType::RightBrace) {
+                self.next_token();
+            } else {
+                // If next token is right brace, consume it and break
+                self.next_token();
+                break;
+            }
         }
         
         statements
     }
     
     fn parse_if_statement(&mut self) -> Option<Statement> {
-        if !self.expect_peek(TokenType::LeftParen) {
-            return None;
-        }
-        
         self.next_token();
+        
+        // Parse the condition directly - no need for parentheses around the condition
         let condition = self.parse_expression(Precedence::Lowest)?;
         
-        if !self.expect_peek(TokenType::RightParen) {
-            return None;
-        }
-        
+        // Parse consequence
         if !self.expect_peek(TokenType::LeftBrace) {
             return None;
         }
-        
         let consequence = self.parse_block_statement();
         
+        // Parse optional else clause
         let alternative = if self.peek_token_is(TokenType::Else) {
-            self.next_token();
-            
+            self.next_token(); // consume 'else'
             if !self.expect_peek(TokenType::LeftBrace) {
                 return None;
             }
-            
             Some(self.parse_block_statement())
         } else {
             None
