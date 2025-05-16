@@ -2017,6 +2017,35 @@ impl Compiler {
                         } else if container.starts_with('[') && container.ends_with(']') {
                             // It's an array-like container
                             let content = container.trim_start_matches('[').trim_end_matches(']').trim();
+                            
+                            // First, check if this array might actually be an object representation
+                            // This is a heuristic to handle arrays that should be treated as objects
+                            if content.contains(",") && !index.parse::<usize>().is_ok() {
+                                // This might be an array that should be treated as an object
+                                // Convert it to an object format
+                                let mut pairs = Vec::new();
+                                
+                                // Add the new property
+                                pairs.push(format!("{}: {}", index, value));
+                                
+                                // Add existing elements as properties
+                                if !content.is_empty() {
+                                    let elements: Vec<&str> = content.split(',').map(|s| s.trim()).collect();
+                                    for (i, elem) in elements.iter().enumerate() {
+                                        pairs.push(format!("{}: {}", i, elem));
+                                    }
+                                }
+                                
+                                // Create a new object
+                                let new_container = format!("{{{}}}", pairs.join(", "));
+                                stack.push(new_container);
+                                
+                                if !self.clean_output {
+                                    println!("[Interpreter] Converted array to object for property '{}'", index);
+                                }
+                                return Ok(());
+                            }
+                            
                             let mut elements: Vec<String> = Vec::new();
                             
                             // Process existing elements
@@ -2038,18 +2067,36 @@ impl Compiler {
                                 let new_container = format!("[{}]", elements.join(", "));
                                 stack.push(new_container);
                             } else {
-                                // If index is not a number, we can't modify the array
-                                if !self.clean_output {
-                                    println!("[Interpreter] Cannot use non-numeric index '{}' with array", index);
+                                // If index is not a number, try to treat this as an object
+                                // Convert the array to an object format
+                                let mut pairs = Vec::new();
+                                pairs.push(format!("{}: {}", index, value));
+                                
+                                // Add original array elements as numeric properties
+                                for (i, elem) in elements.iter().enumerate() {
+                                    pairs.push(format!("{}: {}", i, elem));
                                 }
-                                stack.push(container); // Push back the original container
+                                
+                                // Create a new object
+                                let new_container = format!("{{{}}}", pairs.join(", "));
+                                stack.push(new_container);
+                                
+                                if !self.clean_output {
+                                    println!("[Interpreter] Converted array to object for property '{}'", index);
+                                }
                             }
                         } else {
-                            // For other container types, we don't know how to handle them yet
+                            // For strings or other primitive values, convert to an object
+                            let mut pairs = Vec::new();
+                            pairs.push(format!("{}: {}", index, value));
+                            
+                            // Create a new object with the property
+                            let new_container = format!("{{{}}}", pairs.join(", "));
+                            stack.push(new_container);
+                            
                             if !self.clean_output {
-                                println!("[Interpreter] Unknown container type for SetIndex: {}", container);
+                                println!("[Interpreter] Created new object with property '{}'", index);
                             }
-                            stack.push(container); // Push back the original container
                         }
                     } else {
                         // Not enough values on the stack
