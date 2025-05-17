@@ -171,7 +171,7 @@ impl LibraryManager {
         random_lib.register_function("shuffle", crate::functions::randomlib::shuffle);
         self.register_library(random_lib);
 
-        // File library
+        // File library (legacy)
         let mut file_lib = Library::new("file");
         file_lib.register_function("read", crate::functions::filelib::read);
         file_lib.register_function("write", crate::functions::filelib::write);
@@ -179,6 +179,30 @@ impl LibraryManager {
         file_lib.register_function("exists", crate::functions::filelib::exists);
         file_lib.register_function("delete", crate::functions::filelib::delete);
         self.register_library(file_lib);
+
+        // Filesystem library (extended)
+        let mut fs_lib = Library::new("filesystem");
+        fs_lib.register_function("exists", crate::functions::filesystemlib::exists);
+        fs_lib.register_function("is_file", crate::functions::filesystemlib::is_file);
+        fs_lib.register_function("is_dir", crate::functions::filesystemlib::is_dir);
+        fs_lib.register_function("create_dir", crate::functions::filesystemlib::create_dir);
+        fs_lib.register_function("remove", crate::functions::filesystemlib::remove);
+        fs_lib.register_function("read_file", crate::functions::filesystemlib::read_file);
+        fs_lib.register_function("write_file", crate::functions::filesystemlib::write_file);
+        fs_lib.register_function("list_dir", crate::functions::filesystemlib::list_dir);
+        fs_lib.register_function("metadata", crate::functions::filesystemlib::metadata);
+        fs_lib.register_function("absolute_path", crate::functions::filesystemlib::absolute_path);
+        fs_lib.register_function("copy", crate::functions::filesystemlib::copy_file);
+        fs_lib.register_function("move", crate::functions::filesystemlib::move_file);
+        fs_lib.register_function("extension", crate::functions::filesystemlib::extension);
+        fs_lib.register_function("file_stem", crate::functions::filesystemlib::file_stem);
+        fs_lib.register_function("parent_dir", crate::functions::filesystemlib::parent_dir);
+        fs_lib.register_function("join_path", crate::functions::filesystemlib::join_path);
+        fs_lib.register_function("change_dir", crate::functions::filesystemlib::change_dir);
+        fs_lib.register_function("current_dir", crate::functions::filesystemlib::current_dir);
+        fs_lib.register_function("temp_file", crate::functions::filesystemlib::temp_file);
+        fs_lib.register_function("temp_dir", crate::functions::filesystemlib::temp_dir);
+        self.register_library(fs_lib);
 
         // JSON library
         let mut json_lib = Library::new("json");

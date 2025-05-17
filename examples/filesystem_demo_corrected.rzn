@@ -1,0 +1,124 @@
+# Razen Filesystem Library Demo (Corrected Version)
+# This file demonstrates all the filesystem functions available in Razen
+
+# Import the filesystem library
+lib filesystem;
+
+# Set up some test files and directories
+let test_dir = "./razen_fs_test";
+let test_file = test_dir + "/test.txt";
+let test_file2 = test_dir + "/test2.txt";
+let test_subdir = test_dir + "/subdir";
+
+show "===== Razen Filesystem Library Demo =====\n";
+
+# Check if our test directory exists and create it if needed
+show "1. Checking if directory exists:";
+show "Directory exists: " + Filesystem[exists](test_dir);
+
+# Create directory if it doesn't exist (avoiding 'not' operator)
+show "Creating test directory...";
+show "Directory created: " + Filesystem[create_dir](test_dir);
+
+# Create a subdirectory
+show "\n2. Creating subdirectory:";
+show "Creating subdirectory...";
+show "Subdirectory created: " + Filesystem[create_dir](test_subdir);
+
+# Write to a file
+show "\n3. Writing to a file:";
+show "File written: " + Filesystem[write_file](test_file, "Hello, Razen Filesystem!\nThis is a test file.", false);
+
+# Read from a file
+show "\n4. Reading from a file:";
+show "File contents:\n" + Filesystem[read_file](test_file);
+
+# Append to a file
+show "\n5. Appending to a file:";
+show "File appended: " + Filesystem[write_file](test_file, "\nThis line was appended.", true);
+show "Updated file contents:\n" + Filesystem[read_file](test_file);
+
+# Check if path is a file
+show "\n6. Checking if path is a file:";
+show "Is file: " + Filesystem[is_file](test_file);
+
+# Check if path is a directory
+show "\n7. Checking if path is a directory:";
+show "Is directory: " + Filesystem[is_dir](test_dir);
+
+# Get current directory
+show "\n8. Getting current directory:";
+show "Current directory: " + Filesystem[current_dir]();
+
+# Get absolute path
+show "\n9. Getting absolute path:";
+show "Absolute path: " + Filesystem[absolute_path](test_file);
+
+# Copy a file (using 'copy' instead of 'copy_file')
+show "\n10. Copying a file:";
+show "File copied: " + Filesystem[copy](test_file, test_file2);
+show "Copied file exists: " + Filesystem[exists](test_file2);
+show "Copied file contents:\n" + Filesystem[read_file](test_file2);
+
+# Get file extension
+show "\n11. Getting file extension:";
+show "File extension: " + Filesystem[extension](test_file);
+
+# Get file stem (name without extension)
+show "\n12. Getting file stem:";
+show "File stem: " + Filesystem[file_stem](test_file);
+
+# Get parent directory
+show "\n13. Getting parent directory:";
+show "Parent directory: " + Filesystem[parent_dir](test_file);
+
+# Join paths
+show "\n14. Joining paths:";
+show "Joined path: " + Filesystem[join_path]([test_dir, "joined", "path.txt"]);
+
+# List directory contents
+show "\n15. Listing directory contents:";
+show "Directory contents: " + Filesystem[list_dir](test_dir);
+
+# Move a file (using 'move' instead of 'move_file')
+show "\n16. Moving a file:";
+let moved_file = test_dir + "/moved.txt";
+show "File moved: " + Filesystem[move](test_file2, moved_file);
+show "Original file exists: " + Filesystem[exists](test_file2);
+show "Moved file exists: " + Filesystem[exists](moved_file);
+
+# Create a temporary file
+show "\n17. Creating a temporary file:";
+let temp_file = Filesystem[temp_file]("razen_test_");
+show "Temporary file created: " + temp_file;
+show "Temporary file exists: " + Filesystem[exists](temp_file);
+
+# Create a temporary directory
+show "\n18. Creating a temporary directory:";
+let temp_dir = Filesystem[temp_dir]("razen_test_");
+show "Temporary directory created: " + temp_dir;
+show "Temporary directory exists: " + Filesystem[exists](temp_dir);
+
+# Clean up (remove files and directories)
+show "\n19. Cleaning up:";
+
+# Remove the moved file
+show "Removing moved file: " + Filesystem[remove](moved_file);
+
+# Remove the original test file
+show "Removing test file: " + Filesystem[remove](test_file);
+
+# Remove the temporary file
+show "Removing temporary file: " + Filesystem[remove](temp_file);
+
+# Remove the subdirectory
+show "Removing subdirectory: " + Filesystem[remove](test_subdir);
+
+# Remove the temporary directory
+show "Removing temporary directory: " + Filesystem[remove](temp_dir);
+
+# Finally, remove the test directory
+show "Removing test directory: " + Filesystem[remove](test_dir, true);
+
+show "\n===== Filesystem Demo Complete =====\n";
+show "All filesystem functions have been demonstrated.";

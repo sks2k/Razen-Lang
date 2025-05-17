@@ -22,6 +22,7 @@ mod ht;
 mod audio;
 mod image;
 mod date;
+mod filesystem;
 
 // New modules for self-compilation
 mod memory;
@@ -136,6 +137,10 @@ pub mod imagelib {
 
 pub mod datelib {
     pub use super::date::*;
+}
+
+pub mod filesystemlib {
+    pub use super::filesystem::*;
 }
 
 // New library modules for self-compilation
