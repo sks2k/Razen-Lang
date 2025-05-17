@@ -5,10 +5,10 @@
 lib filesystem;
 
 # Set up some test files and directories
-let test_dir = "./razen_fs_test";
-let test_file = test_dir + "/test.txt";
-let test_file2 = test_dir + "/test2.txt";
-let test_subdir = test_dir + "/subdir";
+take test_dir = "./razen_fs_test";
+take test_file = test_dir + "/test.txt";
+take test_file2 = test_dir + "/test2.txt";
+take test_subdir = test_dir + "/subdir";
 
 show "===== Razen Filesystem Library Demo =====\n";
 

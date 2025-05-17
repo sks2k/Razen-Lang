@@ -1,0 +1,76 @@
+# Razen Filesystem Library Simple Demo
+# This file demonstrates the filesystem functions using literal strings
+
+# Import the filesystem library
+lib filesystem;
+
+show "===== Razen Filesystem Library Simple Demo =====\n";
+
+# 1. Check if a file exists
+show "1. Checking if file exists:";
+show "File exists: " + Filesystem[exists]("./test.txt");
+
+# 2. Create a directory
+show "\n2. Creating directory:";
+show "Directory created: " + Filesystem[create_dir]("./test_dir");
+
+# 3. Write to a file
+show "\n3. Writing to a file:";
+show "File written: " + Filesystem[write_file]("./test_dir/test.txt", "Hello, Razen Filesystem!\nThis is a test file.", false);
+
+# 4. Read from a file
+show "\n4. Reading from a file:";
+show "File contents:\n" + Filesystem[read_file]("./test_dir/test.txt");
+
+# 5. Check if path is a file
+show "\n5. Checking if path is a file:";
+show "Is file: " + Filesystem[is_file]("./test_dir/test.txt");
+
+# 6. Check if path is a directory
+show "\n6. Checking if path is a directory:";
+show "Is directory: " + Filesystem[is_dir]("./test_dir");
+
+# 7. Get current directory
+show "\n7. Getting current directory:";
+show "Current directory: " + Filesystem[current_dir]();
+
+# 8. Get absolute path
+show "\n8. Getting absolute path:";
+show "Absolute path: " + Filesystem[absolute_path]("./test_dir/test.txt");
+
+# 9. List directory contents
+show "\n9. Listing directory contents:";
+show "Directory contents: " + Filesystem[list_dir]("./test_dir");
+
+# 10. Copy a file
+show "\n10. Copying a file:";
+show "File copied: " + Filesystem[copy]("./test_dir/test.txt", "./test_dir/test2.txt");
+
+# 11. Get file extension
+show "\n11. Getting file extension:";
+show "File extension: " + Filesystem[extension]("./test_dir/test.txt");
+
+# 12. Get file stem (name without extension)
+show "\n12. Getting file stem:";
+show "File stem: " + Filesystem[file_stem]("./test_dir/test.txt");
+
+# 13. Get parent directory
+show "\n13. Getting parent directory:";
+show "Parent directory: " + Filesystem[parent_dir]("./test_dir/test.txt");
+
+# 14. Join paths
+show "\n14. Joining paths:";
+show "Joined path: " + Filesystem[join_path](["test_dir", "joined", "path.txt"]);
+
+# 15. Move a file
+show "\n15. Moving a file:";
+show "File moved: " + Filesystem[move]("./test_dir/test2.txt", "./test_dir/moved.txt");
+
+# 16. Clean up
+show "\n16. Cleaning up:";
+show "File removed: " + Filesystem[remove]("./test_dir/test.txt");
+show "Moved file removed: " + Filesystem[remove]("./test_dir/moved.txt");
+show "Directory removed: " + Filesystem[remove]("./test_dir");
+
+show "\n===== Filesystem Demo Complete =====\n";
+show "Basic filesystem functions have been demonstrated.";
