@@ -52,7 +52,7 @@ pub fn exists(args: Vec<Value>) -> Result<Value, String> {
         return Err("filesystem.exists() takes exactly 1 argument (path)".to_string());
     }
     
-    let path = safe_to_string(&args[0])?;
+    let path = args[0].as_string()?;
     Ok(Value::Bool(Path::new(&path).exists()))
 }
 
@@ -63,7 +63,7 @@ pub fn is_file(args: Vec<Value>) -> Result<Value, String> {
         return Err("filesystem.is_file() takes exactly 1 argument (path)".to_string());
     }
     
-    let path = safe_to_string(&args[0])?;
+    let path = args[0].as_string()?;
     Ok(Value::Bool(Path::new(&path).is_file()))
 }
 
@@ -74,7 +74,7 @@ pub fn is_dir(args: Vec<Value>) -> Result<Value, String> {
         return Err("filesystem.is_dir() takes exactly 1 argument (path)".to_string());
     }
     
-    let path = safe_to_string(&args[0])?;
+    let path = args[0].as_string()?;
     Ok(Value::Bool(Path::new(&path).is_dir()))
 }
 
@@ -85,7 +85,7 @@ pub fn create_dir(args: Vec<Value>) -> Result<Value, String> {
         return Err("filesystem.create_dir() takes 1-3 arguments (path, recursive = false, mode = 0o755)".to_string());
     }
     
-    let path = safe_to_string(&args[0])?;
+    let path = args[0].as_string()?;
     let recursive = if args.len() >= 2 { 
         match &args[1] {
             Value::Bool(b) => *b,
@@ -156,7 +156,7 @@ pub fn remove(args: Vec<Value>) -> Result<Value, String> {
         return Err("filesystem.remove() takes 1 or 2 arguments (path, recursive = false)".to_string());
     }
     
-    let path = safe_to_string(&args[0])?;
+    let path = args[0].as_string()?;
     let recursive = if args.len() == 2 { 
         match &args[1] {
             Value::Bool(b) => *b,
@@ -208,7 +208,7 @@ pub fn read_file(args: Vec<Value>) -> Result<Value, String> {
         return Err("filesystem.read_file() takes 1 or 2 arguments (path, binary = false)".to_string());
     }
     
-    let path = safe_to_string(&args[0])?;
+    let path = args[0].as_string()?;
     let path_obj = Path::new(&path);
     
     // Optional binary mode parameter
@@ -259,8 +259,8 @@ pub fn write_file(args: Vec<Value>) -> Result<Value, String> {
         return Err("filesystem.write_file() takes 2-4 arguments (path, content, append = false, binary = false)".to_string());
     }
     
-    let path = safe_to_string(&args[0])?;
-    let content = safe_to_string(&args[1])?;
+    let path = args[0].as_string()?;
+    let content = args[1].as_string()?;
     
     // Parse append flag (3rd argument)
     let append = if args.len() >= 3 { 
@@ -342,7 +342,7 @@ pub fn list_dir(args: Vec<Value>) -> Result<Value, String> {
         return Err("filesystem.list_dir() takes 1 or 2 arguments (path, detailed = false)".to_string());
     }
     
-    let path = safe_to_string(&args[0])?;
+    let path = args[0].as_string()?;
     let path_obj = Path::new(&path);
     
     // Check if detailed mode is enabled (returns objects with metadata instead of just names)

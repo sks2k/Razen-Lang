@@ -6,9 +6,9 @@ lib filesystem;
 
 # Set up some test files and directories
 take test_dir = "./razen_fs_test";
-take test_file = test_dir + "/test.txt";
-take test_file2 = test_dir + "/test2.txt";
-take test_subdir = test_dir + "/subdir";
+take test_file = "./razen_fs_test/test.txt";
+take test_file2 = "./razen_fs_test/test2.txt";
+take test_subdir = "./razen_fs_test/subdir";
 
 show "===== Razen Filesystem Library Demo =====\n";
 
@@ -82,20 +82,20 @@ show "Directory contents: " + Filesystem[list_dir](test_dir);
 
 # Move a file (using 'move' instead of 'move_file')
 show "\n16. Moving a file:";
-let moved_file = test_dir + "/moved.txt";
+take moved_file = "./razen_fs_test/moved.txt";
 show "File moved: " + Filesystem[move](test_file2, moved_file);
 show "Original file exists: " + Filesystem[exists](test_file2);
 show "Moved file exists: " + Filesystem[exists](moved_file);
 
 # Create a temporary file
 show "\n17. Creating a temporary file:";
-let temp_file = Filesystem[temp_file]("razen_test_");
+take temp_file = Filesystem[temp_file]("razen_test_");
 show "Temporary file created: " + temp_file;
 show "Temporary file exists: " + Filesystem[exists](temp_file);
 
 # Create a temporary directory
 show "\n18. Creating a temporary directory:";
-let temp_dir = Filesystem[temp_dir]("razen_test_");
+take temp_dir = Filesystem[temp_dir]("razen_test_");
 show "Temporary directory created: " + temp_dir;
 show "Temporary directory exists: " + Filesystem[exists](temp_dir);
 
