@@ -3,7 +3,7 @@
 # Razen Language Installer Script
 # Author: Prathmesh Barot
 # Copyright 2025 Prathmesh Barot, Basai Corporation
-# Version: beta v0.1.6589 (Libraries Update new libs added image and date and etc.)
+# Version: beta v0.1.67 (Tokens update and new libraries added.)
 
 set -e  # Exit on error
 
@@ -79,7 +79,7 @@ else
     # Download version file if not present
     if ! curl -s -o version "$RAZEN_REPO/version" &>/dev/null; then
         echo -e "${RED}Failed to download version information. Using default version.${NC}"
-        RAZEN_VERSION="beta v0.1.6589 (Libraries Update new libs added image and date and etc.)"
+        RAZEN_VERSION="beta v0.1.67 (Tokens update and new libraries added.)"
     else
         RAZEN_VERSION=$(cat version)
         # Store the version file for future reference

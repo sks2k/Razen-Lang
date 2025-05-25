@@ -295,7 +295,7 @@ impl Parser {
             TokenType::Map | TokenType::Key | TokenType::Value |
             TokenType::Current | TokenType::Now | TokenType::Year | TokenType::Month | 
             TokenType::Day | TokenType::Hour | TokenType::Minute | TokenType::Second |
-            TokenType::Store | TokenType::Box | TokenType::Ref |
+            TokenType::Store | TokenType::Box | TokenType::Ref => self.parse_variable_declaration(),
             
             // 17 - Compiler Construction Keywords
             TokenType::Grammar => self.parse_grammar_statement(),
@@ -373,6 +373,9 @@ impl Parser {
     
     fn parse_variable_declaration(&mut self) -> Option<Statement> {
         let var_type = self.current_token.literal.clone();
+        let token_type = self.current_token.token_type.clone();
+        let token_line = self.current_token.line;
+        let token_column = self.current_token.column;
         
         if !self.expect_peek(TokenType::Identifier) {
             return None;
@@ -387,6 +390,287 @@ impl Parser {
         self.next_token();
         
         let value = self.parse_expression(Precedence::Lowest)?;
+        
+        // Type checking based on variable declaration token
+        match token_type {
+            // 1. General Purpose Variables
+            TokenType::Let => {
+                // let => for numeric variables (integers, floats)
+                // Also allow function calls and expressions that might return numbers
+                match value {
+                    Expression::NumberLiteral(_) => {},
+                    Expression::InfixExpression { .. } => {}, // Allow expressions that might result in numbers
+                    Expression::PrefixExpression { .. } => {}, // Allow expressions that might result in numbers
+                    Expression::Identifier(_) => {}, // Allow identifiers (runtime check needed)
+                    Expression::CallExpression { .. } => {}, // Allow function calls (runtime check needed)
+                    Expression::LibraryCall { .. } => {}, // Allow library function calls (like TimeLib[now]())
+                    _ => {
+                        // Only show warning for obvious mismatches like strings and booleans
+                        if let Expression::StringLiteral(_) = value {
+                            self.errors.push(format!(
+                                "Type mismatch: 'let' should be used for numeric values at line {}, column {}",
+                                token_line, token_column
+                            ));
+                        } else if let Expression::BooleanLiteral(_) = value {
+                            self.errors.push(format!(
+                                "Type mismatch: 'let' should be used for numeric values at line {}, column {}",
+                                token_line, token_column
+                            ));
+                        }
+                        // Allow other types to pass through for flexibility
+                    }
+                }
+            },
+            TokenType::Take => {
+                // take => for string variables and text manipulation
+                match value {
+                    Expression::StringLiteral(_) => {},
+                    Expression::InfixExpression { .. } => {}, // Allow expressions that might result in strings
+                    Expression::Identifier(_) => {}, // Allow identifiers (runtime check needed)
+                    Expression::CallExpression { .. } => {}, // Allow function calls (runtime check needed)
+                    Expression::LibraryCall { .. } => {}, // Allow library function calls
+                    _ => {
+                        // Only show warning for obvious mismatches
+                        if let Expression::NumberLiteral(_) = value {
+                            self.errors.push(format!(
+                                "Type mismatch: 'take' should be used for string values at line {}, column {}",
+                                token_line, token_column
+                            ));
+                        } else if let Expression::BooleanLiteral(_) = value {
+                            self.errors.push(format!(
+                                "Type mismatch: 'take' should be used for string values at line {}, column {}",
+                                token_line, token_column
+                            ));
+                        }
+                        // Allow other types to pass through for flexibility
+                    }
+                }
+            },
+            TokenType::Hold => {
+                // hold => for boolean variables and logical conditions
+                match value {
+                    Expression::BooleanLiteral(_) => {},
+                    Expression::InfixExpression { .. } => {}, // Allow expressions that might result in booleans
+                    Expression::PrefixExpression { .. } => {}, // Allow expressions that might result in booleans
+                    Expression::Identifier(_) => {}, // Allow identifiers (runtime check needed)
+                    Expression::CallExpression { .. } => {}, // Allow function calls (runtime check needed)
+                    Expression::LibraryCall { .. } => {}, // Allow library function calls
+                    _ => {
+                        // Only show warning for obvious mismatches
+                        if let Expression::NumberLiteral(_) = value {
+                            self.errors.push(format!(
+                                "Type mismatch: 'hold' should be used for boolean values at line {}, column {}",
+                                token_line, token_column
+                            ));
+                        } else if let Expression::StringLiteral(_) = value {
+                            self.errors.push(format!(
+                                "Type mismatch: 'hold' should be used for boolean values at line {}, column {}",
+                                token_line, token_column
+                            ));
+                        }
+                        // Allow other types to pass through for flexibility
+                    }
+                }
+            },
+            TokenType::Put => {
+                // put => for variables of any type (no restrictions)
+            },
+            
+            // 2. Mathematical Variables
+            TokenType::Sum | TokenType::Diff | TokenType::Prod | TokenType::Div | TokenType::Mod => {
+                // Mathematical variables should be used with numeric values
+                // These tokens are aliases for 'let' and should behave the same way
+                match value {
+                    Expression::NumberLiteral(_) => {},
+                    Expression::InfixExpression { .. } => {}, // Allow expressions that might result in numbers
+                    Expression::PrefixExpression { .. } => {}, // Allow expressions that might result in numbers
+                    Expression::Identifier(_) => {}, // Allow identifiers (runtime check needed)
+                    Expression::CallExpression { .. } => {}, // Allow function calls (runtime check needed)
+                    Expression::LibraryCall { .. } => {}, // Allow library function calls
+                    _ => {
+                        // Only show warning for obvious mismatches
+                        if let Expression::StringLiteral(_) = value {
+                            self.errors.push(format!(
+                                "Type mismatch: '{}' should be used for numeric values at line {}, column {}",
+                                var_type, token_line, token_column
+                            ));
+                        } else if let Expression::BooleanLiteral(_) = value {
+                            self.errors.push(format!(
+                                "Type mismatch: '{}' should be used for numeric values at line {}, column {}",
+                                var_type, token_line, token_column
+                            ));
+                        }
+                        // Allow other types to pass through for flexibility
+                    }
+                }
+            },
+            
+            // 4. String Variables
+            TokenType::Text | TokenType::Concat | TokenType::Slice | TokenType::Len => {
+                // String variables should be used with string values
+                // These tokens are aliases for 'take' and should behave the same way
+                match value {
+                    Expression::StringLiteral(_) => {},
+                    Expression::InfixExpression { .. } => {}, // Allow expressions that might result in strings
+                    Expression::Identifier(_) => {}, // Allow identifiers (runtime check needed)
+                    Expression::CallExpression { .. } => {}, // Allow function calls (runtime check needed)
+                    Expression::LibraryCall { .. } => {}, // Allow library function calls
+                    _ => {
+                        // Only show warning for obvious mismatches
+                        if let Expression::NumberLiteral(_) = value {
+                            self.errors.push(format!(
+                                "Type mismatch: '{}' should be used for string values at line {}, column {}",
+                                var_type, token_line, token_column
+                            ));
+                        } else if let Expression::BooleanLiteral(_) = value {
+                            self.errors.push(format!(
+                                "Type mismatch: '{}' should be used for string values at line {}, column {}",
+                                var_type, token_line, token_column
+                            ));
+                        }
+                        // Allow other types to pass through for flexibility
+                    }
+                }
+            },
+            
+            // 5. List & Array Variables
+            TokenType::List | TokenType::Arr | TokenType::Append | TokenType::Remove => {
+                // Collection variables should be used with array literals or identifiers
+                // These tokens are aliases for 'put' when used with collections
+                match value {
+                    Expression::ArrayLiteral { .. } => {},
+                    Expression::Identifier(_) => {}, // Allow identifiers (runtime check needed)
+                    Expression::CallExpression { .. } => {}, // Allow function calls (runtime check needed)
+                    Expression::InfixExpression { .. } => {}, // Allow expressions that might result in arrays
+                    Expression::LibraryCall { .. } => {}, // Allow library function calls
+                    _ => {
+                        // Only show warning for obvious mismatches like simple literals
+                        if let Expression::NumberLiteral(_) = value {
+                            self.errors.push(format!(
+                                "Type mismatch: '{}' should be used for collection values at line {}, column {}",
+                                var_type, token_line, token_column
+                            ));
+                        } else if let Expression::StringLiteral(_) = value {
+                            self.errors.push(format!(
+                                "Type mismatch: '{}' should be used for collection values at line {}, column {}",
+                                var_type, token_line, token_column
+                            ));
+                        } else if let Expression::BooleanLiteral(_) = value {
+                            self.errors.push(format!(
+                                "Type mismatch: '{}' should be used for collection values at line {}, column {}",
+                                var_type, token_line, token_column
+                            ));
+                        }
+                        // Allow other types to pass through for flexibility
+                    }
+                }
+            },
+            
+            // 6. Dictionary/Map Variables
+            TokenType::Map | TokenType::Key | TokenType::Value => {
+                // Map variables should be used with map literals or identifiers
+                // These tokens are aliases for 'put' when used with dictionaries/maps
+                match value {
+                    Expression::MapLiteral { .. } => {},
+                    Expression::ArrayLiteral { .. } => {}, // Allow arrays for key-value pairs
+                    Expression::Identifier(_) => {}, // Allow identifiers (runtime check needed)
+                    Expression::CallExpression { .. } => {}, // Allow function calls (runtime check needed)
+                    Expression::LibraryCall { .. } => {}, // Allow library function calls
+                    _ => {
+                        // Only show warning for obvious mismatches like simple literals
+                        if let Expression::NumberLiteral(_) = value {
+                            self.errors.push(format!(
+                                "Type mismatch: '{}' should be used for map/dictionary values at line {}, column {}",
+                                var_type, token_line, token_column
+                            ));
+                        } else if let Expression::StringLiteral(_) = value {
+                            self.errors.push(format!(
+                                "Type mismatch: '{}' should be used for map/dictionary values at line {}, column {}",
+                                var_type, token_line, token_column
+                            ));
+                        } else if let Expression::BooleanLiteral(_) = value {
+                            self.errors.push(format!(
+                                "Type mismatch: '{}' should be used for map/dictionary values at line {}, column {}",
+                                var_type, token_line, token_column
+                            ));
+                        }
+                        // Allow other types to pass through for flexibility
+                    }
+                }
+            },
+            
+            // 7. Date & Time Variables
+            TokenType::Current | TokenType::Now | TokenType::Year | TokenType::Month | 
+            TokenType::Day | TokenType::Hour | TokenType::Minute | TokenType::Second => {
+                // Date/time variables should be used with appropriate values
+                // These tokens are aliases for 'let' when used with time values (they're numbers)
+                match value {
+                    Expression::NumberLiteral(_) => {}, // Allow numbers for time components
+                    Expression::StringLiteral(_) => {}, // Allow strings for date formats
+                    Expression::Identifier(_) => {}, // Allow identifiers (runtime check needed)
+                    Expression::CallExpression { .. } => {}, // Allow function calls (runtime check needed)
+                    Expression::LibraryCall { .. } => {}, // Allow library function calls
+                    Expression::InfixExpression { .. } => {}, // Allow expressions that might result in numbers or strings
+                    Expression::PrefixExpression { .. } => {}, // Allow expressions that might result in numbers
+                    _ => {
+                        // Only show warning for obvious mismatches
+                        if let Expression::BooleanLiteral(_) = value {
+                            self.errors.push(format!(
+                                "Type mismatch: '{}' should be used for date/time values at line {}, column {}",
+                                var_type, token_line, token_column
+                            ));
+                        } else if let Expression::ArrayLiteral { .. } = value {
+                            self.errors.push(format!(
+                                "Type mismatch: '{}' should be used for date/time values at line {}, column {}",
+                                var_type, token_line, token_column
+                            ));
+                        } else if let Expression::MapLiteral { .. } = value {
+                            self.errors.push(format!(
+                                "Type mismatch: '{}' should be used for date/time values at line {}, column {}",
+                                var_type, token_line, token_column
+                            ));
+                        }
+                        // Allow other types to pass through for flexibility
+                    }
+                }
+            },
+            
+            // 8. User-Defined Variables
+            TokenType::Store | TokenType::Box | TokenType::Ref => {
+                // These can be used with any type, but we'll add specific validation for Ref
+                if token_type == TokenType::Ref {
+                    match value {
+                        Expression::Identifier(_) => {}, // Ref should point to an existing variable
+                        Expression::CallExpression { .. } => {}, // Allow function calls (runtime check needed)
+                        Expression::LibraryCall { .. } => {}, // Allow library function calls
+                        _ => {
+                            // Only show warning for obvious mismatches like literals
+                            if let Expression::NumberLiteral(_) = value {
+                                self.errors.push(format!(
+                                    "Type mismatch: 'ref' should be used with an identifier at line {}, column {}",
+                                    token_line, token_column
+                                ));
+                            } else if let Expression::StringLiteral(_) = value {
+                                self.errors.push(format!(
+                                    "Type mismatch: 'ref' should be used with an identifier at line {}, column {}",
+                                    token_line, token_column
+                                ));
+                            } else if let Expression::BooleanLiteral(_) = value {
+                                self.errors.push(format!(
+                                    "Type mismatch: 'ref' should be used with an identifier at line {}, column {}",
+                                    token_line, token_column
+                                ));
+                            }
+                            // Allow other types to pass through for flexibility
+                        }
+                    }
+                }
+                // Store and Box can hold any type, so no specific validation
+            },
+            
+            // Default case for any other tokens
+            _ => {}
+        }
         
         if self.peek_token_is(TokenType::Semicolon) {
             self.next_token();

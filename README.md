@@ -1,4 +1,4 @@
-# Razen Programming Language (beta v0.1.658)
+# Razen Programming Language beta v0.1.67 (Tokens update and new libraries added.)
 
 ## Overview
 Razen is a modern, intuitive programming language designed for clarity, performance, and ease of use. With a clean syntax inspired by Python and strong type safety, Razen offers an excellent balance between development speed and runtime performance.
@@ -9,8 +9,7 @@ Developed by Prathmesh Barot, Basai Corporation.
 - **Intuitive Syntax**: Python-like syntax that's easy to read and write
 - **Fast Performance**: Built for efficiency with optimized runtime execution
 - **Built-in Debugging**: Comprehensive debugging tools including step-by-step execution
-- **String Interpolation**: Powerful nested string interpolation with `${...}` syntax
-- **Type Safety**: Strong type checking for variables with different variable types
+- **Type Safety**: Strong type checking for variables with specialized declaration tokens
 - **Rich Library System**: Extensive library system with bracket notation for function calls
 - **Expressive Conditionals**: Clean if/else syntax with support for nested conditions
 - **Interactive Mode**: Built-in REPL for testing code snippets
@@ -19,6 +18,7 @@ Developed by Prathmesh Barot, Basai Corporation.
 - **OOP Support**: Class-based object-oriented programming capabilities
 - **Colored Output**: Built-in support for colored terminal output
 - **Robust Error Handling**: Comprehensive error handling with try/catch blocks
+- **Filesystem Library**: Comprehensive filesystem operations for file and directory management
 
 ## Installation
 
@@ -146,42 +146,52 @@ razen-run hello.rzn
 ### Basic Razen Program
 
 ```razen
+# Hello World program in Razen
+show "Hello, World!";
+
 # Variables with type enforcement
-let number = 42;          # Numeric values only
-take message = "Hello";   # String values only
-hold is_active = true;    # Boolean values only
-put anything = "flexible"; # Any type allowed
+let num = 42;  # Numeric variable
+take name = "Alice";  # String variable
+hold is_active = true;  # Boolean variable
+put anything = "This can be any type";  # Any type variable
 
-# String concatenation
-show "Hello, " + message + "!";
+# Mathematical operations with specialized tokens
+sum total = 100 + 50;  # Sum calculation
+diff result = 100 - 50;  # Difference calculation
+prod product = 5 * 10;  # Product calculation
+div quotient = 20 / 4;  # Division calculation
+mod remainder = 10 % 3;  # Modulus calculation
 
-# Calculations
-let total = number * 2.5;
-show "Total: " + total;
+# String operations with specialized tokens
+text greeting = "Welcome to Razen";  # String data
+concat fullName = "John" + " " + "Doe";  # String concatenation
+slice firstName = "John Doe";  # Will use with substring operations
 
-# Conditionals
-if (total > 50) {
-    show "Qualifies for free shipping!";
+# String operations
+take message = "Hello, " + name + "!";
+show message;
+
+# Conditional statements
+if (num > 40) {
+    show "Number is greater than 40";
+} else if (num == 40) {
+    show "Number is exactly 40";
 } else {
-    show "Add more items for free shipping.";
+    show "Number is less than 40";
 }
 
-# Input
-read user_input = "Enter your name: ";
-show "Hello, " + user_input + "!";
+# Loops
+let i = 0;
+while (i < 5) {
+    show "Loop iteration: " + i;
+    i = i + 1;
+}
 
-# String concatenation
-take inner = "value";
-take outer = "Outer with " + inner;
-show outer;
-```
+# Using library functions
+show "Current time: " + TimeLib[now]();
+show "Random number: " + Random[int](1, 100);
 
-### Colored Output
-
-```razen
-type cli;
-
-# Using colors in output
+# Colored output
 show(red) "This is a red error message";
 show(green) "This is a green success message";
 show(yellow) "This is a yellow warning message";
@@ -292,27 +302,85 @@ Razen supports different variable types with type enforcement:
 
 - **let**: For numeric values (integers and floats)
   ```razen
-  let count = 42
-  let price = 9.99
+  let count = 42;
+  let price = 9.99;
   ```
 
 - **take**: For string values
   ```razen
-  take name = "John"
-  take message = "Hello, World!"
+  take name = "John";
+  take message = "Hello, World!";
   ```
 
 - **hold**: For boolean values
   ```razen
-  hold is_active = true
-  hold has_permission = false
+  hold is_active = true;
+  hold has_permission = false;
   ```
 
 - **put**: For any type (no type restrictions)
   ```razen
-  put anything = 42
-  put anything = "Now I'm a string"
-  put anything = true
+  put anything = 42;
+  put anything = "Now I'm a string";
+  put anything = true;
+  ```
+
+### Mathematical Variables
+
+- **sum**, **diff**, **prod**, **div**, **mod**: For numeric operations
+  ```razen
+  sum total = 100 + 50;  # Sum calculation
+  diff result = 100 - 50;  # Difference calculation
+  prod product = 5 * 10;  # Product calculation
+  div quotient = 20 / 4;  # Division calculation
+  mod remainder = 10 % 3;  # Modulus calculation
+  ```
+
+### String Variables
+
+- **text**, **concat**, **slice**: For string operations
+  ```razen
+  text greeting = "Welcome to Razen";  # String data
+  concat fullName = "John" + " " + "Doe";  # String concatenation
+  slice firstName = "John Doe";  # Will use with substring operations
+  ```
+
+### Collection Variables
+
+- **list**, **arr**, **append**, **remove**: For array operations
+  ```razen
+  list dynamicList = [1, 2, 3, 4, 5];  # Dynamic array
+  arr fixedArray = [10, 20, 30];  # Fixed-size array
+  append newList = [1, 2, 3, 4, 5, 6];  # Array with appended element
+  remove shorterList = [2, 3, 4, 5];  # Array after removal
+  ```
+
+### Dictionary/Map Variables
+
+- **map**, **key**, **value**: For dictionary operations
+  ```razen
+  map userInfo = ["name", "John", "age", 30];  # Key-value storage using arrays
+  key userKeys = ["name", "age"];  # Dictionary keys
+  value userValues = ["John", 30];  # Dictionary values
+  ```
+
+### Date & Time Variables
+
+- **current**, **now**, **year**, **month**, **day**, **hour**, **minute**, **second**: For date/time operations
+  ```razen
+  current currentTime = TimeLib[now]();  # Current date/time
+  year currentYear = TimeLib[year]();  # Year component
+  month currentMonth = TimeLib[month]();  # Month component
+  day currentDay = TimeLib[day]();  # Day component
+  ```
+
+### User-Defined Variables
+
+- **store**, **box**, **ref**: For special variable operations
+  ```razen
+  store savedData = "This will be saved";  # Persistent storage
+  box tempData = "Temporary data";  # Temporary storage
+  ref nameRef = message;  # Reference to another variable
   ```
 
 ## Object-Oriented Programming

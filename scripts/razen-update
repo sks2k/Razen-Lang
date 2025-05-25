@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Razen Language Update Utility
 # Copyright 2025 Prathmesh Barot, Basai Corporation
-# Version: beta v0.1.6589 (Libraries Update new libs added image and date and etc.)
+# Version: beta v0.1.67 (Tokens update and new libraries added.)
 
 # Colors for terminal output
 GREEN="\033[0;32m"

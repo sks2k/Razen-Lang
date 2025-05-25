@@ -1,0 +1,71 @@
+# Import required libraries
+lib timelib;
+lib uuid;
+lib strlib;
+lib arrlib;
+
+# Correct variable declarations test file
+
+# 1. General Purpose Variables
+let num = 42;  # Numeric variable
+take message = "Hello, Razen!";  # String variable
+hold isValid = true;  # Boolean variable
+put anything = "This can be any type";  # Any type variable
+
+# 2. Mathematical Variables
+sum total = 100 + 50;  # Sum calculation
+diff result = 100 - 50;  # Difference calculation
+prod product = 5 * 10;  # Product calculation
+div quotient = 20 / 4;  # Division calculation
+mod remainder = 10 % 3;  # Modulus calculation
+
+# 4. String Variables
+text greeting = "Welcome to Razen";  # String data
+concat fullName = "John" + " " + "Doe";  # String concatenation
+slice firstName = "John Doe";  # Will use substring later
+let nameLength = 8;  # String length - using 'let' instead of 'len' for numeric value
+
+# 5. List & Array Variables
+list dynamicList = [1, 2, 3, 4, 5];  # Dynamic array
+arr fixedArray = [10, 20, 30];  # Fixed-size array
+append newList = [1, 2, 3, 4, 5, 6];  # Array with appended element
+remove shorterList = [2, 3, 4, 5];  # Array after removal
+
+# 6. Dictionary/Map Variables
+map userInfo = ["name", "John", "age", 30];  # Key-value storage using arrays
+key userKeys = ["name", "age"];  # Dictionary keys
+value userValues = ["John", 30];  # Dictionary values
+
+# 7. Date & Time Variables
+current currentTime = TimeLib[now]();  # Current date/time
+take timestamp = TimeLib[timestamp]();  # Current timestamp
+year currentYear = TimeLib[year]();  # Year component
+month currentMonth = TimeLib[month]();  # Month component
+day currentDay = TimeLib[day]();  # Day component
+hour currentHour = TimeLib[hour]();  # Hour component
+minute currentMinute = TimeLib[minute]();  # Minute component
+second currentSecond = TimeLib[second]();  # Second component
+
+# 8. User-Defined Variables
+store savedData = "This will be saved";  # Persistent storage
+box tempData = "Temporary data";  # Temporary storage
+ref nameRef = message;  # Reference to another variable
+
+# Display some values
+show "Testing correct variable declarations";
+show num;
+show message;
+show isValid;
+
+# Using library functions
+show "UUID: " + UUID[generate]();
+show "Current time: " + TimeLib[format](TimeLib[now](), "YYYY-MM-DD HH:mm:ss");
+
+# Using string functions
+show "First name: " + StrLib[substring](firstName, 0, 4);
+
+# Using array functions
+show "Array length: " + ArrLib[length](dynamicList);
+
+# Exit program
+exit;

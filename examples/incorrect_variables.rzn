@@ -1,0 +1,47 @@
+# Import required libraries
+lib timelib;
+lib uuid;
+
+# Incorrect variable declarations test file
+
+# 1. General Purpose Variables with incorrect types
+let stringInLet = "This should be a number";  # ERROR: let should be used for numeric values
+take numberInTake = 42;  # ERROR: take should be used for string values
+hold stringInHold = "This should be a boolean";  # ERROR: hold should be used for boolean values
+
+# 2. Mathematical Variables with incorrect types
+sum boolInSum = true;  # ERROR: sum should be used for numeric values
+diff arrayInDiff = [1, 2, 3];  # ERROR: diff should be used for numeric values
+prod stringInProd = "Product";  # ERROR: prod should be used for numeric values
+
+# 4. String Variables with incorrect types
+text numberInText = 123;  # ERROR: text should be used for string values
+concat boolInConcat = false;  # ERROR: concat should be used for string values
+slice numberInSlice = 42;  # ERROR: slice should be used for string values
+
+# 5. List & Array Variables with incorrect types
+list numberInList = 42;  # ERROR: list should be used for collection values
+arr stringInArr = "Not an array";  # ERROR: arr should be used for collection values
+
+# 6. Dictionary/Map Variables with incorrect types
+map numberInMap = 42;  # ERROR: map should be used for map/dictionary values
+key boolInKey = true;  # ERROR: key should be used for map/dictionary values
+
+# 7. Date & Time Variables with incorrect types
+year arrayInYear = [2025];  # ERROR: year should be used for date/time values
+month mapInMonth = ["month", 5];  # ERROR: month should be used for date/time values
+
+# 8. User-Defined Variables with incorrect types
+ref numberInRef = 42;  # ERROR: ref should point to an identifier, not a literal
+
+# Display some values
+show "Testing incorrect variable declarations";
+
+# Try to use the variables
+show "Attempting to display variables with incorrect types:";
+show stringInLet;
+show numberInTake;
+show stringInHold;
+
+# Exit program
+exit;
