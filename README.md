@@ -6,19 +6,19 @@ Razen is a modern, intuitive programming language designed for clarity, performa
 Developed by Prathmesh Barot, Basai Corporation.
 
 ## Features
-- **Intuitive Syntax**: Python-like syntax that's easy to read and write
-- **Fast Performance**: Built for efficiency with optimized runtime execution
-- **Built-in Debugging**: Comprehensive debugging tools including step-by-step execution
-- **Type Safety**: Strong type checking for variables with specialized declaration tokens
-- **Rich Library System**: Extensive library system with bracket notation for function calls
-- **Expressive Conditionals**: Clean if/else syntax with support for nested conditions
-- **Interactive Mode**: Built-in REPL for testing code snippets
-- **Lightweight**: Small footprint with minimal dependencies
-- **Cross-platform support**: Works on Linux, macOS, and Windows
-- **OOP Support**: Class-based object-oriented programming capabilities
-- **Colored Output**: Built-in support for colored terminal output
-- **Robust Error Handling**: Comprehensive error handling with try/catch blocks
-- **Filesystem Library**: Comprehensive filesystem operations for file and directory management
+- **Intuitive Syntax**: Python-like syntax that's easy to read and write.
+- **Fast Performance**: Built for efficiency with optimized runtime execution.
+- **Built-in Debugging**: Comprehensive debugging tools including step-by-step execution.
+- **Type Safety**: Strong type checking for variables with specialized declaration tokens.
+- **Rich Library System**: Extensive library system with bracket notation for function calls.
+- **Expressive Conditionals**: Clean if/else syntax with support for nested conditions.
+- **Interactive Mode**: Built-in REPL for testing code snippets.
+- **Lightweight**: Small footprint with minimal dependencies.
+- **Cross-platform support**: Works on Linux, macOS, and Windows.
+- **OOP Support**: Class-based object-oriented programming capabilities.
+- **Colored Output**: Built-in support for colored terminal output.
+- **Robust Error Handling**: Comprehensive error handling with try/catch blocks.
+- **Filesystem Library**: Comprehensive filesystem operations for file and directory management.
 
 ## Installation
 
@@ -101,7 +101,7 @@ If you encounter installation issues:
    # Install Visual Studio Build Tools
    # Download from: https://visualstudio.microsoft.com/visual-cpp-build-tools/
    # Select "C++ build tools" workload during installation
-   
+
    # Verify installation
    rustup default stable-x86_64-pc-windows-msvc
    rustc --version
@@ -110,13 +110,13 @@ If you encounter installation issues:
 2. **For GNU Toolchain Issues**:
    ```bash
    # The installer attempts automatic installation, but if it fails:
-   
+
    # Via MSYS2 (recommended)
    pacman -S mingw-w64-x86_64-gcc mingw-w64-x86_64-toolchain
-   
+
    # Via Chocolatey
    choco install mingw -y
-   
+
    # Verify installation
    rustup default stable-x86_64-pc-windows-gnu
    rustc --version
@@ -126,11 +126,11 @@ If you encounter installation issues:
    ```bash
    # Check available toolchains
    rustup toolchain list
-   
+
    # Install specific toolchain
    rustup toolchain install stable-x86_64-pc-windows-gnu
    rustup toolchain install stable-x86_64-pc-windows-msvc
-   
+
    # Switch between toolchains
    rustup default stable-x86_64-pc-windows-msvc  # For Visual Studio users
    rustup default stable-x86_64-pc-windows-gnu   # For MinGW-w64 users
