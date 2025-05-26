@@ -1768,6 +1768,17 @@ impl Compiler {
                                 }
                             }
                         },
+                        "__import_lib" => {
+                            if args.len() >= 1 {
+                                let lib_name = &args[0];
+                                if !self.clean_output {
+                                    println!("Importing library: {}", lib_name);
+                                }
+                                // Library is already registered during compilation
+                                // Just return success
+                                stack.push("true".to_string());
+                            }
+                        },
                         _ => {
                             built_in_handled = false;
                         }
