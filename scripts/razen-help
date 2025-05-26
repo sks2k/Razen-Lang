@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Razen Language Help Script
 # Copyright © 2025 Prathmesh Barot, Basai Corporation
-# Version: beta v0.1.67 (Tokens update and new libraries added.)
+# Version: beta v0.1.675 (Universal Installer & new features added.)
 
 # Colors for terminal output
 BLUE="\033[0;34m"
@@ -88,7 +88,7 @@ echo -e "    ${CYAN}Example:${NC} razen new my_program\n"
 echo -e "  ${YELLOW}version${NC} - Display Razen version information"
 echo -e "    ${CYAN}Usage:${NC} razen version"
 echo -e "    ${CYAN}Example:${NC} razen version\n"
-    
+
 echo -e "  ${YELLOW}debug${NC} - Run a program with debug information"
 echo -e "    ${CYAN}Usage:${NC} razen-debug <filename.rzn>"
 echo -e "    ${CYAN}Example:${NC} razen-debug hello_world.rzn\n"
@@ -125,4 +125,4 @@ echo -e "  For more information, visit: ${CYAN}https://razen-lang.org${NC}"
 echo -e "  Report issues: ${CYAN}https://github.com/BasaiCorp/razen-lang/issues${NC}\n"
 
 # COPYRIGHT
-echo -e "${YELLOW}Copyright © 2025 Prathmesh Barot, Basai Corporation${NC}" 
+echo -e "${YELLOW}Copyright © 2025 Prathmesh Barot, Basai Corporation${NC}"

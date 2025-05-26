@@ -66,7 +66,7 @@ trap 'rm -rf "$TMP_DIR"' EXIT
 # Check for internet connectivity
 check_internet() {
     echo -e "${YELLOW}Checking internet connectivity...${NC}"
-    
+
     # Use different commands based on OS
     if [[ "$OS" == "windows" ]]; then
         if ! ping -n 1 github.com &>/dev/null && ! ping -n 1 google.com &>/dev/null; then
@@ -81,7 +81,7 @@ check_internet() {
             return 1
         fi
     fi
-    
+
     echo -e "  ${GREEN}✓${NC} Internet connection detected"
     return 0
 }
@@ -89,7 +89,7 @@ check_internet() {
 # Check for sudo/admin privileges
 check_permissions() {
     echo -e "${YELLOW}Checking for required permissions...${NC}"
-    
+
     if [[ "$OS" == "windows" ]]; then
         # Check for admin rights on Windows
         if ! net session &>/dev/null; then
@@ -118,7 +118,7 @@ check_permissions() {
             echo -e "  ${GREEN}✓${NC} Sudo access confirmed"
         fi
     fi
-    
+
     return 0
 }
 
@@ -127,18 +127,18 @@ handle_error() {
     local exit_code=$1
     local error_message=$2
     local recovery_hint=$3
-    
+
     echo -e "${RED}Error: $error_message (Exit code: $exit_code)${NC}"
-    
+
     if [ -n "$recovery_hint" ]; then
         echo -e "${YELLOW}Hint: $recovery_hint${NC}"
     fi
-    
+
     if [ -d "$TMP_DIR" ]; then
         echo -e "${YELLOW}Cleaning up temporary files...${NC}"
         rm -rf "$TMP_DIR"
     fi
-    
+
     exit $exit_code
 }
 
@@ -146,7 +146,7 @@ handle_error() {
 create_symlink() {
     local src=$1
     local dest=$2
-    
+
     if [[ "$OS" == "windows" ]]; then
         # Windows symlinks (needs admin privileges)
         if [[ -d "$src" ]]; then
@@ -175,7 +175,7 @@ add_to_path_windows() {
 # Install Rust based on OS
 install_rust() {
     echo -e "${YELLOW}Installing Rust...${NC}"
-    
+
     if [[ "$OS" == "windows" ]]; then
         # Download and run rustup-init.exe for Windows
         curl -sSf -o "$TMP_DIR/rustup-init.exe" https://win.rustup.rs/x86_64
@@ -186,7 +186,7 @@ install_rust() {
         curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
         source "$HOME/.cargo/env"
     fi
-    
+
     echo -e "  ${GREEN}✓${NC} Rust installed successfully"
 }
 
@@ -198,7 +198,7 @@ get_version() {
         # Download version file if not present
         if ! curl -s -o "$TMP_DIR/version" "$RAZEN_REPO/version" &>/dev/null; then
             echo -e "${RED}Failed to download version information. Using default version.${NC}"
-            RAZEN_VERSION="beta v0.1.67 (Tokens update and new libraries added.)"
+            RAZEN_VERSION="beta v0.1.675 (Universal Installer & new features added.)"
         else
             RAZEN_VERSION=$(cat "$TMP_DIR/version")
             # Store the version file for future reference
@@ -210,11 +210,11 @@ get_version() {
 # Check if Razen is installed and get the installed version
 check_installed_razen() {
     echo -e "${YELLOW}Checking for existing Razen installation...${NC}"
-    
+
     # Check if razen-help command exists
     if command -v razen-help &>/dev/null; then
         echo -e "  ${GREEN}✓${NC} Razen is installed"
-        
+
         # Try to get the installed version
         if [[ "$OS" == "windows" ]]; then
             if [ -f "$INSTALL_DIR/version" ]; then
@@ -233,17 +233,17 @@ check_installed_razen() {
                 return 0
             fi
         fi
-        
+
         # If we couldn't get version but command exists
         echo -e "  ${YELLOW}Could not determine installed version${NC}"
         INSTALLED_VERSION="unknown"
         return 0
     fi
-    
+
     # Check if installation directory exists
     if [ -d "$INSTALL_DIR" ]; then
         echo -e "  ${GREEN}✓${NC} Razen installation directory found"
-        
+
         # Try to get the installed version
         if [[ "$OS" == "windows" ]]; then
             if [ -f "$INSTALL_DIR/version" ]; then
@@ -262,13 +262,13 @@ check_installed_razen() {
                 return 0
             fi
         fi
-        
+
         # If we couldn't get version but directory exists
         echo -e "  ${YELLOW}Could not determine installed version${NC}"
         INSTALLED_VERSION="unknown"
         return 0
     fi
-    
+
     echo -e "  ${YELLOW}No existing Razen installation found${NC}"
     return 1
 }
@@ -280,17 +280,17 @@ needs_update() {
     if [ -z "$INSTALLED_VERSION" ]; then
         return 0
     fi
-    
+
     # If installed version is unknown, assume update is needed
     if [ "$INSTALLED_VERSION" == "unknown" ]; then
         return 0
     fi
-    
+
     # If versions are different, update is needed
     if [ "$INSTALLED_VERSION" != "$RAZEN_VERSION" ]; then
         return 0
     fi
-    
+
     # Versions are the same, no update needed
     return 1
 }
@@ -306,7 +306,7 @@ display_banner() {
     echo "██║  ██║██║  ██║███████╗███████╗██║ ╚████║"
     echo "╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝╚══════╝╚═╝  ╚═══╝"
     echo -e "${NC}"
-    
+
     if [[ "$1" == "uninstall" ]]; then
         echo -e "${CYAN}Razen Programming Language Uninstaller${NC}"
     elif [[ "$1" == "force" ]]; then
@@ -316,7 +316,7 @@ display_banner() {
     else
         echo -e "${CYAN}Razen Programming Language Installer${NC}"
     fi
-    
+
     echo -e "${CYAN}Version: $RAZEN_VERSION${NC}"
     echo -e "${CYAN}Detected OS: $OS${NC}"
     echo -e "${CYAN}=======================================${NC}"
@@ -332,7 +332,7 @@ clone_repository() {
         echo -e "${RED}Git is not installed. Please install Git and try again.${NC}"
         exit 1
     fi
-    
+
     git clone --depth=1 "$RAZEN_GIT_REPO" "$TMP_DIR/razen" || handle_error $? "Failed to clone repository" "Check your internet connection and GitHub access"
     echo -e "  ${GREEN}✓${NC} Razen repository cloned successfully"
 }
@@ -345,7 +345,7 @@ copy_files() {
     else
         sudo mkdir -p "$INSTALL_DIR" || handle_error $? "Failed to create installation directory" "Check your permissions"
     fi
-    
+
     # Copy required files and folders
     echo -e "${YELLOW}Copying Razen files to $INSTALL_DIR...${NC}"
     REQUIRED_ITEMS=(
@@ -360,7 +360,7 @@ copy_files() {
         "LICENSE"
         "README.md"
     )
-    
+
     for item in "${REQUIRED_ITEMS[@]}"; do
         if [[ "$OS" == "windows" ]]; then
             cp -r "$TMP_DIR/razen/$item" "$INSTALL_DIR/" || handle_error $? "Failed to copy $item" "Check permissions and disk space"
@@ -368,14 +368,14 @@ copy_files() {
             sudo cp -r "$TMP_DIR/razen/$item" "$INSTALL_DIR/" || handle_error $? "Failed to copy $item" "Check permissions and disk space"
         fi
     done
-    
+
     # Copy universal installer for reference
     if [[ "$OS" == "windows" ]]; then
         cp "$TMP_DIR/razen/installer.sh" "$INSTALL_DIR/" 2>/dev/null || true
     else
         sudo cp "$TMP_DIR/razen/installer.sh" "$INSTALL_DIR/" 2>/dev/null || true
     fi
-    
+
     echo -e "  ${GREEN}✓${NC} All required files copied successfully"
 }
 
@@ -386,9 +386,9 @@ select_ide() {
     echo "2. JetBrains IDEs"
     echo "3. Both"
     echo "4. Skip IDE extension installation"
-    
+
     read -p "Enter your choice (1-4): " ide_choice
-    
+
     case $ide_choice in
         1)
             echo -e "${YELLOW}Installing VSCode extension support...${NC}"
@@ -436,23 +436,23 @@ select_ide() {
 # Step 4: Create Symbolic Links
 create_symlinks() {
     echo -e "${YELLOW}Creating executable links for Razen scripts...${NC}"
-    
+
     # Get list of script files
     SCRIPT_FILES=($(find "$INSTALL_DIR/scripts" -type f -name "*.sh" -o -name "*.py" 2>/dev/null))
-    
+
     # Create symbolic links for each script
     for script in "${SCRIPT_FILES[@]}"; do
         # Extract just the filename without extension
         filename=$(basename "$script")
         filename_noext="${filename%.*}"
-        
+
         # Make the script executable
         if [[ "$OS" == "windows" ]]; then
             chmod +x "$script" || handle_error $? "Failed to make $script executable" "Check permissions"
         else
             sudo chmod +x "$script" || handle_error $? "Failed to make $script executable" "Check permissions"
         fi
-        
+
         # Create symbolic link or batch file wrapper
         if [[ "$OS" == "windows" ]]; then
             # For Windows, create .bat wrapper in BIN_DIR
@@ -465,24 +465,24 @@ create_symlinks() {
             echo -e "  ${GREEN}✓${NC} Created symbolic link for $filename_noext"
         fi
     done
-    
+
     # For Windows, add to PATH
     if [[ "$OS" == "windows" ]]; then
         add_to_path_windows
     fi
-    
+
     echo -e "  ${GREEN}✓${NC} All command links created successfully"
 }
 
 # Step 5: Rust Dependency Check and Build
 setup_rust_and_build() {
     echo -e "${YELLOW}Checking for Rust installation...${NC}"
-    
+
     # Check if Rust is installed
     if ! command -v rustc &>/dev/null || ! command -v cargo &>/dev/null; then
         echo -e "${RED}Rust is not installed on your system.${NC}"
         read -p "Would you like to install Rust now? (y/n): " install_rust_choice
-        
+
         if [[ "$install_rust_choice" =~ ^[Yy]$ ]]; then
             install_rust
         else
@@ -491,14 +491,14 @@ setup_rust_and_build() {
     else
         echo -e "  ${GREEN}✓${NC} Rust is installed"
     fi
-    
+
     # Build Razen
     echo -e "${YELLOW}Building Razen...${NC}"
     cd "$INSTALL_DIR" || handle_error $? "Failed to navigate to installation directory" "Check if the directory exists"
-    
+
     # Ensure PATH includes cargo
     export PATH="$HOME/.cargo/bin:$PATH"
-    
+
     # Fix permissions before building
     if [[ "$OS" == "windows" ]]; then
         # Windows doesn't need permission fixes
@@ -508,14 +508,14 @@ setup_rust_and_build() {
         echo -e "${YELLOW}Setting proper permissions for build...${NC}"
         current_user=$(whoami)
         sudo chown -R "$current_user" "$INSTALL_DIR"
-        
+
         # Build with current user permissions
         cargo build --release || handle_error $? "Failed to build Razen" "Check for compilation errors and ensure Rust is properly installed"
-        
+
         # Return ownership to root for system directories
         sudo chown -R root:root "$INSTALL_DIR"
     fi
-    
+
     echo -e "  ${GREEN}✓${NC} Razen built successfully"
 }
 
@@ -530,9 +530,9 @@ install_ide_extensions() {
         echo "5. Trae AI"
         echo "6. Zed"
         echo "7. Skip extension installation"
-        
+
         read -p "Enter your choice (1-7): " vscode_choice
-        
+
         case $vscode_choice in
             [1-6])
                 # Get IDE-specific extension directory based on OS
@@ -564,10 +564,10 @@ install_ide_extensions() {
                         6) ext_dir="$HOME/.zed/extensions" && ide_name="Zed" ;;
                     esac
                 fi
-                
+
                 # Create extension directory if it doesn't exist
                 mkdir -p "$ext_dir" || handle_error $? "Failed to create extension directory" "Check permissions"
-                
+
                 # Copy extension
                 echo -e "${YELLOW}Installing Razen extension for $ide_name...${NC}"
                 cp -r "$INSTALL_DIR/razen-vscode-extension" "$ext_dir/razen.razen-lang" || handle_error $? "Failed to install extension" "Check permissions"
@@ -581,7 +581,7 @@ install_ide_extensions() {
                 ;;
         esac
     fi
-    
+
     if [[ "$IDE_CHOICE" == "jetbrains" || "$IDE_CHOICE" == "both" ]]; then
         echo -e "${YELLOW}Select your JetBrains IDE to install the Razen plugin:${NC}"
         echo "1. IntelliJ IDEA"
@@ -593,9 +593,9 @@ install_ide_extensions() {
         echo "7. GoLand"
         echo "8. RubyMine"
         echo "9. Skip plugin installation"
-        
+
         read -p "Enter your choice (1-9): " jetbrains_choice
-        
+
         if [[ "$jetbrains_choice" =~ ^[1-8]$ ]]; then
             # Get IDE-specific plugin directory based on OS
             if [[ "$OS" == "windows" ]]; then
@@ -632,14 +632,14 @@ install_ide_extensions() {
                     8) plugin_dir="$HOME/.config/JetBrains/RubyMine*/plugins" && ide_name="RubyMine" ;;
                 esac
             fi
-            
+
             # Find actual plugin directory (resolving wildcard)
             plugin_dir=$(echo $plugin_dir)
-            
+
             if [ -d "$plugin_dir" ]; then
                 # Create plugin directory if needed
                 mkdir -p "$plugin_dir" || handle_error $? "Failed to create plugin directory" "Check permissions"
-                
+
                 # Copy plugin
                 echo -e "${YELLOW}Installing Razen plugin for $ide_name...${NC}"
                 cp -r "$INSTALL_DIR/razen-jetbrains-plugin" "$plugin_dir/razen-lang" || handle_error $? "Failed to install plugin" "Check permissions"
@@ -659,7 +659,7 @@ install_ide_extensions() {
 # Step 7: Display Help Information
 display_help() {
     echo -e "${YELLOW}Displaying Razen help information...${NC}"
-    
+
     # Determine razen-help command path
     if [[ "$OS" == "windows" ]]; then
         RAZEN_HELP="$BIN_DIR/razen-help.bat"
@@ -685,11 +685,11 @@ display_help() {
 installation_complete() {
     echo -e "${GREEN}=== Razen Installation Complete ===${NC}"
     echo -e "${CYAN}Razen has been successfully installed to: $INSTALL_DIR${NC}"
-    
+
     if [[ "$OS" == "windows" ]]; then
         echo -e "${CYAN}The following commands are now available from: $BIN_DIR${NC}"
         echo -e "${CYAN}Make sure this directory is in your PATH.${NC}"
-        
+
         # List available commands
         for cmd in "$BIN_DIR"/*.bat; do
             if [ -f "$cmd" ]; then
@@ -699,13 +699,13 @@ installation_complete() {
         done
     else
         echo -e "${CYAN}The following commands are now available globally:${NC}"
-        
+
         # List available commands
         for cmd in $(find "$BIN_DIR" -type l -exec readlink {} \; 2>/dev/null | grep -E "$INSTALL_DIR/scripts" | xargs -r basename); do
             echo -e "  ${GREEN}•${NC} $cmd"
         done
     fi
-    
+
     echo -e "\n${CYAN}You can now start using Razen!${NC}"
     echo -e "${CYAN}For more information, visit: https://razen-lang.org${NC}"
     echo -e "${CYAN}Happy coding!${NC}"
@@ -714,14 +714,14 @@ installation_complete() {
 # Uninstall Razen
 uninstall_razen() {
     echo -e "${YELLOW}Uninstalling Razen...${NC}"
-    
+
     # Get confirmation
     read -p "Are you sure you want to uninstall Razen? (y/n): " confirm
     if [[ ! "$confirm" =~ ^[Yy]$ ]]; then
         echo -e "${CYAN}Uninstallation cancelled.${NC}"
         exit 0
     fi
-    
+
     # Remove symbolic links
     echo -e "${YELLOW}Removing symbolic links...${NC}"
     if [[ "$OS" == "windows" ]]; then
@@ -733,7 +733,7 @@ uninstall_razen() {
             sudo rm -f "$BIN_DIR/$link" 2>/dev/null
         done
     fi
-    
+
     # Remove installation directory
     echo -e "${YELLOW}Removing Razen installation directory...${NC}"
     if [[ "$OS" == "windows" ]]; then
@@ -741,7 +741,7 @@ uninstall_razen() {
     else
         sudo rm -rf "$INSTALL_DIR" 2>/dev/null || echo -e "${RED}Failed to remove installation directory. You may need to remove it manually: $INSTALL_DIR${NC}"
     fi
-    
+
     echo -e "${GREEN}Razen has been uninstalled successfully.${NC}"
 }
 
@@ -753,19 +753,19 @@ main() {
         uninstall_razen
         exit 0
     fi
-    
+
     # Check for internet connectivity
     check_internet || exit 1
-    
+
     # Check for required permissions
     check_permissions || exit 1
-    
+
     # Get version information
     get_version
-    
+
     # Display banner
     display_banner "$1"
-    
+
     # Check for existing installation unless force flag is used
     if [[ "$1" != "force" ]]; then
         if check_installed_razen; then
@@ -791,31 +791,31 @@ main() {
             fi
         fi
     fi
-    
+
     # Step 1: Clone repository
     clone_repository
-    
+
     # Step 2: Copy required files and folders
     copy_files
-    
+
     # Step 3: IDE Extension Selection
     select_ide
-    
+
     # Step 4: Create Symbolic Links
     create_symlinks
-    
+
     # Step 5: Rust Dependency Check and Build
     setup_rust_and_build
-    
+
     # Step 6: IDE Extension Installation
     install_ide_extensions
-    
+
     # Step 7: Display Help Information
     display_help
-    
+
     # Step 8: Installation Complete
     installation_complete
-    
+
     echo -e "${CYAN}To uninstall Razen in the future, run: $0 uninstall${NC}"
     echo -e "${CYAN}To check for updates, simply run this installer again.${NC}"
 }

@@ -1,4 +1,4 @@
-# Razen Programming Language beta v0.1.67 (Tokens update and new libraries added.)
+# Razen Programming Language beta v0.1.675 (Universal Installer & new features added.)
 
 ## Overview
 Razen is a modern, intuitive programming language designed for clarity, performance, and ease of use. With a clean syntax inspired by Python and strong type safety, Razen offers an excellent balance between development speed and runtime performance.
@@ -22,45 +22,38 @@ Developed by Prathmesh Barot, Basai Corporation.
 
 ## Installation
 
-### Linux
-```bash
-# Using curl
-curl -o install.sh "https://raw.githubusercontent.com/BasaiCorp/razen-lang/main/install.sh" && chmod +x install.sh && sudo ./install.sh
-```
+### Universal Installer (All Platforms)
+
+Razen now provides a single universal installer that works across all major platforms:
 
 ```bash
-# Using wget
-wget -O install.sh "https://raw.githubusercontent.com/BasaiCorp/razen-lang/main/install.sh" && chmod +x install.sh && sudo ./install.sh
-```
-
-### macOS
-```bash
-# Using curl
-curl -o install-mac.sh "https://raw.githubusercontent.com/BasaiCorp/razen-lang/main/install-mac.sh" && chmod +x install-mac.sh && sudo ./install-mac.sh
+# Using curl (Linux/macOS/Windows with Git Bash)
+curl -o installer.sh "https://raw.githubusercontent.com/BasaiCorp/razen-lang/main/installer.sh" && chmod +x installer.sh && ./installer.sh
 ```
 
 ```bash
-# Using Homebrew (coming soon)
-brew install razen
+# Using wget (Linux)
+wget -O installer.sh "https://raw.githubusercontent.com/BasaiCorp/razen-lang/main/installer.sh" && chmod +x installer.sh && ./installer.sh
 ```
 
-### Windows
-```powershell
-# Using PowerShell (Run as Administrator)
-# First, create a temporary directory and change to it
-cd $env:USERPROFILE\Desktop
-# Download and run the installer
-Invoke-WebRequest -Uri "https://raw.githubusercontent.com/BasaiCorp/razen-lang/main/install.ps1" -OutFile "install.ps1"; .\install.ps1
+### Windows Installation
+
+For Windows users:
+```bash
+# Using Git Bash
+curl -o installer.sh "https://raw.githubusercontent.com/BasaiCorp/razen-lang/main/installer.sh" && chmod +x installer.sh && ./installer.sh
 ```
 
-```powershell
-# Alternative method (if the above doesn't work):
-# 1. Open PowerShell as Administrator
-# 2. Run these commands:
-cd $env:USERPROFILE\Desktop
-[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-Invoke-WebRequest -Uri "https://raw.githubusercontent.com/BasaiCorp/razen-lang/main/install.ps1" -OutFile "install.ps1"
-.\install.ps1
+> **Note**: Windows installation requires Git Bash, which you can download from [https://git-scm.com/downloads](https://git-scm.com/downloads)
+
+### Installation Options
+
+The installer provides additional options:
+
+```bash
+./installer.sh           # Standard installation/update
+./installer.sh force     # Force a fresh installation
+./installer.sh uninstall # Remove Razen from your system
 ```
 
 This will download and install Razen globally on your system, making the `razen` command available from anywhere.
@@ -78,12 +71,13 @@ This will automatically check for updates and install the newest version if avai
 
 To uninstall Razen:
 ```bash
-razen uninstall
+./installer.sh uninstall
 ```
 
-Alternatively:
+or
+
 ```bash
-sudo /usr/local/lib/razen/install.sh --uninstall
+razen uninstall
 ```
 
 ## Usage
@@ -96,7 +90,6 @@ razen <filename.rzn>       # Run a Razen script
 razen new <filename>       # Create a new Razen program
 razen version              # Display version information
 razen help                 # Show help information
-razen uninstall            # Uninstall Razen
 
 # Specialized Tools
 razen-debug <filename.rzn> # Debug mode with detailed output
@@ -286,15 +279,19 @@ Runs a Razen program in test mode, useful for testing scripts and validating fun
 razen-test my-program.rzn
 ```
 
-### razen uninstall
-Safely removes all Razen files and symbolic links from your system. Provides confirmation before proceeding.
-
 ## File Locations
 
+### Linux/macOS
 - **Core files**: `/usr/local/lib/razen`
 - **Examples**: `/usr/local/lib/razen/examples`
 - **Scripts**: `/usr/local/lib/razen/scripts`
 - **Library Files**: `/usr/local/lib/razen/properties/libs`
+
+### Windows
+- **Core files**: `C:\Program Files\Razen`
+- **Examples**: `C:\Program Files\Razen\examples`
+- **Scripts**: `C:\Program Files\Razen\scripts`
+- **Executables**: `C:\Program Files\Razen\bin`
 
 ## Variable Types
 
@@ -396,12 +393,12 @@ class Person {
         this.name = name;
         this.age = age;
     }
-    
+
     # Method to display information
     fun display() {
         show "Name: " + this.name + ", Age: " + this.age;
     }
-    
+
     # Method to have a birthday
     fun haveBirthday() {
         this.age = this.age + 1;
@@ -427,7 +424,7 @@ class Employee extends Person {
         super.init(name, age);
         this.position = position;
     }
-    
+
     fun display() {
         super.display();
         show "Position: " + this.position;
@@ -459,3 +456,14 @@ For questions, support, or feedback about Razen, please contact:
 - GitHub: [https://github.com/BasaiCorp/razen-lang](https://github.com/BasaiCorp/razen-lang)
 
 **Official website coming soon!**
+
+## Changelog
+
+### beta v0.1.675
+- Added universal installer supporting Linux, macOS, and Windows
+- Improved update system with version comparison
+- Added direct uninstall option via installer
+- Enhanced IDE extension support
+- Fixed permissions issues with cargo build
+- Updated library files with new features
+- Improved error handling and user feedback

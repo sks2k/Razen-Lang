@@ -57,7 +57,7 @@ get_version() {
   elif [ -f "$PROJECT_ROOT/version" ]; then
     cat "$PROJECT_ROOT/version"
   else
-    echo "beta v0.1.67 (Tokens update and new libraries added.)" # Fallback version
+    echo "beta v0.1.675 (Universal Installer & new features added.)" # Fallback version
   fi
 }
 
@@ -73,18 +73,18 @@ if [ "$1" == "new" ]; then
         echo "Usage: razen new <filename>"
         exit 1
     fi
-    
+
     # Create a new Razen file
     FILENAME="$2"
     if [[ "$FILENAME" != *.rzn ]]; then
         FILENAME="${FILENAME}.rzn"
     fi
-    
+
     echo -e "${YELLOW}Creating new Razen program: ${FILENAME}${NC}"
-    
+
     # Get current date
     CURRENT_DATE=$(get_current_date)
-    
+
     cat > "$FILENAME" << EOF
 type freestyle;
 
@@ -120,16 +120,16 @@ while (counter < 5) {
 
 show "Program completed!";
 EOF
-    
+
     echo -e "${GREEN}✓${NC} Created $FILENAME"
     exit 0
-    
+
 elif [ "$1" == "version" ] || [ "$1" == "--version" ] || [ "$1" == "-v" ]; then
     VERSION=$(get_version)
     echo "Razen Language $VERSION"
     echo "Copyright 2025 Prathmesh Barot, Basai Corporation"
     exit 0
-    
+
 elif [ "$1" == "help" ] || [ "$1" == "--help" ] || [ "$1" == "-h" ]; then
     # Call the help script if available, otherwise show basic help
     if command -v razen-help &>/dev/null; then
@@ -144,13 +144,13 @@ elif [ "$1" == "help" ] || [ "$1" == "--help" ] || [ "$1" == "-h" ]; then
         echo "  razen update             Update Razen to the latest version"
     fi
     exit 0
-    
+
 elif [ "$1" == "uninstall" ]; then
     echo -e "${YELLOW}Uninstalling Razen...${NC}"
     echo -e "${RED}This will remove all Razen files and scripts.${NC}"
     read -p "Are you sure you want to uninstall Razen? (y/n): " -n 1 -r
     echo
-    
+
     if [[ $REPLY =~ ^[Yy]$ ]]; then
         # Check if we're in Linux or macOS
         if [[ "$OSTYPE" == "linux-gnu"* ]]; then
@@ -198,12 +198,12 @@ elif [ "$1" == "update" ]; then
         exit 1
     fi
     exit 0
-    
+
 elif [ "$1" == "run" ] && [ -n "$2" ]; then
     # Run mode with filename
     FILENAME="$2"
     shift 2  # Remove 'run' and filename from args
-    
+
     # Get absolute path of the file
     if [[ "$FILENAME" == /* ]]; then
         # File already has an absolute path
@@ -212,18 +212,18 @@ elif [ "$1" == "run" ] && [ -n "$2" ]; then
         # Convert to absolute path
         ABSOLUTE_PATH="$(cd "$(dirname "$FILENAME")" && pwd)/$(basename "$FILENAME")"
     fi
-    
+
     # Check if the file exists
     if [ ! -f "$ABSOLUTE_PATH" ]; then
         echo -e "${RED}Error: File '$FILENAME' not found${NC}"
         exit 1
     fi
-    
+
     # Execute the Razen compiler in 'run' mode
     echo -e "${YELLOW}Running $FILENAME...${NC}"
     "$RAZEN_BIN" run "$ABSOLUTE_PATH" "$@"
     exit $?
-    
+
 elif [ -z "$1" ]; then
     # No arguments provided, show usage
     echo -e "${YELLOW}Razen Language Interpreter${NC}"
@@ -248,7 +248,7 @@ if [[ "$FILENAME" == /* ]]; then
 else
     # Convert to absolute path
     ABSOLUTE_PATH="$(cd "$(dirname "$FILENAME")" 2>/dev/null && pwd)/$(basename "$FILENAME")"
-    
+
     # If the directory doesn't exist, try current directory
     if [ $? -ne 0 ]; then
         ABSOLUTE_PATH="$(pwd)/$(basename "$FILENAME")"

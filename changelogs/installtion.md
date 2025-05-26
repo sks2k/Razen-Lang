@@ -98,14 +98,14 @@ check_permissions() {
         echo -e "  ${GREEN}✓${NC} Running with root privileges"
         return 0
     fi
-    
+
     # Test sudo access
     if ! sudo -v &>/dev/null; then
         echo -e "${RED}Error: This script requires sudo privileges to install system-wide.${NC}"
         echo -e "${YELLOW}Please run with sudo or as root.${NC}"
         return 1
     fi
-    
+
     echo -e "  ${GREEN}✓${NC} Sudo access confirmed"
     return 0
 }
@@ -115,18 +115,18 @@ handle_error() {
     local exit_code=$1
     local error_message=$2
     local recovery_hint=$3
-    
+
     echo -e "${RED}Error: $error_message (Exit code: $exit_code)${NC}"
-    
+
     if [ -n "$recovery_hint" ]; then
         echo -e "${YELLOW}Hint: $recovery_hint${NC}"
     fi
-    
+
     if [ -d "$TMP_DIR" ]; then
         echo -e "${YELLOW}Cleaning up temporary files...${NC}"
         rm -rf "$TMP_DIR"
     fi
-    
+
     exit $exit_code
 }
 
@@ -137,7 +137,7 @@ else
     # Download version file if not present
     if ! curl -s -o version "$RAZEN_REPO/version" &>/dev/null; then
         echo -e "${RED}Failed to download version information. Using default version.${NC}"
-        RAZEN_VERSION="beta v0.1.67 (Tokens update and new libraries added.)"
+        RAZEN_VERSION="beta v0.1.675 (Universal Installer & new features added.)"
     else
         RAZEN_VERSION=$(cat version)
         # Store the version file for future reference
@@ -148,7 +148,7 @@ fi
 
 ### 3. Display Banner
 
-```bash 
+```bash
 # Print banner
 echo -e "${BLUE}"
 echo "██████╗  █████╗ ███████╗███████╗███╗   ██╗"
@@ -270,13 +270,13 @@ for script in "${SCRIPT_FILES[@]}"; do
     # Extract just the filename without extension
     filename=$(basename "$script")
     filename_noext="${filename%.*}"
-    
+
     # Make the script executable
     sudo chmod +x "$script" || handle_error $? "Failed to make $script executable" "Check permissions"
-    
+
     # Create symbolic link
     sudo ln -sf "$script" "/usr/local/bin/$filename_noext" || handle_error $? "Failed to create symbolic link for $filename_noext" "Check if /usr/local/bin exists and is writable"
-    
+
     echo -e "  ${GREEN}✓${NC} Created symbolic link for $filename_noext"
 done
 
@@ -292,14 +292,14 @@ echo -e "${YELLOW}Checking for Rust installation...${NC}"
 if ! command -v rustc &>/dev/null || ! command -v cargo &>/dev/null; then
     echo -e "${RED}Rust is not installed on your system.${NC}"
     read -p "Would you like to install Rust now? (y/n): " install_rust
-    
+
     if [[ "$install_rust" =~ ^[Yy]$ ]]; then
         echo -e "${YELLOW}Installing Rust...${NC}"
         curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y || handle_error $? "Failed to install Rust" "Try installing Rust manually from https://rustup.rs/"
-        
+
         # Source the cargo environment
         source "$HOME/.cargo/env" || handle_error $? "Failed to source Cargo environment" "Try restarting your terminal and running the installer again"
-        
+
         echo -e "  ${GREEN}✓${NC} Rust installed successfully"
     else
         handle_error 1 "Rust is required to build Razen" "Please install Rust from https://rustup.rs/ and run the installer again"
@@ -327,9 +327,9 @@ if [[ "$IDE_CHOICE" == "vscode" || "$IDE_CHOICE" == "both" ]]; then
     echo "5. Trae AI"
     echo "6. Zed"
     echo "7. Skip extension installation"
-    
+
     read -p "Enter your choice (1-7): " vscode_choice
-    
+
     case $vscode_choice in
         [1-6])
             # Get IDE-specific extension directory
@@ -341,10 +341,10 @@ if [[ "$IDE_CHOICE" == "vscode" || "$IDE_CHOICE" == "both" ]]; then
                 5) ext_dir="$HOME/.trae/extensions" && ide_name="Trae AI" ;;
                 6) ext_dir="$HOME/.zed/extensions" && ide_name="Zed" ;;
             esac
-            
+
             # Create extension directory if it doesn't exist
             mkdir -p "$ext_dir" || handle_error $? "Failed to create extension directory" "Check permissions"
-            
+
             # Copy extension
             echo -e "${YELLOW}Installing Razen extension for $ide_name...${NC}"
             cp -r "$INSTALL_DIR/razen-vscode-extension" "$ext_dir/razen.razen-lang" || handle_error $? "Failed to install extension" "Check permissions"
@@ -370,9 +370,9 @@ if [[ "$IDE_CHOICE" == "jetbrains" || "$IDE_CHOICE" == "both" ]]; then
     echo "7. GoLand"
     echo "8. RubyMine"
     echo "9. Skip plugin installation"
-    
+
     read -p "Enter your choice (1-9): " jetbrains_choice
-    
+
     if [[ "$jetbrains_choice" =~ ^[1-8]$ ]]; then
         # Get IDE-specific plugin directory
         case $jetbrains_choice in
@@ -385,14 +385,14 @@ if [[ "$IDE_CHOICE" == "jetbrains" || "$IDE_CHOICE" == "both" ]]; then
             7) plugin_dir="$HOME/.config/JetBrains/GoLand*/plugins" && ide_name="GoLand" ;;
             8) plugin_dir="$HOME/.config/JetBrains/RubyMine*/plugins" && ide_name="RubyMine" ;;
         esac
-        
+
         # Find actual plugin directory (resolving wildcard)
         plugin_dir=$(echo $plugin_dir)
-        
+
         if [ -d "$plugin_dir" ]; then
             # Create plugin directory if needed
             mkdir -p "$plugin_dir" || handle_error $? "Failed to create plugin directory" "Check permissions"
-            
+
             # Copy plugin
             echo -e "${YELLOW}Installing Razen plugin for $ide_name...${NC}"
             cp -r "$INSTALL_DIR/razen-jetbrains-plugin" "$plugin_dir/razen-lang" || handle_error $? "Failed to install plugin" "Check permissions"
@@ -443,23 +443,23 @@ echo -e "${CYAN}Happy coding!${NC}"
 
 If you encounter issues during installation, here are some common solutions:
 
-1. **Permission Errors**: 
+1. **Permission Errors**:
    - Linux/macOS: Run the installer with sudo privileges
    - Windows: Run Git Bash as Administrator
 
-2. **Missing Dependencies**: 
+2. **Missing Dependencies**:
    - Ensure Rust is properly installed
    - For Windows users: Make sure Git Bash or WSL is installed
 
-3. **IDE Extension Issues**: 
+3. **IDE Extension Issues**:
    - Try manually installing the extensions from their respective marketplaces
    - Check the extension directories match your IDE installation
 
-4. **Path Issues**: 
+4. **Path Issues**:
    - Linux/macOS: Make sure /usr/local/bin is in your PATH environment variable
    - Windows: Restart your terminal after installation to refresh PATH
 
-5. **Build Failures**: 
+5. **Build Failures**:
    - Check for error messages in the build output
    - Make sure all dependencies are installed
    - Windows users may need Visual C++ Build Tools
