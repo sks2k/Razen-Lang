@@ -7,9 +7,14 @@ const {
   InitializeParams,
   DidChangeConfigurationNotification,
   CompletionItem,
+  CompletionItemKind,
   TextDocumentPositionParams,
   TextDocumentSyncKind,
-  InitializeResult
+  InitializeResult,
+  InsertTextFormat,
+  MarkupKind,
+  SemanticTokensBuilder,
+  SemanticTokensLegend
 } = require('vscode-languageserver/node');
 
 const { TextDocument } = require('vscode-languageserver-textdocument');
@@ -746,10 +751,21 @@ function validateRazenDocument(textDocument) {
   const lines = text.split(/\r?\n/g);
   const diagnostics = [];
 
+  // Clear previous variable and library tracking for this document
+  const documentUri = textDocument.uri;
+  const variableMap = new Map();
+  documentVariables.set(documentUri, variableMap);
+  
+  // Create a new map for library imports
+  const libraryMap = new Map();
+  documentLibraries.set(documentUri, libraryMap);
+
   // Regular expressions for token usage and library calls
   const tokenRegex = /\b(let|take|hold|put|sum|diff|prod|div|mod|text|concat|slice|len|list|arr)\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*=\s*([^;]+)/g;
   const libraryRegex = /\b([a-zA-Z_][a-zA-Z0-9_]*)\s*\[\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*\]\s*\(/g;
   const libraryAssignmentRegex = /\b(let|take|hold|put|sum|diff|prod|div|mod|text|concat|slice|len|list|arr)\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*=\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*\[\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*\]\s*\(/g;
+  const variableUsageRegex = /\b([a-zA-Z_][a-zA-Z0-9_]*)\b(?!\s*\[|\s*=\s*)/g;
+  const libraryImportRegex = /\blib\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*;/g;
 
   // Check each line for token usage
   for (let i = 0; i < lines.length; i++) {
@@ -759,6 +775,21 @@ function validateRazenDocument(textDocument) {
     if (line.trim().startsWith('#')) {
       continue;
     }
+    
+    // Check for library imports
+    let libraryImportMatch;
+    const lineLibraryImportRegex = new RegExp(libraryImportRegex.source, libraryImportRegex.flags);
+    while ((libraryImportMatch = lineLibraryImportRegex.exec(line)) !== null) {
+      const [fullMatch, libraryName] = libraryImportMatch;
+      
+      // Track library import
+      libraryMap.set(libraryName.toLowerCase(), {
+        line: i,
+        character: libraryImportMatch.index + fullMatch.indexOf(libraryName),
+        length: libraryName.length,
+        used: false
+      });
+    }
 
     // Check library function assignment with token type
     let libraryAssignmentMatch;
@@ -766,6 +797,23 @@ function validateRazenDocument(textDocument) {
     while ((libraryAssignmentMatch = lineLibraryAssignmentRegex.exec(line)) !== null) {
       const [fullMatch, tokenType, variableName, library, functionName] = libraryAssignmentMatch;
       const error = validateLibraryFunctionReturnType(tokenType, library, functionName);
+      
+      // Track variable declaration
+      variableMap.set(variableName, {
+        line: i,
+        character: libraryAssignmentMatch.index + fullMatch.indexOf(variableName),
+        length: variableName.length,
+        used: false,
+        type: tokenType
+      });
+      
+      // Mark library as used if it exists in our library map
+      const libraryLower = library.toLowerCase();
+      if (libraryMap.has(libraryLower)) {
+        const libInfo = libraryMap.get(libraryLower);
+        libInfo.used = true;
+        libraryMap.set(libraryLower, libInfo);
+      }
       
       if (error) {
         const diagnostic = {
@@ -793,6 +841,15 @@ function validateRazenDocument(textDocument) {
       const [fullMatch, tokenType, variableName, value] = tokenMatch;
       const error = validateTokenUsage(tokenType, value.trim());
       
+      // Track variable declaration
+      variableMap.set(variableName, {
+        line: i,
+        character: tokenMatch.index + fullMatch.indexOf(variableName),
+        length: variableName.length,
+        used: false,
+        type: tokenType
+      });
+      
       if (error) {
         const diagnostic = {
           severity: DiagnosticSeverity.Warning,
@@ -814,6 +871,14 @@ function validateRazenDocument(textDocument) {
       const [fullMatch, library, functionName] = libraryMatch;
       const error = validateLibraryUsage(library, functionName);
       
+      // Mark library as used if it exists in our library map
+      const libraryLower = library.toLowerCase();
+      if (libraryMap.has(libraryLower)) {
+        const libInfo = libraryMap.get(libraryLower);
+        libInfo.used = true;
+        libraryMap.set(libraryLower, libInfo);
+      }
+      
       if (error) {
         const diagnostic = {
           severity: DiagnosticSeverity.Warning,
@@ -827,10 +892,48 @@ function validateRazenDocument(textDocument) {
         diagnostics.push(diagnostic);
       }
     }
+    
+    // Check variable usages
+    let variableUsageMatch;
+    const lineVariableUsageRegex = new RegExp(variableUsageRegex.source, variableUsageRegex.flags);
+    while ((variableUsageMatch = lineVariableUsageRegex.exec(line)) !== null) {
+      const [fullMatch, variableName] = variableUsageMatch;
+      
+      // Skip if this is a library name
+      if (LIBRARIES[variableName]) {
+        continue;
+      }
+      
+      // Mark variable as used if it exists in our variable map
+      if (variableMap.has(variableName)) {
+        const varInfo = variableMap.get(variableName);
+        // Only mark as used if this is not the declaration line or position
+        if (i !== varInfo.line || variableUsageMatch.index !== varInfo.character) {
+          varInfo.used = true;
+          variableMap.set(variableName, varInfo);
+        }
+      }
+    }
   }
 
   return diagnostics;
 }
+
+// Define semantic token types and modifiers
+const tokenTypes = ['variable', 'library'];
+const tokenModifiers = ['declaration', 'unused', 'used'];
+
+// Create the legend for semantic tokens
+const legend = {
+  tokenTypes,
+  tokenModifiers
+};
+
+// Map to track variable declarations and usages
+const documentVariables = new Map();
+
+// Map to track library imports and usages
+const documentLibraries = new Map();
 
 // Initialize connection
 connection.onInitialize((params) => {
@@ -839,7 +942,16 @@ connection.onInitialize((params) => {
       textDocumentSync: TextDocumentSyncKind.Incremental,
       // Tell the client that this server supports code completion.
       completionProvider: {
-        resolveProvider: true
+        resolveProvider: true,
+        triggerCharacters: ['.', '[', '(', ' ']
+      },
+      // Add semantic tokens provider capability
+      semanticTokensProvider: {
+        legend,
+        range: false, // We don't support range requests yet
+        full: {
+          delta: false // We don't support delta requests yet
+        }
       }
     }
   };
@@ -847,6 +959,214 @@ connection.onInitialize((params) => {
 
 connection.onInitialized(() => {
   connection.console.log('Razen Language Server initialized');
+});
+
+// Provide semantic tokens for variable usage highlighting
+connection.languages.semanticTokens.on((params) => {
+  const document = documents.get(params.textDocument.uri);
+  if (!document) {
+    return { data: [] };
+  }
+  
+  const builder = new SemanticTokensBuilder();
+  const variableMap = documentVariables.get(document.uri);
+  const libraryMap = documentLibraries.get(document.uri);
+  
+  if (variableMap) {
+    // Add tokens for each variable
+    for (const [varName, varInfo] of variableMap.entries()) {
+      // Token type is 'variable' (index 0)
+      const tokenType = 0;
+      
+      // Token modifiers:
+      // - 'declaration' (index 0) for all variables
+      // - 'unused' (index 1) for variables that are not used
+      // - 'used' (index 2) for variables that are used
+      let tokenModifiers = 1 << 0; // declaration
+      
+      if (varInfo.used) {
+        tokenModifiers |= 1 << 2; // used
+      } else {
+        tokenModifiers |= 1 << 1; // unused
+      }
+      
+      // Add the token at the declaration site
+      builder.push(
+        varInfo.line,
+        varInfo.character,
+        varInfo.length,
+        tokenType,
+        tokenModifiers
+      );
+      
+      // Find all usages of this variable in the document
+      const text = document.getText();
+      const lines = text.split(/\r?\n/g);
+      
+      // Regular expression to find variable usages
+      const varUsageRegex = new RegExp(`\\b(${varName})\\b(?!\\s*\\[|\\s*=\\s*)`, 'g');
+      
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        let match;
+        
+        while ((match = varUsageRegex.exec(line)) !== null) {
+          // Skip the declaration site which we already added
+          if (i === varInfo.line && match.index === varInfo.character) {
+            continue;
+          }
+          
+          // Add token for this usage with 'used' modifier
+          builder.push(
+            i,
+            match.index,
+            varName.length,
+            tokenType,
+            1 << 2 // used
+          );
+        }
+      }
+    }
+  }
+  
+  // Add tokens for library imports
+  if (libraryMap) {
+    for (const [libName, libInfo] of libraryMap.entries()) {
+      // Token type is 'library' (index 1)
+      const tokenType = 1;
+      
+      // Token modifiers:
+      // - 'declaration' (index 0) for all libraries
+      // - 'unused' (index 1) for libraries that are not used
+      // - 'used' (index 2) for libraries that are used
+      let tokenModifiers = 1 << 0; // declaration
+      
+      if (libInfo.used) {
+        tokenModifiers |= 1 << 2; // used
+      } else {
+        tokenModifiers |= 1 << 1; // unused
+      }
+      
+      // Add the token at the import site
+      builder.push(
+        libInfo.line,
+        libInfo.character,
+        libInfo.length,
+        tokenType,
+        tokenModifiers
+      );
+      
+      // Find all usages of this library in the document
+      const text = document.getText();
+      const lines = text.split(/\r?\n/g);
+      
+      // Regular expression to find library usages in function calls
+      const libUsageRegex = new RegExp(`\\b(${libName})\\s*\\[`, 'gi');
+      
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        let match;
+        
+        while ((match = libUsageRegex.exec(line)) !== null) {
+          // Add token for this usage with 'used' modifier
+          builder.push(
+            i,
+            match.index,
+            libName.length,
+            tokenType,
+            1 << 2 // used
+          );
+        }
+      }
+    }
+  }
+  
+  return builder.build();
+});
+
+// Handle completion requests
+connection.onCompletion((textDocumentPosition) => {
+  const document = documents.get(textDocumentPosition.textDocument.uri);
+  if (!document) {
+    return null;
+  }
+
+  const text = document.getText();
+  const lines = text.split(/\r?\n/g);
+  const position = textDocumentPosition.position;
+  const line = lines[position.line];
+  const linePrefix = line.substring(0, position.character);
+
+  // Create completion items array
+  const completionItems = [];
+
+  // Check if we're typing a library name
+  const libraryMatch = linePrefix.match(/([a-zA-Z_][a-zA-Z0-9_]*)\s*\[\s*$/); // Matches "libraryName[ "
+  if (libraryMatch) {
+    const libraryName = libraryMatch[1].toLowerCase();
+    const libraryFunctions = LIBRARIES[libraryName];
+    
+    if (libraryFunctions) {
+      // Add library functions as completion items
+      for (const funcName of libraryFunctions) {
+        const returnType = LIBRARY_RETURN_TYPES[libraryName] && 
+                          LIBRARY_RETURN_TYPES[libraryName][funcName] ? 
+                          LIBRARY_RETURN_TYPES[libraryName][funcName] : 'any';
+        
+        const tokenType = getTokenTypeForReturnType(libraryName, funcName) || 'put';
+        
+        completionItems.push({
+          label: funcName,
+          kind: CompletionItemKind.Function,
+          detail: `${libraryName}[${funcName}]`,
+          documentation: {
+            kind: MarkupKind.Markdown,
+            value: `Function in ${libraryName} library\n\nReturns: ${returnType}\nUse with: ${tokenType} variable = ${libraryName}[${funcName}](...)`
+          },
+          insertText: `${funcName}](`
+        });
+      }
+    }
+  }
+  
+  // Check if we're typing a token
+  const tokenMatch = linePrefix.match(/^\s*(let|take|hold|put|sum|diff|prod|div|mod|text|concat|slice|len|list|arr)\s*$/); // Matches token followed by space
+  if (tokenMatch) {
+    const token = tokenMatch[1];
+    const expectedType = TOKEN_TYPES[token]?.expectedType;
+    
+    completionItems.push({
+      label: `${token} variableName = value`,
+      kind: CompletionItemKind.Snippet,
+      detail: `${token} variable declaration`,
+      documentation: {
+        kind: MarkupKind.Markdown,
+        value: TOKEN_TYPES[token]?.description || `${token} variable declaration`
+      },
+      insertText: `${token} ${expectedType === 'number' ? 'num' : expectedType === 'string' ? 'str' : expectedType === 'boolean' ? 'flag' : 'var'} = $1`,
+      insertTextFormat: InsertTextFormat.Snippet
+    });
+  }
+  
+  // Suggest libraries when typing
+  if (linePrefix.match(/\b[a-z][a-zA-Z0-9_]*$/)) {
+    for (const library in LIBRARIES) {
+      completionItems.push({
+        label: library,
+        kind: CompletionItemKind.Module,
+        detail: `${library} library`,
+        documentation: `Library with ${LIBRARIES[library].length} functions`,
+        insertText: `${library}[`
+      });
+    }
+  }
+
+  return completionItems;
+});
+
+// Handle completion item resolution
+connection.onCompletionResolve((item) => {
+  return item;
 });
 
 // The content of a text document has changed.

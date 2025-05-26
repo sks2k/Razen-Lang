@@ -1,27 +1,6 @@
-type freestyle;
+lib random;
 
-lib validation;
+let number = Random[choice]([1, 2, 3]);
+take string = "string";
 
-fun email_is_valid(email) {
-    take valid = Validation[email](email);
-    if (valid = true) {
-        show "success"
-    } else {
-        show "fail"
-    }
-}
-
-read email;
-take test_dir = "./test_dir"
-take test = "/test.txt"
-if (Validation[email](email)) {
-    show "Success"
-    if (Filesystem[exists]("./test_dir")) {
-        Filesystem[write_file]("./test_dir/test.txt", "Hello, Razen Filesystem!\nThis is a test file.", false);
-        show "done"
-    } else {
-        show "error"
-    }
-} else {
-    show "error"
-}
+show number + string;

@@ -1,6 +1,9 @@
 const vscode = require('vscode');
 const { razenKeywords, razenVariables, razenFunctions, razenConstants, razenLibraries } = require('./razenLanguageData');
 const { activateLanguageServer, deactivateLanguageServer } = require('./server/razenClient');
+const { exec } = require('child_process');
+const path = require('path');
+const fs = require('fs');
 
 /**
  * @param {vscode.ExtensionContext} context
@@ -10,6 +13,15 @@ function activate(context) {
     
     // Activate the language server for error checking
     activateLanguageServer(context);
+    
+    // Register the run, debug, and test commands
+    const runFileCommand = vscode.commands.registerCommand('razen.runFile', runRazenFile);    
+    const debugFileCommand = vscode.commands.registerCommand('razen.debugFile', debugRazenFile);
+    const testFileCommand = vscode.commands.registerCommand('razen.testFile', testRazenFile);
+    
+    context.subscriptions.push(runFileCommand);
+    context.subscriptions.push(debugFileCommand);
+    context.subscriptions.push(testFileCommand);
 
     // Register the completion item provider for Razen language
     const completionProvider = vscode.languages.registerCompletionItemProvider(
@@ -987,6 +999,281 @@ function getContextAwareCompletionItems(linePrefix, document, position) {
     }
     
     return completionItems;
+}
+
+/**
+ * Run a Razen file using the razen-run script
+ * @param {vscode.Uri} [uri] - The URI of the file to run
+ */
+async function runRazenFile(uri) {
+    // Get the active text editor if no URI is provided
+    if (!uri) {
+        const editor = vscode.window.activeTextEditor;
+        if (!editor) {
+            vscode.window.showErrorMessage('No file is open to run');
+            return;
+        }
+        
+        // Check if the file is a Razen file
+        if (path.extname(editor.document.fileName) !== '.rzn') {
+            vscode.window.showErrorMessage('Not a Razen file (.rzn)');
+            return;
+        }
+        
+        // Save the file before running
+        if (editor.document.isDirty) {
+            await editor.document.save();
+        }
+        
+        uri = editor.document.uri;
+    }
+    
+    // Convert URI to file path
+    const filePath = uri.fsPath;
+    
+    // Create or show the output channel
+    const outputChannel = vscode.window.createOutputChannel('Razen Run');
+    outputChannel.show(true); // Preserve focus
+    
+    // Find the razen-run script
+    const workspaceFolder = vscode.workspace.getWorkspaceFolder(uri);
+    let razenRunScript = '';
+    
+    // Try to find the script in the workspace
+    if (workspaceFolder) {
+        const possibleScriptPaths = [
+            path.join(workspaceFolder.uri.fsPath, 'scripts', 'razen-run'),
+            path.join(workspaceFolder.uri.fsPath, '..', 'scripts', 'razen-run'),
+            path.join(workspaceFolder.uri.fsPath, '..', '..', 'scripts', 'razen-run')
+        ];
+        
+        for (const scriptPath of possibleScriptPaths) {
+            if (fs.existsSync(scriptPath)) {
+                razenRunScript = scriptPath;
+                break;
+            }
+        }
+    }
+    
+    // If not found in workspace, try common installation locations
+    if (!razenRunScript) {
+        const commonPaths = [
+            '/usr/local/bin/razen-run',
+            '/usr/bin/razen-run',
+            path.join(process.env.HOME || process.env.USERPROFILE, '.razen', 'bin', 'razen-run')
+        ];
+        
+        for (const scriptPath of commonPaths) {
+            if (fs.existsSync(scriptPath)) {
+                razenRunScript = scriptPath;
+                break;
+            }
+        }
+    }
+    
+    // If still not found, use the command directly (assuming it's in PATH)
+    if (!razenRunScript) {
+        razenRunScript = 'razen-run';
+    }
+    
+    // Show running message
+    outputChannel.appendLine(`Running: ${filePath}`);
+    outputChannel.appendLine('-----------------------------------');
+    
+    // Execute the razen-run script with the file path
+    const command = `"${razenRunScript}" "${filePath}"`;
+    
+    // Create a terminal to run the command
+    const terminal = vscode.window.createTerminal('Razen Run');
+    terminal.sendText(command);
+    terminal.show();
+}
+
+/**
+ * Debug a Razen file using the razen-debug script
+ * @param {vscode.Uri} [uri] - The URI of the file to debug
+ */
+async function debugRazenFile(uri) {
+    // Get the active text editor if no URI is provided
+    if (!uri) {
+        const editor = vscode.window.activeTextEditor;
+        if (!editor) {
+            vscode.window.showErrorMessage('No file is open to debug');
+            return;
+        }
+        
+        // Check if the file is a Razen file
+        if (path.extname(editor.document.fileName) !== '.rzn') {
+            vscode.window.showErrorMessage('Not a Razen file (.rzn)');
+            return;
+        }
+        
+        // Save the file before debugging
+        if (editor.document.isDirty) {
+            await editor.document.save();
+        }
+        
+        uri = editor.document.uri;
+    }
+    
+    // Convert URI to file path
+    const filePath = uri.fsPath;
+    
+    // Create or show the output channel
+    const outputChannel = vscode.window.createOutputChannel('Razen Debug');
+    outputChannel.show(true); // Preserve focus
+    
+    // Find the razen-debug script
+    const workspaceFolder = vscode.workspace.getWorkspaceFolder(uri);
+    let razenDebugScript = '';
+    
+    // Try to find the script in the workspace
+    if (workspaceFolder) {
+        const possibleScriptPaths = [
+            path.join(workspaceFolder.uri.fsPath, 'scripts', 'razen-debug'),
+            path.join(workspaceFolder.uri.fsPath, '..', 'scripts', 'razen-debug'),
+            path.join(workspaceFolder.uri.fsPath, '..', '..', 'scripts', 'razen-debug')
+        ];
+        
+        for (const scriptPath of possibleScriptPaths) {
+            if (fs.existsSync(scriptPath)) {
+                razenDebugScript = scriptPath;
+                break;
+            }
+        }
+    }
+    
+    // If not found in workspace, try common installation locations
+    if (!razenDebugScript) {
+        const commonPaths = [
+            '/usr/local/bin/razen-debug',
+            '/usr/bin/razen-debug',
+            path.join(process.env.HOME || process.env.USERPROFILE, '.razen', 'bin', 'razen-debug')
+        ];
+        
+        for (const scriptPath of commonPaths) {
+            if (fs.existsSync(scriptPath)) {
+                razenDebugScript = scriptPath;
+                break;
+            }
+        }
+    }
+    
+    // If still not found, use the command directly (assuming it's in PATH)
+    if (!razenDebugScript) {
+        razenDebugScript = 'razen-debug';
+    }
+    
+    // Show debugging message
+    outputChannel.appendLine(`Debugging: ${filePath}`);
+    outputChannel.appendLine('-----------------------------------');
+    
+    // Execute the razen-debug script with the file path
+    const command = `"${razenDebugScript}" "${filePath}"`;
+    
+    // Create a terminal to run the command
+    const terminal = vscode.window.createTerminal('Razen Debug');
+    terminal.sendText(command);
+    terminal.show();
+}
+
+/**
+ * Run tests for a Razen file or directory using the razen-test script
+ * @param {vscode.Uri} [uri] - The URI of the file or directory to test
+ */
+async function testRazenFile(uri) {
+    // Get the active text editor if no URI is provided
+    if (!uri) {
+        const editor = vscode.window.activeTextEditor;
+        if (!editor) {
+            // If no editor is active, try to run tests for the entire workspace
+            const workspaceFolders = vscode.workspace.workspaceFolders;
+            if (!workspaceFolders || workspaceFolders.length === 0) {
+                vscode.window.showErrorMessage('No file or workspace is open to test');
+                return;
+            }
+            
+            uri = workspaceFolders[0].uri;
+        } else {
+            // Check if the file is a Razen file
+            if (path.extname(editor.document.fileName) !== '.rzn') {
+                vscode.window.showErrorMessage('Not a Razen file (.rzn)');
+                return;
+            }
+            
+            // Save the file before testing
+            if (editor.document.isDirty) {
+                await editor.document.save();
+            }
+            
+            uri = editor.document.uri;
+        }
+    }
+    
+    // Convert URI to file path
+    const filePath = uri.fsPath;
+    
+    // Create or show the output channel
+    const outputChannel = vscode.window.createOutputChannel('Razen Test');
+    outputChannel.show(true); // Preserve focus
+    
+    // Find the razen-test script
+    const workspaceFolder = vscode.workspace.getWorkspaceFolder(uri);
+    let razenTestScript = '';
+    
+    // Try to find the script in the workspace
+    if (workspaceFolder) {
+        const possibleScriptPaths = [
+            path.join(workspaceFolder.uri.fsPath, 'scripts', 'razen-test'),
+            path.join(workspaceFolder.uri.fsPath, '..', 'scripts', 'razen-test'),
+            path.join(workspaceFolder.uri.fsPath, '..', '..', 'scripts', 'razen-test')
+        ];
+        
+        for (const scriptPath of possibleScriptPaths) {
+            if (fs.existsSync(scriptPath)) {
+                razenTestScript = scriptPath;
+                break;
+            }
+        }
+    }
+    
+    // If not found in workspace, try common installation locations
+    if (!razenTestScript) {
+        const commonPaths = [
+            '/usr/local/bin/razen-test',
+            '/usr/bin/razen-test',
+            path.join(process.env.HOME || process.env.USERPROFILE, '.razen', 'bin', 'razen-test')
+        ];
+        
+        for (const scriptPath of commonPaths) {
+            if (fs.existsSync(scriptPath)) {
+                razenTestScript = scriptPath;
+                break;
+            }
+        }
+    }
+    
+    // If still not found, use the command directly (assuming it's in PATH)
+    if (!razenTestScript) {
+        razenTestScript = 'razen-test';
+    }
+    
+    // Show testing message
+    const isDirectory = fs.lstatSync(filePath).isDirectory();
+    if (isDirectory) {
+        outputChannel.appendLine(`Running tests in directory: ${filePath}`);
+    } else {
+        outputChannel.appendLine(`Running tests for file: ${filePath}`);
+    }
+    outputChannel.appendLine('-----------------------------------');
+    
+    // Execute the razen-test script with the file or directory path
+    const command = `"${razenTestScript}" "${filePath}"`;
+    
+    // Create a terminal to run the command
+    const terminal = vscode.window.createTerminal('Razen Test');
+    terminal.sendText(command);
+    terminal.show();
 }
 
 function deactivate() {

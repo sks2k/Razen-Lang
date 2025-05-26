@@ -41,8 +41,68 @@
       {
         "command": "razen.insertTemplate",
         "title": "Razen: Insert Template"
+      },
+      {
+        "command": "razen.runFile",
+        "title": "Razen: Run File",
+        "icon": {
+          "light": "./icons/run-light.svg",
+          "dark": "./icons/run-dark.svg"
+        }
+      },
+      {
+        "command": "razen.debugFile",
+        "title": "Razen: Debug File",
+        "icon": {
+          "light": "./icons/debug-light.svg",
+          "dark": "./icons/debug-dark.svg"
+        }
+      },
+      {
+        "command": "razen.testFile",
+        "title": "Razen: Run Tests",
+        "icon": {
+          "light": "./icons/test-light.svg",
+          "dark": "./icons/test-dark.svg"
+        }
       }
-    ]
+    ],
+    "menus": {
+      "editor/title": [
+        {
+          "command": "razen.runFile",
+          "when": "resourceLangId == razen",
+          "group": "navigation@1"
+        },
+        {
+          "command": "razen.debugFile",
+          "when": "resourceLangId == razen",
+          "group": "navigation@2"
+        },
+        {
+          "command": "razen.testFile",
+          "when": "resourceLangId == razen",
+          "group": "navigation@3"
+        }
+      ],
+      "explorer/context": [
+        {
+          "command": "razen.runFile",
+          "when": "resourceExtname == .rzn",
+          "group": "navigation@1"
+        },
+        {
+          "command": "razen.debugFile",
+          "when": "resourceExtname == .rzn",
+          "group": "navigation@2"
+        },
+        {
+          "command": "razen.testFile",
+          "when": "resourceExtname == .rzn",
+          "group": "navigation@3"
+        }
+      ]
+    }
   },
   "keywords": [
     "razen",

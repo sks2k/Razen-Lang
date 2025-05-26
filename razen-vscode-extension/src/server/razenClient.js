@@ -1,5 +1,5 @@
 const path = require('path');
-const { workspace, ExtensionContext } = require('vscode');
+const { workspace, ExtensionContext, window, commands, languages, SemanticTokensLegend } = require('vscode');
 
 const {
   LanguageClient,
@@ -47,8 +47,58 @@ function activateLanguageServer(context) {
     clientOptions
   );
 
+  // Define semantic token types and modifiers for variable and library usage highlighting
+  const tokenTypes = ['variable', 'library'];
+  const tokenModifiers = ['declaration', 'unused', 'used'];
+  const legend = new SemanticTokensLegend(tokenTypes, tokenModifiers);
+  
+  // Register semantic token provider through the client
+  const tokenProvider = languages.registerDocumentSemanticTokensProvider(
+    { language: 'razen' },
+    {
+      provideDocumentSemanticTokens: (_) => {
+        // The actual tokens are provided by the server
+        return null;
+      }
+    },
+    legend
+  );
+  
+  // Add the token provider to subscriptions
+  context.subscriptions.push(tokenProvider);
+  
   // Start the client. This will also launch the server
   client.start();
+  
+  // Add custom CSS to style semantic tokens
+  const workspaceConfig = workspace.getConfiguration();
+  workspaceConfig.update('editor.semanticTokenColorCustomizations', {
+    enabled: true,
+    rules: {
+      'variable.declaration.unused': {
+        foreground: '#75715E', // Dull color for unused variables
+        fontStyle: 'italic'
+      },
+      'variable.declaration.used': {
+        foreground: '#F8F8F2', // Bright color for used variables
+        fontStyle: 'bold'
+      },
+      'variable.used': {
+        foreground: '#F8F8F2', // Bright color for variable usages
+      },
+      'library.declaration.unused': {
+        foreground: '#7E7E7E', // Dull color for unused libraries
+        fontStyle: 'italic'
+      },
+      'library.declaration.used': {
+        foreground: '#66D9EF', // Bright blue color for used libraries
+        fontStyle: 'bold'
+      },
+      'library.used': {
+        foreground: '#66D9EF', // Bright blue color for library usages
+      }
+    }
+  }, true);
 }
 
 function deactivateLanguageServer() {
