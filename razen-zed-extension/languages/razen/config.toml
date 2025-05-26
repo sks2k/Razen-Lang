@@ -1,0 +1,26 @@
+name = "Razen"
+grammar = "razen"
+path_suffixes = ["rzn"]
+line_comments = ["# "]
+block_comment = ["/*", "*/"]
+tab_size = 4
+hard_tabs = false
+
+[autoclose]
+"(" = ")"
+"[" = "]"
+"{" = "}"
+"\"" = "\""
+"'" = "'"
+
+[brackets]
+"(" = ")"
+"[" = "]"
+"{" = "}"
+
+[word_characters]
+patterns = ["[a-zA-Z0-9_]"]
+
+[indentation]
+size = 4
+use_tabs = false

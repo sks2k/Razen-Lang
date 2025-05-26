@@ -97,6 +97,96 @@ const razenKeywords = [
         documentation: 'Used to declare the type of document.\n\n```razen\ntype web;\n```\n\nAvailable options: web, script, cli, freestyle'
     },
     {
+        name: 'use',
+        description: 'Module import',
+        documentation: 'Used to import modules.\n\n```razen\nuse module;\n```'
+    },
+    {
+        name: 'export',
+        description: 'Export definition',
+        documentation: 'Used to export definitions from a module.\n\n```razen\nexport fun myFunction() { }\n```'
+    },
+    {
+        name: 'as',
+        description: 'Alias definition',
+        documentation: 'Used to create an alias for an imported module.\n\n```razen\nuse module as m;\n```'
+    },
+    {
+        name: 'from',
+        description: 'Import source',
+        documentation: 'Used to specify the source of an import.\n\n```razen\nimport { function } from module;\n```'
+    },
+    {
+        name: 'import',
+        description: 'Import specific items',
+        documentation: 'Used to import specific items from a module.\n\n```razen\nimport { function } from module;\n```'
+    },
+    {
+        name: 'class',
+        description: 'Class definition',
+        documentation: 'Used to define a class.\n\n```razen\nclass MyClass {\n  // class body\n}\n```'
+    },
+    {
+        name: 'api',
+        description: 'API declaration',
+        documentation: 'Used to declare an API.\n\n```razen\napi MyAPI {\n  // API definition\n}\n```'
+    },
+    {
+        name: 'call',
+        description: 'API call',
+        documentation: 'Used to make an API call.\n\n```razen\ncall MyAPI.endpoint(params);\n```'
+    },
+    {
+        name: 'get',
+        description: 'HTTP GET request',
+        documentation: 'Used for HTTP GET requests.\n\n```razen\nget("https://example.com/api");\n```'
+    },
+    {
+        name: 'post',
+        description: 'HTTP POST request',
+        documentation: 'Used for HTTP POST requests.\n\n```razen\npost("https://example.com/api", data);\n```'
+    },
+    {
+        name: 'await',
+        description: 'Async operation',
+        documentation: 'Used to wait for an asynchronous operation to complete.\n\n```razen\nawait asyncFunction();\n```'
+    },
+    {
+        name: 'connect',
+        description: 'Connection establishment',
+        documentation: 'Used to establish a connection to an external service.\n\n```razen\nconnect to "database";\n```'
+    },
+    {
+        name: 'to',
+        description: 'Connection target',
+        documentation: 'Used to specify the target of a connection.\n\n```razen\nconnect to "database";\n```'
+    },
+    {
+        name: 'debug',
+        description: 'Debug mode',
+        documentation: 'Used to enable debug mode.\n\n```razen\ndebug { // debugging code }\n```'
+    },
+    {
+        name: 'assert',
+        description: 'Assertion',
+        documentation: 'Used to assert that a condition is true.\n\n```razen\nassert(condition, "Error message");\n```'
+    },
+    {
+        name: 'trace',
+        description: 'Execution tracing',
+        documentation: 'Used to trace execution.\n\n```razen\ntrace { // code to trace }\n```'
+    },
+    {
+        name: 'exit',
+        description: 'Exit program',
+        documentation: 'Used to exit the program.\n\n```razen\nexit;\n```'
+    },
+    {
+        name: 'load',
+        description: 'Loading animation',
+        documentation: 'Used to display a loading animation.\n\n```razen\nload("Loading...");\n```'
+    },
+    {
         name: 'struct',
         description: 'Structure definition',
         documentation: 'Used to define a custom data structure.\n\n```razen\nstruct Person {\n  name: string,\n  age: number,\n  isActive: boolean\n}\n```'
@@ -122,9 +212,10 @@ const razenKeywords = [
 const razenVariables = [
     {
         name: 'let',
+        signature: 'let variableName = value;',
         description: 'Numeric variable declaration',
-        documentation: 'Used for declaring numeric variables and calculations.\n\n```razen\nlet count = 10;\nlet pi = 3.14;\n```',
-        snippet: 'let ${1:variableName} = ${2:0}'
+        documentation: 'Used to declare a numeric variable. Should only be used with numeric values (integers or floats).\n\n```razen\n// Correct usage:\nlet counter = 42;\nlet pi = 3.14;\n\n// Incorrect usage (will cause errors):\n// let name = "John";  // Error: String value with let\n// let isActive = true;  // Error: Boolean value with let\n```',
+        snippet: 'let ${1:variableName} = ${2:numericValue};'
     },
     {
         name: 'take',
@@ -134,9 +225,10 @@ const razenVariables = [
     },
     {
         name: 'hold',
+        signature: 'hold variableName = value;',
         description: 'Boolean variable declaration',
-        documentation: 'Used for declaring boolean variables and logical conditions.\n\n```razen\nhold isActive = true;\n```',
-        snippet: 'hold ${1:variableName} = ${2|true,false|}'
+        documentation: 'Used to declare a boolean variable. Should only be used with boolean values (true/false).\n\n```razen\n// Correct usage:\nhold isActive = true;\nhold hasPermission = false;\nhold comparison = 5 > 3;  // Boolean expression\n\n// Incorrect usage (will cause errors):\n// hold count = 42;  // Error: Numeric value with hold\n// hold name = "John";  // Error: String value with hold\n```',
+        snippet: 'hold ${1:variableName} = ${2|true,false|};'
     },
     {
         name: 'put',
@@ -146,9 +238,10 @@ const razenVariables = [
     },
     {
         name: 'sum',
-        description: 'Addition operation',
-        documentation: 'Used for calculating the sum of values.\n\n```razen\nsum total = a + b;\n```',
-        snippet: 'sum ${1:variableName} = ${2:a} + ${3:b}'
+        signature: 'sum variableName = value1 + value2;',
+        description: 'Sum calculation variable',
+        documentation: 'Used to declare a variable that stores the sum of numeric values. Should only be used with numeric expressions.\n\n```razen\n// Correct usage:\nsum total = 10 + 20;\nsum result = a + b;  // Where a and b are numeric\n\n// Incorrect usage (will cause errors):\n// sum message = "Hello" + "World";  // Error: String concatenation with sum\n```',
+        snippet: 'sum ${1:variableName} = ${2:numericValue1} + ${3:numericValue2};'
     },
     {
         name: 'diff',
@@ -158,9 +251,10 @@ const razenVariables = [
     },
     {
         name: 'prod',
-        description: 'Multiplication operation',
-        documentation: 'Used for calculating the product of values.\n\n```razen\nprod result = a * b;\n```',
-        snippet: 'prod ${1:variableName} = ${2:a} * ${3:b}'
+        signature: 'prod variableName = value1 * value2;',
+        description: 'Product calculation variable',
+        documentation: 'Used to declare a variable that stores the product of numeric values. Should only be used with numeric expressions.\n\n```razen\n// Correct usage:\nprod result = 5 * 10;\nprod area = width * height;  // Where width and height are numeric\n\n// Incorrect usage (will cause errors):\n// prod result = "Hello" * 3;  // Error: String multiplication with prod\n```',
+        snippet: 'prod ${1:variableName} = ${2:numericValue1} * ${3:numericValue2};'
     },
     {
         name: 'div',
@@ -170,9 +264,10 @@ const razenVariables = [
     },
     {
         name: 'mod',
-        description: 'Modulus operation',
-        documentation: 'Used for calculating the remainder of division.\n\n```razen\nmod result = a % b;\n```',
-        snippet: 'mod ${1:variableName} = ${2:a} % ${3:b}'
+        signature: 'mod variableName = value1 % value2;',
+        description: 'Modulus calculation variable',
+        documentation: 'Used to declare a variable that stores the remainder of division. Should only be used with numeric expressions.\n\n```razen\n// Correct usage:\nmod result = 10 % 3;  // result = 1\nmod isEven = number % 2;  // 0 if even, 1 if odd\n\n// Incorrect usage (will cause errors):\n// mod result = "Hello" % 2;  // Error: String modulus with mod\n```',
+        snippet: 'mod ${1:variableName} = ${2:numericValue1} % ${3:numericValue2};'
     },
     {
         name: 'power',
@@ -182,9 +277,10 @@ const razenVariables = [
     },
     {
         name: 'text',
+        signature: 'text variableName = value;',
         description: 'String data storage',
-        documentation: 'Used for storing and manipulating text.\n\n```razen\ntext message = "Hello, World!";\n```',
-        snippet: 'text ${1:variableName} = ${2:value}'
+        documentation: 'Used to declare a variable for storing string data. Should only be used with string values.\n\n```razen\n// Correct usage:\ntext greeting = "Hello, World!";\ntext name = "John";\n\n// Incorrect usage (will cause errors):\n// text count = 42;  // Error: Numeric value with text\n// text isActive = true;  // Error: Boolean value with text\n```',
+        snippet: 'text ${1:variableName} = "${2:stringValue}";'
     },
     {
         name: 'list',
@@ -777,6 +873,111 @@ const razenLibraries = [
             { name: 'env', description: 'Get environment variable', signature: 'OS[env](name)' },
             { name: 'cwd', description: 'Get current working directory', signature: 'OS[cwd]()' },
             { name: 'platform', description: 'Get platform name', signature: 'OS[platform]()' }
+        ]
+    },
+    {
+        name: 'filesystem',
+        description: 'Filesystem Library',
+        functions: [
+            { name: 'exists', description: 'Check if file or directory exists', signature: 'Filesystem[exists](path)' },
+            { name: 'is_file', description: 'Check if path is a file', signature: 'Filesystem[is_file](path)' },
+            { name: 'is_dir', description: 'Check if path is a directory', signature: 'Filesystem[is_dir](path)' },
+            { name: 'create_dir', description: 'Create a directory', signature: 'Filesystem[create_dir](path)' },
+            { name: 'remove', description: 'Remove a file or directory', signature: 'Filesystem[remove](path)' },
+            { name: 'read_file', description: 'Read file contents', signature: 'Filesystem[read_file](path)' },
+            { name: 'write_file', description: 'Write content to file', signature: 'Filesystem[write_file](path, content)' },
+            { name: 'list_dir', description: 'List directory contents', signature: 'Filesystem[list_dir](path)' },
+            { name: 'metadata', description: 'Get file or directory metadata', signature: 'Filesystem[metadata](path)' },
+            { name: 'absolute_path', description: 'Get absolute path', signature: 'Filesystem[absolute_path](path)' },
+            { name: 'copy', description: 'Copy file or directory', signature: 'Filesystem[copy](source, destination)' },
+            { name: 'move', description: 'Move file or directory', signature: 'Filesystem[move](source, destination)' },
+            { name: 'extension', description: 'Get file extension', signature: 'Filesystem[extension](path)' },
+            { name: 'file_stem', description: 'Get file name without extension', signature: 'Filesystem[file_stem](path)' },
+            { name: 'parent_dir', description: 'Get parent directory', signature: 'Filesystem[parent_dir](path)' },
+            { name: 'join_path', description: 'Join path components', signature: 'Filesystem[join_path](path1, path2, ...)' },
+            { name: 'change_dir', description: 'Change current directory', signature: 'Filesystem[change_dir](path)' },
+            { name: 'current_dir', description: 'Get current directory', signature: 'Filesystem[current_dir]()' },
+            { name: 'temp_file', description: 'Create temporary file', signature: 'Filesystem[temp_file]()' },
+            { name: 'temp_dir', description: 'Create temporary directory', signature: 'Filesystem[temp_dir]()' }
+        ]
+    },
+    {
+        name: 'lexerlib',
+        description: 'Lexer Library',
+        functions: [
+            { name: 'create_lexer', description: 'Create a lexer instance', signature: 'LexerLib[create_lexer](source)' },
+            { name: 'tokenize', description: 'Tokenize source code', signature: 'LexerLib[tokenize](source)' },
+            { name: 'define_token', description: 'Define a token type', signature: 'LexerLib[define_token](name, pattern)' }
+        ]
+    },
+    {
+        name: 'parserlib',
+        description: 'Parser Library',
+        functions: [
+            { name: 'create_parser', description: 'Create a parser instance', signature: 'ParserLib[create_parser](tokens)' },
+            { name: 'parse', description: 'Parse tokens into AST', signature: 'ParserLib[parse](tokens)' },
+            { name: 'define_rule', description: 'Define a grammar rule', signature: 'ParserLib[define_rule](name, pattern)' },
+            { name: 'create_grammar', description: 'Create a grammar definition', signature: 'ParserLib[create_grammar](rules)' }
+        ]
+    },
+    {
+        name: 'astlib',
+        description: 'AST Library',
+        functions: [
+            { name: 'create_node', description: 'Create an AST node', signature: 'ASTLib[create_node](type, value)' },
+            { name: 'define_node_type', description: 'Define a node type', signature: 'ASTLib[define_node_type](name, fields)' },
+            { name: 'traverse', description: 'Traverse an AST', signature: 'ASTLib[traverse](ast, visitor)' },
+            { name: 'create_visitor', description: 'Create an AST visitor', signature: 'ASTLib[create_visitor](handlers)' }
+        ]
+    },
+    {
+        name: 'symbollib',
+        description: 'Symbol Library',
+        functions: [
+            { name: 'create_symbol_table', description: 'Create a symbol table', signature: 'SymbolLib[create_symbol_table]()' },
+            { name: 'define_symbol', description: 'Define a symbol', signature: 'SymbolLib[define_symbol](name, type)' },
+            { name: 'add_symbol', description: 'Add a symbol to table', signature: 'SymbolLib[add_symbol](table, symbol)' },
+            { name: 'lookup_symbol', description: 'Look up a symbol', signature: 'SymbolLib[lookup_symbol](table, name)' }
+        ]
+    },
+    {
+        name: 'typelib',
+        description: 'Type Library',
+        functions: [
+            { name: 'define_type', description: 'Define a type', signature: 'TypeLib[define_type](name, fields)' },
+            { name: 'check_type', description: 'Check type of value', signature: 'TypeLib[check_type](value, type)' },
+            { name: 'create_type_system', description: 'Create a type system', signature: 'TypeLib[create_type_system]()' },
+            { name: 'infer_type', description: 'Infer type of expression', signature: 'TypeLib[infer_type](expr)' }
+        ]
+    },
+    {
+        name: 'irlib',
+        description: 'IR Library',
+        functions: [
+            { name: 'create_instruction', description: 'Create an IR instruction', signature: 'IRLib[create_instruction](opcode, operands)' },
+            { name: 'generate', description: 'Generate IR from AST', signature: 'IRLib[generate](ast)' },
+            { name: 'optimize', description: 'Optimize IR', signature: 'IRLib[optimize](ir)' },
+            { name: 'to_string', description: 'Convert IR to string', signature: 'IRLib[to_string](ir)' }
+        ]
+    },
+    {
+        name: 'codegenlib',
+        description: 'Code Generation Library',
+        functions: [
+            { name: 'create_generator', description: 'Create a code generator', signature: 'CodeGenLib[create_generator](target)' },
+            { name: 'generate', description: 'Generate code from IR', signature: 'CodeGenLib[generate](ir)' },
+            { name: 'define_target', description: 'Define a target platform', signature: 'CodeGenLib[define_target](name, options)' },
+            { name: 'emit_code', description: 'Emit generated code', signature: 'CodeGenLib[emit_code](code, file)' }
+        ]
+    },
+    {
+        name: 'optimizelib',
+        description: 'Optimization Library',
+        functions: [
+            { name: 'create_pass', description: 'Create an optimization pass', signature: 'OptimizeLib[create_pass](name, handler)' },
+            { name: 'apply', description: 'Apply optimization pass', signature: 'OptimizeLib[apply](pass, ir)' },
+            { name: 'analyze', description: 'Analyze code for optimizations', signature: 'OptimizeLib[analyze](ir)' },
+            { name: 'create_pipeline', description: 'Create optimization pipeline', signature: 'OptimizeLib[create_pipeline](passes)' }
         ]
     },
     {

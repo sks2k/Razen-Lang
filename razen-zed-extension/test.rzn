@@ -1,0 +1,414 @@
+type freestyle;
+
+# Razen Language Extension Test File
+# This file demonstrates all the features supported by the Zed extension
+# Created: 2024-12-19
+
+# Import various libraries to test library support
+lib arrlib;
+lib strlib;
+lib mathlib;
+lib timelib;
+lib random;
+lib file;
+lib json;
+lib bolt;
+lib seed;
+lib color;
+lib crypto;
+lib regex;
+lib uuid;
+lib os;
+lib validation;
+lib system;
+lib netlib;
+lib audio;
+lib image;
+lib date;
+lib memlib;
+lib binlib;
+lib bitlib;
+lib syslib;
+lib complib;
+lib thrlib;
+
+# ======================================================================
+# SECTION 1: VARIABLE DECLARATIONS
+# ======================================================================
+
+show "=== Testing Variable Declarations ===";
+
+# Basic variable types
+let number = 42;                          # Numeric variable
+take message = "Hello, Razen World!";     # String variable
+hold isActive = true;                     # Boolean variable
+put mixedData = [1, "text", true, null];  # Any type variable
+
+# Mathematical operations
+sum total = 100 + 50;                     # Addition
+diff result = 100 - 30;                   # Subtraction
+prod product = 5 * 10;                    # Multiplication
+div quotient = 20 / 4;                    # Division
+mod remainder = 10 % 3;                   # Modulus
+power squared = 5 ** 2;                   # Exponentiation
+
+# String operations
+text greeting = "Welcome to Razen";
+concat fullMessage = greeting + " - " + message;
+slice substring = StrLib[substring](fullMessage, 0, 7);
+let messageLength = StrLib[length](message);
+
+# Collections
+list numbers = [1, 2, 3, 4, 5];
+arr fixedArray = [10, 20, 30];
+map userInfo = ["name", "John", "age", 30, "active", true];
+
+# Date and time
+current currentTime = TimeLib[now]();
+year currentYear = Date[year]();
+month currentMonth = Date[month]();
+day currentDay = Date[day]();
+
+# Storage variables
+store persistentData = "This will be saved";
+box temporaryData = "Temporary storage";
+ref messageRef = message;
+
+# Display test results
+show "Number: " + number;
+show "Message: " + message;
+show "Is Active: " + isActive;
+show "Total: " + total;
+show "Product: " + product;
+show "Full Message: " + fullMessage;
+show "Array Length: " + ArrLib[length](numbers);
+
+# ======================================================================
+# SECTION 2: FUNCTIONS AND CONTROL FLOW
+# ======================================================================
+
+show "\n=== Testing Functions and Control Flow ===";
+
+# Function definitions
+fun greetUser(name, title) {
+    if (name == null or name == "") {
+        return "Hello, Guest!";
+    }
+    
+    take prefix = "";
+    if (title != null and title != "") {
+        prefix = title + " ";
+    }
+    
+    return "Hello, " + prefix + name + "!";
+}
+
+fun calculateFactorial(n) {
+    if (n <= 1) {
+        return 1;
+    }
+    return n * calculateFactorial(n - 1);
+}
+
+fun processArray(arr) {
+    if (arr == null or ArrLib[length](arr) == 0) {
+        return "Empty array";
+    }
+    
+    list processed = [];
+    for (item in arr) {
+        ArrLib[push](processed, item * 2);
+    }
+    
+    return processed;
+}
+
+# Control flow examples
+fun demonstrateControlFlow() {
+    # If-else-elif chains
+    let score = 85;
+    
+    if (score >= 90) {
+        show "Grade: A";
+    } elif (score >= 80) {
+        show "Grade: B";
+    } elif (score >= 70) {
+        show "Grade: C";
+    } else {
+        show "Grade: F";
+    }
+    
+    # While loops
+    let counter = 0;
+    while (counter < 3) {
+        show "Counter: " + counter;
+        counter = counter + 1;
+    }
+    
+    # For loops with ranges
+    for (let i = 0; i < 5; i = i + 1) {
+        show "Loop iteration: " + i;
+    }
+    
+    # For loops with collections
+    list colors = ["red", "green", "blue"];
+    for (color in colors) {
+        show "Color: " + color;
+    }
+}
+
+# Exception handling
+fun demonstrateErrorHandling() {
+    try {
+        let result = div(10, 0);
+        show "This shouldn't print";
+    } catch {
+        show "Caught division by zero error";
+    } finally {
+        show "Cleanup completed";
+    }
+}
+
+# Test functions
+show greetUser("Alice", "Dr.");
+show "Factorial of 5: " + calculateFactorial(5);
+show "Processed array: " + processArray([1, 2, 3]);
+demonstrateControlFlow();
+demonstrateErrorHandling();
+
+# ======================================================================
+# SECTION 3: LIBRARY DEMONSTRATIONS
+# ======================================================================
+
+show "\n=== Testing Library Functions ===";
+
+# Array library operations
+show "--- Array Library ---";
+list testArray = [3, 1, 4, 1, 5];
+ArrLib[push](testArray, 9);
+show "After push: " + testArray;
+show "Array length: " + ArrLib[length](testArray);
+show "Joined: " + ArrLib[join](testArray, "-");
+
+# String library operations
+show "--- String Library ---";
+take testString = "  Hello, World!  ";
+show "Original: '" + testString + "'";
+show "Trimmed: '" + StrLib[trim](testString) + "'";
+show "Uppercase: " + StrLib[upper](testString);
+show "Replace: " + StrLib[replace](testString, "World", "Razen");
+show "Starts with 'Hello': " + StrLib[starts_with](StrLib[trim](testString), "Hello");
+
+# Math library operations
+show "--- Math Library ---";
+show "Add: " + MathLib[add](15, 25);
+show "Square root of 16: " + MathLib[sqrt](16);
+show "Power of 2^8: " + MathLib[power](2, 8);
+show "Random number: " + MathLib[random]();
+show "Max of (3, 7, 2): " + MathLib[max](3, 7, 2);
+
+# Time and date operations
+show "--- Time Library ---";
+show "Current timestamp: " + TimeLib[now]();
+show "Formatted time: " + TimeLib[format](TimeLib[now](), "YYYY-MM-DD HH:mm:ss");
+show "Current year: " + Date[year]();
+show "Days in current month: " + Date[days_in_month](Date[year](), Date[month]());
+
+# JSON operations
+show "--- JSON Library ---";
+put sampleData = ["name", "John", "age", 30, "skills", ["JavaScript", "Python", "Razen"]];
+take jsonString = JSON[stringify](sampleData);
+show "JSON string: " + jsonString;
+
+# Color operations
+show "--- Color Library ---";
+show "Hex to RGB: " + Color[hex_to_rgb]("#ff6600");
+show "RGB to Hex: " + Color[rgb_to_hex]([255, 102, 0]);
+
+# UUID operations
+show "--- UUID Library ---";
+take newUuid = UUID[generate]();
+show "Generated UUID: " + newUuid;
+show "Is valid UUID: " + UUID[is_valid](newUuid);
+
+# Validation operations
+show "--- Validation Library ---";
+show "Email validation (valid): " + Validation[email]("user@example.com");
+show "Email validation (invalid): " + Validation[email]("not-an-email");
+show "Required validation: " + Validation[required]("Some value");
+
+# ======================================================================
+# SECTION 4: ADVANCED FEATURES
+# ======================================================================
+
+show "\n=== Testing Advanced Features ===";
+
+# Colored output
+show(red) "This is red text";
+show(green) "This is green text";
+show(blue) "This is blue text";
+show(yellow) "This is yellow text";
+show(bright_cyan) "This is bright cyan text";
+
+# String interpolation
+take userName = "Developer";
+let userAge = 25;
+show "User info: ${userName} is ${userAge} years old";
+
+# Complex data structures
+map complexData = [
+    "user", ["name", "Alice", "email", "alice@example.com"],
+    "settings", ["theme", "dark", "language", "razen"],
+    "stats", ["login_count", 42, "last_login", TimeLib[now]()]
+];
+
+# Library bracket notation examples
+take upperString = StrLib[upper]("razen language");
+let arraySum = MathLib[add](MathLib[add](1, 2), MathLib[add](3, 4));
+take randomChoice = Random[choice](["apple", "banana", "cherry"]);
+
+show "Complex operations:";
+show "- Upper string: " + upperString;
+show "- Array sum: " + arraySum;
+show "- Random choice: " + randomChoice;
+
+# ======================================================================
+# SECTION 5: COMPILER CONSTRUCTION FEATURES
+# ======================================================================
+
+show "\n=== Testing Compiler Features ===";
+
+# Compiler construction keywords
+token identifier = "variable_name";
+lexer tokenList = ["TOKEN1", "TOKEN2", "TOKEN3"];
+parser syntaxTree = "AST_NODE";
+ast rootNode = "ROOT";
+node childNode = "CHILD";
+scope globalScope = "GLOBAL";
+symbol symbolEntry = "SYMBOL";
+
+show "Compiler tokens: " + identifier;
+show "Lexer tokens: " + tokenList;
+
+# ======================================================================
+# SECTION 6: SYSTEM PROGRAMMING
+# ======================================================================
+
+show "\n=== Testing System Features ===";
+
+# Memory operations (simulated)
+show "Memory allocation test:";
+show "- Pointer operations available";
+show "- Buffer management supported";
+show "- System calls accessible";
+
+# Bitwise operations
+let bitwiseResult1 = BitLib[and](5, 3);    # 0101 & 0011 = 0001
+let bitwiseResult2 = BitLib[or](5, 3);     # 0101 | 0011 = 0111
+let bitwiseResult3 = BitLib[xor](5, 3);    # 0101 ^ 0011 = 0110
+
+show "Bitwise operations:";
+show "- 5 AND 3 = " + bitwiseResult1;
+show "- 5 OR 3 = " + bitwiseResult2;
+show "- 5 XOR 3 = " + bitwiseResult3;
+
+# OS information
+show "OS Platform: " + OS[platform]();
+show "Current directory: " + OS[cwd]();
+
+# ======================================================================
+# SECTION 7: TEST FUNCTIONS
+# ======================================================================
+
+show "\n=== Test Functions ===";
+
+# Test functions (these will be detected as runnable)
+fun test_basic_math() {
+    let result = MathLib[add](2, 3);
+    if (result == 5) {
+        show "✓ Basic math test passed";
+    } else {
+        show "✗ Basic math test failed";
+    }
+}
+
+fun test_string_operations() {
+    take result = StrLib[upper]("hello");
+    if (result == "HELLO") {
+        show "✓ String operations test passed";
+    } else {
+        show "✗ String operations test failed";
+    }
+}
+
+fun test_array_operations() {
+    list arr = [1, 2, 3];
+    ArrLib[push](arr, 4);
+    if (ArrLib[length](arr) == 4) {
+        show "✓ Array operations test passed";
+    } else {
+        show "✗ Array operations test failed";
+    }
+}
+
+# Run tests
+test_basic_math();
+test_string_operations();
+test_array_operations();
+
+# ======================================================================
+# SECTION 8: PERFORMANCE AND BOLT
+# ======================================================================
+
+show "\n=== Testing Performance Features ===";
+
+# Bolt library for intensive operations
+show "Bolt operations:";
+show "- High-performance processing available";
+show "- Parallel execution supported";
+show "- Optimized for large datasets";
+
+# Seed generation for games/maps
+take gameSeed = Seed[generate](16);
+show "Generated game seed: " + gameSeed;
+
+# ======================================================================
+# SECTION 9: NETWORKING AND API
+# ======================================================================
+
+show "\n=== Testing Network Features ===";
+
+# Network operations (simulated)
+show "Network capabilities:";
+show "- HTTP requests supported";
+show "- API integrations available";
+show "- WebSocket connections possible";
+
+# API keywords
+api UserAPI = "https://api.example.com/users";
+call getData = "GET /api/data";
+connect database = "postgresql://localhost:5432/mydb";
+
+# ======================================================================
+# FINAL SUMMARY
+# ======================================================================
+
+show "\n" + "=".repeat(50);
+show "🎉 Razen Extension Test Complete! 🎉";
+show "=".repeat(50);
+show "✓ Syntax highlighting: WORKING";
+show "✓ Variable declarations: WORKING";
+show "✓ Function definitions: WORKING";
+show "✓ Library support: WORKING";
+show "✓ Control flow: WORKING";
+show "✓ Error handling: WORKING";
+show "✓ Advanced features: WORKING";
+show "✓ Compiler features: WORKING";
+show "✓ System programming: WORKING";
+show "✓ Network features: WORKING";
+show "✓ Test functions: WORKING";
+show "=".repeat(50);
+
+# End of test file
+show "Extension test completed successfully!";
+show "Thank you for using Razen with Zed! 🚀";

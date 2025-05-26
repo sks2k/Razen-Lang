@@ -1,11 +1,15 @@
 const vscode = require('vscode');
 const { razenKeywords, razenVariables, razenFunctions, razenConstants, razenLibraries } = require('./razenLanguageData');
+const { activateLanguageServer, deactivateLanguageServer } = require('./server/razenClient');
 
 /**
  * @param {vscode.ExtensionContext} context
  */
 function activate(context) {
     console.log('Razen Language Extension is now active!');
+    
+    // Activate the language server for error checking
+    activateLanguageServer(context);
 
     // Register the completion item provider for Razen language
     const completionProvider = vscode.languages.registerCompletionItemProvider(
@@ -985,7 +989,10 @@ function getContextAwareCompletionItems(linePrefix, document, position) {
     return completionItems;
 }
 
-function deactivate() {}
+function deactivate() {
+    // Deactivate the language server
+    return deactivateLanguageServer();
+}
 
 module.exports = {
     activate,

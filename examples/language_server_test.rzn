@@ -1,0 +1,38 @@
+# This is a test file for the Razen language server
+
+# Testing variable declarations with correct types
+let num = 42;
+take message = "Hello, Razen!";
+hold isValid = true;
+put anything = "This can be any type";
+
+# Testing variable declarations with incorrect types (should show warnings)
+let wrongType = "This should be a number";
+take wrongType2 = 123;
+hold wrongType3 = 42;
+
+# Testing library function calls
+filesystem[exists]("test.txt");
+filesystem[read_file]("example.txt");
+filesystem[write_file]("output.txt", "Hello World");
+filesystem[list_dir](".");
+filesystem[is_file]("test.txt");
+filesystem[is_dir]("examples");
+filesystem[create_dir]("new_folder");
+filesystem[remove]("temp.txt");
+filesystem[metadata]("example.txt");
+filesystem[absolute_path]("relative/path");
+filesystem[copy]("source.txt", "destination.txt");
+filesystem[move]("old.txt", "new.txt");
+filesystem[extension]("file.txt");
+filesystem[file_stem]("file.txt");
+filesystem[parent_dir]("path/to/file.txt");
+filesystem[join_path]("path", "to", "file.txt");
+filesystem[change_dir]("new/directory");
+filesystem[current_dir]();
+filesystem[temp_file]();
+filesystem[temp_dir]();
+
+# Testing invalid library function calls (should show warnings)
+filesystem[invalid_function]("test.txt");
+nonexistent_library[function]();

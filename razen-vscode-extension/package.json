@@ -58,6 +58,8 @@
     "url": "https://github.com/BasaiCorp/Razen-Lang"
   },
   "dependencies": {
-    "vscode-languageclient": "^7.0.0"
+    "vscode-languageclient": "^7.0.0",
+    "vscode-languageserver": "^7.0.0",
+    "vscode-languageserver-textdocument": "^1.0.4"
   }
 }

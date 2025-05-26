@@ -1,0 +1,83 @@
+[razen]
+# Razen Language Runnables Configuration
+# Configuration for running Razen code directly from Zed IDE
+
+# Main function runner
+[[runnables.razen]]
+name = "Run Main"
+pattern = "fun main\\("
+shell = "razen run {file}"
+working_directory = "{project_root}"
+description = "Run the main function"
+
+# Script runner for any .rzn file
+[[runnables.razen]]
+name = "Run Script"
+pattern = "type (script|freestyle|cli)"
+shell = "razen {file}"
+working_directory = "{project_root}"
+description = "Run Razen script"
+
+# Test function runner
+[[runnables.razen]]
+name = "Run Tests"
+pattern = "fun test_"
+shell = "razen test {file}"
+working_directory = "{project_root}"
+description = "Run test functions"
+
+# Web application runner
+[[runnables.razen]]
+name = "Run Web App"
+pattern = "type web"
+shell = "razen serve {file}"
+working_directory = "{project_root}"
+description = "Start web application"
+
+# CLI application runner
+[[runnables.razen]]
+name = "Run CLI"
+pattern = "type cli"
+shell = "razen cli {file}"
+working_directory = "{project_root}"
+description = "Run CLI application"
+
+# Compiler test runner
+[[runnables.razen]]
+name = "Compile & Run"
+pattern = "(CompLib|lexer|parser|ast)"
+shell = "razen compile {file} && razen run {file_stem}"
+working_directory = "{project_root}"
+description = "Compile and run Razen code"
+
+# Library test runner
+[[runnables.razen]]
+name = "Run Library Tests"
+pattern = "lib (arrlib|strlib|mathlib)"
+shell = "razen test-lib {file}"
+working_directory = "{project_root}"
+description = "Run library functionality tests"
+
+# Interactive runner
+[[runnables.razen]]
+name = "Run Interactive"
+pattern = "(ask|read)"
+shell = "razen interactive {file}"
+working_directory = "{project_root}"
+description = "Run with interactive input support"
+
+# Debug runner
+[[runnables.razen]]
+name = "Debug Run"
+pattern = "show.*debug"
+shell = "razen debug {file}"
+working_directory = "{project_root}"
+description = "Run with debug output"
+
+# Performance runner for bolt operations
+[[runnables.razen]]
+name = "Run with Bolt"
+pattern = "lib bolt"
+shell = "razen bolt {file}"
+working_directory = "{project_root}"
+description = "Run with Bolt performance optimizations"

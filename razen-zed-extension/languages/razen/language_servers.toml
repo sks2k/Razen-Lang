@@ -1,0 +1,51 @@
+[language_servers.razen]
+name = "razen-language-server"
+executable = "razen-ls"
+args = ["--stdio"]
+
+[language_servers.razen.settings]
+razen = { enable = true, trace = { server = "verbose" } }
+
+[language_servers.razen.capabilities]
+completion = true
+hover = true
+signature_help = true
+goto_definition = true
+find_references = true
+document_symbols = true
+workspace_symbols = true
+code_actions = true
+formatting = true
+rename = true
+inlay_hints = true
+semantic_tokens = true
+diagnostics = true
+
+[language_servers.razen.initialization_options]
+enable_snippets = true
+enable_completion = true
+enable_hover = true
+enable_signature_help = true
+enable_goto_definition = true
+enable_find_references = true
+enable_document_symbols = true
+enable_workspace_symbols = true
+enable_code_actions = true
+enable_formatting = true
+enable_rename = true
+enable_inlay_hints = true
+enable_semantic_tokens = true
+enable_diagnostics = true
+library_path = "./libs"
+stdlib_path = "/usr/local/lib/razen/stdlib"
+compiler_path = "razen-compiler"
+interpreter_path = "razen"
+debug_mode = false
+log_level = "info"
+max_completions = 100
+completion_trigger_characters = [".", "[", "(", " ", "+", "=", "\"", "'", ",", ":"]
+signature_help_trigger_characters = ["(", ","]
+document_formatting_provider = true
+document_range_formatting_provider = true
+workspace_configuration = true
+experimental_features = ["advanced_completions", "semantic_highlighting", "code_lens"]

@@ -29,6 +29,15 @@
     },
     {
       "include": "#colored-output"
+    },
+    {
+      "include": "#libraries"
+    },
+    {
+      "include": "#enums"
+    },
+    {
+      "include": "#const-declarations"
     }
   ],
   "repository": {
@@ -64,7 +73,27 @@
       "patterns": [
         {
           "name": "keyword.control.razen",
-          "match": "\\b(if|else|elif|while|for|return|break|continue|fun|when|not|and|or|try|catch|throw|finally|in)\\b"
+          "match": "\\b(if|else|elif|while|for|return|break|continue|fun|when|not|and|or|try|catch|throw|finally|in|use|export|as|from|import|class|api|call|get|post|await|connect|to|debug|assert|trace|type|exit|load)\\b"
+        },
+        {
+          "name": "keyword.declaration.razen",
+          "match": "\\b(let|take|hold|put|sum|diff|prod|div|mod|text|concat|slice|len|list|arr|append|remove|map|key|value|store|box|ref|is)\\b"
+        },
+        {
+          "name": "storage.type.razen",
+          "match": "\\b(const|enum)\\b"
+        },
+        {
+          "name": "keyword.other.razen",
+          "match": "\\b(current|now|year|month|day|hour|minute|second)\\b"
+        },
+        {
+          "name": "keyword.compiler.razen",
+          "match": "\\b(token|lexer|parser|ast|node|visitor|symbol|scope|typesys|ir|codegen|optimize|target|grammar|rule|attribute)\\b"
+        },
+        {
+          "name": "keyword.type.razen",
+          "match": "\\b(inline|final|volatile)\\b"
         },
         {
           "name": "constant.language.razen",
@@ -76,7 +105,7 @@
       "patterns": [
         {
           "name": "entity.name.function.razen",
-          "match": "\\b(plus|minus|times|by|mod|power|round|sqrt|abs|size|join|big|small|split|replace|trim|find|count|add|take|clear|sort|reverse|keys|values|contains|remove|get|time|date|timestamp|sleep|say|ask|write|read_file)\\b"
+          "match": "\\b(plus|minus|times|by|mod|power|round|sqrt|abs|size|join|big|small|split|replace|trim|find|count|add|take|clear|sort|reverse|keys|values|contains|remove|get|time|date|timestamp|sleep|say|ask|write|read_file|exists|is_file|is_dir|create_dir|read_file|write_file|list_dir|metadata|absolute_path|copy|move|extension|file_stem|parent_dir|join_path|change_dir|current_dir|temp_file|temp_dir)\\b"
         },
         {
           "name": "entity.name.function.definition.razen",
@@ -216,6 +245,58 @@
           "captures": {
             "1": { "name": "storage.type.razen" },
             "2": { "name": "support.constant.color.razen" }
+          }
+        }
+      ]
+    },
+    "libraries": {
+      "patterns": [
+        {
+          "name": "entity.name.class.library.razen",
+          "match": "\\b(ArrLib|StrLib|MathLib|TimeLib|Random|File|Filesystem|JSON|Bolt|Seed|MemoryLib|BinaryLib|BitwiseLib|SystemLib|ProcessLib|ThreadLib|CompilerLib|LexerLib|ParserLib|ASTLib|SymbolLib|TypeLib|IRLib|CodeGenLib|OptimizeLib|Color|Crypto|Regex|UUID|OS|Validation|System|BoxLib|LogLib|HTLib|NetLib|Audio|Image|Date)\\b"
+        },
+        {
+          "name": "entity.name.function.library.razen",
+          "match": "\\b(push|pop|join|length|map|filter|unique|upper|lower|substring|replace|length|split|trim|starts_with|ends_with|contains|repeat|add|subtract|multiply|divide|power|sqrt|abs|round|floor|ceil|sin|cos|tan|log|exp|random|max|min|modulo|now|format|parse|add|year|month|day|int|float|choice|shuffle|read|write|append|exists|delete|is_file|is_dir|create_dir|remove|read_file|write_file|list_dir|metadata|absolute_path|copy|move|extension|file_stem|parent_dir|join_path|change_dir|current_dir|temp_file|temp_dir|parse|stringify|run|parallel|generate|map|addressof|deref|add_offset|alloc|free|write_byte|read_byte|create_buffer|free_buffer|buffer_write_string|buffer_read_string|buffer_copy|stats|create|open|close|write_bytes|read_bytes|seek|tell|bytes_to_string|string_to_bytes|and|or|xor|not|left_shift|right_shift|unsigned_right_shift|get_bit|set_bit|count_bits|to_binary|to_hex|from_binary|from_hex|getpid|getcwd|execute|getenv|setenv|environ|args|path_exists|realpath|exit|sleep|hostname|username|current_time|system_name|create|wait|is_running|kill|signal|info|read_stdout|read_stderr|write_stdin|create|join|is_running|sleep|mutex_create|mutex_lock|mutex_unlock|mutex_destroy|current|cpu_count|thread_id|thread_count|create_node|add_child|node_to_string|create_symbol_table|add_symbol|lookup_symbol|generate_ir|optimize_ir|generate_assembly|parse|tokenize|compile|create_lexer|define_token|create_parser|define_rule|create_grammar|define_node_type|traverse|create_visitor|define_symbol|define_type|check_type|create_type_system|infer_type|create_instruction|generate|optimize|to_string|create_generator|define_target|emit_code|create_pass|apply|analyze|create_pipeline|hex_to_rgb|rgb_to_hex|lighten|darken|get_ansi_color|hash|encrypt|decrypt|match|search|is_valid|env|cwd|platform|email|phone|required|min_length|exec|uptime|info|put|get|is_box|info|warn|error|debug|coin|bool|play|pause|stop|record|load|save|resize|crop|weekday|weekday_name|days_in_month|is_leap_year|diff_days|ping|get|post)\\b"
+        }
+      ]
+    },
+    "enums": {
+      "patterns": [
+        {
+          "name": "entity.name.type.enum.razen",
+          "match": "\\b(enum)\\s+([A-Za-z_][A-Za-z0-9_]*)\\s*\\{",
+          "captures": {
+            "1": { "name": "storage.type.enum.razen" },
+            "2": { "name": "entity.name.type.enum.razen" }
+          }
+        },
+        {
+          "name": "constant.other.enum.razen",
+          "match": "\\b([A-Z][A-Z0-9_]*)\\s*(?:=\\s*([0-9]+))?\\s*(?:,|$)",
+          "captures": {
+            "1": { "name": "constant.other.enum.razen" },
+            "2": { "name": "constant.numeric.integer.razen" }
+          }
+        },
+        {
+          "name": "meta.enum-access.razen",
+          "match": "\\b([A-Za-z_][A-Za-z0-9_]*)\\s*\\[\\s*([A-Z][A-Z0-9_]*)\\s*\\]",
+          "captures": {
+            "1": { "name": "entity.name.type.enum.razen" },
+            "2": { "name": "constant.other.enum.razen" }
+          }
+        }
+      ]
+    },
+    "const-declarations": {
+      "patterns": [
+        {
+          "name": "meta.const-declaration.razen",
+          "match": "\\b(const)\\s+([A-Za-z_][A-Za-z0-9_]*)\\s*=",
+          "captures": {
+            "1": { "name": "storage.type.const.razen" },
+            "2": { "name": "variable.other.constant.razen" }
           }
         }
       ]

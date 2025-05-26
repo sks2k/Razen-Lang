@@ -1,0 +1,19 @@
+[package]
+name = "razen-zed-extension"
+version = "0.1.0"
+edition = "2021"
+description = "Zed IDE extension for the Razen programming language"
+authors = ["Razen Language Team <team@razen-lang.org>"]
+license = "MIT"
+repository = "https://github.com/BasaiCorp/Razen-Lang"
+homepage = "https://razen-lang.org"
+readme = "README.md"
+keywords = ["razen", "programming-language", "zed-extension", "syntax-highlighting"]
+categories = ["development-tools", "text-editors"]
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+zed_extension_api = "0.5.0"
+serde_json = "1.0"

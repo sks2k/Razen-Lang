@@ -1,0 +1,159 @@
+# Razen Language Variables Definition
+# This file defines all variables and their purposes in the Razen language
+# Format: variable_name => purpose and use case
+
+# 0️⃣ Document Structure Variables
+# Use these variables to define the type of document you are working with
+# Available options: web, script, cli
+# Example: type web; or type script; or type cli;
+type => for declaring document structure. Use for defining document types and structure. [options: web, script, cli]
+
+# 1️⃣ General Purpose Variables for basic data types:
+let => for declaring numeric variables and calculations. Use for integers, floats, and mathematical operations.
+take => for declaring string variables and text manipulation. Use for text data, string operations, and string interpolation.
+hold => for declaring boolean variables and logical conditions. Use for true/false values and control flow.
+put => for declaring variables of any type. Use when type is unknown or mixed types are needed.
+
+# 2️⃣ Mathematical Variables for calculations & math operations:
+sum => for calculating total or sum of values. Use in addition operations and running totals.
+diff => for calculating difference between values. Use in subtraction operations and comparisons.
+prod => for calculating product of values. Use in multiplication operations and scaling.
+div => for calculating division of values. Use in division operations and ratios.
+mod => for calculating modulus/remainder. Use in cyclic operations and value wrapping.
+
+# 3️⃣ Logical Variables For conditions, booleans, and comparisons:
+if => for conditional execution blocks. Use to check conditions and execute code.
+else => for alternative execution blocks. Use with if for fallback behavior.
+is => for equality comparison. Use to check if values are equal.
+when => for pattern matching and case statements. Use for multiple condition checks.
+not => for logical negation. Use to invert boolean values.
+
+# 4️⃣ String Variables for text & strings:
+text => for string data storage. Use for storing and manipulating text.
+concat => for joining strings together. Use for string concatenation and building messages.
+slice => for extracting parts of strings. Use for substring operations and text parsing.
+len => for getting string length. Use for string size checks and validation.
+
+# 5️⃣ List & Array Variables for collections:
+list => for dynamic arrays and lists. Use for storing multiple values of any type.
+arr => for fixed-size arrays. Use when array size is known and constant.
+append => for adding elements to lists. Use for list growth and element addition.
+remove => for removing elements from lists. Use for list cleanup and element deletion.
+
+# 6️⃣ Dictionary/Map Variables for key-value pairs:
+map => for key-value storage. Use for storing related data with unique keys.
+key => for accessing dictionary keys. Use for key iteration and key-based operations.
+value => for accessing dictionary values. Use for value iteration and value-based operations.
+
+# 7️⃣ Date & Time Variables for timestamps & time:
+current => for current date/time. Use for getting current timestamp.
+now => for current timestamp. Use for precise time measurements.
+year => for year component. Use for date-based calculations.
+month => for month component. Use for date-based calculations.
+day => for day component. Use for date-based calculations.
+hour => for hour component. Use for time-based calculations.
+minute => for minute component. Use for time-based calculations.
+second => for second component. Use for time-based calculations.
+
+# 8️⃣ User-Defined Variables for custom variables:
+store => for persistent storage. Use for saving and loading data.
+box => for temporary storage. Use for short-term data holding.
+ref => for reference variables. Use for aliasing and pointer-like behavior.
+
+# 9️⃣ Input/Output Variables:
+show => for printing output to console. Use for displaying results and messages.
+read => for reading input from user. Use for getting user input and data entry.
+
+# 10️⃣ Control Flow Variables:
+while => for loop control. Use for repeated execution based on condition.
+fun => for function declaration. Use for code organization and reuse.
+
+# 11️⃣ Special Variables:
+true => for boolean true value. Use in boolean expressions.
+false => for boolean false value. Use in boolean expressions.
+null => for null/undefined value. Use for optional or uninitialized data.
+
+# 12 New variables/keywords:
+class => for class declaration. Use for object-oriented programming.
+return => for function return values. Use for sending results back from functions. (also can be used with proepr class name if coder wants to return user to the speified class or function or this so ii will return to that.)
+
+# 13 API Specified variables:
+api => for API declaration. Use for connecting to external services.
+call => for API calls. Use for making requests to external services.
+get => for API responses. Use for receiving data from external services.
+post => for API requests. Use for sending data to external services.
+
+# 14 Comman use keywords/variables:
+connect => for connecting to external services. Use for connecting to external services.
+from => for connecting to external services. Use for connecting to external services. mainly for import. (for import)
+to => for connecting to external services. Use for connecting to external services. mainly for export. (for export)
+
+# 15 Import/Export keywords/variables:
+import => for importing modules. Use for importing modules from other files.
+export => for exporting modules. Use for exporting modules to other files.
+use => for using the function or classs or imported things via import.
+
+# 16 Libraries variables:
+lib => for libraries. Use for using libraries.
+random => for generating random numbers. Use for generating random numbers and random selections.
+ht => (head and tails.) Use for generating random selections between two options.
+coin => for generating random selections between two options. Use for generating random selections between two options.
+math => for mathematical operations and calculations. Use for advanced math functions. and automaticly do maths operation not need to tell proepr things like diff and mod and sum these type just direct tell for more and advance work.
+ping => for pinging a website. Use for checking website availability.
+bolt => for fast operations and speed up load of complex and high lines code means above then 1000 lines.
+seed => for generating game codes and seed and maps gen. (full features will add later.)
+
+# Additional built-in libraries (import using: import lib <name>;)
+string => string utilities (format, search, split, join, pad, etc.)
+array => array/list utilities (map, filter, reduce, unique, etc.)
+date => date and time manipulation (parse, format, add/subtract, etc.)
+file => file I/O (read, write, exists, delete, etc.)
+os => operating system info (env vars, cwd, platform, etc.)
+net => networking (http requests, fetch, ping, etc.)
+json => JSON encode/decode, validation, pretty print, etc.
+regex => regular expressions (search, match, replace, etc.)
+crypto => hashing, encryption, decryption, uuid, etc.
+color => color manipulation (hex/rgb conversion, lighten, darken, etc.)
+system => system commands, process info, uptime, etc.
+ui => user interface helpers (dialogs, alerts, input, etc.)
+storage => persistent storage (local, session, cache, etc.)
+audio => audio playback, recording, manipulation, etc.
+image => image processing (resize, crop, convert, etc.)
+validation => data validation helpers (email, phone, etc.)
+log => logging utilities (info, warn, error, debug, etc.)
+uuid => UUID generation and parsing.
+
+# 17 Compiler Construction Variables:
+token => for token representation in lexical analysis. Use for defining and manipulating tokens in a compiler.
+lexer => for lexical analyzer components. Use for breaking source code into tokens.
+parser => for syntax analyzer components. Use for building parse trees from tokens.
+ast => for abstract syntax tree representation. Use for structured code representation.
+node => for AST node manipulation. Use for working with individual elements in an AST.
+visitor => for implementing the visitor pattern on ASTs. Use for traversing and transforming ASTs.
+symbol => for symbol table entries. Use for tracking identifiers and their properties.
+scope => for scope management. Use for handling variable visibility and lifetime.
+typesys => for type checking and representation. Use for ensuring type safety.
+ir => for intermediate representation. Use for code between parsing and code generation.
+codegen => for code generation. Use for producing target code from IR.
+optimize => for optimization passes. Use for improving generated code efficiency.
+target => for target code specification. Use for defining output code characteristics.
+grammar => for grammar definition. Use for specifying language syntax rules.
+rule => for grammar rules. Use for individual syntax rules in a grammar.
+attribute => for semantic attributes. Use for attaching information to AST nodes.
+
+# 18 Compiler Construction Libraries:
+lexerlib => for lexical analysis operations. Use for tokenizing source code.
+parserlib => for syntax analysis operations. Use for parsing tokens into AST.
+astlib => for abstract syntax tree operations. Use for manipulating and traversing ASTs.
+symbollib => for symbol table operations. Use for managing identifiers and scopes.
+typelib => for type checking operations. Use for verifying type correctness.
+irlib => for intermediate representation operations. Use for working with IR code.
+codegenlib => for code generation operations. Use for producing target code.
+optimizelib => for optimization operations. Use for improving code efficiency.
+
+# 19 Performance and Type Safety Keywords:
+const => for declaring constant values. Use for values that should never change after initialization.
+enum => for defining enumerated types. Use for a fixed set of related values.
+inline => for suggesting function inlining. Use for performance-critical functions that should be inlined.
+final => for declaring classes that cannot be extended. Use for preventing inheritance of certain classes.
+volatile => for declaring variables that might change externally. Use for variables modified by external processes.
