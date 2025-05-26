@@ -172,14 +172,65 @@ add_to_path_windows() {
     fi
 }
 
+# Check for Visual Studio build tools on Windows
+check_vs_build_tools() {
+    # Check for Visual Studio build tools
+    if command -v cl.exe &>/dev/null || \
+       [ -f "C:/Program Files (x86)/Microsoft Visual Studio/2019/BuildTools/VC/Tools/MSVC/*/bin/Hostx64/x64/cl.exe" ] || \
+       [ -f "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/VC/Tools/MSVC/*/bin/Hostx64/x64/cl.exe" ] || \
+       [ -f "C:/Program Files/Microsoft Visual Studio/2019/*/VC/Tools/MSVC/*/bin/Hostx64/x64/cl.exe" ] || \
+       [ -f "C:/Program Files/Microsoft Visual Studio/2022/*/VC/Tools/MSVC/*/bin/Hostx64/x64/cl.exe" ]; then
+        return 0
+    else
+        return 1
+    fi
+}
+
+# Detect current Rust toolchain
+detect_rust_toolchain() {
+    if command -v rustup &>/dev/null; then
+        rustup show active-toolchain 2>/dev/null | cut -d' ' -f1
+    else
+        echo "unknown"
+    fi
+}
+
 # Install Rust based on OS
 install_rust() {
     echo -e "${YELLOW}Installing Rust...${NC}"
 
     if [[ "$OS" == "windows" ]]; then
-        # Download and run rustup-init.exe for Windows
-        curl -sSf -o "$TMP_DIR/rustup-init.exe" https://win.rustup.rs/x86_64
-        "$TMP_DIR/rustup-init.exe" -y --no-modify-path
+        # Check for Visual Studio build tools first
+        if check_vs_build_tools; then
+            echo -e "  ${GREEN}✓${NC} Visual Studio build tools detected"
+            # Download and run rustup-init.exe for Windows with MSVC toolchain
+            curl -sSf -o "$TMP_DIR/rustup-init.exe" https://win.rustup.rs/x86_64
+            "$TMP_DIR/rustup-init.exe" -y --no-modify-path --default-toolchain stable-x86_64-pc-windows-msvc
+        else
+            echo -e "  ${YELLOW}⚠${NC} Visual Studio build tools not detected"
+            echo -e "  ${YELLOW}Installing Rust with GNU toolchain (recommended for this system)${NC}"
+
+            # Check if MinGW-w64 is available
+            if ! command -v x86_64-w64-mingw32-gcc &>/dev/null && ! command -v gcc &>/dev/null; then
+                echo -e "  ${YELLOW}Installing MinGW-w64 for GNU toolchain...${NC}"
+
+                # Try to install via package manager
+                if command -v pacman &>/dev/null; then
+                    # MSYS2/Git Bash environment
+                    pacman -S --noconfirm mingw-w64-x86_64-gcc mingw-w64-x86_64-toolchain 2>/dev/null || true
+                elif command -v choco &>/dev/null; then
+                    # Chocolatey
+                    choco install mingw -y 2>/dev/null || true
+                else
+                    echo -e "  ${YELLOW}Please ensure MinGW-w64 is installed for the GNU toolchain${NC}"
+                    echo -e "  ${YELLOW}You can install it via MSYS2, Chocolatey, or download from: https://www.mingw-w64.org/${NC}"
+                fi
+            fi
+
+            # Download and run rustup-init.exe for Windows with GNU toolchain
+            curl -sSf -o "$TMP_DIR/rustup-init.exe" https://win.rustup.rs/x86_64
+            "$TMP_DIR/rustup-init.exe" -y --no-modify-path --default-toolchain stable-x86_64-pc-windows-gnu
+        fi
         export PATH="$HOME/.cargo/bin:$PATH"
     else
         # Linux/macOS
@@ -188,6 +239,12 @@ install_rust() {
     fi
 
     echo -e "  ${GREEN}✓${NC} Rust installed successfully"
+
+    # Display toolchain information
+    if [[ "$OS" == "windows" ]]; then
+        toolchain=$(detect_rust_toolchain)
+        echo -e "  ${BLUE}ℹ${NC} Active toolchain: $toolchain"
+    fi
 }
 
 # Get version information
@@ -198,7 +255,7 @@ get_version() {
         # Download version file if not present
         if ! curl -s -o "$TMP_DIR/version" "$RAZEN_REPO/version" &>/dev/null; then
             echo -e "${RED}Failed to download version information. Using default version.${NC}"
-            RAZEN_VERSION="beta v0.1.68 (VScode and forks extension update.)"
+            RAZEN_VERSION="beta v0.1.685 (Windows Installtion fixed.)"
         else
             RAZEN_VERSION=$(cat "$TMP_DIR/version")
             # Store the version file for future reference
@@ -490,6 +547,10 @@ setup_rust_and_build() {
         fi
     else
         echo -e "  ${GREEN}✓${NC} Rust is installed"
+        if [[ "$OS" == "windows" ]]; then
+            toolchain=$(detect_rust_toolchain)
+            echo -e "  ${BLUE}ℹ${NC} Active toolchain: $toolchain"
+        fi
     fi
 
     # Build Razen
@@ -499,10 +560,53 @@ setup_rust_and_build() {
     # Ensure PATH includes cargo
     export PATH="$HOME/.cargo/bin:$PATH"
 
+    # Verify toolchain before building on Windows
+    if [[ "$OS" == "windows" ]]; then
+        echo -e "${YELLOW}Verifying Rust toolchain...${NC}"
+        if ! rustc --version &>/dev/null; then
+            handle_error 1 "Rust compiler not accessible" "Ensure Rust is properly installed and in PATH"
+        fi
+
+        # Test basic compilation
+        echo 'fn main() { println!("test"); }' > "$TMP_DIR/test.rs"
+        if ! rustc "$TMP_DIR/test.rs" -o "$TMP_DIR/test.exe" &>/dev/null; then
+            echo -e "${RED}Toolchain verification failed. Build tools may be missing.${NC}"
+            toolchain=$(detect_rust_toolchain)
+            if [[ "$toolchain" == *"msvc"* ]]; then
+                echo -e "${YELLOW}MSVC toolchain detected but build tools missing.${NC}"
+                echo -e "${YELLOW}Trying to switch to GNU toolchain...${NC}"
+                if rustup toolchain install stable-x86_64-pc-windows-gnu &>/dev/null &&
+                   rustup default stable-x86_64-pc-windows-gnu &>/dev/null; then
+                    echo -e "  ${GREEN}✓${NC} Switched to GNU toolchain"
+                    # Test again
+                    if ! rustc "$TMP_DIR/test.rs" -o "$TMP_DIR/test.exe" &>/dev/null; then
+                        handle_error 1 "Both MSVC and GNU toolchains failed" "Please install Visual Studio Build Tools or MinGW-w64"
+                    fi
+                else
+                    handle_error 1 "Failed to switch to GNU toolchain" "Please install Visual Studio Build Tools"
+                fi
+            else
+                handle_error 1 "GNU toolchain compilation failed" "Please ensure MinGW-w64 is properly installed"
+            fi
+        fi
+        echo -e "  ${GREEN}✓${NC} Toolchain verification successful"
+    fi
+
     # Fix permissions before building
     if [[ "$OS" == "windows" ]]; then
         # Windows doesn't need permission fixes
-        cargo build --release || handle_error $? "Failed to build Razen" "Check for compilation errors and ensure Rust is properly installed"
+        if ! cargo build --release; then
+            echo -e "${RED}Build failed. This might be due to missing build tools.${NC}"
+            echo -e "${YELLOW}Troubleshooting steps:${NC}"
+            echo -e "  1. If using MSVC toolchain: Install Visual Studio Build Tools"
+            echo -e "     Download from: https://visualstudio.microsoft.com/visual-cpp-build-tools/"
+            echo -e "  2. If using GNU toolchain: Ensure MinGW-w64 is properly installed"
+            echo -e "  3. Try switching toolchains:"
+            echo -e "     - For MSVC: rustup default stable-x86_64-pc-windows-msvc"
+            echo -e "     - For GNU: rustup default stable-x86_64-pc-windows-gnu"
+            echo -e "  4. Restart your terminal after installing build tools"
+            handle_error $? "Failed to build Razen" "See troubleshooting steps above"
+        fi
     else
         # For Linux/macOS, temporarily change ownership to current user for the build
         echo -e "${YELLOW}Setting proper permissions for build...${NC}"

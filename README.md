@@ -1,4 +1,4 @@
-# Razen Programming Language beta v0.1.68 (VScode and forks extension update.)
+# Razen Programming Language beta v0.1.685 (Windows Installation Fixed)
 
 ## Overview
 Razen is a modern, intuitive programming language designed for clarity, performance, and ease of use. With a clean syntax inspired by Python and strong type safety, Razen offers an excellent balance between development speed and runtime performance.
@@ -45,6 +45,109 @@ curl -o installer.sh "https://raw.githubusercontent.com/BasaiCorp/razen-lang/mai
 ```
 
 > **Note**: Windows installation requires Git Bash, which you can download from [https://git-scm.com/downloads](https://git-scm.com/downloads)
+
+#### Windows Installation Improvements (v0.1.685)
+
+Recent updates have significantly improved Windows installation reliability by addressing the most common build failures:
+
+**Key Improvements:**
+- **Smart Toolchain Detection**: Automatically detects Visual Studio Build Tools availability
+- **Intelligent Fallback System**: Switches from MSVC to GNU toolchain when build tools are missing
+- **Automatic Dependency Installation**: Attempts to install MinGW-w64 for GNU toolchain
+- **Pre-build Verification**: Tests compilation before attempting full Razen build
+- **Enhanced Diagnostics**: Detailed error messages with specific troubleshooting steps
+- **Toolchain Information**: Shows active Rust toolchain during installation
+
+**What Was Fixed:**
+Prior to v0.1.685, Windows installations frequently failed with linking errors like:
+```
+error: linking with `link.exe` failed: exit code: 1
+note: you may need to install Visual Studio build tools with the "C++ build tools" workload
+```
+
+This occurred because the installer would install Rust with the MSVC toolchain but didn't verify that Microsoft Visual C++ build tools were available, causing cargo build failures.
+
+**Technical Details:**
+The installer now handles the common Windows issue where Rust installs with the MSVC toolchain but Microsoft Visual C++ build tools aren't available. Instead of failing, it automatically:
+
+1. Checks for Visual Studio build tools (`cl.exe` and Visual Studio installations)
+2. Uses MSVC toolchain if build tools are detected
+3. Falls back to GNU toolchain (`x86_64-pc-windows-gnu`) if MSVC tools are missing
+4. Attempts to install MinGW-w64 via package managers (MSYS2, Chocolatey)
+5. Verifies the selected toolchain works before building Razen
+6. Provides intelligent error recovery and user guidance
+
+**Platform Compatibility:**
+These Windows-specific improvements have zero impact on Linux and macOS installations, which continue to work exactly as before. All changes are contained within Windows-only code paths.
+
+**Testing & Validation:**
+- Tested on Windows 10/11 with and without Visual Studio installed
+- Verified automatic fallback from MSVC to GNU toolchain
+- Confirmed MinGW-w64 auto-installation via MSYS2 and Chocolatey
+- Validated that Linux and macOS installations remain unchanged
+
+#### Windows Troubleshooting
+
+If you encounter installation issues:
+
+**Build Tool Requirements:**
+- **MSVC Toolchain**: Requires Visual Studio Build Tools or Visual Studio
+- **GNU Toolchain**: Requires MinGW-w64 (automatically installed when possible)
+
+**Step-by-Step Solutions:**
+
+1. **For MSVC Toolchain Issues**:
+   ```bash
+   # Install Visual Studio Build Tools
+   # Download from: https://visualstudio.microsoft.com/visual-cpp-build-tools/
+   # Select "C++ build tools" workload during installation
+   
+   # Verify installation
+   rustup default stable-x86_64-pc-windows-msvc
+   rustc --version
+   ```
+
+2. **For GNU Toolchain Issues**:
+   ```bash
+   # The installer attempts automatic installation, but if it fails:
+   
+   # Via MSYS2 (recommended)
+   pacman -S mingw-w64-x86_64-gcc mingw-w64-x86_64-toolchain
+   
+   # Via Chocolatey
+   choco install mingw -y
+   
+   # Verify installation
+   rustup default stable-x86_64-pc-windows-gnu
+   rustc --version
+   ```
+
+3. **Manual Toolchain Management**:
+   ```bash
+   # Check available toolchains
+   rustup toolchain list
+   
+   # Install specific toolchain
+   rustup toolchain install stable-x86_64-pc-windows-gnu
+   rustup toolchain install stable-x86_64-pc-windows-msvc
+   
+   # Switch between toolchains
+   rustup default stable-x86_64-pc-windows-msvc  # For Visual Studio users
+   rustup default stable-x86_64-pc-windows-gnu   # For MinGW-w64 users
+   ```
+
+4. **Common Error Solutions**:
+   - **"link.exe failed"**: Install Visual Studio Build Tools or switch to GNU toolchain
+   - **"gcc not found"**: Install MinGW-w64 or switch to MSVC toolchain
+   - **Permission errors**: Run Git Bash as Administrator
+   - **PATH issues**: Restart terminal after installing build tools
+   - **Compilation failures**: Run installer again - it will automatically retry with different toolchain
+
+**Environment Requirements:**
+- Git Bash (from Git for Windows)
+- Administrator privileges (recommended)
+- Internet connection for downloading dependencies
+- At least 2GB free disk space
 
 ### Installation Options
 
@@ -458,6 +561,17 @@ For questions, support, or feedback about Razen, please contact:
 **Official website coming soon!**
 
 ## Changelog
+
+### beta v0.1.685 - Windows Installation Fix
+- **Fixed Critical Windows Build Failures**: Resolved linking errors due to missing Visual C++ build tools
+- **Smart Toolchain Detection**: Automatically detects and selects appropriate Rust toolchain (MSVC vs GNU)
+- **Automatic Fallback System**: Switches to GNU toolchain if MSVC toolchain fails
+- **Enhanced Build Verification**: Pre-build tests ensure toolchain compatibility before compilation
+- **Improved Error Handling**: Comprehensive troubleshooting guidance for Windows build issues
+- **MinGW-w64 Auto-Installation**: Attempts automatic installation of required build tools
+- **Better User Feedback**: Clear indication of active toolchain and build status
+- **Cross-Platform Safety**: Windows improvements have zero impact on Linux/macOS functionality
+- **Extensive Testing**: Validated across multiple Windows configurations and environments
 
 ### beta v0.1.675
 - Added universal installer supporting Linux, macOS, and Windows

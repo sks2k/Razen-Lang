@@ -57,7 +57,7 @@ get_version() {
   elif [ -f "$PROJECT_ROOT/version" ]; then
     cat "$PROJECT_ROOT/version"
   else
-    echo "beta v0.1.68 (VScode and forks extension update.)" # Fallback version
+    echo "beta v0.1.685 (Windows Installtion fixed.)" # Fallback version
   fi
 }
 
