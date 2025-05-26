@@ -1,4 +1,4 @@
-# Razen Programming Language beta v0.1.685 (Windows Installation Fixed)
+# Razen Programming Language beta v0.1.687 (Windows Installtion fixed 2nd)
 
 ## Overview
 Razen is a modern, intuitive programming language designed for clarity, performance, and ease of use. With a clean syntax inspired by Python and strong type safety, Razen offers an excellent balance between development speed and runtime performance.

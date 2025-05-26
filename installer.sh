@@ -172,6 +172,243 @@ add_to_path_windows() {
     fi
 }
 
+# Add Cargo to PATH for Windows
+add_cargo_to_path_windows() {
+    echo -e "${YELLOW}Adding Cargo to your PATH...${NC}"
+    local cargo_bin_dir="$HOME/.cargo/bin"
+
+    if command -v powershell &>/dev/null; then
+        # Convert to Windows path format
+        local win_cargo_path=$(echo "$cargo_bin_dir" | sed 's|^/c/|C:\\|' | sed 's|/|\\|g')
+
+        # Check if already in PATH
+        local current_path=$(powershell -Command "[Environment]::GetEnvironmentVariable('Path', 'User')" 2>/dev/null || echo "")
+
+        if [[ "$current_path" != *"$win_cargo_path"* ]]; then
+            powershell -Command "[Environment]::SetEnvironmentVariable('Path', [Environment]::GetEnvironmentVariable('Path', 'User') + ';$win_cargo_path', 'User')" 2>/dev/null || true
+            echo -e "  ${GREEN}✓${NC} Added Cargo ($win_cargo_path) to your PATH"
+        else
+            echo -e "  ${BLUE}ℹ${NC} Cargo already in PATH"
+        fi
+
+        # Also update current session
+        export PATH="$cargo_bin_dir:$PATH"
+    else
+        echo -e "${YELLOW}Could not add Cargo to PATH automatically.${NC}"
+        echo -e "${YELLOW}Please add $cargo_bin_dir to your PATH manually.${NC}"
+    fi
+}
+
+# Download and install MinGW-w64 automatically
+install_mingw_w64_automatically() {
+    echo -e "${YELLOW}Downloading and installing MinGW-w64...${NC}"
+
+    # Create MinGW installation directory
+    local mingw_install_dir="C:/mingw64"
+    local mingw_bin_dir="$mingw_install_dir/bin"
+
+    # Try to download MinGW-w64 - prefer ZIP format for easier extraction
+    echo -e "  ${CYAN}Downloading MinGW-w64 from GitHub...${NC}"
+    local mingw_url_zip="https://github.com/brechtsanders/winlibs_mingw/releases/download/13.2.0-16.0.6-11.0.0-ucrt-r1/winlibs-x86_64-posix-seh-gcc-13.2.0-mingw-w64ucrt-11.0.0-r1.zip"
+    local mingw_archive="$TMP_DIR/mingw-w64.zip"
+
+    if curl -L -o "$mingw_archive" "$mingw_url_zip" 2>/dev/null; then
+        echo -e "  ${GREEN}✓${NC} MinGW-w64 downloaded successfully"
+
+        # Extract using PowerShell
+        if command -v powershell &>/dev/null; then
+            echo -e "  ${CYAN}Extracting MinGW-w64...${NC}"
+
+            # Create extraction directory
+            mkdir -p "$(dirname "$mingw_install_dir")" 2>/dev/null
+
+            # PowerShell extraction command for ZIP files
+            powershell -Command "
+                Add-Type -AssemblyName System.IO.Compression.FileSystem
+                try {
+                    [System.IO.Compression.ZipFile]::ExtractToDirectory('$(cygpath -w "$mingw_archive")', 'C:\\temp\\mingw-extract')
+
+                    # Find the mingw64 directory and move it
+                    \$mingwDirs = Get-ChildItem -Path 'C:\\temp\\mingw-extract' -Directory | Where-Object { \$_.Name -like '*mingw*' -or \$_.Name -like '*gcc*' }
+                    if (\$mingwDirs.Count -gt 0) {
+                        \$sourcePath = \$mingwDirs[0].FullName + '\\mingw64'
+                        if (Test-Path \$sourcePath) {
+                            if (Test-Path 'C:\\mingw64') { Remove-Item 'C:\\mingw64' -Recurse -Force }
+                            Move-Item \$sourcePath 'C:\\mingw64'
+                            Write-Host 'MinGW-w64 moved to C:\\mingw64'
+                        } else {
+                            # Try moving the first directory directly
+                            if (Test-Path 'C:\\mingw64') { Remove-Item 'C:\\mingw64' -Recurse -Force }
+                            Move-Item \$mingwDirs[0].FullName 'C:\\mingw64'
+                            Write-Host 'MinGW-w64 moved to C:\\mingw64'
+                        }
+                    }
+
+                    # Cleanup
+                    Remove-Item 'C:\\temp\\mingw-extract' -Recurse -Force -ErrorAction SilentlyContinue
+                    Write-Host 'Extraction completed'
+                } catch {
+                    Write-Host 'Extraction failed:' \$_.Exception.Message
+                    exit 1
+                }
+            " 2>/dev/null && {
+                echo -e "  ${GREEN}✓${NC} MinGW-w64 extracted to $mingw_install_dir"
+
+                # Add to PATH
+                if [ -f "$mingw_bin_dir/gcc.exe" ]; then
+                    export PATH="$mingw_bin_dir:$PATH"
+                    echo -e "  ${GREEN}✓${NC} Added MinGW-w64 to PATH"
+
+                    # Add to Windows PATH permanently
+                    if command -v powershell &>/dev/null; then
+                        local win_mingw_path=$(echo "$mingw_bin_dir" | sed 's|^/c/|C:\\|' | sed 's|/|\\|g')
+                        powershell -Command "[Environment]::SetEnvironmentVariable('Path', [Environment]::GetEnvironmentVariable('Path', 'User') + ';$win_mingw_path', 'User')" 2>/dev/null || true
+                        echo -e "  ${GREEN}✓${NC} Added MinGW-w64 to Windows PATH permanently"
+                    fi
+
+                    return 0
+                else
+                    echo -e "  ${RED}✗${NC} MinGW-w64 extraction failed - gcc.exe not found"
+                    return 1
+                fi
+            } || {
+                echo -e "  ${RED}✗${NC} Failed to extract MinGW-w64"
+                return 1
+            }
+        else
+            echo -e "  ${RED}✗${NC} PowerShell not available for extraction"
+            return 1
+        fi
+    else
+        echo -e "  ${RED}✗${NC} Failed to download MinGW-w64"
+        return 1
+    fi
+}
+
+# Comprehensive Windows setup function
+setup_windows_environment() {
+    echo -e "${YELLOW}Setting up Windows development environment...${NC}"
+
+    local setup_success=false
+
+    # Check if we already have a working setup
+    if command -v gcc &>/dev/null && command -v rustc &>/dev/null; then
+        echo -e "  ${GREEN}✓${NC} Development environment already configured"
+        add_cargo_to_path_windows
+        return 0
+    fi
+
+    # Try existing package managers first
+    if command -v pacman &>/dev/null; then
+        echo -e "  ${CYAN}Using MSYS2 for setup...${NC}"
+        if pacman -S --noconfirm mingw-w64-x86_64-gcc mingw-w64-x86_64-toolchain mingw-w64-x86_64-pkg-config 2>/dev/null; then
+            setup_success=true
+        fi
+    elif command -v choco &>/dev/null; then
+        echo -e "  ${CYAN}Using Chocolatey for setup...${NC}"
+        if choco install mingw -y 2>/dev/null; then
+            setup_success=true
+        fi
+    fi
+
+    # If no package manager worked, try automatic installation
+    if [ "$setup_success" = false ]; then
+        echo -e "  ${YELLOW}Attempting automatic installation...${NC}"
+
+        # Try direct MinGW-w64 download first
+        if install_mingw_w64_automatically; then
+            setup_success=true
+        else
+            # Try installing Chocolatey and then MinGW
+            if install_chocolatey_automatically; then
+                setup_success=true
+            fi
+        fi
+    fi
+
+    # Update PATH and verify
+    if [ "$setup_success" = true ]; then
+        # Update PATH for common MinGW-w64 locations
+        MINGW_PATHS=(
+            "/c/msys64/mingw64/bin"
+            "/c/mingw64/bin"
+            "/mingw64/bin"
+            "/c/tools/mingw64/bin"
+            "/c/ProgramData/chocolatey/lib/mingw/tools/install/mingw64/bin"
+        )
+
+        for mingw_path in "${MINGW_PATHS[@]}"; do
+            if [ -d "$mingw_path" ] && [ -f "$mingw_path/gcc.exe" ]; then
+                export PATH="$mingw_path:$PATH"
+                echo -e "  ${GREEN}✓${NC} Found and added MinGW-w64: $mingw_path"
+                break
+            fi
+        done
+
+        # Verify gcc is available
+        if command -v gcc &>/dev/null; then
+            echo -e "  ${GREEN}✓${NC} Windows development environment ready"
+            return 0
+        fi
+    fi
+
+    # If everything failed, provide manual instructions
+    echo -e "  ${RED}Automatic setup failed${NC}"
+    echo -e "  ${YELLOW}Manual installation required:${NC}"
+    echo -e "  ${YELLOW}1. MSYS2: https://www.msys2.org/${NC}"
+    echo -e "  ${YELLOW}   Then run: pacman -S mingw-w64-x86_64-gcc mingw-w64-x86_64-toolchain${NC}"
+    echo -e "  ${YELLOW}2. Chocolatey: https://chocolatey.org/install${NC}"
+    echo -e "  ${YELLOW}   Then run: choco install mingw${NC}"
+    echo -e "  ${YELLOW}3. Visual Studio Build Tools: https://visualstudio.microsoft.com/visual-cpp-build-tools/${NC}"
+    return 1
+}
+
+# Install Chocolatey automatically
+install_chocolatey_automatically() {
+    echo -e "${YELLOW}Installing Chocolatey package manager...${NC}"
+
+    if command -v powershell &>/dev/null; then
+        powershell -Command "
+            Set-ExecutionPolicy Bypass -Scope Process -Force
+            [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072
+            try {
+                iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
+                Write-Host 'Chocolatey installed successfully'
+            } catch {
+                Write-Host 'Chocolatey installation failed:' \$_.Exception.Message
+                exit 1
+            }
+        " 2>/dev/null && {
+            echo -e "  ${GREEN}✓${NC} Chocolatey installed successfully"
+
+            # Refresh environment to make choco available
+            export PATH="/c/ProgramData/chocolatey/bin:$PATH"
+
+            # Install MinGW via Chocolatey
+            echo -e "  ${CYAN}Installing MinGW-w64 via Chocolatey...${NC}"
+            if powershell -Command "choco install mingw -y" 2>/dev/null; then
+                echo -e "  ${GREEN}✓${NC} MinGW-w64 installed via Chocolatey"
+
+                # Add Chocolatey MinGW to PATH
+                local choco_mingw_path="/c/ProgramData/chocolatey/lib/mingw/tools/install/mingw64/bin"
+                if [ -d "$choco_mingw_path" ] && [ -f "$choco_mingw_path/gcc.exe" ]; then
+                    export PATH="$choco_mingw_path:$PATH"
+                    echo -e "  ${GREEN}✓${NC} Added Chocolatey MinGW-w64 to PATH"
+                    return 0
+                fi
+            fi
+
+            return 1
+        } || {
+            echo -e "  ${RED}✗${NC} Failed to install Chocolatey"
+            return 1
+        }
+    else
+        echo -e "  ${RED}✗${NC} PowerShell not available for Chocolatey installation"
+        return 1
+    fi
+}
+
 # Check for Visual Studio build tools on Windows
 check_vs_build_tools() {
     # Check for Visual Studio build tools
@@ -212,19 +449,8 @@ install_rust() {
 
             # Check if MinGW-w64 is available
             if ! command -v x86_64-w64-mingw32-gcc &>/dev/null && ! command -v gcc &>/dev/null; then
-                echo -e "  ${YELLOW}Installing MinGW-w64 for GNU toolchain...${NC}"
-
-                # Try to install via package manager
-                if command -v pacman &>/dev/null; then
-                    # MSYS2/Git Bash environment
-                    pacman -S --noconfirm mingw-w64-x86_64-gcc mingw-w64-x86_64-toolchain 2>/dev/null || true
-                elif command -v choco &>/dev/null; then
-                    # Chocolatey
-                    choco install mingw -y 2>/dev/null || true
-                else
-                    echo -e "  ${YELLOW}Please ensure MinGW-w64 is installed for the GNU toolchain${NC}"
-                    echo -e "  ${YELLOW}You can install it via MSYS2, Chocolatey, or download from: https://www.mingw-w64.org/${NC}"
-                fi
+                echo -e "  ${YELLOW}Setting up MinGW-w64 for GNU toolchain...${NC}"
+                setup_windows_environment
             fi
 
             # Download and run rustup-init.exe for Windows with GNU toolchain
@@ -244,6 +470,9 @@ install_rust() {
     if [[ "$OS" == "windows" ]]; then
         toolchain=$(detect_rust_toolchain)
         echo -e "  ${BLUE}ℹ${NC} Active toolchain: $toolchain"
+
+        # Add Cargo to PATH
+        add_cargo_to_path_windows
     fi
 }
 
@@ -255,7 +484,7 @@ get_version() {
         # Download version file if not present
         if ! curl -s -o "$TMP_DIR/version" "$RAZEN_REPO/version" &>/dev/null; then
             echo -e "${RED}Failed to download version information. Using default version.${NC}"
-            RAZEN_VERSION="beta v0.1.685 (Windows Installtion fixed.)"
+            RAZEN_VERSION="beta v0.1.687 (Windows Installtion fixed 2nd)"
         else
             RAZEN_VERSION=$(cat "$TMP_DIR/version")
             # Store the version file for future reference
@@ -526,6 +755,10 @@ create_symlinks() {
     # For Windows, add to PATH
     if [[ "$OS" == "windows" ]]; then
         add_to_path_windows
+        # Ensure Cargo is in PATH if Rust is already installed
+        if command -v cargo &>/dev/null; then
+            add_cargo_to_path_windows
+        fi
     fi
 
     echo -e "  ${GREEN}✓${NC} All command links created successfully"
@@ -578,15 +811,35 @@ setup_rust_and_build() {
                 if rustup toolchain install stable-x86_64-pc-windows-gnu &>/dev/null &&
                    rustup default stable-x86_64-pc-windows-gnu &>/dev/null; then
                     echo -e "  ${GREEN}✓${NC} Switched to GNU toolchain"
+                    # Update toolchain info
+                    toolchain=$(detect_rust_toolchain)
+                    echo -e "  ${BLUE}ℹ${NC} Active toolchain: $toolchain"
                     # Test again
                     if ! rustc "$TMP_DIR/test.rs" -o "$TMP_DIR/test.exe" &>/dev/null; then
+                        echo -e "${RED}GNU toolchain also failed. Checking for gcc...${NC}"
+                        if ! command -v gcc &>/dev/null; then
+                            echo -e "${RED}gcc not found in PATH.${NC}"
+                            echo -e "${YELLOW}Please install MinGW-w64:${NC}"
+                            echo -e "  ${CYAN}1. Via MSYS2:${NC} pacman -S mingw-w64-x86_64-gcc"
+                            echo -e "  ${CYAN}2. Via Chocolatey:${NC} choco install mingw"
+                            echo -e "  ${CYAN}3. Manual download:${NC} https://www.mingw-w64.org/"
+                        fi
                         handle_error 1 "Both MSVC and GNU toolchains failed" "Please install Visual Studio Build Tools or MinGW-w64"
                     fi
                 else
                     handle_error 1 "Failed to switch to GNU toolchain" "Please install Visual Studio Build Tools"
                 fi
             else
-                handle_error 1 "GNU toolchain compilation failed" "Please ensure MinGW-w64 is properly installed"
+                echo -e "${RED}GNU toolchain compilation failed.${NC}"
+                if ! command -v gcc &>/dev/null; then
+                    echo -e "${RED}gcc not found in PATH.${NC}"
+                    echo -e "${YELLOW}MinGW-w64 installation required. Please run one of:${NC}"
+                    echo -e "  ${CYAN}MSYS2:${NC} pacman -S mingw-w64-x86_64-gcc mingw-w64-x86_64-toolchain"
+                    echo -e "  ${CYAN}Chocolatey:${NC} choco install mingw"
+                    echo -e "  ${CYAN}Manual:${NC} Download from https://www.mingw-w64.org/"
+                    echo -e "  ${CYAN}Then add MinGW-w64 bin directory to your PATH${NC}"
+                fi
+                handle_error 1 "GNU toolchain compilation failed" "Please ensure MinGW-w64 is properly installed and in PATH"
             fi
         fi
         echo -e "  ${GREEN}✓${NC} Toolchain verification successful"
@@ -596,16 +849,39 @@ setup_rust_and_build() {
     if [[ "$OS" == "windows" ]]; then
         # Windows doesn't need permission fixes
         if ! cargo build --release; then
-            echo -e "${RED}Build failed. This might be due to missing build tools.${NC}"
-            echo -e "${YELLOW}Troubleshooting steps:${NC}"
-            echo -e "  1. If using MSVC toolchain: Install Visual Studio Build Tools"
-            echo -e "     Download from: https://visualstudio.microsoft.com/visual-cpp-build-tools/"
-            echo -e "  2. If using GNU toolchain: Ensure MinGW-w64 is properly installed"
-            echo -e "  3. Try switching toolchains:"
-            echo -e "     - For MSVC: rustup default stable-x86_64-pc-windows-msvc"
-            echo -e "     - For GNU: rustup default stable-x86_64-pc-windows-gnu"
-            echo -e "  4. Restart your terminal after installing build tools"
-            handle_error $? "Failed to build Razen" "See troubleshooting steps above"
+            echo -e "${RED}Build failed. Analyzing the issue...${NC}"
+            toolchain=$(detect_rust_toolchain)
+            echo -e "${BLUE}Current toolchain: $toolchain${NC}"
+
+            if [[ "$toolchain" == *"gnu"* ]]; then
+                if ! command -v gcc &>/dev/null; then
+                    echo -e "${RED}gcc not found! MinGW-w64 is required for GNU toolchain.${NC}"
+                    echo -e "${YELLOW}Quick fix options:${NC}"
+                    echo -e "  ${CYAN}1. Install MSYS2 and run:${NC}"
+                    echo -e "     pacman -S mingw-w64-x86_64-gcc mingw-w64-x86_64-toolchain"
+                    echo -e "     export PATH=\"/c/msys64/mingw64/bin:\$PATH\""
+                    echo -e "  ${CYAN}2. Install via Chocolatey:${NC}"
+                    echo -e "     choco install mingw"
+                    echo -e "  ${CYAN}3. Switch to MSVC toolchain:${NC}"
+                    echo -e "     rustup default stable-x86_64-pc-windows-msvc"
+                    echo -e "     (Requires Visual Studio Build Tools)"
+                else
+                    echo -e "${YELLOW}gcc found but build still failed. Missing dependencies.${NC}"
+                    echo -e "${YELLOW}Try installing complete MinGW-w64 toolchain:${NC}"
+                    echo -e "  pacman -S mingw-w64-x86_64-toolchain mingw-w64-x86_64-pkg-config"
+                fi
+            else
+                echo -e "${RED}MSVC toolchain requires Visual Studio Build Tools.${NC}"
+                echo -e "${YELLOW}Options:${NC}"
+                echo -e "  ${CYAN}1. Install Visual Studio Build Tools:${NC}"
+                echo -e "     https://visualstudio.microsoft.com/visual-cpp-build-tools/"
+                echo -e "  ${CYAN}2. Switch to GNU toolchain:${NC}"
+                echo -e "     rustup default stable-x86_64-pc-windows-gnu"
+                echo -e "     (Requires MinGW-w64)"
+            fi
+
+            echo -e "${YELLOW}After fixing dependencies, restart terminal and run installer again.${NC}"
+            handle_error $? "Failed to build Razen" "Install required build tools for your toolchain"
         fi
     else
         # For Linux/macOS, temporarily change ownership to current user for the build
