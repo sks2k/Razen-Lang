@@ -897,6 +897,9 @@ setup_rust_and_build() {
     fi
 
     echo -e "  ${GREEN}✓${NC} Razen built successfully"
+    
+    # Copy the compiler to system path
+    copy_compiler_to_system_path
 }
 
 # Step 6: IDE Extension Installation
@@ -1061,7 +1064,91 @@ display_help() {
     fi
 }
 
-# Step 8: Installation Complete
+# Step 8: Copy Compiler to System Path
+copy_compiler_to_system_path() {
+    echo -e "${YELLOW}Copying Razen compiler to system path...${NC}"
+    
+    # Source path (where the compiled binary is located)
+    local src_path="$INSTALL_DIR/target/release/razen_compiler"
+    
+    # Check if the binary exists
+    if [ ! -f "$src_path" ]; then
+        echo -e "${RED}Error: Razen compiler binary not found at $src_path${NC}"
+        echo -e "${YELLOW}Skipping system path installation${NC}"
+        return 1
+    fi
+    
+    # Destination path based on OS
+    if [[ "$OS" == "linux" || "$OS" == "macos" ]]; then
+        # For Linux/macOS
+        local dest_path="$BIN_DIR/razen_compiler"
+        echo -e "${YELLOW}Copying to $dest_path...${NC}"
+        
+        # Copy with sudo for system directories
+        sudo cp "$src_path" "$dest_path" || {
+            echo -e "${RED}Failed to copy Razen compiler to $dest_path${NC}"
+            return 1
+        }
+        
+        # Set executable permissions
+        sudo chmod +x "$dest_path" || {
+            echo -e "${RED}Failed to set executable permissions on $dest_path${NC}"
+            return 1
+        }
+        
+    elif [[ "$OS" == "windows" ]]; then
+        # For Windows
+        local win_dest_dir="/mnt/c/Program Files/Razen"
+        local win_dest_path="$win_dest_dir/razen_compiler.exe"
+        
+        # Create destination directory if it doesn't exist
+        mkdir -p "$win_dest_dir" 2>/dev/null || {
+            echo -e "${YELLOW}Creating directory with elevated privileges...${NC}"
+            if command -v powershell &>/dev/null; then
+                powershell -Command "Start-Process powershell -Verb RunAs -ArgumentList 'mkdir -Force \"C:\Program Files\Razen\"'" 2>/dev/null || true
+            fi
+        }
+        
+        echo -e "${YELLOW}Copying to $win_dest_path...${NC}"
+        
+        # Copy the file (with admin privileges if possible)
+        if [ -d "$win_dest_dir" ] && [ -w "$win_dest_dir" ]; then
+            # Direct copy if we have write permissions
+            cp "$src_path.exe" "$win_dest_path" || {
+                echo -e "${RED}Failed to copy Razen compiler to $win_dest_path${NC}"
+                return 1
+            }
+        else
+            # Try with elevated privileges
+            if command -v powershell &>/dev/null; then
+                echo -e "${YELLOW}Copying with elevated privileges...${NC}"
+                powershell -Command "Start-Process powershell -Verb RunAs -ArgumentList 'Copy-Item -Force \"$(cygpath -w "$src_path.exe")\" \"C:\Program Files\Razen\razen_compiler.exe\"'" 2>/dev/null || {
+                    echo -e "${RED}Failed to copy with elevated privileges${NC}"
+                    echo -e "${YELLOW}Please manually copy $src_path.exe to C:\Program Files\Razen\razen_compiler.exe${NC}"
+                    return 1
+                }
+            else
+                echo -e "${RED}PowerShell not available for elevated copy${NC}"
+                echo -e "${YELLOW}Please manually copy $src_path.exe to C:\Program Files\Razen\razen_compiler.exe${NC}"
+                return 1
+            fi
+        fi
+        
+        # Add to PATH if not already there
+        if command -v powershell &>/dev/null; then
+            echo -e "${YELLOW}Ensuring Razen is in system PATH...${NC}"
+            powershell -Command "[Environment]::SetEnvironmentVariable('Path', [Environment]::GetEnvironmentVariable('Path', 'Machine') + ';C:\Program Files\Razen', 'Machine')" 2>/dev/null || {
+                echo -e "${YELLOW}Could not add to system PATH automatically.${NC}"
+                echo -e "${YELLOW}Please add C:\Program Files\Razen to your system PATH manually.${NC}"
+            }
+        fi
+    fi
+    
+    echo -e "  ${GREEN}✓${NC} Razen compiler successfully installed to system path"
+    return 0
+}
+
+# Step 9: Installation Complete
 installation_complete() {
     echo -e "${GREEN}=== Razen Installation Complete ===${NC}"
     echo -e "${CYAN}Razen has been successfully installed to: $INSTALL_DIR${NC}"
@@ -1107,11 +1194,47 @@ uninstall_razen() {
     if [[ "$OS" == "windows" ]]; then
         # Remove bat files from BIN_DIR
         rm -f "$BIN_DIR"/*.bat 2>/dev/null
+        
+        # Remove razen_compiler from Windows Program Files
+        echo -e "${YELLOW}Removing Razen compiler from system path...${NC}"
+        if [ -f "/mnt/c/Program Files/Razen/razen_compiler.exe" ]; then
+            if [ -w "/mnt/c/Program Files/Razen" ]; then
+                # Direct removal if we have write permissions
+                rm -f "/mnt/c/Program Files/Razen/razen_compiler.exe" 2>/dev/null || 
+                    echo -e "${RED}Failed to remove razen_compiler.exe. You may need to remove it manually from C:\Program Files\Razen\${NC}"
+            else
+                # Try with elevated privileges
+                if command -v powershell &>/dev/null; then
+                    echo -e "${YELLOW}Removing with elevated privileges...${NC}"
+                    powershell -Command "Start-Process powershell -Verb RunAs -ArgumentList 'Remove-Item -Force \"C:\Program Files\Razen\razen_compiler.exe\"'" 2>/dev/null || 
+                        echo -e "${RED}Failed to remove with elevated privileges. You may need to remove it manually from C:\Program Files\Razen\${NC}"
+                else
+                    echo -e "${RED}PowerShell not available for elevated removal${NC}"
+                    echo -e "${YELLOW}Please manually remove C:\Program Files\Razen\razen_compiler.exe${NC}"
+                fi
+            fi
+        fi
     else
         # Find and remove all symlinks pointing to Razen scripts
         for link in $(find "$BIN_DIR" -type l -exec readlink {} \; 2>/dev/null | grep -E "$INSTALL_DIR/scripts" | xargs -r dirname | xargs -r basename); do
             sudo rm -f "$BIN_DIR/$link" 2>/dev/null
         done
+        
+        # Remove razen_compiler from system bin directories
+        echo -e "${YELLOW}Removing Razen compiler from system path...${NC}"
+        if [ -f "$BIN_DIR/razen_compiler" ]; then
+            sudo rm -f "$BIN_DIR/razen_compiler" 2>/dev/null || 
+                echo -e "${RED}Failed to remove razen_compiler. You may need to remove it manually from $BIN_DIR${NC}"
+        fi
+        # Also check other possible locations
+        if [ -f "/usr/bin/razen_compiler" ]; then
+            sudo rm -f "/usr/bin/razen_compiler" 2>/dev/null || 
+                echo -e "${RED}Failed to remove razen_compiler. You may need to remove it manually from /usr/bin${NC}"
+        fi
+        if [ -f "$HOME/.local/bin/razen_compiler" ]; then
+            rm -f "$HOME/.local/bin/razen_compiler" 2>/dev/null || 
+                echo -e "${RED}Failed to remove razen_compiler. You may need to remove it manually from $HOME/.local/bin${NC}"
+        fi
     fi
 
     # Remove installation directory

@@ -152,35 +152,46 @@ elif [ "$1" == "uninstall" ]; then
     echo
 
     if [[ $REPLY =~ ^[Yy]$ ]]; then
-        # Check if we're in Linux or macOS
-        if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-            # Check if the install.sh script exists
-            INSTALL_SCRIPT="/usr/local/lib/razen/install.sh"
-            if [ -f "$INSTALL_SCRIPT" ]; then
-                sudo "$INSTALL_SCRIPT" --uninstall
+        # Find the installer.sh script
+        INSTALLER_SCRIPT=""
+        
+        # First check if we can find it relative to the project root
+        if [ -f "$PROJECT_ROOT/installer.sh" ]; then
+            INSTALLER_SCRIPT="$PROJECT_ROOT/installer.sh"
+        # Then check in the installation directory
+        elif [ -n "$INSTALL_DIR" ] && [ -f "$INSTALL_DIR/installer.sh" ]; then
+            INSTALLER_SCRIPT="$INSTALL_DIR/installer.sh"
+        # Check common installation paths
+        elif [ -f "/usr/local/lib/razen/installer.sh" ]; then
+            INSTALLER_SCRIPT="/usr/local/lib/razen/installer.sh"
+        elif [ -f "/usr/lib/razen/installer.sh" ]; then
+            INSTALLER_SCRIPT="/usr/lib/razen/installer.sh"
+        elif [ -f "$HOME/.local/lib/razen/installer.sh" ]; then
+            INSTALLER_SCRIPT="$HOME/.local/lib/razen/installer.sh"
+        # For Windows
+        elif [ -f "/mnt/c/Program Files/Razen/installer.sh" ]; then
+            INSTALLER_SCRIPT="/mnt/c/Program Files/Razen/installer.sh"
+        fi
+        
+        if [ -n "$INSTALLER_SCRIPT" ]; then
+            echo -e "${YELLOW}Found installer script at: $INSTALLER_SCRIPT${NC}"
+            # Use sudo for system directories on Linux/macOS
+            if [[ "$OSTYPE" == "linux-gnu"* || "$OSTYPE" == "darwin"* ]]; then
+                if [[ "$INSTALLER_SCRIPT" == "/usr"* ]]; then
+                    sudo bash "$INSTALLER_SCRIPT" uninstall
+                else
+                    bash "$INSTALLER_SCRIPT" uninstall
+                fi
+            # For Windows
+            elif [[ "$OSTYPE" == "cygwin" || "$OSTYPE" == "msys" || "$OSTYPE" == "win32" ]]; then
+                bash "$INSTALLER_SCRIPT" uninstall
             else
-                echo -e "${RED}Error: Installer script not found at $INSTALL_SCRIPT${NC}"
-                echo "Please run: sudo <path-to-install.sh> --uninstall"
-                exit 1
+                bash "$INSTALLER_SCRIPT" uninstall
             fi
-        elif [[ "$OSTYPE" == "darwin"* ]]; then
-            # macOS specific uninstall
-            INSTALL_SCRIPT="/usr/local/razen/install-mac.sh"
-            if [ -f "$INSTALL_SCRIPT" ]; then
-                sudo "$INSTALL_SCRIPT" --uninstall
-            else
-                echo -e "${RED}Error: Installer script not found at $INSTALL_SCRIPT${NC}"
-                echo "Please run: sudo <path-to-install-mac.sh> --uninstall"
-                exit 1
-            fi
-        elif [[ "$OSTYPE" == "cygwin" || "$OSTYPE" == "msys" || "$OSTYPE" == "win32" ]]; then
-            # Windows specific message
-            echo -e "${YELLOW}Windows installation detected.${NC}"
-            echo -e "${YELLOW}Please use PowerShell to uninstall:${NC}"
-            echo -e "${GREEN}Run: ${CYAN}.\\install.ps1 --uninstall${NC}"
-            exit 0
         else
-            echo -e "${RED}Could not determine operating system.${NC}"
+            echo -e "${RED}Error: Could not find the installer script.${NC}"
+            echo -e "${YELLOW}Please run the uninstall command directly:${NC}"
+            echo -e "${CYAN}bash <path-to-installer.sh> uninstall${NC}"
             exit 1
         fi
     else
