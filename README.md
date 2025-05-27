@@ -1,4 +1,4 @@
-# Razen Programming Language beta v0.1.687 (Windows Installtion fixed 2nd)
+# Razen Programming Language beta v0.1.69 (API Library Enhancements)
 
 ## Overview
 Razen is a modern, intuitive programming language designed for clarity, performance, and ease of use. With a clean syntax inspired by Python and strong type safety, Razen offers an excellent balance between development speed and runtime performance.
@@ -19,6 +19,29 @@ Developed by Prathmesh Barot, Basai Corporation.
 - **Colored Output**: Built-in support for colored terminal output.
 - **Robust Error Handling**: Comprehensive error handling with try/catch blocks.
 - **Filesystem Library**: Comprehensive filesystem operations for file and directory management.
+
+## Changelog
+
+Razen is under active development with regular updates. The latest version is **beta v0.1.69** which includes significant API Library enhancements.
+
+### Latest Release: beta v0.1.69 - API Library Enhancements
+
+This release focuses on improving the Razen API library with better HTTP request handling, response processing, and data extraction capabilities. View the full changelog in your preferred format:
+
+- [Markdown Version (beta_v0.1.69_api.md)](changelogs/beta_v0.1.69_api.md) - Best for GitHub viewing
+- [MDX Version (beta_v0.1.69_api.mdx)](changelogs/beta_v0.1.69_api.mdx) - Enhanced with interactive components
+- [AsciiDoc Version (beta_v0.1.69_api.adoc)](changelogs/beta_v0.1.69_api.adoc) - Rich formatting with advanced features
+
+### Key Improvements in v0.1.69
+
+- Fixed URL decoding for proper handling of encoded strings
+- Enhanced form data handling for HTTP requests
+- Improved API configuration and execution
+- Better response processing with JSON parsing
+- More flexible API call options
+- Comprehensive error handling
+
+For older versions and detailed release notes, please visit the [changelogs](changelogs/) directory.
 
 ## Installation
 
@@ -46,45 +69,9 @@ curl -o installer.sh "https://raw.githubusercontent.com/BasaiCorp/razen-lang/mai
 
 > **Note**: Windows installation requires Git Bash, which you can download from [https://git-scm.com/downloads](https://git-scm.com/downloads)
 
-#### Windows Installation Improvements (v0.1.685)
+#### Windows Installation Notes
 
-Recent updates have significantly improved Windows installation reliability by addressing the most common build failures:
-
-**Key Improvements:**
-- **Smart Toolchain Detection**: Automatically detects Visual Studio Build Tools availability
-- **Intelligent Fallback System**: Switches from MSVC to GNU toolchain when build tools are missing
-- **Automatic Dependency Installation**: Attempts to install MinGW-w64 for GNU toolchain
-- **Pre-build Verification**: Tests compilation before attempting full Razen build
-- **Enhanced Diagnostics**: Detailed error messages with specific troubleshooting steps
-- **Toolchain Information**: Shows active Rust toolchain during installation
-
-**What Was Fixed:**
-Prior to v0.1.685, Windows installations frequently failed with linking errors like:
-```
-error: linking with `link.exe` failed: exit code: 1
-note: you may need to install Visual Studio build tools with the "C++ build tools" workload
-```
-
-This occurred because the installer would install Rust with the MSVC toolchain but didn't verify that Microsoft Visual C++ build tools were available, causing cargo build failures.
-
-**Technical Details:**
-The installer now handles the common Windows issue where Rust installs with the MSVC toolchain but Microsoft Visual C++ build tools aren't available. Instead of failing, it automatically:
-
-1. Checks for Visual Studio build tools (`cl.exe` and Visual Studio installations)
-2. Uses MSVC toolchain if build tools are detected
-3. Falls back to GNU toolchain (`x86_64-pc-windows-gnu`) if MSVC tools are missing
-4. Attempts to install MinGW-w64 via package managers (MSYS2, Chocolatey)
-5. Verifies the selected toolchain works before building Razen
-6. Provides intelligent error recovery and user guidance
-
-**Platform Compatibility:**
-These Windows-specific improvements have zero impact on Linux and macOS installations, which continue to work exactly as before. All changes are contained within Windows-only code paths.
-
-**Testing & Validation:**
-- Tested on Windows 10/11 with and without Visual Studio installed
-- Verified automatic fallback from MSVC to GNU toolchain
-- Confirmed MinGW-w64 auto-installation via MSYS2 and Chocolatey
-- Validated that Linux and macOS installations remain unchanged
+Windows installation has been significantly improved in recent versions with better toolchain detection and automatic dependency installation. For detailed information about Windows-specific improvements, please refer to the changelogs.
 
 #### Windows Troubleshooting
 

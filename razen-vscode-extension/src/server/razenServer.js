@@ -498,6 +498,26 @@ const LIBRARY_RETURN_TYPES = {
     'year': 'number',         // Returns year
     'month': 'number',        // Returns month
     'day': 'number'           // Returns day
+  },
+  
+  // API library return types
+  'apilib': {
+    'get': 'string',          // Returns response body from GET request
+    'post': 'string',         // Returns response body from POST request
+    'putmethod': 'string',    // Returns response body from PUT request
+    'delete': 'string',       // Returns response body from DELETE request
+    'patch': 'string',        // Returns response body from PATCH request
+    'call': 'string',         // Returns response body from generic request
+    'parse_json': 'object',   // Returns parsed JSON object
+    'to_json': 'string',      // Returns JSON string
+    'create_api': 'object',   // Returns API configuration object
+    'execute_api': 'string',  // Returns response from API call
+    'url_encode': 'string',   // Returns URL encoded string
+    'url_decode': 'string',   // Returns URL decoded string
+    'form_data': 'object',    // Returns form data object
+    'is_success': 'boolean',  // Returns true if response is successful
+    'is_client_error': 'boolean', // Returns true if response has client error
+    'is_server_error': 'boolean'  // Returns true if response has server error
   }
 };
 
@@ -618,7 +638,10 @@ const LIBRARIES = {
   'image': ['load', 'save', 'resize', 'crop'],
   
   // Date library
-  'date': ['now', 'year', 'month', 'day', 'format', 'parse', 'add_days', 'add_months', 'add_years', 'weekday', 'weekday_name', 'days_in_month', 'is_leap_year', 'diff_days']
+  'date': ['now', 'year', 'month', 'day', 'format', 'parse', 'add_days', 'add_months', 'add_years', 'weekday', 'weekday_name', 'days_in_month', 'is_leap_year', 'diff_days'],
+  
+  // API library
+  'apilib': ['get', 'post', 'putmethod', 'delete', 'patch', 'call', 'parse_json', 'to_json', 'create_api', 'execute_api', 'url_encode', 'url_decode', 'form_data', 'is_success', 'is_client_error', 'is_server_error']
 };
 
 // Helper function to determine value type
