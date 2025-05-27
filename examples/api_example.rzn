@@ -1,0 +1,138 @@
+type freestyle;
+
+# Razen API Example
+# This file demonstrates the API functionality in Razen
+
+# Import libraries
+lib validation;  # For input validation
+lib json;        # For JSON handling
+lib netlib;      # For network utilities
+lib timelib;     # For timestamp generation
+
+# API Key declarations - Replace with your actual API keys
+api gemini = "AIkamkjmskldzjvkiocjxvixv"  # Google Gemini API
+api openai = "sk-youropenaikey123456789"  # OpenAI API
+api weather = "your-weather-api-key"      # Weather API example
+
+# ===== GEMINI API EXAMPLE =====
+show "===== GEMINI API EXAMPLE =====";
+show "Enter your prompt for Gemini:";
+read prompt;
+
+# Validate input
+if (Validation[required](prompt)) {
+    # Make API call to Gemini
+    call gemini_response = gemini with {
+        "prompt": prompt,
+        "max_tokens": 100
+    };
+    
+    # Display response
+    show "Gemini Response:";
+    show gemini_response;
+} else {
+    show "Error: Prompt cannot be empty";
+}
+
+# ===== OPENAI API EXAMPLE =====
+show "\n===== OPENAI API EXAMPLE =====";
+show "Enter your prompt for OpenAI:";
+read openai_prompt;
+
+# Make API call to OpenAI with POST method
+if (Validation[required](openai_prompt)) {
+    post openai_request = {
+        "model": "gpt-3.5-turbo",
+        "messages": [
+            {"role": "system", "content": "You are a helpful assistant."},
+            {"role": "user", "content": openai_prompt}
+        ]
+    };
+    
+    call openai_response = openai with openai_request;
+    
+    # Display response
+    show "OpenAI Response:";
+    show openai_response;
+} else {
+    show "Error: Prompt cannot be empty";
+}
+
+# ===== WEATHER API EXAMPLE =====
+show "\n===== WEATHER API EXAMPLE =====";
+show "Enter city name for weather information:";
+read city;
+
+# Validate city input
+if (Validation[required](city)) {
+    # Make GET request to weather API
+    get weather_params = {
+        "q": city,
+        "units": "metric"
+    };
+    
+    call weather_data = weather with weather_params;
+    
+    # Parse and display weather information
+    show "Weather in " + city + ":";
+    
+    # Parse the JSON response using stringify and direct access
+    # Since JSON[get] isn't available, we'll use direct access to the parsed object
+    let weather_obj = JSON[parse](JSON[stringify](weather_data));
+    show "Temperature: " + weather_obj["main"]["temp"] + "°C";
+    show "Conditions: " + weather_obj["weather"][0]["description"];
+    show "Humidity: " + weather_obj["main"]["humidity"] + "%";
+} else {
+    show "Error: City name cannot be empty";
+}
+
+# ===== CUSTOM API EXAMPLE =====
+show "\n===== CUSTOM API EXAMPLE =====";
+show "This example shows how to create and use a custom API endpoint";
+
+# Define custom API endpoint
+api custom_api = "https://api.example.com/data"
+
+# Create request parameters
+post custom_request = {
+    "user_id": "12345",
+    "action": "get_data",
+    "timestamp": TimeLib[now]()
+};
+
+# Make API call with error handling
+try {
+    call custom_response = custom_api with custom_request;
+    
+    # Process successful response
+    show "Custom API Response:";
+    show custom_response;
+    
+    # Extract specific data from response
+    # Parse the response and check if data exists
+    let response_obj = JSON[parse](JSON[stringify](custom_response));
+    if (response_obj["data"]) {
+        show "Extracted data: " + response_obj["data"];
+    }
+} catch (error) {
+    # Handle API error
+    show "Error calling custom API: " + error;
+}
+
+# ===== API AUTHENTICATION EXAMPLE =====
+show "\n===== API AUTHENTICATION EXAMPLE =====";
+
+# Define API with authentication
+api secured_api = {
+    "url": "https://api.secured-example.com",
+    "auth_type": "bearer",
+    "token": "your-auth-token"
+}
+
+# Make authenticated API call
+call secured_response = secured_api with {
+    "action": "get_profile"
+};
+
+show "Secured API Response:";
+show secured_response;

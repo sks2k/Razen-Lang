@@ -1,0 +1,100 @@
+# Razen API Library Test
+# This file demonstrates how to use the API library for HTTP requests and JSON handling
+
+# Import the API library
+lib apilib;
+
+show "===== Razen API Library Test =====";
+
+# Basic GET request
+show "1. Testing Basic GET Request:";
+put bitcoin_price_url = "https://api.coindesk.com/v1/bpi/currentprice.json";
+put bitcoin_response = APILib[get](bitcoin_price_url);
+
+# Check if request was successful
+show "Request successful: " + APILib[is_success](bitcoin_response);
+
+# Parse JSON response
+let bitcoin_data = APILib[parse_json](bitcoin_response);
+show "Bitcoin data retrieved successfully!";
+
+# Extract and display specific information from the response
+show "2. Displaying Bitcoin Price Information:";
+show "Time updated: " + bitcoin_data["time"]["updated"];
+show "USD rate: " + bitcoin_data["bpi"]["USD"]["rate"];
+show "EUR rate: " + bitcoin_data["bpi"]["EUR"]["rate"];
+show "GBP rate: " + bitcoin_data["bpi"]["GBP"]["rate"];
+
+# Demonstrate URL encoding/decoding
+show "3. Testing URL Encoding/Decoding:";
+put search_query = "bitcoin price";
+put encoded_query = APILib[url_encode](search_query);
+show "Original query: " + search_query;
+show "Encoded query: " + encoded_query;
+show "Decoded query: " + APILib[url_decode](encoded_query);
+
+# Create a custom API configuration
+show "4. Testing Custom API Configuration:";
+let github_api = APILib[create_api]("https://api.github.com");
+let github_response = APILib[execute_api](github_api, "/users/octocat");
+let github_data = APILib[parse_json](github_response);
+show "GitHub user data retrieved:";
+show "Login: " + github_data["login"];
+show "Name: " + github_data["name"];
+show "Public repos: " + github_data["public_repos"];
+
+# Test POST request with form data
+show "5. Testing POST Request with Form Data:";
+let form = APILib[form_data]([
+    "name", "Razen Test",
+    "message", "Testing the API library"
+]);
+let post_response = APILib[post]("https://httpbin.org/post", form);
+let post_data = APILib[parse_json](post_response);
+show "POST request successful: " + APILib[is_success](post_response);
+show "Form data sent: " + post_data["form"]["name"] + " - " + post_data["form"]["message"];
+
+# Test other HTTP methods
+show "6. Testing Other HTTP Methods:";
+let put_response = APILib[putmethod]("https://httpbin.org/put", "test data");
+show "PUT request successful: " + APILib[is_success](put_response);
+
+let delete_response = APILib[delete]("https://httpbin.org/delete");
+show "DELETE request successful: " + APILib[is_success](delete_response);
+
+let patch_response = APILib[patch]("https://httpbin.org/patch", "patch data");
+show "PATCH request successful: " + APILib[is_success](patch_response);
+
+# Test error handling
+show "7. Testing Error Handling:";
+put invalid_url = "https://invalid-url-that-does-not-exist.xyz";
+put error_response = APILib[get](invalid_url);
+show "Invalid URL request successful: " + APILib[is_success](error_response);
+show "Is client error: " + APILib[is_client_error](error_response);
+show "Is server error: " + APILib[is_server_error](error_response);
+
+# Convert data to JSON
+show "8. Testing JSON Conversion:";
+put person = [
+    "name", "John Doe",
+    "age", 30,
+    "skills", ["JavaScript", "Python", "Razen"]
+];
+put json_string = APILib[to_json](person);
+show "Object converted to JSON: " + json_string;
+
+# Generic API call
+show "9. Testing Generic API Call:";
+put options = [
+    "method", "GET",
+    "headers", [
+        "Accept", "application/json",
+        "User-Agent", "Razen-API-Test"
+    ]
+];
+put generic_response = APILib[call]("https://httpbin.org/get", options);
+put generic_data = APILib[parse_json](generic_response);
+show "Generic API call successful: " + APILib[is_success](generic_response);
+show "User-Agent sent: " + generic_data["headers"]["User-Agent"];
+
+show "===== API Library Test Completed =====";

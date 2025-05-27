@@ -1,0 +1,383 @@
+type freestyle;
+
+# Razen API Documentation and Examples
+# This file demonstrates the proper usage of API functionality in Razen
+
+# ===== API TOKEN REFERENCE =====
+# api => for API declaration. Use for connecting to external services.
+# call => for API calls. Use for making requests to external services.
+# get => for API responses. Use for receiving data from external services.
+# post => for API requests. Use for sending data to external services.
+
+# Import required libraries
+lib validation;  # For input validation
+lib json;        # For JSON handling
+lib netlib;      # For network utilities
+lib timelib;     # For timestamp generation
+lib strlib;      # For string manipulation
+
+# ===== SECTION 1: API DECLARATION =====
+show "===== API DECLARATION EXAMPLES =====";
+
+# Basic API declaration with just an API key
+api simple_api = "your-api-key-here";
+
+# Advanced API declaration with configuration object
+api complex_api = {
+    "url": "https://api.example.com/v1",
+    "key": "your-api-key-here",
+    "version": "1.0"
+};
+
+# API declaration with authentication details
+api auth_api = {
+    "url": "https://secure-api.example.com",
+    "auth_type": "bearer",
+    "token": "your-bearer-token",
+    "timeout": 30
+};
+
+# API declaration for different authentication methods
+api basic_auth_api = {
+    "url": "https://api.example.com/basic",
+    "auth_type": "basic",
+    "username": "user",
+    "password": "pass"
+};
+
+api api_key_auth = {
+    "url": "https://api.example.com/apikey",
+    "auth_type": "apikey",
+    "key_name": "x-api-key",
+    "key_value": "your-api-key",
+    "key_location": "header"  # Can be "header", "query", or "cookie"
+};
+
+# ===== SECTION 2: MAKING API CALLS =====
+show "\n===== API CALL EXAMPLES =====";
+
+# Simple API call with no parameters
+call simple_response = simple_api;
+
+# API call with inline parameters
+call weather_response = complex_api with {
+    "location": "New York",
+    "units": "metric"
+};
+
+# API call with predefined parameters
+put search_params = {
+    "q": "Razen programming language",
+    "limit": 10
+};
+call search_results = complex_api with search_params;
+
+# ===== SECTION 3: GET REQUESTS =====
+show "\n===== GET REQUEST EXAMPLES =====";
+
+# Simple GET request with query parameters
+get user_params = {
+    "id": "12345",
+    "fields": "name,email,profile"
+};
+
+call user_data = auth_api with user_params;
+
+# GET request with path parameters
+put product_id = "p-789";
+call product_data = complex_api with {
+    "_path": "/products/" + product_id,
+    "include_reviews": true
+};
+
+# GET request with headers
+get request_with_headers = {
+    "_headers": {
+        "Accept": "application/json",
+        "Cache-Control": "no-cache"
+    },
+    "timestamp": TimeLib[now]()
+};
+
+call custom_response = auth_api with request_with_headers;
+
+# ===== SECTION 4: POST REQUESTS =====
+show "\n===== POST REQUEST EXAMPLES =====";
+
+# Simple POST request with JSON body
+post create_user = {
+    "name": "John Doe",
+    "email": "john@example.com",
+    "role": "user"
+};
+
+call user_creation_response = auth_api with create_user;
+
+# POST request with complex nested data
+post create_order = {
+    "customer": {
+        "id": "cust-123",
+        "name": "Jane Smith"
+    },
+    "items": [
+        {
+            "product_id": "prod-456",
+            "quantity": 2,
+            "price": 29.99
+        },
+        {
+            "product_id": "prod-789",
+            "quantity": 1,
+            "price": 49.99
+        }
+    ],
+    "shipping_address": {
+        "street": "123 Main St",
+        "city": "Anytown",
+        "state": "CA",
+        "zip": "12345"
+    },
+    "payment_method": "credit_card"
+};
+
+call order_response = complex_api with create_order;
+
+# POST request with form data
+post form_data = {
+    "_content_type": "application/x-www-form-urlencoded",
+    "username": "user123",
+    "password": "securepass",
+    "remember_me": true
+};
+
+call login_response = auth_api with form_data;
+
+# POST request with file upload
+post file_upload = {
+    "_content_type": "multipart/form-data",
+    "file": "@/path/to/file.jpg",
+    "description": "Profile picture"
+};
+
+call upload_response = auth_api with file_upload;
+
+# ===== SECTION 5: ERROR HANDLING =====
+show "\n===== ERROR HANDLING EXAMPLES =====";
+
+# Basic error handling with try/catch
+try {
+    call risky_response = auth_api with {
+        "action": "risky_operation"
+    };
+    
+    show "Operation successful: " + risky_response;
+} catch (error) {
+    show "API Error: " + error;
+}
+
+# Advanced error handling with status code checking
+call status_response = complex_api with {
+    "test": "status_code"
+};
+
+if (status_response["_status"] >= 200 && status_response["_status"] < 300) {
+    show "Success with status: " + status_response["_status"];
+} else if (status_response["_status"] >= 400 && status_response["_status"] < 500) {
+    show "Client error with status: " + status_response["_status"];
+    show "Error message: " + status_response["error"]["message"];
+} else if (status_response["_status"] >= 500) {
+    show "Server error with status: " + status_response["_status"];
+}
+
+# ===== SECTION 6: REAL-WORLD EXAMPLES =====
+show "\n===== REAL-WORLD API EXAMPLES =====";
+
+# Example 1: Weather API
+api weather_api = "your-weather-api-key";
+
+show "Enter city name:";
+read city;
+
+if (Validation[required](city)) {
+    call weather_data = weather_api with {
+        "q": city,
+        "units": "metric"
+    };
+    
+    # Parse the JSON response
+    let weather_obj = JSON[parse](JSON[stringify](weather_data));
+    
+    show "Weather in " + city + ":";
+    show "Temperature: " + weather_obj["main"]["temp"] + "°C";
+    show "Conditions: " + weather_obj["weather"][0]["description"];
+    show "Humidity: " + weather_obj["main"]["humidity"] + "%";
+} else {
+    show "Error: City name cannot be empty";
+}
+
+# Example 2: Chat API
+api chat_api = {
+    "url": "https://api.chat-service.com",
+    "key": "your-chat-api-key"
+};
+
+show "Enter your message:";
+read user_message;
+
+if (Validation[required](user_message)) {
+    post chat_request = {
+        "model": "chat-model-1",
+        "messages": [
+            {"role": "system", "content": "You are a helpful assistant."},
+            {"role": "user", "content": user_message}
+        ],
+        "temperature": 0.7,
+        "max_tokens": 150
+    };
+    
+    call chat_response = chat_api with chat_request;
+    
+    # Parse and display the response
+    let response_obj = JSON[parse](JSON[stringify](chat_response));
+    show "Assistant: " + response_obj["choices"][0]["message"]["content"];
+} else {
+    show "Error: Message cannot be empty";
+}
+
+# Example 3: E-commerce API
+api shop_api = {
+    "url": "https://api.shop-example.com",
+    "auth_type": "bearer",
+    "token": "your-shop-api-token"
+};
+
+# Get product catalog
+get catalog_params = {
+    "category": "electronics",
+    "limit": 5,
+    "sort": "popularity"
+};
+
+call catalog = shop_api with catalog_params;
+
+# Display products
+let products = JSON[parse](JSON[stringify](catalog))["products"];
+show "Available Products:";
+for (let i = 0; i < ArrLib[length](products); i++) {
+    put product = products[i];
+    show (i + 1) + ". " + product["name"] + " - $" + product["price"];
+}
+
+# Purchase a product
+show "Enter product number to purchase (1-" + ArrLib[length](products) + "):";
+read product_num;
+
+let selected_index = StrLib[to_number](product_num) - 1;
+if (selected_index >= 0 && selected_index < ArrLib[length](products)) {
+    put selected_product = products[selected_index];
+    
+    post purchase_request = {
+        "product_id": selected_product["id"],
+        "quantity": 1,
+        "payment": {
+            "method": "credit_card",
+            "card_token": "tok_visa_simulated"
+        }
+    };
+    
+    call purchase_response = shop_api with purchase_request;
+    
+    # Check purchase status
+    let purchase_result = JSON[parse](JSON[stringify](purchase_response));
+    if (purchase_result["success"]) {
+        show "Purchase successful!";
+        show "Order ID: " + purchase_result["order_id"];
+        show "Estimated delivery: " + purchase_result["delivery_date"];
+    } else {
+        show "Purchase failed: " + purchase_result["error"];
+    }
+} else {
+    show "Invalid product selection";
+}
+
+# ===== SECTION 7: BEST PRACTICES =====
+show "\n===== API BEST PRACTICES =====";
+
+# 1. Always validate user input before making API calls
+show "1. Always validate user input before making API calls";
+
+# 2. Use appropriate error handling
+show "2. Use appropriate error handling with try/catch blocks";
+
+# 3. Set reasonable timeouts
+show "3. Set reasonable timeouts for API calls";
+api timeout_example = {
+    "url": "https://api.example.com",
+    "timeout": 30  # 30 seconds timeout
+};
+
+# 4. Use proper authentication
+show "4. Use proper authentication methods for secure APIs";
+
+# 5. Handle rate limiting
+show "5. Handle rate limiting with exponential backoff";
+let max_retries = 3;
+let retry_count = 0;
+hold success = false;
+
+while (!success && retry_count < max_retries) {
+    try {
+        call rate_limited_api = complex_api with {
+            "action": "rate_limited_operation"
+        };
+        success = true;
+    } catch (error) {
+        if (error["_status"] == 429) {  # Too Many Requests
+            retry_count = retry_count + 1;
+            let wait_time = 2 ^ retry_count;  # Exponential backoff
+            show "Rate limited. Retrying in " + wait_time + " seconds...";
+            # In a real implementation, we would wait here
+        } else {
+            show "Error: " + error;
+            break;
+        }
+    }
+}
+
+# 6. Cache responses when appropriate
+show "6. Cache responses when appropriate to reduce API calls";
+
+# 7. Use pagination for large datasets
+show "7. Use pagination for large datasets";
+let page = 1;
+let per_page = 10;
+hold has_more = true;
+
+while (has_more) {
+    call paginated_response = complex_api with {
+        "page": page,
+        "per_page": per_page
+    };
+    
+    let response_obj = JSON[parse](JSON[stringify](paginated_response));
+    
+    # Process current page
+    show "Processing page " + page;
+    
+    # Check if there are more pages
+    has_more = response_obj["has_more"];
+    page = page + 1;
+    
+    # In a real implementation, we would process each item here
+    
+    # For this example, we'll just do 3 pages
+    if (page > 3) {
+        break;
+    }
+}
+
+# ===== CONCLUSION =====
+show "\n===== CONCLUSION =====";
+show "This documentation demonstrates the proper usage of API functionality in Razen.";
+show "Use the 'api', 'call', 'get', and 'post' tokens to interact with external services.";
+show "Remember to follow best practices for security and error handling.";

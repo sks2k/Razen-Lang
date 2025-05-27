@@ -3,6 +3,7 @@ use std::fmt;
 use std::sync::Arc;
 
 use crate::value::Value;
+use crate::functions::apilib;
 
 /// LibraryFunction represents a callable function in a library
 pub type LibraryFunction = fn(Vec<Value>) -> Result<Value, String>;
@@ -203,6 +204,26 @@ impl LibraryManager {
         fs_lib.register_function("temp_file", crate::functions::filesystemlib::temp_file);
         fs_lib.register_function("temp_dir", crate::functions::filesystemlib::temp_dir);
         self.register_library(fs_lib);
+        
+        // API library
+        let mut api_lib = Library::new("apilib");
+        api_lib.register_function("get", crate::functions::apilib::get);
+        api_lib.register_function("post", crate::functions::apilib::post);
+        api_lib.register_function("putmethod", crate::functions::apilib::putmethod);
+        api_lib.register_function("delete", crate::functions::apilib::delete);
+        api_lib.register_function("patch", crate::functions::apilib::patch);
+        api_lib.register_function("call", crate::functions::apilib::call);
+        api_lib.register_function("parse_json", crate::functions::apilib::parse_json);
+        api_lib.register_function("to_json", crate::functions::apilib::to_json);
+        api_lib.register_function("create_api", crate::functions::apilib::create_api);
+        api_lib.register_function("execute_api", crate::functions::apilib::execute_api);
+        api_lib.register_function("url_encode", crate::functions::apilib::url_encode);
+        api_lib.register_function("url_decode", crate::functions::apilib::url_decode);
+        api_lib.register_function("form_data", crate::functions::apilib::form_data);
+        api_lib.register_function("is_success", crate::functions::apilib::is_success);
+        api_lib.register_function("is_client_error", crate::functions::apilib::is_client_error);
+        api_lib.register_function("is_server_error", crate::functions::apilib::is_server_error);
+        self.register_library(api_lib);
 
         // JSON library
         let mut json_lib = Library::new("json");

@@ -23,6 +23,7 @@ mod audio;
 mod image;
 mod date;
 mod filesystem;
+mod api;
 
 // New modules for self-compilation
 mod memory;
@@ -97,6 +98,10 @@ pub mod cryptolib {
 
 pub mod regexlib {
     pub use super::regex::*;
+}
+
+pub mod apilib {
+    pub use super::api::*;
 }
 
 pub mod uuidlib {
