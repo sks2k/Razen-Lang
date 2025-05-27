@@ -1470,6 +1470,11 @@ impl Compiler {
         // Call stack to support function calls
         let mut call_stack: Vec<(usize, HashMap<String, String>)> = Vec::new(); // (return_address, local_variables)
         
+        // Exception handling state
+        let mut exception_handlers: Vec<(String, usize)> = Vec::new(); // (handler_label, handler_pc)
+        let mut current_exception: Option<String> = None;
+        let mut in_exception_handling = false;
+        
         // Map of function parameter names indexed by function address
         let mut function_parameters: HashMap<usize, Vec<String>> = HashMap::new();
         
@@ -2336,6 +2341,72 @@ impl Compiler {
                 IR::Label(_name) => {
                     // Labels are just markers, no need to do anything at runtime
                     // Just skip to the next instruction
+                },
+                IR::SetupTryCatch => {
+                    // Setup a try-catch block
+                    if let Some(handler_label) = stack.pop() {
+                        // Find the PC for this handler label
+                        let handler_pc = self.ir.iter().enumerate()
+                            .find(|(_, ir)| {
+                                if let IR::Label(label) = ir {
+                                    label == &handler_label
+                                } else {
+                                    false
+                                }
+                            })
+                            .map(|(idx, _)| idx);
+                        
+                        if let Some(handler_pc) = handler_pc {
+                            // Push the handler onto the stack of exception handlers
+                            exception_handlers.push((handler_label, handler_pc));
+                            if !self.clean_output {
+                                println!("[Interpreter] Setup try-catch with handler at {}", handler_pc);
+                            }
+                        } else {
+                            if !self.clean_output {
+                                println!("[Interpreter] Error: Could not find handler label: {}", handler_label);
+                            }
+                        }
+                    }
+                },
+                IR::ClearTryCatch => {
+                    // Clear the most recent exception handler
+                    if exception_handlers.pop().is_some() {
+                        if !self.clean_output {
+                            println!("[Interpreter] Cleared try-catch handler");
+                        }
+                    }
+                },
+                IR::ThrowException => {
+                    // Throw an exception
+                    if let Some(error_message) = stack.pop() {
+                        if !self.clean_output {
+                            println!("[Interpreter] Throwing exception: {}", error_message);
+                        }
+                        
+                        // Set the current exception (clone to avoid move issues)
+                        current_exception = Some(error_message.clone());
+                        
+                        // If we have an exception handler, jump to it
+                        if let Some((_handler_label, handler_pc)) = exception_handlers.last() {
+                            if !self.clean_output {
+                                println!("[Interpreter] Jumping to exception handler at {}", handler_pc);
+                            }
+                            
+                            // Push the exception message back on the stack for the catch block
+                            stack.push(error_message.clone());
+                            
+                            // Set the in_exception_handling flag
+                            in_exception_handling = true;
+                            
+                            // Jump to the handler
+                            pc = *handler_pc;
+                            continue; // Skip the pc increment at the end of the loop
+                        } else {
+                            // No handler, propagate the exception
+                            return Err(format!("Unhandled exception: {}", error_message));
+                        }
+                    }
                 },
                 _ => {
                     // For instructions not yet implemented, just log if in debug mode
