@@ -936,8 +936,27 @@ impl Parser {
         
         let try_block = self.parse_block_statement();
         
+        let mut catch_param = None;
         let catch_block = if self.peek_token_is(TokenType::Catch) {
             self.next_token();
+            
+            // Parse the catch parameter if it exists
+            if self.peek_token_is(TokenType::LeftParen) {
+                self.next_token(); // consume '('
+                
+                if self.peek_token_is(TokenType::Identifier) {
+                    self.next_token(); // consume identifier
+                    catch_param = Some(self.current_token.literal.clone());
+                    
+                    if !self.expect_peek(TokenType::RightParen) {
+                        return None;
+                    }
+                } else {
+                    if !self.expect_peek(TokenType::RightParen) {
+                        return None;
+                    }
+                }
+            }
             
             if !self.expect_peek(TokenType::LeftBrace) {
                 return None;
@@ -962,6 +981,7 @@ impl Parser {
         
         Some(Statement::TryStatement {
             try_block,
+            catch_param,
             catch_block,
             finally_block,
         })

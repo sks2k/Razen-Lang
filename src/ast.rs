@@ -66,6 +66,7 @@ pub enum Statement {
     },
     TryStatement {
         try_block: Vec<Statement>,
+        catch_param: Option<String>,  // Parameter name for the caught error
         catch_block: Option<Vec<Statement>>,
         finally_block: Option<Vec<Statement>>,
     },
@@ -415,7 +416,7 @@ impl fmt::Display for Node {
                             write!(f, "show {};", Node::Expression(value.clone()))
                         }
                     },
-                    Statement::TryStatement { try_block, catch_block, finally_block } => {
+                    Statement::TryStatement { try_block, catch_param, catch_block, finally_block } => {
                         let mut result = String::from("try {
 ");
                         for stmt in try_block {

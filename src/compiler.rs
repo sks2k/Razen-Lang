@@ -24,6 +24,11 @@ enum IR {
     Dup,
     Swap,
     
+    // Exception handling
+    SetupTryCatch,
+    ClearTryCatch,
+    ThrowException,
+    
     // Memory operations
     StoreVar(String),
     LoadVar(String),
@@ -482,8 +487,8 @@ impl Compiler {
             Statement::LoadStatement { cycles, block } => {
                 self.compile_load_statement(cycles, block);
             },
-            Statement::TryStatement { try_block, catch_block, finally_block } => {
-                self.compile_try_statement(try_block, catch_block, finally_block);
+            Statement::TryStatement { try_block, catch_param, catch_block, finally_block } => {
+                self.compile_try_statement(try_block, catch_param, catch_block, finally_block);
             },
             Statement::ThrowStatement { value } => {
                 self.compile_throw_statement(value);
@@ -949,37 +954,71 @@ impl Compiler {
         self.emit(IR::Print);
     }
     
-    fn compile_try_statement(&mut self, try_block: Vec<Statement>, catch_block: Option<Vec<Statement>>, finally_block: Option<Vec<Statement>>) {
-        // This is a simplified implementation of try/catch/finally
-        // In a real implementation, this would involve exception handling
+    fn compile_try_statement(&mut self, try_block: Vec<Statement>, catch_param: Option<String>, catch_block: Option<Vec<Statement>>, finally_block: Option<Vec<Statement>>) {
+        // Proper implementation of try/catch/finally with exception handling
+        
+        // Generate unique labels for the try-catch-finally blocks
+        let try_end_label = self.generate_label("try_end");
+        let catch_start_label = self.generate_label("catch_start");
+        let catch_end_label = self.generate_label("catch_end");
+        let finally_start_label = self.generate_label("finally_start");
+        let finally_end_label = self.generate_label("finally_end");
+        
+        // Set up exception handling
+        self.emit(IR::PushString(catch_start_label.clone())); // Push catch handler address
+        self.emit(IR::SetupTryCatch); // Setup try-catch block
         
         // Compile the try block
+        self.enter_scope();
         for stmt in try_block {
             self.compile_statement(stmt);
         }
+        self.leave_scope();
+        
+        // End of try block - clear exception handler and jump to finally
+        self.emit(IR::ClearTryCatch); // Clear the try-catch handler
+        self.emit(IR::Jump(self.ir.len() + 1)); // Jump to finally block
+        self.emit_label(&catch_start_label); // Catch handler starts here
         
         // Compile the catch block if it exists
         if let Some(catch) = catch_block {
+            self.enter_scope();
+            
+            // If we have a catch parameter, store the exception in it
+            if let Some(param_name) = catch_param {
+                let index = self.symbol_table.define(&param_name);
+                self.emit(IR::StoreVar(param_name)); // Store exception in the variable
+            } else {
+                self.emit(IR::Pop); // Pop the exception if no parameter to store it
+            }
+            
             for stmt in catch {
                 self.compile_statement(stmt);
             }
+            self.leave_scope();
+        } else {
+            // If no catch block, just pop the exception
+            self.emit(IR::Pop);
         }
         
-        // Compile the finally block if it exists
+        // Finally block - always executed
+        self.emit_label(&finally_start_label);
         if let Some(finally) = finally_block {
+            self.enter_scope();
             for stmt in finally {
                 self.compile_statement(stmt);
             }
+            self.leave_scope();
         }
+        self.emit_label(&finally_end_label);
     }
     
     fn compile_throw_statement(&mut self, value: Expression) {
-        // Compile the value to be thrown
+        // Compile the value to throw
         self.compile_expression(value);
         
-        // In a real implementation, this would involve exception handling
-        // For now, we'll just print the error and exit
-        self.emit(IR::Print);
+        // Throw the exception using the new exception handling mechanism
+        self.emit(IR::ThrowException);
     }
     
     fn compile_read_statement(&mut self, name: String) {
@@ -1387,6 +1426,9 @@ impl Compiler {
                 IR::SetGlobal(_) => code.push(0x2B), // Global variable operations
                 IR::Sleep => code.push(0x2C),
                 IR::LibraryCall(_, _, _) => code.push(0x2D),
+                IR::SetupTryCatch => code.push(0x2E),
+                IR::ClearTryCatch => code.push(0x2F),
+                IR::ThrowException => code.push(0x30),
             }
         }
         

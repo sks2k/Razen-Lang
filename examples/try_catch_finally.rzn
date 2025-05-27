@@ -1,0 +1,86 @@
+# Simple try-catch example
+# This file demonstrates basic error handling in Razen
+
+# Import libraries
+lib mathlib;
+lib arrlib;
+lib strlib;
+
+show "===== Razen Try-Catch Examples =====";
+
+# Example 1: Division by zero error
+show "Example 1: Division by zero";
+try {
+    let a = 10;
+    let b = 0;
+    show "Attempting to divide " + a + " by " + b;
+    let result = MathLib[divide](a, b);
+    show "Result: " + result; # This line won't execute
+} catch (error) {
+    show "Caught error: " + error;
+} finally {
+    # Code that always executes
+    show "Cleanup operations";
+}
+
+# Example 2: Array index out of bounds
+show "\nExample 2: Array index out of bounds";
+try {
+    put numbers = [1, 2, 3];
+    show "Array: " + numbers;
+    show "Attempting to access index 5";
+    put values = numbers[5]; # This should cause an error
+    show "Value: " + values; # This line won't execute
+} catch (error) {
+    show "Caught error: " + error;
+} finally {
+    # Code that always executes
+    show "Cleanup operations";
+}
+
+# Example 3: Type error
+show "\nExample 3: Type error";
+try {
+    take textb = "Hello";
+    show "Text: " + textb;
+    show "Attempting to use text as a function";
+    put result = textb(); # This should cause an error    show "Attempting to access index 5";
+    put values = numbers[5]; # This should cause an error
+    show "Value: " + values; # This line won't execute
+} catch (error) {
+    show "Caught error: " + error;
+} finally {
+    show "Result: " + result; # This line won't execute
+}
+
+# Example 4: Using try-catch with library functions
+show "\nExample 4: Using try-catch with library functions";
+try {
+    show "Trying to use ArrLib functions on an invalid array";
+    put empty_array = [];
+    put first_element = ArrLib[pop](empty_array);
+    show "First element: " + first_element; # This line won't execute if pop fails on empty array
+} catch (error) {
+    show "Caught library error: " + error;
+} finally {
+    # Code that always executes
+    show "Cleanup operations";
+}
+
+# Example 5: Checking conditions and throwing errors
+show "\nExample 5: Throwing custom errors";
+try {
+    let age = 15;
+    show "Checking if age is valid for registration";
+    
+    if (age < 18) {
+        throw "Age must be 18 or older to register";
+    }
+    
+    show "Registration successful!"; # This won't execute if age < 18
+} catch (error) {
+    show "Registration error: " + error;
+} finally {
+    # Code that always executes
+    show "Cleanup operations";
+}
