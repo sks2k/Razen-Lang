@@ -11,6 +11,13 @@
     "Programming Languages"
   ],
   "main": "./src/extension.js",
+  "activationEvents": [
+    "onLanguage:razen",
+    "onCommand:razen.insertTemplate",
+    "onCommand:razen.runFile",
+    "onCommand:razen.debugFile",
+    "onCommand:razen.testFile"
+  ],
   "contributes": {
     "languages": [
       {
@@ -116,6 +123,11 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/BasaiCorp/Razen-Lang"
+  },
+  "license": "SEE LICENSE IN LICENSE",
+  "author": {
+    "name": "Prathmesh Barot",
+    "email": "prathmeshbarot2009@gmail.com"
   },
   "dependencies": {
     "vscode-languageclient": "^7.0.0",
