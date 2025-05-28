@@ -1,12 +1,12 @@
 # Contributor Covenant Code of Conduct
 
-## 👋 Our Pledge
+## Our Pledge
 
 We as members, contributors, and maintainers of the Razen project pledge to make participation in our project and community a harassment-free experience for everyone, regardless of age, body size, disability, ethnicity, gender identity and expression, level of experience, education, socio-economic status, nationality, personal appearance, race, religion, or sexual identity and orientation.
 
 We commit to fostering an open, welcoming, diverse, inclusive, and healthy community.
 
-## 🤝 Our Standards
+## Our Standards
 
 Examples of behavior that contributes to creating a positive environment include:
 
@@ -24,24 +24,24 @@ Examples of unacceptable behavior by participants include:
 - Publishing others’ private information, such as a physical or electronic address, without explicit permission
 - Any other conduct which could reasonably be considered inappropriate in a professional or open-source setting
 
-## 📏 Our Responsibilities
+## Our Responsibilities
 
 Project maintainers are responsible for clarifying the standards of acceptable behavior and are expected to take appropriate and fair corrective action in response to any instances of unacceptable behavior.
 
 They have the right and responsibility to remove, edit, or reject comments, commits, code, wiki edits, issues, and other contributions that are not aligned with this Code of Conduct.
 
-## 🧭 Scope
+## Scope
 
 This Code of Conduct applies within all project spaces — including GitHub, Discord, forums, and social media — and also applies when an individual is officially representing the project or its community in public spaces.
 
-## 🚨 Enforcement
+## Enforcement
 
 Instances of abusive, harassing, or otherwise unacceptable behavior may be reported by contacting the lead maintainer at:
-📧 **prathmeshbarot2009@gmail.com**
+**prathmeshbarot2009@gmail.com**
 
 All complaints will be reviewed and investigated and will result in a response that is deemed necessary and appropriate to the circumstances. The maintainers are obligated to maintain confidentiality with regard to the reporter of an incident.
 
-## 📄 Attribution
+## Attribution
 
 This Code of Conduct is adapted from the [Contributor Covenant][homepage], version 2.1, available at
 https://www.contributor-covenant.org/version/2/1/code_of_conduct.html
@@ -51,4 +51,4 @@ https://www.contributor-covenant.org/faq
 
 ---
 
-Maintained with ❤️ by **Prathmesh Barot** under the **Basai Corporation**, a solo-managed community-driven initiative for open, free, and non-commercial development.
+Maintained by **Prathmesh Barot** under the **Basai Corporation**, a solo-managed community-driven initiative for open, free, and non-commercial development.
