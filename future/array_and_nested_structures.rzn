@@ -1,0 +1,201 @@
+# Razen Array and Nested Structures Proposal
+# This file demonstrates proposed syntax and functionality for improved array handling and nested structures
+
+# Import libraries
+lib strlib;
+lib arrlib;
+lib mathlib;
+
+show "===== Razen Array and Nested Structures Proposal =====";
+
+# ===== SECTION 1: BASIC ARRAY OPERATIONS =====
+show "\n1. Basic Array Operations";
+
+# Current array creation
+show "Current array creation:";
+put simple_array = [1, 2, 3, 4, 5];
+show "Simple array: " + simple_array;
+
+# Proposed array access with variables
+show "\nProposed array access with variables:";
+let index = 2;
+# Current approach - direct index
+show "Direct access: " + simple_array[2];
+# Proposed approach - variable index
+show "Variable index access: " + simple_array[index];
+
+# Proposed array methods
+show "\nProposed array methods:";
+show "Length: " + ArrLib[length](simple_array);
+show "First element: " + ArrLib[first](simple_array);
+show "Last element: " + ArrLib[last](simple_array);
+show "Slice (1-3): " + ArrLib[slice](simple_array, 1, 3);
+
+# ===== SECTION 2: NESTED ARRAYS =====
+show "\n2. Nested Arrays";
+
+# Current nested array creation (limited)
+show "Current nested array approach:";
+put outer = [1, 2, 3];
+put inner = [4, 5, 6];
+# This doesn't work well in current Razen
+
+# Proposed nested array creation
+show "\nProposed nested array creation:";
+put nested_array = [
+    [1, 2, 3],
+    [4, 5, 6],
+    [7, 8, 9]
+];
+show "Nested array declaration";
+
+# Proposed nested array access
+show "\nProposed nested array access:";
+# Current multi-step approach
+show "Multi-step approach:";
+put row = nested_array[1];
+show "Row 1: " + row;
+show "Element at row 1, col 2: " + row[2];
+
+# Proposed direct nested access
+show "\nProposed direct nested access:";
+show "Direct access to element at row 1, col 2: nested_array[1][2]";
+# Implementation would allow: show nested_array[1][2];
+
+# ===== SECTION 3: OBJECTS/MAPS =====
+show "\n3. Objects/Maps";
+
+# Current key-value approach using arrays
+show "Current key-value approach:";
+put person = [
+    "name", "John Doe",
+    "age", 30,
+    "city", "New York"
+];
+show "Person: " + person;
+show "Name: " + person[1]; # Value is at index 1
+show "Age: " + person[3];  # Value is at index 3
+
+# Proposed object syntax
+show "\nProposed object syntax:";
+show "Declaration: put person = { \"name\": \"John Doe\", \"age\": 30, \"city\": \"New York\" }";
+# Implementation would allow:
+# put person = { "name": "John Doe", "age": 30, "city": "New York" };
+# show "Name: " + person["name"];
+# show "Age: " + person["age"];
+
+# ===== SECTION 4: NESTED OBJECTS =====
+show "\n4. Nested Objects";
+
+# Current approach (very limited)
+show "Current approach (limited):";
+put user = [
+    "name", "Alice",
+    "details", ["email", "alice@example.com", "phone", "123-456-7890"]
+];
+show "User: " + user;
+# Accessing nested data is cumbersome
+put details = user[3];
+show "Email: " + details[1];
+
+# Proposed nested object syntax
+show "\nProposed nested object syntax:";
+show "Declaration: put user = { \"name\": \"Alice\", \"details\": { \"email\": \"alice@example.com\", \"phone\": \"123-456-7890\" } }";
+# Implementation would allow:
+# put user = { "name": "Alice", "details": { "email": "alice@example.com", "phone": "123-456-7890" } };
+# show "Email: " + user["details"]["email"];
+
+# ===== SECTION 5: ARRAY OF OBJECTS =====
+show "\n5. Array of Objects";
+
+# Current approach (very limited)
+show "Current approach (limited):";
+put users = [
+    ["name", "Alice", "age", 25],
+    ["name", "Bob", "age", 30]
+];
+show "Users: " + users;
+put first_user = users[0];
+show "First user name: " + first_user[1];
+
+# Proposed array of objects syntax
+show "\nProposed array of objects syntax:";
+show "Declaration: put users = [ { \"name\": \"Alice\", \"age\": 25 }, { \"name\": \"Bob\", \"age\": 30 } ]";
+# Implementation would allow:
+# put users = [ { "name": "Alice", "age": 25 }, { "name": "Bob", "age": 30 } ];
+# show "First user name: " + users[0]["name"];
+
+# ===== SECTION 6: ARRAY MANIPULATION =====
+show "\n6. Array Manipulation";
+
+# Current array manipulation
+show "Current array manipulation:";
+put numbers = [1, 2, 3];
+show "Original array: " + numbers;
+show "After push: " + ArrLib[push](numbers, 4);
+show "After pop: " + ArrLib[pop](numbers);
+
+# Proposed array methods
+show "\nProposed array methods:";
+show "Map: ArrLib[map](numbers, function(x) { return x * 2; })";
+show "Filter: ArrLib[filter](numbers, function(x) { return x > 1; })";
+show "Reduce: ArrLib[reduce](numbers, function(acc, x) { return acc + x; }, 0)";
+show "Sort: ArrLib[sort](numbers)";
+show "Reverse: ArrLib[reverse](numbers)";
+
+# ===== SECTION 7: DESTRUCTURING =====
+show "\n7. Destructuring";
+
+# Current approach (not supported)
+show "Current approach (not supported):";
+put coords = [10, 20, 30];
+let x = coords[0];
+let y = coords[1];
+let z = coords[2];
+show "Coordinates: x=" + x + ", y=" + y + ", z=" + z;
+
+# Proposed destructuring syntax
+show "\nProposed destructuring syntax:";
+show "Declaration: let [x, y, z] = coords";
+# Implementation would allow:
+# let [x, y, z] = coords;
+# show "Destructured coordinates: x=" + x + ", y=" + y + ", z=" + z;
+
+# ===== SECTION 8: SPREAD OPERATOR =====
+show "\n8. Spread Operator";
+
+# Current approach (not supported)
+show "Current approach (not supported):";
+put arr1 = [1, 2, 3];
+put arr2 = [4, 5, 6];
+# No easy way to combine arrays
+
+# Proposed spread syntax
+show "\nProposed spread syntax:";
+show "Declaration: put combined = [...arr1, ...arr2]";
+# Implementation would allow:
+# put combined = [...arr1, ...arr2];
+# show "Combined array: " + combined;
+
+# ===== SECTION 9: IMPLEMENTATION CONSIDERATIONS =====
+show "\n9. Implementation Considerations";
+
+show "1. Token handling: Ensure proper token handling for array and object access";
+show "2. Parser updates: Update the parser to support nested indexing";
+show "3. Variable indexing: Allow variables as array indices";
+show "4. Object syntax: Implement object literal syntax with key-value pairs";
+show "5. Method chaining: Support method chaining for array operations";
+show "6. Error handling: Provide clear error messages for invalid access";
+show "7. Type checking: Implement type checking for arrays and objects";
+show "8. Performance: Optimize array and object operations for performance";
+
+# ===== SECTION 10: BACKWARD COMPATIBILITY =====
+show "\n10. Backward Compatibility";
+
+show "1. Maintain support for current array syntax";
+show "2. Provide migration path for existing code";
+show "3. Document new features and best practices";
+show "4. Add compiler warnings for deprecated patterns";
+show "5. Ensure library functions work with both old and new syntax";
+
+show "\n===== End of Proposal =====";
