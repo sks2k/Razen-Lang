@@ -484,7 +484,7 @@ get_version() {
         # Download version file if not present
         if ! curl -s -o "$TMP_DIR/version" "$RAZEN_REPO/version" &>/dev/null; then
             echo -e "${RED}Failed to download version information. Using default version.${NC}"
-            RAZEN_VERSION="beta v0.1.69 (API Library Enhancements)"
+            RAZEN_VERSION="beta v0.1.691 (Installer and API Updates)"
         else
             RAZEN_VERSION=$(cat "$TMP_DIR/version")
             # Store the version file for future reference
@@ -911,52 +911,94 @@ install_ide_extensions() {
         echo "3. Cursor AI"
         echo "4. Windsurf"
         echo "5. Trae AI"
-        echo "6. Zed"
-        echo "7. Skip extension installation"
+        echo "6. Skip extension installation"
 
-        read -p "Enter your choice (1-7): " vscode_choice
+        read -p "Enter your choice (1-6): " vscode_choice
 
         case $vscode_choice in
-            [1-6])
+            [1-5])
                 # Get IDE-specific extension directory based on OS
                 if [[ "$OS" == "windows" ]]; then
                     case $vscode_choice in
-                        1) ext_dir="$APPDATA/Code/User/extensions" && ide_name="Visual Studio Code" ;;
-                        2) ext_dir="$APPDATA/VSCodium/User/extensions" && ide_name="VSCodium" ;;
-                        3) ext_dir="$APPDATA/Cursor/User/extensions" && ide_name="Cursor AI" ;;
-                        4) ext_dir="$APPDATA/Windsurf/User/extensions" && ide_name="Windsurf" ;;
-                        5) ext_dir="$APPDATA/Trae/User/extensions" && ide_name="Trae AI" ;;
-                        6) ext_dir="$APPDATA/Zed/User/extensions" && ide_name="Zed" ;;
+                        1) ide_cmd="code" && ide_name="Visual Studio Code" ;;
+                        2) ide_cmd="codium" && ide_name="VSCodium" ;;
+                        3) ide_cmd="cursor" && ide_name="Cursor AI" ;;
+                        4) ide_cmd="windsurf" && ide_name="Windsurf" ;;
+                        5) ide_cmd="trae" && ide_name="Trae AI" ;;
                     esac
                 elif [[ "$OS" == "macos" ]]; then
                     case $vscode_choice in
-                        1) ext_dir="$HOME/Library/Application Support/Code/User/extensions" && ide_name="Visual Studio Code" ;;
-                        2) ext_dir="$HOME/Library/Application Support/VSCodium/User/extensions" && ide_name="VSCodium" ;;
-                        3) ext_dir="$HOME/Library/Application Support/Cursor/User/extensions" && ide_name="Cursor AI" ;;
-                        4) ext_dir="$HOME/Library/Application Support/Windsurf/User/extensions" && ide_name="Windsurf" ;;
-                        5) ext_dir="$HOME/Library/Application Support/Trae/User/extensions" && ide_name="Trae AI" ;;
-                        6) ext_dir="$HOME/Library/Application Support/Zed/extensions" && ide_name="Zed" ;;
+                        1) ide_cmd="code" && ide_name="Visual Studio Code" ;;
+                        2) ide_cmd="codium" && ide_name="VSCodium" ;;
+                        3) ide_cmd="cursor" && ide_name="Cursor AI" ;;
+                        4) ide_cmd="windsurf" && ide_name="Windsurf" ;;
+                        5) ide_cmd="trae" && ide_name="Trae AI" ;;
                     esac
                 else # Linux
                     case $vscode_choice in
-                        1) ext_dir="$HOME/.vscode/extensions" && ide_name="Visual Studio Code" ;;
-                        2) ext_dir="$HOME/.vscode-oss/extensions" && ide_name="VSCodium" ;;
-                        3) ext_dir="$HOME/.cursor/extensions" && ide_name="Cursor AI" ;;
-                        4) ext_dir="$HOME/.windsurf/extensions" && ide_name="Windsurf" ;;
-                        5) ext_dir="$HOME/.trae/extensions" && ide_name="Trae AI" ;;
-                        6) ext_dir="$HOME/.zed/extensions" && ide_name="Zed" ;;
+                        1) ide_cmd="code" && ide_name="Visual Studio Code" ;;
+                        2) ide_cmd="codium" && ide_name="VSCodium" ;;
+                        3) ide_cmd="cursor" && ide_name="Cursor AI" ;;
+                        4) ide_cmd="windsurf" && ide_name="Windsurf" ;;
+                        5) ide_cmd="trae" && ide_name="Trae AI" ;;
                     esac
                 fi
 
-                # Create extension directory if it doesn't exist
-                mkdir -p "$ext_dir" || handle_error $? "Failed to create extension directory" "Check permissions"
-
-                # Copy extension
-                echo -e "${YELLOW}Installing Razen extension for $ide_name...${NC}"
-                cp -r "$INSTALL_DIR/razen-vscode-extension" "$ext_dir/razen.razen-lang" || handle_error $? "Failed to install extension" "Check permissions"
-                echo -e "  ${GREEN}✓${NC} Razen extension installed for $ide_name"
+                # Get extension directory based on IDE and OS
+                if [[ "$OS" == "windows" ]]; then
+                    case $vscode_choice in
+                        1) ext_dir="$APPDATA/Code/User/extensions" ;;  # VSCode
+                        2) ext_dir="$APPDATA/VSCodium/User/extensions" ;;  # VSCodium
+                        3) ext_dir="$APPDATA/Cursor/User/extensions" ;;  # Cursor
+                        4) ext_dir="$APPDATA/Windsurf/User/extensions" ;;  # Windsurf
+                        5) ext_dir="$APPDATA/Trae/User/extensions" ;;  # Trae
+                    esac
+                elif [[ "$OS" == "macos" ]]; then
+                    case $vscode_choice in
+                        1) ext_dir="$HOME/Library/Application Support/Code/User/extensions" ;;  # VSCode
+                        2) ext_dir="$HOME/Library/Application Support/VSCodium/User/extensions" ;;  # VSCodium
+                        3) ext_dir="$HOME/Library/Application Support/Cursor/User/extensions" ;;  # Cursor
+                        4) ext_dir="$HOME/Library/Application Support/Windsurf/User/extensions" ;;  # Windsurf
+                        5) ext_dir="$HOME/Library/Application Support/Trae/User/extensions" ;;  # Trae
+                    esac
+                else # Linux
+                    case $vscode_choice in
+                        1) ext_dir="$HOME/.vscode/extensions" ;;  # VSCode
+                        2) ext_dir="$HOME/.vscode-oss/extensions" ;;  # VSCodium
+                        3) ext_dir="$HOME/.cursor/extensions" ;;  # Cursor
+                        4) ext_dir="$HOME/.windsurf/extensions" ;;  # Windsurf
+                        5) ext_dir="$HOME/.trae/extensions" ;;  # Trae
+                    esac
+                fi
+                
+                # First try command-line installation if available
+                if command -v "$ide_cmd" &>/dev/null; then
+                    # Try to install extension using VSIX file
+                    echo -e "${YELLOW}Installing Razen extension for $ide_name using command line...${NC}"
+                    if "$ide_cmd" --install-extension "$INSTALL_DIR/razen-vscode-extension/razen-language-0.3.0.vsix" &>/dev/null; then
+                        echo -e "  ${GREEN}✓${NC} Razen extension installed for $ide_name using command line"
+                        installation_success=true
+                    else
+                        echo -e "  ${YELLOW}Command line installation failed, trying folder copy method...${NC}"
+                        installation_success=false
+                    fi
+                else
+                    echo -e "${YELLOW}$ide_name command not found, trying folder copy method...${NC}"
+                    installation_success=false
+                fi
+                
+                # If command-line installation failed or command not available, try folder copy method
+                if [[ "$installation_success" != "true" && -n "$ext_dir" ]]; then
+                    # Create extension directory if it doesn't exist
+                    mkdir -p "$ext_dir" || handle_error $? "Failed to create extension directory" "Check permissions"
+                    
+                    # Copy extension to the extension directory with the same name
+                    echo -e "${YELLOW}Installing Razen extension for $ide_name using folder copy...${NC}"
+                    cp -r "$INSTALL_DIR/razen-vscode-extension" "$ext_dir/razen.razen-lang" || handle_error $? "Failed to install extension" "Check permissions"
+                    echo -e "  ${GREEN}✓${NC} Razen extension installed for $ide_name using folder copy"
+                fi
                 ;;
-            7)
+            6)
                 echo -e "${YELLOW}Skipping VSCode extension installation${NC}"
                 ;;
             *)

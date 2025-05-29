@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Razen Language Extension Manager Script
 # Copyright © 2025 Prathmesh Barot, Basai Corporation
-# Version: beta v0.1.69 (API Library Enhancements)
+# Version: beta v0.1.691 (Installer and API Updates)
 
 # Colors for terminal output
 BLUE="\033[0;34m"
