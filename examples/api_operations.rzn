@@ -52,7 +52,15 @@ let form = APILib[form_data]([
 let post_response = APILib[post]("https://httpbin.org/post", form);
 let post_data = APILib[parse_json](post_response);
 show "POST request successful: " + APILib[is_success](post_response);
-show "Form data sent: " + post_data["form"]["name"] + " - " + post_data["form"]["message"];
+# The data is sent as JSON, not as form data
+show "Data sent: " + post_data["data"];
+
+# Access the data using the json field
+show "JSON data: " + post_data["json"];
+
+# We can't access form data directly since it's empty
+# Instead, we need to parse the data string manually
+show "Form data is empty: " + post_data["form"];
 
 # Test other HTTP methods
 show "6. Testing Other HTTP Methods:";

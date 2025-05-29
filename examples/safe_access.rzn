@@ -1,0 +1,33 @@
+type freestyle;
+
+# Import libraries
+lib random;
+
+# variables declaration
+let zero = 0;
+let start = 1;
+let end = 10;
+
+# random number generation
+let random_number = Random[int](start, end);
+show "Random number between " + start + " and " + end + ": " + random_number;
+
+# random float generation
+let random_float = Random[float](zero, start);
+show "Random float between " + zero + " and " + start + ": " + random_float;
+
+# random choice generation
+take choise_random = Random[choice]("apple", "banana", "cherry");
+show "Random choice: " + choise_random;
+
+# random array generation
+let shuffled_array = Random[shuffle]([1, 2, 3, 4, 5]);
+show "Shuffled array: " + shuffled_array;
+
+# Direct random opeartions
+
+show "Random integer (1-10): " + Random[int](1, 10);
+show "Random float (0-1): " + Random[float](0, 1);
+show "Random choice: " + Random[choice](["apple", "banana", "cherry"]);
+show "Shuffled array: " + Random[shuffle]([1, 2, 3, 4, 5]);
+

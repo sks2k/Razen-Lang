@@ -2115,9 +2115,22 @@ impl Compiler {
                             }
                         }
                         
-                        // If we still haven't found anything, push 'undefined'
+                        // If we still haven't found anything, provide a more descriptive error message
                         if !found {
-                            stack.push("undefined".to_string());
+                            // Create a more descriptive error message with context
+                            let error_msg = if container.starts_with('[') && container.ends_with(']') {
+                                format!("undefined (key '{}' not found in array)", index)
+                            } else if container.starts_with('{') && container.ends_with('}') {
+                                format!("undefined (key '{}' not found in object)", index)
+                            } else {
+                                format!("undefined (cannot access '{}' on non-container value)", index)
+                            };
+                            
+                            if !self.clean_output {
+                                println!("[Compiler] GetIndex error: {}", error_msg);
+                            }
+                            
+                            stack.push(error_msg);
                         }
                     } else {
                         stack.push("undefined".to_string());
