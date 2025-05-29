@@ -1,0 +1,35 @@
+# Razen Nested Values Minimal Test
+# This example shows the current behavior and desired behavior for nested values
+
+show "===== Razen Nested Values Minimal Test =====";
+
+# Current working behavior: numeric indexing
+show "1. Current Working Behavior: Numeric Indexing";
+put person = [
+    "name", "John Doe",
+    "age", 30,
+    "skills", ["JavaScript", "Python", "Razen"]
+];
+
+show "person: " + person;
+show "person[0] (key): " + person[0];     # Should show "name"
+show "person[1] (value): " + person[1];   # Should show "John Doe"
+show "person[4] (key): " + person[4];     # Should show "skills"
+show "person[5] (value): " + person[5];   # Should show the skills array
+
+# Current issue: string key access
+show "2. Current Issue: String Key Access";
+show "person['name'] (undefined): " + person["name"];
+show "person['skills'] (undefined): " + person["skills"];
+
+# Current issue: nested array access
+show "3. Current Issue: Nested Array Access";
+show "skills array (person[5]): " + person[5];
+show "First skill (person[5][0]) (undefined): " + person[5][0];
+
+# Desired behavior
+show "4. Desired Behavior:";
+show "We want person['name'] to return 'John Doe'";
+show "We want person['skills'][0] to return 'JavaScript'";
+
+show "===== Test Completed =====";

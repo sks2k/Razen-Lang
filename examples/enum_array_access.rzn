@@ -1,0 +1,69 @@
+# Razen Enum Array Access Test
+# This example demonstrates using enums for array access
+
+show "===== Razen Enum Array Access Test =====";
+
+# Define enums for array indices
+enum PersonField {
+    NAME = 0,
+    AGE = 1,
+    SKILLS = 2
+}
+
+enum SkillIndex {
+    FIRST = 0,
+    SECOND = 1,
+    THIRD = 2
+}
+
+# Create a person array
+put person = [
+    "John Doe",
+    30,
+    ["JavaScript", "Python", "Razen"]
+];
+
+# Access array elements using enum values
+show "1. Basic Enum Array Access:";
+show "Name: " + person[PersonField[NAME]];
+show "Age: " + person[PersonField[AGE]];
+show "Skills array: " + person[PersonField[SKILLS]];
+
+# Access nested array elements using enum values
+show "2. Nested Enum Array Access:";
+show "First skill: " + person[PersonField[SKILLS]][SkillIndex[FIRST]];
+show "Second skill: " + person[PersonField[SKILLS]][SkillIndex[SECOND]];
+show "Third skill: " + person[PersonField[SKILLS]][SkillIndex[THIRD]];
+
+# Define enum for object-like structure
+enum AddressField {
+    STREET = 0,
+    CITY = 1,
+    ZIP = 2
+}
+
+# Create a more complex structure
+put employee = [
+    "Jane Smith",
+    28,
+    ["Java", "Rust", "Go"],
+    ["123 Main St", "Anytown", "12345"]  # Address at index 3
+];
+
+# Define enum for employee structure
+enum EmployeeField {
+    NAME = 0,
+    AGE = 1,
+    SKILLS = 2,
+    ADDRESS = 3
+}
+
+# Access complex nested structure
+show "3. Complex Nested Structure with Enums:";
+show "Employee name: " + employee[EmployeeField[NAME]];
+show "Employee age: " + employee[EmployeeField[AGE]];
+show "Employee first skill: " + employee[EmployeeField[SKILLS]][SkillIndex[FIRST]];
+show "Employee street: " + employee[EmployeeField[ADDRESS]][AddressField[STREET]];
+show "Employee city: " + employee[EmployeeField[ADDRESS]][AddressField[CITY]];
+
+show "===== Test Completed =====";

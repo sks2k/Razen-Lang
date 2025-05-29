@@ -1,0 +1,97 @@
+# Razen Nested Values Enhanced Test
+# This example demonstrates the enhanced support for nested values and string key access
+
+show "===== Razen Nested Values Enhanced Test =====";
+
+# 1. Basic array with numeric indices
+show "1. Basic Array with Numeric Indices:";
+put numbers = [10, 20, 30, 40, 50];
+show "Array: " + numbers;
+show "numbers[0]: " + numbers[0];
+show "numbers[2]: " + numbers[2];
+
+# 2. Key-value pairs in arrays with string key access
+show "2. Key-Value Pairs with String Key Access:";
+put person = [
+    "name", "John Doe",
+    "age", 30,
+    "isEmployed", true
+];
+show "Person: " + person;
+show "person['name']: " + person["name"];
+show "person['age']: " + person["age"];
+show "person['isEmployed']: " + person["isEmployed"];
+
+# 3. Nested arrays with numeric indices
+show "3. Nested Arrays with Numeric Indices:";
+put matrix = [
+    [1, 2, 3],
+    [4, 5, 6],
+    [7, 8, 9]
+];
+show "Matrix: " + matrix;
+show "matrix[0]: " + matrix[0];
+show "matrix[1]: " + matrix[1];
+show "matrix[0][1]: " + matrix[0][1];
+show "matrix[2][2]: " + matrix[2][2];
+
+# 4. Nested objects with string key access
+show "4. Nested Objects with String Key Access:";
+put employee = [
+    "name", "Jane Smith",
+    "age", 28,
+    "address", [
+        "street", "123 Main St",
+        "city", "Anytown",
+        "zipCode", "12345"
+    ],
+    "skills", ["JavaScript", "Python", "Razen"]
+];
+
+show "Employee: " + employee;
+show "employee['name']: " + employee["name"];
+show "employee['address']: " + employee["address"];
+show "employee['address']['city']: " + employee["address"]["city"];
+show "employee['skills']: " + employee["skills"];
+show "employee['skills'][0]: " + employee["skills"][0];
+show "employee['skills'][2]: " + employee["skills"][2];
+
+# 5. Complex nested structure
+show "5. Complex Nested Structure:";
+put company = [
+    "name", "Tech Innovations",
+    "founded", 2010,
+    "locations", [
+        [
+            "city", "San Francisco",
+            "employees", 120
+        ],
+        [
+            "city", "New York",
+            "employees", 85
+        ]
+    ],
+    "departments", [
+        [
+            "name", "Engineering",
+            "head", [
+                "name", "Alice Johnson",
+                "hireDate", "2012-03-15"
+            ]
+        ],
+        [
+            "name", "Marketing",
+            "head", [
+                "name", "Bob Smith",
+                "hireDate", "2014-07-22"
+            ]
+        ]
+    ]
+];
+
+show "Company: " + company;
+show "company['name']: " + company["name"];
+show "company['locations'][0]['city']: " + company["locations"][0]["city"];
+show "company['departments'][0]['head']['name']: " + company["departments"][0]["head"]["name"];
+
+show "===== Test Completed =====";

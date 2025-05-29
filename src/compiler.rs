@@ -2030,17 +2030,86 @@ impl Compiler {
                         
                         // If not found yet, try array indexing (if this is an array)
                         if !found && container.starts_with('[') && container.ends_with(']') {
-                            let content = &container[1..container.len()-1];
-                            let elements: Vec<&str> = content.split(',').collect();
+                            // Extract the array content without the brackets
+                            let content = &container[1..container.len()-1].trim();
                             
-                            if let Ok(idx) = index.parse::<usize>() {
-                                if idx < elements.len() {
-                                    stack.push(elements[idx].to_string());
-                                    found = true;
+                            // Handle empty array
+                            if content.is_empty() {
+                                stack.push("undefined".to_string());
+                                found = true;
+                            } else {
+                                // Parse the array elements, handling nested arrays and objects
+                                let mut elements = Vec::new();
+                                let mut current = String::new();
+                                let mut bracket_depth = 0;
+                                
+                                // Parse elements considering nested structures
+                                for c in content.chars() {
+                                    match c {
+                                        '[' => {
+                                            bracket_depth += 1;
+                                            current.push(c);
+                                        },
+                                        ']' => {
+                                            bracket_depth -= 1;
+                                            current.push(c);
+                                        },
+                                        ',' => {
+                                            if bracket_depth == 0 {
+                                                // End of an element
+                                                elements.push(current.trim().to_string());
+                                                current = String::new();
+                                            } else {
+                                                current.push(c);
+                                            }
+                                        },
+                                        _ => current.push(c),
+                                    }
+                                }
+                                
+                                // Add the last element if not empty
+                                if !current.is_empty() {
+                                    elements.push(current.trim().to_string());
+                                }
+                                
+                                // Try numeric index first
+                                if let Ok(idx) = index.parse::<usize>() {
+                                    if idx < elements.len() {
+                                        stack.push(elements[idx].clone());
+                                        found = true;
+                                    } else {
+                                        // Invalid array index
+                                        if !self.clean_output {
+                                            println!("[Interpreter] Array index out of bounds: {} >= {}", idx, elements.len());
+                                        }
+                                    }
                                 } else {
-                                    // Invalid array index
-                                    if !self.clean_output {
-                                        println!("[Interpreter] Array index out of bounds: {} >= {}", idx, elements.len());
+                                    // Try string key access for key-value pairs in arrays
+                                    // Format is ["key1", "value1", "key2", "value2", ...]
+                                    let mut i = 0;
+                                    while i < elements.len() - 1 { // Need at least one more element for the value
+                                        // Check if this element is a key that matches our index
+                                        let key = elements[i].trim();
+                                        // Remove quotes if present
+                                        let clean_key = if (key.starts_with('"') && key.ends_with('"')) || 
+                                                         (key.starts_with('\'') && key.ends_with('\'')) {
+                                            &key[1..key.len()-1]
+                                        } else {
+                                            key
+                                        };
+                                        
+                                        // Check if this key matches our index
+                                        if clean_key == index {
+                                            // Found a matching key, return the next element as the value
+                                            stack.push(elements[i + 1].clone());
+                                            found = true;
+                                            break;
+                                        }
+                                        i += 2; // Move to the next key-value pair
+                                    }
+                                    
+                                    if !found && !self.clean_output {
+                                        println!("[Interpreter] Key '{}' not found in array", index);
                                     }
                                 }
                             }

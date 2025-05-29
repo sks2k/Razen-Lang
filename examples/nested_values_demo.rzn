@@ -1,0 +1,134 @@
+# Razen Nested Values and Arrays Demo
+# This file demonstrates how to work with nested values and arrays in Razen
+
+show "===== Razen Nested Values and Arrays Demo =====";
+
+# Basic array declaration
+show "1. Basic Array Declaration:";
+put simple_array = [1, 2, 3, 4, 5];
+show "Simple array: " + simple_array;
+
+# Array with mixed types
+show "2. Array with Mixed Types:";
+put mixed_array = [42, "hello", true, 3.14];
+show "Mixed array: " + mixed_array;
+
+# Accessing array elements
+show "3. Accessing Array Elements:";
+show "First element: " + simple_array[0];
+show "Second element: " + simple_array[1];
+show "Last element: " + simple_array[4];
+
+# Array operations
+show "4. Array Operations:";
+put numbers = [10, 20, 30];
+show "Original numbers: " + numbers;
+numbers[1] = 25;  # Modify an element
+show "After modification: " + numbers;
+numbers[3] = 40;  # Add a new element
+show "After addition: " + numbers;
+
+# Nested arrays
+show "5. Nested Arrays:";
+put matrix = [
+    [1, 2, 3],
+    [4, 5, 6],
+    [7, 8, 9]
+];
+show "Matrix: " + matrix;
+show "Matrix[1][2]: " + matrix[1][2];  # Should access the value 6
+
+# Key-value pairs (similar to objects/maps)
+show "6. Key-Value Pairs:";
+put person = [
+    "name", "John Doe",
+    "age", 30,
+    "isEmployed", true
+];
+show "Person object: " + person;
+show "Name: " + person["name"];
+show "Age: " + person["age"];
+show "Employed: " + person["isEmployed"];
+
+# Nested objects
+show "7. Nested Objects:";
+put employee = [
+    "name", "Jane Smith",
+    "age", 28,
+    "address", [
+        "street", "123 Main St",
+        "city", "Anytown",
+        "zipCode", "12345"
+    ],
+    "skills", ["JavaScript", "Python", "Razen"]
+];
+
+show "Employee: " + employee;
+show "Employee name: " + employee["name"];
+show "Employee city: " + employee["address"]["city"];
+show "First skill: " + employee["skills"][0];
+
+# Complex nested structure
+show "8. Complex Nested Structure:";
+put company = [
+    "name", "Tech Innovations",
+    "founded", 2010,
+    "locations", [
+        [
+            "city", "San Francisco",
+            "employees", 120
+        ],
+        [
+            "city", "New York",
+            "employees", 85
+        ]
+    ],
+    "departments", [
+        [
+            "name", "Engineering",
+            "head", [
+                "name", "Alice Johnson",
+                "hireDate", "2012-03-15"
+            ]
+        ],
+        [
+            "name", "Marketing",
+            "head", [
+                "name", "Bob Smith",
+                "hireDate", "2014-07-22"
+            ]
+        ]
+    ]
+];
+
+show "Company: " + company;
+show "Company name: " + company["name"];
+show "First location city: " + company["locations"][0]["city"];
+show "Engineering department head: " + company["departments"][0]["head"]["name"];
+
+# Array manipulation
+show "9. Array Manipulation:";
+put fruits = ["apple", "banana", "cherry"];
+show "Original fruits: " + fruits;
+
+# Add element
+fruits[3] = "orange";
+show "After adding orange: " + fruits;
+
+# Replace element
+fruits[1] = "blueberry";
+show "After replacing banana with blueberry: " + fruits;
+
+# Working with array length
+put fruits_length = 4;  # Manually tracking length
+show "Number of fruits: " + fruits_length;
+
+# Iterating through an array
+show "10. Iterating Through an Array:";
+let i = 0;
+while (i < fruits_length) {
+    show "Fruit " + i + ": " + fruits[i];
+    i = i + 1;
+}
+
+show "===== Nested Values and Arrays Demo Completed =====";
