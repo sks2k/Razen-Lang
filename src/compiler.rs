@@ -977,8 +977,12 @@ impl Compiler {
         
         // End of try block - clear exception handler and jump to finally
         self.emit(IR::ClearTryCatch); // Clear the try-catch handler
-        self.emit(IR::Jump(self.ir.len() + 1)); // Jump to finally block
-        self.emit_label(&catch_start_label); // Catch handler starts here
+        
+        // Store the position for the jump to finally
+        let jump_to_finally_pos = self.emit(IR::Jump(0)); // Placeholder, will be updated
+        
+        // Catch handler starts here
+        self.emit_label(&catch_start_label);
         
         // Compile the catch block if it exists
         if let Some(catch) = catch_block {
@@ -1001,7 +1005,12 @@ impl Compiler {
             self.emit(IR::Pop);
         }
         
+        // Store the position for the jump to finally after catch
+        let jump_after_catch_pos = self.emit(IR::Jump(0)); // Placeholder, will be updated
+        self.emit_label(&catch_end_label);
+        
         // Finally block - always executed
+        let finally_pos = self.ir.len();
         self.emit_label(&finally_start_label);
         if let Some(finally) = finally_block {
             self.enter_scope();
@@ -1011,6 +1020,10 @@ impl Compiler {
             self.leave_scope();
         }
         self.emit_label(&finally_end_label);
+        
+        // Update the jump positions now that we know where the finally block is
+        self.replace_instruction(jump_to_finally_pos, IR::Jump(finally_pos));
+        self.replace_instruction(jump_after_catch_pos, IR::Jump(finally_pos));
     }
     
     fn compile_throw_statement(&mut self, value: Expression) {
@@ -2082,6 +2095,35 @@ impl Compiler {
                                         if !self.clean_output {
                                             println!("[Interpreter] Array index out of bounds: {} >= {}", idx, elements.len());
                                         }
+                                        
+                                        // Throw an exception for array index out of bounds
+                                        let error_msg = format!("Array index out of bounds: {} >= {}", idx, elements.len());
+                                        
+                                        // Manually throw the exception
+                                        if let Some((_handler_label, handler_pc)) = exception_handlers.last() {
+                                            if !self.clean_output {
+                                                println!("[Interpreter] Throwing array index exception to handler at {}", handler_pc);
+                                            }
+                                            
+                                            // Clone the handler_pc to avoid borrowing issues
+                                            let handler_pc_clone = *handler_pc;
+                                            
+                                            // Pop any exception handlers that were set up in the try block
+                                            exception_handlers.pop();
+                                            
+                                            // Push the error message to the stack for the catch block
+                                            stack.push(error_msg);
+                                            
+                                            // Set the in_exception_handling flag
+                                            in_exception_handling = true;
+                                            
+                                            // Jump to the handler
+                                            pc = handler_pc_clone;
+                                            continue; // Skip the pc increment at the end of the loop
+                                        } else {
+                                            // No handler, propagate the exception
+                                            return Err(format!("Unhandled exception: {}", error_msg));
+                                        }
                                     }
                                 } else {
                                     // Try string key access for key-value pairs in arrays
@@ -2246,10 +2288,10 @@ impl Compiler {
                     }
                     
                     // Call the library function
-                    let result = match crate::library::call_library(&lib_name.to_lowercase(), function_name, args) {
+                    match crate::library::call_library(&lib_name.to_lowercase(), function_name, args) {
                         Ok(value) => {
                             // Convert the result back to a string for the stack
-                            match value {
+                            let result = match value {
                                 crate::value::Value::Int(i) => i.to_string(),
                                 crate::value::Value::Float(f) => f.to_string(),
                                 crate::value::Value::Bool(b) => b.to_string(),
@@ -2267,18 +2309,46 @@ impl Compiler {
                                     format!("{{{}}}", entries.join(", "))
                                 },
                                 crate::value::Value::Null => "null".to_string(),
-                            }
+                            };
+                            // Push the result onto the stack
+                            stack.push(result);
                         },
                         Err(e) => {
                             if !self.clean_output {
                                 println!("Error calling library function: {}", e);
                             }
-                            "undefined".to_string()
+                            
+                            // Instead of returning "undefined", throw an exception that can be caught
+                            // Push the error message onto the stack
+                            stack.push(e.to_string());
+                            
+                            // If we have an exception handler, throw the exception
+                            if !exception_handlers.is_empty() {
+                                // Get the last exception handler
+                                if let Some((_handler_label, handler_pc)) = exception_handlers.last() {
+                                    if !self.clean_output {
+                                        println!("[Interpreter] Throwing library exception to handler at {}", handler_pc);
+                                    }
+                                    
+                                    // Clone the handler_pc to avoid borrowing issues
+                                    let handler_pc_clone = *handler_pc;
+                                    
+                                    // Pop any exception handlers that were set up in the try block
+                                    exception_handlers.pop();
+                                    
+                                    // Set the in_exception_handling flag
+                                    in_exception_handling = true;
+                                    
+                                    // Jump to the handler
+                                    pc = handler_pc_clone;
+                                    continue; // Skip the pc increment at the end of the loop
+                                }
+                            } else {
+                                // No handler, propagate the exception
+                                return Err(format!("Unhandled exception: {}", e));
+                            }
                         }
                     };
-                    
-                    // Push the result onto the stack
-                    stack.push(result);
                 },
                 IR::CreateArray(count) => {
                     // Create array implementation
@@ -2475,14 +2545,22 @@ impl Compiler {
                                 println!("[Interpreter] Jumping to exception handler at {}", handler_pc);
                             }
                             
+                            // Clone the handler_pc to avoid borrowing issues
+                            let handler_pc_clone = *handler_pc;
+                            
+                            // Pop any exception handlers that were set up in the try block
+                            // to prevent them from catching exceptions in the catch block
+                            exception_handlers.pop();
+                            
                             // Push the exception message back on the stack for the catch block
-                            stack.push(error_message.clone());
+                            // Make sure we're pushing the actual error message, not just "true"
+                            stack.push(error_message);
                             
                             // Set the in_exception_handling flag
                             in_exception_handling = true;
                             
                             // Jump to the handler
-                            pc = *handler_pc;
+                            pc = handler_pc_clone;
                             continue; // Skip the pc increment at the end of the loop
                         } else {
                             // No handler, propagate the exception
