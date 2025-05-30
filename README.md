@@ -1,4 +1,4 @@
-# Razen Programming Language beta v0.1.691 (Installer and API Updates)
+# Razen Programming Language beta v0.1.695 - (Language Streamlining & Error Handling Enhancements)
 
 ## Overview
 Razen is a modern, intuitive programming language designed for clarity, performance, and ease of use. With a clean syntax inspired by Python and strong type safety, Razen offers an excellent balance between development speed and runtime performance.
@@ -22,26 +22,26 @@ Developed by Prathmesh Barot, Basai Corporation.
 
 ## Changelog
 
-Razen is under active development with regular updates. The latest version is **beta v0.1.69** which includes significant API Library enhancements.
+Razen is under active development with regular updates. The latest version is **beta v0.1.695** which includes language streamlining and error handling enhancements.
 
-### Latest Release: beta v0.1.69 - API Library Enhancements
+### Latest Release: beta v0.1.695 - Language Streamlining & Error Handling Enhancements
 
-This release focuses on improving the Razen API library with better HTTP request handling, response processing, and data extraction capabilities. View the full changelog in your preferred format:
+This release focuses on streamlining the Razen language by removing redundant tokens and enhancing the error handling mechanism. View the full changelog in your preferred format:
 
-- [Markdown Version (beta_v0.1.69_api.md)](changelogs/beta_v0.1.69_api.md) - Best for GitHub viewing
-- [MDX Version (beta_v0.1.69_api.mdx)](changelogs/beta_v0.1.69_api.mdx) - Enhanced with interactive components
-- [AsciiDoc Version (beta_v0.1.69_api.adoc)](changelogs/beta_v0.1.69_api.adoc) - Rich formatting with advanced features
+- [Markdown Version (beta_v0.1.695.md)](changelogs/beta_v0.1.695.md) - Best for GitHub viewing
+- [MDX Version (beta_v0.1.695.mdx)](changelogs/beta_v0.1.695.mdx) - Enhanced with interactive components
+- [AsciiDoc Version (beta_v0.1.695.adoc)](changelogs/beta_v0.1.695.adoc) - Rich formatting with advanced features
 
-### Key Improvements in v0.1.69
+### Key Improvements in v0.1.695
 
-- Fixed URL decoding for proper handling of encoded strings
-- Enhanced form data handling for HTTP requests
-- Improved API configuration and execution
-- Better response processing with JSON parsing
-- More flexible API call options
-- Comprehensive error handling
+- Enhanced try-catch-finally mechanism for robust exception handling
+- Improved error reporting with detailed line and column information
+- Removed redundant string-related tokens (Text, Concat, Slice, Len)
+- Removed redundant date/time tokens in favor of TimeLib integration
+- Optimized library loading for commonly used libraries
+- Streamlined parser with simplified token registration
 
-For older versions and detailed release notes, please visit the [changelogs](changelogs/) directory.
+For a complete history of all version changelogs, please visit the [changelogs.mdx](changelogs/changelogs.mdx) file or browse the [changelogs](changelogs/) directory for individual version details.
 
 ## Installation
 
@@ -211,7 +211,7 @@ This creates a new file `hello.rzn` with a Hello World template:
 # Powered by Razen Language
 
 # Your code goes here
-let message = "Hello, World!";
+take message = "Hello, World!";
 show message;
 
 # Read user input
@@ -245,12 +245,6 @@ prod product = 5 * 10;  # Product calculation
 div quotient = 20 / 4;  # Division calculation
 mod remainder = 10 % 3;  # Modulus calculation
 
-# String operations with specialized tokens
-text greeting = "Welcome to Razen";  # String data
-concat fullName = "John" + " " + "Doe";  # String concatenation
-slice firstName = "John Doe";  # Will use with substring operations
-
-# String operations
 take message = "Hello, " + name + "!";
 show message;
 
@@ -423,15 +417,6 @@ Razen supports different variable types with type enforcement:
   mod remainder = 10 % 3;  # Modulus calculation
   ```
 
-### String Variables
-
-- **text**, **concat**, **slice**: For string operations
-  ```razen
-  text greeting = "Welcome to Razen";  # String data
-  concat fullName = "John" + " " + "Doe";  # String concatenation
-  slice firstName = "John Doe";  # Will use with substring operations
-  ```
-
 ### Collection Variables
 
 - **list**, **arr**, **append**, **remove**: For array operations
@@ -449,16 +434,6 @@ Razen supports different variable types with type enforcement:
   map userInfo = ["name", "John", "age", 30];  # Key-value storage using arrays
   key userKeys = ["name", "age"];  # Dictionary keys
   value userValues = ["John", 30];  # Dictionary values
-  ```
-
-### Date & Time Variables
-
-- **current**, **now**, **year**, **month**, **day**, **hour**, **minute**, **second**: For date/time operations
-  ```razen
-  current currentTime = TimeLib[now]();  # Current date/time
-  year currentYear = TimeLib[year]();  # Year component
-  month currentMonth = TimeLib[month]();  # Month component
-  day currentDay = TimeLib[day]();  # Day component
   ```
 
 ### User-Defined Variables
@@ -480,19 +455,19 @@ Razen supports class-based object-oriented programming with a clean and intuitiv
 class Person {
     # Constructor (implicitly called when creating new instances)
     fun init(name, age) {
-        this.name = name;
-        this.age = age;
+        this[name] = name;
+        this[age] = age;
     }
 
     # Method to display information
     fun display() {
-        show "Name: " + this.name + ", Age: " + this.age;
+        show "Name: " + this[name] + ", Age: " + this[age];
     }
 
     # Method to have a birthday
     fun haveBirthday() {
-        this.age = this.age + 1;
-        show this.name + " is now " + this.age + " years old!";
+        this[age] = this[age] + 1;
+        show this[name] + " is now " + this[age] + " years old!";
     }
 }
 
@@ -511,13 +486,13 @@ Razen supports class inheritance using the `extends` keyword:
 ```razen
 class Employee extends Person {
     fun init(name, age, position) {
-        super.init(name, age);
-        this.position = position;
+        super[init](name, age);
+        this[position] = position;
     }
 
     fun display() {
-        super.display();
-        show "Position: " + this.position;
+        super[display]();
+        show "Position: " + this[position];
     }
 }
 ```
@@ -546,25 +521,3 @@ For questions, support, or feedback about Razen, please contact:
 - GitHub: [https://github.com/BasaiCorp/razen-lang](https://github.com/BasaiCorp/razen-lang)
 
 **Official website coming soon!**
-
-## Changelog
-
-### beta v0.1.685 - Windows Installation Fix
-- **Fixed Critical Windows Build Failures**: Resolved linking errors due to missing Visual C++ build tools
-- **Smart Toolchain Detection**: Automatically detects and selects appropriate Rust toolchain (MSVC vs GNU)
-- **Automatic Fallback System**: Switches to GNU toolchain if MSVC toolchain fails
-- **Enhanced Build Verification**: Pre-build tests ensure toolchain compatibility before compilation
-- **Improved Error Handling**: Comprehensive troubleshooting guidance for Windows build issues
-- **MinGW-w64 Auto-Installation**: Attempts automatic installation of required build tools
-- **Better User Feedback**: Clear indication of active toolchain and build status
-- **Cross-Platform Safety**: Windows improvements have zero impact on Linux/macOS functionality
-- **Extensive Testing**: Validated across multiple Windows configurations and environments
-
-### beta v0.1.675
-- Added universal installer supporting Linux, macOS, and Windows
-- Improved update system with version comparison
-- Added direct uninstall option via installer
-- Enhanced IDE extension support
-- Fixed permissions issues with cargo build
-- Updated library files with new features
-- Improved error handling and user feedback

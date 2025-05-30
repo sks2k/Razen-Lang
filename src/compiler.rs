@@ -1986,7 +1986,7 @@ impl Compiler {
                 IR::GetIndex => {
                     if let (Some(index), Some(container)) = (stack.pop(), stack.pop()) {
                         if !self.clean_output {
-                            println!("[Interpreter] GetIndex: {} from {}", index, container);
+                            println!("[Compiler] GetIndex: {} from {}", index, container);
                         }
                         
                         let mut found = false; // Track if we've found the value
@@ -2002,7 +2002,7 @@ impl Compiler {
                                 let value = &after_key[0..end_pos];
                                 
                                 if !self.clean_output {
-                                    println!("[Interpreter] Found enum value: {} = {}", index, value);
+                                    println!("[Compiler] Found enum value: {} = {}", index, value);
                                 }
                                 
                                 // Push the value to the stack and mark as found
@@ -2034,7 +2034,7 @@ impl Compiler {
                         if !found {
                             if let Some(enum_value) = variables.get(&index) {
                                 if !self.clean_output {
-                                    println!("[Interpreter] Found enum value in variables: {} = {}", index, enum_value);
+                                    println!("[Compiler] Found enum value in variables: {} = {}", index, enum_value);
                                 }
                                 stack.push(enum_value.clone());
                                 found = true;
@@ -2093,7 +2093,7 @@ impl Compiler {
                                     } else {
                                         // Invalid array index
                                         if !self.clean_output {
-                                            println!("[Interpreter] Array index out of bounds: {} >= {}", idx, elements.len());
+                                            println!("[Compiler] Array index out of bounds: {} >= {}", idx, elements.len());
                                         }
                                         
                                         // Throw an exception for array index out of bounds
@@ -2102,7 +2102,7 @@ impl Compiler {
                                         // Manually throw the exception
                                         if let Some((_handler_label, handler_pc)) = exception_handlers.last() {
                                             if !self.clean_output {
-                                                println!("[Interpreter] Throwing array index exception to handler at {}", handler_pc);
+                                                println!("[Compiler] Throwing array index exception to handler at {}", handler_pc);
                                             }
                                             
                                             // Clone the handler_pc to avoid borrowing issues
@@ -2151,7 +2151,7 @@ impl Compiler {
                                     }
                                     
                                     if !found && !self.clean_output {
-                                        println!("[Interpreter] Key '{}' not found in array", index);
+                                        println!("[Compiler] Key '{}' not found in array", index);
                                     }
                                 }
                             }
@@ -2327,7 +2327,7 @@ impl Compiler {
                                 // Get the last exception handler
                                 if let Some((_handler_label, handler_pc)) = exception_handlers.last() {
                                     if !self.clean_output {
-                                        println!("[Interpreter] Throwing library exception to handler at {}", handler_pc);
+                                        println!("[Compiler] Throwing library exception to handler at {}", handler_pc);
                                     }
                                     
                                     // Clone the handler_pc to avoid borrowing issues
@@ -2379,7 +2379,7 @@ impl Compiler {
                     // 3. Container (array or map)
                     if let (Some(value), Some(index), Some(mut container)) = (stack.pop(), stack.pop(), stack.pop()) {
                         if !self.clean_output {
-                            println!("[Interpreter] SetIndex: {} at {} in {}", value, index, container);
+                            println!("[Compiler] SetIndex: {} at {} in {}", value, index, container);
                         }
                         
                         // Handle different container types
@@ -2466,7 +2466,7 @@ impl Compiler {
                                 stack.push(new_container);
                                 
                                 if !self.clean_output {
-                                    println!("[Interpreter] Converted array to object for property '{}'", index);
+                                    println!("[Compiler] Converted array to object for property '{}'", index);
                                 }
                             }
                         } else {
@@ -2479,13 +2479,13 @@ impl Compiler {
                             stack.push(new_container);
                             
                             if !self.clean_output {
-                                println!("[Interpreter] Created new object with property '{}'", index);
+                                println!("[Compiler] Created new object with property '{}'", index);
                             }
                         }
                     } else {
                         // Not enough values on the stack
                         if !self.clean_output {
-                            println!("[Interpreter] SetIndex: Not enough values on stack");
+                            println!("[Compiler] SetIndex: Not enough values on stack");
                         }
                         stack.push("undefined".to_string());
                     }
@@ -2512,11 +2512,11 @@ impl Compiler {
                             // Push the handler onto the stack of exception handlers
                             exception_handlers.push((handler_label, handler_pc));
                             if !self.clean_output {
-                                println!("[Interpreter] Setup try-catch with handler at {}", handler_pc);
+                                println!("[Compiler] Setup try-catch with handler at {}", handler_pc);
                             }
                         } else {
                             if !self.clean_output {
-                                println!("[Interpreter] Error: Could not find handler label: {}", handler_label);
+                                println!("[Compiler] Error: Could not find handler label: {}", handler_label);
                             }
                         }
                     }
@@ -2525,7 +2525,7 @@ impl Compiler {
                     // Clear the most recent exception handler
                     if exception_handlers.pop().is_some() {
                         if !self.clean_output {
-                            println!("[Interpreter] Cleared try-catch handler");
+                            println!("[Compiler] Cleared try-catch handler");
                         }
                     }
                 },
@@ -2533,7 +2533,7 @@ impl Compiler {
                     // Throw an exception
                     if let Some(error_message) = stack.pop() {
                         if !self.clean_output {
-                            println!("[Interpreter] Throwing exception: {}", error_message);
+                            println!("[Compiler] Throwing exception: {}", error_message);
                         }
                         
                         // Set the current exception (clone to avoid move issues)
@@ -2542,7 +2542,7 @@ impl Compiler {
                         // If we have an exception handler, jump to it
                         if let Some((_handler_label, handler_pc)) = exception_handlers.last() {
                             if !self.clean_output {
-                                println!("[Interpreter] Jumping to exception handler at {}", handler_pc);
+                                println!("[Compiler] Jumping to exception handler at {}", handler_pc);
                             }
                             
                             // Clone the handler_pc to avoid borrowing issues

@@ -1,0 +1,123 @@
+# Razen v0.1.695 - Language Streamlining & Error Handling Enhancements
+
+**Release Date**: May 30, 2025  
+**Status**: Beta  
+
+## What's New
+
+### Enhanced Error Handling
+- **Improved Try-Catch-Finally Mechanism**: More robust exception handling with proper cleanup
+- **Better Error Reporting**: More descriptive error messages with line and column information
+- **Nested Exception Support**: Properly handle exceptions within exception handlers
+- **Resource Management**: Guaranteed resource cleanup with finally blocks
+
+### Library System Improvements
+- **Optimized Library Loading**: Faster import times for commonly used libraries
+- **Enhanced StrLib Functions**: More powerful string manipulation capabilities
+- **TimeLib Integration**: Comprehensive date and time handling through the TimeLib interface
+
+## Removed Features
+
+### String-Related Tokens
+Based on community feedback and code reviews on Reddit, we've removed redundant tokens to make the language more streamlined and efficient:
+
+- **Removed `Text` Token**: String data storage is now handled by built-in operators and StrLib
+- **Removed `Concat` Token**: String joining is now handled through the `+` operator and StrLib[join]
+- **Removed `Slice` Token**: Substring extraction is now handled through StrLib[substring]
+- **Removed `Len` Token**: String length is now accessed through StrLib[length]
+
+### Date & Time Tokens
+- **Removed `Current` Token**: Current date/time is now handled through TimeLib[now]
+- **Removed `Now` Token**: Current timestamp is now handled through TimeLib[timestamp]
+- **Removed `Year` Token**: Year extraction is now handled through TimeLib[year]
+- **Removed `Month` Token**: Month extraction is now handled through TimeLib[month]
+- **Removed `Day` Token**: Day extraction is now handled through TimeLib[day]
+- **Removed `Hour` Token**: Hour extraction is now handled through TimeLib[hour]
+- **Removed `Minute` Token**: Minute extraction is now handled through TimeLib[minute]
+- **Removed `Second` Token**: Second extraction is now handled through TimeLib[second]
+
+### Reasons for Removal
+- **Community Feedback**: Users found these tokens redundant and confusing
+- **Library Integration**: TimeLib and StrLib provide more comprehensive functionality
+- **Simplification**: Reduces cognitive load by using consistent operators
+- **Performance**: Removes unnecessary token parsing overhead
+- **Maintainability**: Simplifies the codebase and reduces potential bugs
+
+## Technical Improvements
+
+### Parser Updates
+- **Simplified Token Registration**: Removed redundant token registrations
+- **Streamlined Type Checking**: Removed specialized type checking for date/time values
+- **Enhanced Error Messages**: More consistent error reporting for variable declarations
+
+### Code Cleanup
+- **Removed Redundant Display Formatting**: Simplified the `fmt::Display` implementation
+- **Removed Redundant Token Mappings**: Simplified the `lookup_ident` function
+- **Added Clarifying Comments**: Added comments to indicate that operations are now handled by libraries
+
+## Documentation Updates
+
+### Updated Examples
+- All examples using the removed tokens have been updated to use the new approach
+- New examples demonstrate the preferred way to handle string and date/time operations
+
+### Migration Guide
+If you were using the removed tokens, here's how to migrate:
+
+#### String Operations
+```razen
+# Import required libraries
+lib strlib;
+
+# Old way
+text greeting = "Welcome to Razen";
+concat fullName = "John" + " " + "Doe";
+slice firstName = "John Doe"[0:4];
+len nameLength = "John Doe".length;
+
+# New way
+take greeting = "Welcome to Razen";
+take fullName = "John Doe";
+take firstName = StrLib[substring]("John Doe", 0, 4);
+take nameLength = StrLib[length]("John Doe");
+```
+
+#### Date & Time Operations
+```razen
+# Import required libraries
+lib timelib;
+
+# Old way
+current currentTime = now();
+year currentYear = currentTime.year;
+month currentMonth = currentTime.month;
+
+# New way
+let currentTime = TimeLib[now]();
+let currentYear = TimeLib[year](currentTime);
+let currentMonth = TimeLib[month](currentTime);
+```
+
+## Enahced error handeling 
+```razen
+# Enhanced try-catch-finally example
+try {
+    # Code that might throw an exception
+    let numbers = [1, 2, 3];
+    let value = numbers[5]; # This will throw an exception
+} catch (error) {
+    # Handle the exception
+    show "Error occurred: " + error;
+} finally {
+    # This block always executes
+    show "Cleanup operations complete";
+}
+```
+
+## Future Plans
+- Further streamlining of redundant tokens
+- Enhanced library support for common operations
+- Performance optimizations for string and date/time operations
+
+## Acknowledgements
+Thanks to the Razen community for their valuable feedback and suggestions that led to these improvements.

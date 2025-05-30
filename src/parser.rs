@@ -79,15 +79,7 @@ impl Parser {
         parser.register_prefix(TokenType::Key, Parser::parse_identifier);
         parser.register_prefix(TokenType::Value, Parser::parse_identifier);
         
-        // Register date/time keywords as identifier parsers
-        parser.register_prefix(TokenType::Current, Parser::parse_identifier);
-        parser.register_prefix(TokenType::Now, Parser::parse_identifier);
-        parser.register_prefix(TokenType::Year, Parser::parse_identifier);
-        parser.register_prefix(TokenType::Month, Parser::parse_identifier);
-        parser.register_prefix(TokenType::Day, Parser::parse_identifier);
-        parser.register_prefix(TokenType::Hour, Parser::parse_identifier);
-        parser.register_prefix(TokenType::Minute, Parser::parse_identifier);
-        parser.register_prefix(TokenType::Second, Parser::parse_identifier);
+        // Date and time operations are handled with libraries
         
         // Register user-defined keywords as identifier parsers
         parser.register_prefix(TokenType::Store, Parser::parse_identifier);
@@ -288,8 +280,6 @@ impl Parser {
             TokenType::Sum | TokenType::Diff | TokenType::Prod | TokenType::Div | TokenType::Mod |
             TokenType::List | TokenType::Arr | TokenType::Append | TokenType::Remove |
             TokenType::Map | TokenType::Key | TokenType::Value |
-            TokenType::Current | TokenType::Now | TokenType::Year | TokenType::Month | 
-            TokenType::Day | TokenType::Hour | TokenType::Minute | TokenType::Second |
             TokenType::Store | TokenType::Box | TokenType::Ref => self.parse_variable_declaration(),
             
             // 17 - Compiler Construction Keywords
@@ -570,41 +560,8 @@ impl Parser {
                 }
             },
             
-            // 7. Date & Time Variables
-            TokenType::Current | TokenType::Now | TokenType::Year | TokenType::Month | 
-            TokenType::Day | TokenType::Hour | TokenType::Minute | TokenType::Second => {
-                // Date/time variables should be used with appropriate values
-                // These tokens are aliases for 'let' when used with time values (they're numbers)
-                match value {
-                    Expression::NumberLiteral(_) => {}, // Allow numbers for time components
-                    Expression::StringLiteral(_) => {}, // Allow strings for date formats
-                    Expression::Identifier(_) => {}, // Allow identifiers (runtime check needed)
-                    Expression::CallExpression { .. } => {}, // Allow function calls (runtime check needed)
-                    Expression::LibraryCall { .. } => {}, // Allow library function calls
-                    Expression::InfixExpression { .. } => {}, // Allow expressions that might result in numbers or strings
-                    Expression::PrefixExpression { .. } => {}, // Allow expressions that might result in numbers
-                    _ => {
-                        // Only show warning for obvious mismatches
-                        if let Expression::BooleanLiteral(_) = value {
-                            self.errors.push(format!(
-                                "Type mismatch: '{}' should be used for date/time values at line {}, column {}",
-                                var_type, token_line, token_column
-                            ));
-                        } else if let Expression::ArrayLiteral { .. } = value {
-                            self.errors.push(format!(
-                                "Type mismatch: '{}' should be used for date/time values at line {}, column {}",
-                                var_type, token_line, token_column
-                            ));
-                        } else if let Expression::MapLiteral { .. } = value {
-                            self.errors.push(format!(
-                                "Type mismatch: '{}' should be used for date/time values at line {}, column {}",
-                                var_type, token_line, token_column
-                            ));
-                        }
-                        // Allow other types to pass through for flexibility
-                    }
-                }
-            },
+            // Date & Time operations are handled with libraries
+            
             
             // 8. User-Defined Variables
             TokenType::Store | TokenType::Box | TokenType::Ref => {

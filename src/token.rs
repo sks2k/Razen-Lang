@@ -28,15 +28,7 @@ pub enum TokenType {
     Key,    // Dictionary keys
     Value,  // Dictionary values
     
-    // Date & Time Variables
-    Current, // Current date/time
-    Now,     // Current timestamp
-    Year,    // Year component
-    Month,   // Month component
-    Day,     // Day component
-    Hour,    // Hour component
-    Minute,  // Minute component
-    Second,  // Second component
+    // Date & Time operations are handled with libraries
     
     // User-Defined Variables
     Store,  // Persistent storage
@@ -271,15 +263,7 @@ impl fmt::Display for TokenType {
             TokenType::Key => write!(f, "KEY"),
             TokenType::Value => write!(f, "VALUE"),
             
-            // Date & Time Variables
-            TokenType::Current => write!(f, "CURRENT"),
-            TokenType::Now => write!(f, "NOW"),
-            TokenType::Year => write!(f, "YEAR"),
-            TokenType::Month => write!(f, "MONTH"),
-            TokenType::Day => write!(f, "DAY"),
-            TokenType::Hour => write!(f, "HOUR"),
-            TokenType::Minute => write!(f, "MINUTE"),
-            TokenType::Second => write!(f, "SECOND"),
+            // Date & Time operations are handled with libraries
             
             // User-Defined Variables
             TokenType::Store => write!(f, "STORE"),
@@ -541,15 +525,7 @@ pub fn lookup_identifier(identifier: &str) -> TokenType {
         "key" => TokenType::Key,
         "value" => TokenType::Value,
         
-        // Date & Time Variables
-        "current" => TokenType::Current,
-        "now" => TokenType::Now,
-        "year" => TokenType::Year,
-        "month" => TokenType::Month,
-        "day" => TokenType::Day,
-        "hour" => TokenType::Hour,
-        "minute" => TokenType::Minute,
-        "second" => TokenType::Second,
+        // Date & Time operations are handled with libraries
         
         // User-Defined Variables
         "store" => TokenType::Store,
