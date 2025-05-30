@@ -192,9 +192,11 @@ fun recursiveFunction(depth) {
     
     if (depth <= 0) {
         throw "Reached maximum recursion depth";
+    } else {
+        # Add a proper return to avoid infinite recursion
+        recursiveFunction(depth - 1);
+        return "Completed recursion at depth " + depth;
     }
-    
-    recursiveFunction(depth - 1);
 }
 
 # Example 10: Try without catch (should error)

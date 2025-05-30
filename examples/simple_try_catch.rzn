@@ -1,0 +1,51 @@
+# Simple try-catch example without division
+show "===== Simple Try-Catch Test =====";
+
+# Example 1: Basic try-catch with string exception
+show "\n1. Basic Error Handling - String Exception";
+try {
+    show "About to throw a string exception";
+    throw "This is a test exception";
+    show "This line should not execute";
+} catch (error) {
+    show "Caught error: " + error;
+} finally {
+    show "Finally block executed (should always run)";
+}
+
+# Example 2: Array index out of bounds
+show "\n2. Array Index Out of Bounds";
+try {
+    put numbers = [1, 2, 3];
+    show "Array: " + numbers;
+    show "Accessing invalid index";
+    put valueofindex = numbers[5]; # This should throw an exception
+    show "This line should not execute";
+} catch (error) {
+    show "Caught error: " + error;
+} finally {
+    show "Finally block executed (should always run)";
+}
+
+# Example 3: Nested try-catch
+show "\n3. Nested Try-Catch Blocks";
+try {
+    show "Outer try block";
+    try {
+        show "Inner try block";
+        throw "Inner exception thrown";
+        show "This line should not execute";
+    } catch (innerError) {
+        show "Inner catch block caught: " + innerError;
+        throw "Re-thrown from inner catch: " + innerError;
+    } finally {
+        show "Inner finally block (should always execute)";
+    }
+    show "This line should not execute";
+} catch (outerError) {
+    show "Outer catch block caught: " + outerError;
+} finally {
+    show "Outer finally block (should always execute)";
+}
+
+show "\nAll tests completed successfully!";

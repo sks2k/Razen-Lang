@@ -15,11 +15,7 @@ pub enum TokenType {
     Div,    // Division
     Mod,    // Modulus/Remainder
     
-    // String Variables
-    Text,   // String data storage
-    Concat, // String joining
-    Slice,  // Substring extraction
-    Len,    // String length
+    // String operations are handled with built-in operators
     
     // List & Array Variables
     List,   // Dynamic arrays
@@ -262,10 +258,7 @@ impl fmt::Display for TokenType {
             TokenType::Mod => write!(f, "MOD"),
             
             // String Variables
-            TokenType::Text => write!(f, "TEXT"),
-            TokenType::Concat => write!(f, "CONCAT"),
-            TokenType::Slice => write!(f, "SLICE"),
-            TokenType::Len => write!(f, "LEN"),
+            // String-related tokens removed
             
             // List & Array Variables
             TokenType::List => write!(f, "LIST"),
@@ -535,10 +528,7 @@ pub fn lookup_identifier(identifier: &str) -> TokenType {
         "mod" => TokenType::Mod,
         
         // String Variables
-        "text" => TokenType::Text,
-        "concat" => TokenType::Concat,
-        "slice" => TokenType::Slice,
-        "len" => TokenType::Len,
+        // String-related tokens removed
         
         // List & Array Variables
         "list" => TokenType::List,

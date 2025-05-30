@@ -66,11 +66,7 @@ impl Parser {
         parser.register_prefix(TokenType::Div, Parser::parse_identifier);
         parser.register_prefix(TokenType::Mod, Parser::parse_identifier);
         
-        // Register string operation keywords as identifier parsers
-        parser.register_prefix(TokenType::Text, Parser::parse_identifier);
-        parser.register_prefix(TokenType::Concat, Parser::parse_identifier);
-        parser.register_prefix(TokenType::Slice, Parser::parse_identifier);
-        parser.register_prefix(TokenType::Len, Parser::parse_identifier);
+        // String operations are handled with built-in operators
         
         // Register list and array keywords as identifier parsers
         parser.register_prefix(TokenType::List, Parser::parse_identifier);
@@ -290,7 +286,6 @@ impl Parser {
             // Variable declaration keywords
             TokenType::Let | TokenType::Take | TokenType::Hold | TokenType::Put | 
             TokenType::Sum | TokenType::Diff | TokenType::Prod | TokenType::Div | TokenType::Mod |
-            TokenType::Text | TokenType::Concat | TokenType::Slice | TokenType::Len |
             TokenType::List | TokenType::Arr | TokenType::Append | TokenType::Remove |
             TokenType::Map | TokenType::Key | TokenType::Value |
             TokenType::Current | TokenType::Now | TokenType::Year | TokenType::Month | 
@@ -505,33 +500,9 @@ impl Parser {
                 }
             },
             
-            // 4. String Variables
-            TokenType::Text | TokenType::Concat | TokenType::Slice | TokenType::Len => {
-                // String variables should be used with string values
-                // These tokens are aliases for 'take' and should behave the same way
-                match value {
-                    Expression::StringLiteral(_) => {},
-                    Expression::InfixExpression { .. } => {}, // Allow expressions that might result in strings
-                    Expression::Identifier(_) => {}, // Allow identifiers (runtime check needed)
-                    Expression::CallExpression { .. } => {}, // Allow function calls (runtime check needed)
-                    Expression::LibraryCall { .. } => {}, // Allow library function calls
-                    _ => {
-                        // Only show warning for obvious mismatches
-                        if let Expression::NumberLiteral(_) = value {
-                            self.errors.push(format!(
-                                "Type mismatch: '{}' should be used for string values at line {}, column {}",
-                                var_type, token_line, token_column
-                            ));
-                        } else if let Expression::BooleanLiteral(_) = value {
-                            self.errors.push(format!(
-                                "Type mismatch: '{}' should be used for string values at line {}, column {}",
-                                var_type, token_line, token_column
-                            ));
-                        }
-                        // Allow other types to pass through for flexibility
-                    }
-                }
-            },
+            // String operations are handled with built-in operators
+            // Removed string-specific token handling
+            
             
             // 5. List & Array Variables
             TokenType::List | TokenType::Arr | TokenType::Append | TokenType::Remove => {
