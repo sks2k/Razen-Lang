@@ -14,9 +14,9 @@ show "===== Mixed Library Test =====";
 show "Random number between 1-100: " + Random.int(1, 100);
 
 # Test memory library
-let value = 42;
+num value = 42;
 # Uncomment the line below to test memory library
-# let ptr = Memory.addressof(value);
+# num ptr = Memory.addressof(value);
 # show "Address of value: " + ptr;
 
-show "===== Test Completed =====";
+show "===== Test Compnumed =====";

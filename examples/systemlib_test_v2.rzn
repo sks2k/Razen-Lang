@@ -7,55 +7,55 @@ lib systemlib;
 show "===== SYSTEM LIBRARY TEST =====";
 
 # Test basic system functions
-let pid = SystemLib[getpid]();
+num pid = SystemLib[getpid]();
 show "Process ID: " + pid;
 
-let cwd = SystemLib[getcwd]();
+num cwd = SystemLib[getcwd]();
 show "Current working directory: " + cwd;
 
-let current_time = SystemLib[current_time]();
+num current_time = SystemLib[current_time]();
 show "Current time: " + current_time;
 
-let system_name = SystemLib[system_name]();
+num system_name = SystemLib[system_name]();
 show "System name: " + system_name;
 
 # Test environment variables
-let path = SystemLib[getenv]("PATH");
+num path = SystemLib[getenv]("PATH");
 show "PATH environment variable: " + path;
 
-let set_env = SystemLib[setenv]("TEST_VAR", "test_value");
+num set_env = SystemLib[setenv]("TEST_VAR", "test_value");
 show "Setting TEST_VAR environment variable: " + set_env;
 
-let test_var = SystemLib[getenv]("TEST_VAR");
+num test_var = SystemLib[getenv]("TEST_VAR");
 show "TEST_VAR value: " + test_var;
 
 # Test command execution
-let exec_result = SystemLib[execute]("echo Hello from Razen System Library");
+num exec_result = SystemLib[execute]("echo Hello from Razen System Library");
 show "Executing 'echo Hello from Razen System Library': " + exec_result;
 
 # Test environment and arguments
-let environ = SystemLib[environ]();
+num environ = SystemLib[environ]();
 show "Environment variables: " + environ;
 
-let args = SystemLib[args]();
+num args = SystemLib[args]();
 show "Command line arguments: " + args;
 
 # Test file system operations
-let path_exists = SystemLib[path_exists](cwd);
+num path_exists = SystemLib[path_exists](cwd);
 show "Current path exists: " + path_exists;
 
-let real_path = SystemLib[realpath](".");
+num real_path = SystemLib[realpath](".");
 show "Real path of '.': " + real_path;
 
 # Test additional system functions
-let hostname = SystemLib[hostname]();
+num hostname = SystemLib[hostname]();
 show "Hostname: " + hostname;
 
-let username = SystemLib[username]();
+num username = SystemLib[username]();
 show "Username: " + username;
 
 # Test sleep function (very brief)
-let sleep_result = SystemLib[sleep](10); # Sleep for 10ms
+num sleep_result = SystemLib[sleep](10); # Sleep for 10ms
 show "Sleep result (10ms): " + sleep_result;
 
-show "===== SYSTEM LIBRARY TEST COMPLETE =====";
+show "===== SYSTEM LIBRARY TEST COMPnumE =====";

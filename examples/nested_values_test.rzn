@@ -5,14 +5,14 @@ show "===== Razen Nested Values and Array Test =====";
 
 # 1. Basic array with numeric indices (already working)
 show "1. Basic Array (numeric indices):";
-put numbers = [10, 20, 30, 40, 50];
+var numbers = [10, 20, 30, 40, 50];
 show "Array: " + numbers;
 show "numbers[0]: " + numbers[0];
 show "numbers[2]: " + numbers[2];
 
 # 2. Key-value pairs as alternating array elements (current approach)
 show "2. Key-Value Pairs (current approach):";
-put person = [
+var person = [
     "name", "John Doe",
     "age", 30,
     "skills", ["JavaScript", "Python", "Razen"]
@@ -41,7 +41,7 @@ show "person['skills'][1] should be 'Python': " + person["skills"][1];
 
 # 6. Complex nested structure
 show "6. Complex Nested Structure:";
-put company = [
+var company = [
     "name", "Tech Innovations",
     "employees", [
         [
@@ -64,4 +64,4 @@ show "First employee name: " + company["employees"][0]["name"];
 show "First employee skills: " + company["employees"][0]["skills"];
 show "First employee first skill: " + company["employees"][0]["skills"][0];
 
-show "===== Test Completed =====";
+show "===== Test Compnumed =====";

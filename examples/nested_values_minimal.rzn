@@ -5,7 +5,7 @@ show "===== Razen Nested Values Minimal Test =====";
 
 # Current working behavior: numeric indexing
 show "1. Current Working Behavior: Numeric Indexing";
-put person = [
+var person = [
     "name", "John Doe",
     "age", 30,
     "skills", ["JavaScript", "Python", "Razen"]
@@ -32,4 +32,4 @@ show "4. Desired Behavior:";
 show "We want person['name'] to return 'John Doe'";
 show "We want person['skills'][0] to return 'JavaScript'";
 
-show "===== Test Completed =====";
+show "===== Test Compnumed =====";

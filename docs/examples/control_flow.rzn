@@ -18,7 +18,7 @@ show "\nWhile loop:";
 take count = 0;
 while (count < 5) {
     show "Count: " + count;
-    let count = count + 1;
+    num count = count + 1;
 }
 
 # For loop with arrays
@@ -49,7 +49,7 @@ while (i < 10) {
         break;
     }
     show "i = " + i;
-    let i = i + 1;
+    num i = i + 1;
 }
 
 # Continue statement

@@ -11,18 +11,18 @@ show "===== MemoLibrary Test =====";
 
 # Test pointer operations
 show "1. Testing Pointer Operations:";
-let value = 42;
-let ptr = Memory[addressof](value);
+num value = 42;
+num ptr = Memory[addressof](value);
 show "Address of value: " + ptr;
 
 # Test memory allocation
 show "2. Testing Memory Allocation:";
-let size = 1024;  # bytes
-let memory_block = Memory[alloc](size);
+num size = 1024;  # bytes
+num memory_block = Memory[alloc](size);
 show "Allocated " + size + " bytes at address: " + memory_block;
 
 # Free allocated memory
 Memory[free](memory_block);
 show "Memory freed";
 
-show "===== Memry Library Test Completed =====";
+show "===== Memry Library Test Compnumed =====";

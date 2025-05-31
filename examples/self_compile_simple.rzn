@@ -61,4 +61,4 @@ show "Divide: " + MathLib[divide](20, 5);
 show "Power: " + MathLib[pow](2, 3);
 show "Square root of 16: " + MathLib[sqrt](16);
 
-show "===== TEST COMPLETE =====";
+show "===== TEST COMPnumE =====";

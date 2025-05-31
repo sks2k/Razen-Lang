@@ -6,9 +6,9 @@ type freestyle;
 # This is a freestyle Razen program where you can mix different paradigms
 
 # Variables
-take name = "Razen";
-let age = 1;
-hold isAwesome = true;
+str name = "Razen";
+num age = 1;
+bool isAwesome = true;
 
 # Display a welcome message
 show "Welcome to " + name + "!";
@@ -18,16 +18,16 @@ if (isAwesome) {
     show name + " is awesome!";
 }
 
-# Get user input
+# Get user invar
 show "What is your name?";
 read userName;
 show "Hello, " + userName + "!";
 
 # Create a simple loop
-let counter = 0;
+num counter = 0;
 while (counter < 5) {
     show "Counter: " + counter;
     counter = counter + 1;
 }
 
-show "Program completed!";
+show "Program compnumed!";

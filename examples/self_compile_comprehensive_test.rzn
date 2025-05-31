@@ -17,17 +17,17 @@ show "===== RAZEN SELF-COMPILATION COMPREHENSIVE TEST =====";
 show(yellow) "1. Testing Memory Operations:";
 
 # Test pointer operations
-let value = 42;
+num value = 42;
 show(yellow) "Original value: " + value;
-let ptr = MemoryLib[addressof](value);
+num ptr = MemoryLib[addressof](value);
 show(yellow) "Pointer to value: " + ptr;
-let retrieved = MemoryLib[deref](ptr);
+num retrieved = MemoryLib[deref](ptr);
 show(yellow) "Dereferenced value: " + retrieved;
-let next_address = MemoryLib[add_offset](ptr, 1);
+num next_address = MemoryLib[add_offset](ptr, 1);
 show(yellow) "Next address: " + next_address;
 
 # Test memory allocation and byte operations
-let size = 1024;
+num size = 1024;
 show(yellow) "Allocating memory: " + MemoryLib[alloc](size);
 show(yellow) "Memory stats: " + MemoryLib[stats]();
 
@@ -54,7 +54,7 @@ show(blue) "Creating binary file: " + BinaryLib[create]("test_binary.bin");
 show(blue) "Opening binary file for writing: " + BinaryLib[open]("test_binary.bin", "w");
 
 # Get the file handle from the open operation
-let write_handle = 1; # First file handle will be 1
+num write_handle = 1; # First file handle will be 1
 show(blue) "Write handle: " + write_handle;
 
 # Write data to the file
@@ -67,7 +67,7 @@ show(blue) "Closing write handle: " + BinaryLib[close](write_handle);
 show(blue) "Opening binary file for reading: " + BinaryLib[open]("test_binary.bin", "r");
 
 # Get the new file handle
-let read_handle = 2; # Second file handle will be 2
+num read_handle = 2; # Second file handle will be 2
 show(blue) "Read handle: " + read_handle;
 
 # Test tell function (current position)
@@ -87,7 +87,7 @@ show(blue) "Reading next 5 bytes: " + BinaryLib[read_bytes](read_handle, 5);
 show(blue) "Converting string to bytes: " + BinaryLib[string_to_bytes]("Test");
 
 # Test bytes to string conversion
-let test_bytes = [72, 101, 108, 108, 111]; # "Hello" in ASCII
+num test_bytes = [72, 101, 108, 108, 111]; # "Hello" in ASCII
 show(blue) "Converting bytes to string: " + BinaryLib[bytes_to_string](test_bytes);
 
 # Close the file after reading
@@ -100,8 +100,8 @@ show(blue) "File stats: " + BinaryLib[stats]();
 show(red) "3. Testing Bitwise Operations:";
 
 # Test basic bitwise operations
-let a = 5;  # 0101 in binary
-let b = 3;  # 0011 in binary
+num a = 5;  # 0101 in binary
+num b = 3;  # 0011 in binary
 
 show(red) "Bitwise AND: " + BitwiseLib[and](a, b);
 show(red) "Bitwise OR: " + BitwiseLib[or](a, b);
@@ -131,7 +131,7 @@ show(green) "System name: " + SystemLib[system_name]();
 
 # Test environment variables
 show(green) "PATH environment variable: " + SystemLib[getenv]("PATH");
-let env_result = SystemLib[setenv]("TEST_VAR", "test_value");
+num env_result = SystemLib[setenv]("TEST_VAR", "test_value");
 show(green) "TEST_VAR value: " + SystemLib[getenv]("TEST_VAR");
 
 # Test command execution
@@ -153,11 +153,11 @@ show(green) "Username: " + SystemLib[username]();
 show(cyan) "5. Testing Process Management Operations:";
 
 # Create a process
-let pid = ProcessLib[create]("echo Process created by Razen");
+num pid = ProcessLib[create]("echo Process created by Razen");
 show(cyan) "Process ID: " + pid;
 
 # Wait for process
-let status = ProcessLib[wait](pid);
+num status = ProcessLib[wait](pid);
 show(cyan) "Process exit status: " + status;
 
 # Check if process is running (should be false after wait)
@@ -172,15 +172,15 @@ show(cyan) "Process info: " + ProcessLib[info]();
 # show(cyan) "Process signal test: " + ProcessLib[signal](pid, "SIGTERM");
 
 # Create a process for testing I/O
-let io_pid = ProcessLib[create]("cat");
+num io_pid = ProcessLib[create]("cat");
 show(cyan) "IO Process ID: " + io_pid;
 
 # Test process I/O functions
-let stdin_result = ProcessLib[write_stdin](io_pid, "Test input");
+num stdin_result = ProcessLib[write_stdin](io_pid, "Test invar");
 show(cyan) "Write to stdin result: " + stdin_result;
 
 # Kill the process after testing
-let kill_result = ProcessLib[kill](io_pid);
+num kill_result = ProcessLib[kill](io_pid);
 show(cyan) "Kill process result: " + kill_result;
 
 # Thread Operations
@@ -191,7 +191,7 @@ show(magenta) "Thread ID: " + ThreadLib[thread_id]();
 show(magenta) "Thread count: " + ThreadLib[thread_count]();
 
 # Test mutex operations
-let mutex = ThreadLib[mutex_create]();
+num mutex = ThreadLib[mutex_create]();
 show(magenta) "Creating mutex: " + mutex;
 show(magenta) "Locking mutex: " + ThreadLib[mutex_lock](mutex);
 show(magenta) "Unlocking mutex: " + ThreadLib[mutex_unlock](mutex);
@@ -206,32 +206,32 @@ show(magenta) "Thread sleep test: " + ThreadLib[sleep](10); # Sleep for 10ms
 show(yellow) "7. Testing Compiler Operations:";
 
 # Test AST node creation
-let ast_node = CompilerLib[create_node]("variable", "x", "integer");
+num ast_node = CompilerLib[create_node]("variable", "x", "integer");
 show(yellow) "Created AST node: " + CompilerLib[node_to_string](ast_node);
 
 # Test adding child nodes
-let child_node = CompilerLib[create_node]("literal", "42", "integer");
-let add_child_result = CompilerLib[add_child](ast_node, child_node);
+num child_node = CompilerLib[create_node]("literal", "42", "integer");
+num add_child_result = CompilerLib[add_child](ast_node, child_node);
 show(yellow) "Add child result: " + add_child_result;
 show(yellow) "AST node with child: " + CompilerLib[node_to_string](ast_node);
 
 # Test symbol table operations
-let symbol_table = CompilerLib[create_symbol_table]();
-let add_symbol_result1 = CompilerLib[add_symbol](symbol_table, "x", "integer", 0);
-let add_symbol_result2 = CompilerLib[add_symbol](symbol_table, "y", "string", 1);
+num symbol_table = CompilerLib[create_symbol_table]();
+num add_symbol_result1 = CompilerLib[add_symbol](symbol_table, "x", "integer", 0);
+num add_symbol_result2 = CompilerLib[add_symbol](symbol_table, "y", "string", 1);
 show(yellow) "Add symbol results: " + add_symbol_result1 + ", " + add_symbol_result2;
 
-let symbol = CompilerLib[lookup_symbol](symbol_table, "x");
+num symbol = CompilerLib[lookup_symbol](symbol_table, "x");
 show(yellow) "Symbol 'x' info: " + symbol;
 
 # Test code generation
-let ir_code = CompilerLib[generate_ir]("x = 5 + 3");
+num ir_code = CompilerLib[generate_ir]("x = 5 + 3");
 show(yellow) "IR code: " + ir_code);
 
-let optimized_ir = CompilerLib[optimize_ir](ir_code);
+num optimized_ir = CompilerLib[optimize_ir](ir_code);
 show(yellow) "Optimized IR: " + optimized_ir);
 
-let assembly = CompilerLib[generate_assembly](optimized_ir);
+num assembly = CompilerLib[generate_assembly](optimized_ir);
 show(yellow) "Assembly code: " + assembly);
 
 # Test tokenizing, parsing, and compiling
@@ -248,4 +248,4 @@ show(blue) "Warning log: " + LogLib[warn]("This is a warning message");
 show(blue) "Error log: " + LogLib[error]("This is an error message");
 show(blue) "Debug log: " + LogLib[debug]("This is a debug message");
 
-show "===== SELF-COMPILATION COMPREHENSIVE TEST COMPLETE =====";
+show "===== SELF-COMPILATION COMPREHENSIVE TEST COMPnumE =====";

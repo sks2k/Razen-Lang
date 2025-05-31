@@ -12,12 +12,12 @@ enum Status {
     PENDING = 0,
     ACTIVE = 1,
     INACTIVE = 2,
-    DELETED = 3
+    DEnumED = 3
 }
 
 # Using bracket notation to access enum values
-let selectedColor = Color[BLUE];
-let currentStatus = Status[ACTIVE];
+num selectedColor = Color[BLUE];
+num currentStatus = Status[ACTIVE];
 
 # Display the results
 show "Enums with bracket notation:";

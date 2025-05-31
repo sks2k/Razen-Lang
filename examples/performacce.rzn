@@ -1,11 +1,11 @@
-hold isTrue = true;               # Boolean true
-hold isFalse = false;             # Boolean false
-hold comparison = 5 > 3;          # Comparison (true)
-hold logicalAnd = true && false;  # Logical AND (false)
-hold logicalOr = true || false;   # Logical OR (true)
-hold logicalNot = !true;  
+bool isTrue = true;               # Boolean true
+bool isFalse = false;             # Boolean false
+bool comparison = 5 > 3;          # Comparison (true)
+bool logicalAnd = true && false;  # Logical AND (false)
+bool logicalOr = true || false;   # Logical OR (true)
+bool logicalNot = !true;  
 
-show "Boolean variables with 'hold':";
+show "Boolean variables with 'bool':";
 if (isTrue) {
     show "isTrue is true";
 } else {
@@ -37,18 +37,18 @@ if (logicalNot) {
     show "logicalNot is false";
 }
 
-show "mixed variables with 'put':";
+show "mixed variables with 'var':";
 
-put anything = 42;                # Number
-put anything = "text";            # Reassign to string
-put anything = true;              # Reassign to boolean
-put mixed = [1, "two", true];    # Array with mixed types
+var anything = 42;                # Number
+var anything = "text";            # Reassign to string
+var anything = true;              # Reassign to boolean
+var mixed = [1, "two", true];    # Array with mixed types
 
-show "Mixed type variables with 'put':";
+show "Mixed type variables with 'var':";
 show "anything: " + anything;
 show "mixed array: " + mixed;
 
-let i = 0;
+num i = 0;
 while (i < 5) {
     arraySum = arraySum + numbers[i];
     i = i + 1;
@@ -78,11 +78,11 @@ enum Status {
     PENDING = 0,
     ACTIVE = 1,
     INACTIVE = 2,
-    DELETED = 3
+    DEnumED = 3
 }
 
-let selectedColor = Color[BLUE];
-let currentStatus = Status[ACTIVE];
+num selectedColor = Color[BLUE];
+num currentStatus = Status[ACTIVE];
 
 show "Enums:";
 show "Selected color: " + selectedColor;

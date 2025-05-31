@@ -11,10 +11,10 @@ show "===== Razen Error Handling Examples =====";
 # Example 1: Basic try-catch with division by zero
 show "\n1. Basic Error Handling - Division by Zero";
 try {
-    let a = 10;
-    let b = 0;
+    num a = 10;
+    num b = 0;
     show "Attempting to divide " + a + " by " + b;
-    let result = MathLib[divide](a, b);
+    num result = MathLib[divide](a, b);
     show "Result: " + result; # This line shouldn't execute
 } catch (error) {
     # Currently shows "true" instead of error message
@@ -27,16 +27,16 @@ try {
 # Example 2: Multiple statements in try block
 show "\n2. Multiple Statements - Only First Error Should Be Caught";
 try {
-    put numbers = [1, 2, 3];
+    var numbers = [1, 2, 3];
     show "Array: " + numbers;
     show "First operation - accessing invalid index";
-    put value1 = numbers[5]; # First error
+    var value1 = numbers[5]; # First error
     show "Issue: This line shouldn't execute";
     
-    let c = 10;
-    let d = 0;
+    num c = 10;
+    num d = 0;
     show "Second operation - division by zero";
-    let result2 = c / d; # Second error (shouldn't be reached)
+    num result2 = c / d; # Second error (shouldn't be reached)
     show "Issue: This line shouldn't execute either";
 } catch (error) {
     # Should only catch the first error (array index)
@@ -69,7 +69,7 @@ try {
 # Example 4: Error type checking simulation
 show "\n4. Error Type Checking";
 try {
-    let choice = 2;
+    num choice = 2;
     
     if (choice == 1) {
         throw "TypeError: Invalid type";
@@ -97,7 +97,7 @@ try {
 
 # Example 5: Try-catch with return values
 show "\n5. Return Values from Try-Catch";
-put result = getValueSafely();
+var result = getValueSafely();
 show "Safe operation result: " + result;
 
 # Function with internal try-catch
@@ -122,7 +122,7 @@ show Filesystem[write_file]("./test_cleanup.txt", "Test content", false);
 
 try {
     show "Opening and reading file...";
-    take fileContent = Filesystem[read_file]("./test_cleanup.txt");
+    str fileContent = Filesystem[read_file]("./test_cleanup.txt");
     show "File content: " + fileContent;
     
     # Simulate an error during file processing
@@ -146,7 +146,7 @@ show "File exists after cleanup: " + Filesystem[exists]("./test_cleanup.txt");
 show "\n7. Custom Error Objects";
 try {
     # Simple string error instead of object since Razen doesn't fully support complex arrays
-    take errorMessage = "ValidationError: Invalid input data (code 400, field: username)";
+    str errorMessage = "ValidationError: Invalid invar data (code 400, field: username)";
     throw errorMessage;
 } catch (error) {
     show "Caught custom error: " + error;
@@ -157,22 +157,22 @@ try {
 # Example 8: Try-catch in loops
 show "\n8. Try-Catch in Loops";
 # Simplified version without complex array operations
-let i = 0;
+num i = 0;
 while (i < 5) {
     try {
         # Create some test cases that will sometimes succeed, sometimes fail
-        let divisor = 0;
+        num divisor = 0;
         if (i == 0 || i == 2 || i == 4) {
             divisor = 10; # These will succeed
         }
         
         show "Processing item " + i + ": 100/" + divisor;
-        let calc = 100 / divisor;
+        num calc = 100 / divisor;
         show "Result: " + calc;
     } catch (error) {
         show "Error processing item " + i + ": " + error;
     }
-    let i = i + 1;
+    num i = i + 1;
 }
 
 show "Issue: Should be able to use try-catch in loops with array operations";
@@ -195,7 +195,7 @@ fun recursiveFunction(depth) {
     } else {
         # Add a proper return to avoid infinite recursion
         recursiveFunction(depth - 1);
-        return "Completed recursion at depth " + depth;
+        return "Compnumed recursion at depth " + depth;
     }
 }
 

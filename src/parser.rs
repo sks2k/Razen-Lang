@@ -60,11 +60,8 @@ impl Parser {
         parser.register_prefix(TokenType::Not, Parser::parse_prefix_expression);
         
         // Register mathematical keywords as identifier parsers
-        parser.register_prefix(TokenType::Sum, Parser::parse_identifier);
-        parser.register_prefix(TokenType::Diff, Parser::parse_identifier);
-        parser.register_prefix(TokenType::Prod, Parser::parse_identifier);
-        parser.register_prefix(TokenType::Div, Parser::parse_identifier);
-        parser.register_prefix(TokenType::Mod, Parser::parse_identifier);
+        // Mathematical variable tokens removed
+        // Using Num token instead for numeric variables
         
         // String operations are handled with built-in operators
         
@@ -276,8 +273,7 @@ impl Parser {
     fn parse_statement(&mut self) -> Option<Statement> {
         match self.current_token.token_type {
             // Variable declaration keywords
-            TokenType::Let | TokenType::Take | TokenType::Hold | TokenType::Put | 
-            TokenType::Sum | TokenType::Diff | TokenType::Prod | TokenType::Div | TokenType::Mod |
+            TokenType::Num | TokenType::Str | TokenType::Bool | TokenType::Var | TokenType::Const |
             TokenType::List | TokenType::Arr | TokenType::Append | TokenType::Remove |
             TokenType::Map | TokenType::Key | TokenType::Value |
             TokenType::Store | TokenType::Box | TokenType::Ref => self.parse_variable_declaration(),
@@ -379,8 +375,8 @@ impl Parser {
         // Type checking based on variable declaration token
         match token_type {
             // 1. General Purpose Variables
-            TokenType::Let => {
-                // let => for numeric variables (integers, floats)
+            TokenType::Num => {
+                // num => for numeric variables (integers, floats)
                 // Also allow function calls and expressions that might return numbers
                 match value {
                     Expression::NumberLiteral(_) => {},
@@ -393,12 +389,12 @@ impl Parser {
                         // Only show warning for obvious mismatches like strings and booleans
                         if let Expression::StringLiteral(_) = value {
                             self.errors.push(format!(
-                                "Type mismatch: 'let' should be used for numeric values at line {}, column {}",
+                                "Type mismatch: 'num' should be used for numeric values at line {}, column {}",
                                 token_line, token_column
                             ));
                         } else if let Expression::BooleanLiteral(_) = value {
                             self.errors.push(format!(
-                                "Type mismatch: 'let' should be used for numeric values at line {}, column {}",
+                                "Type mismatch: 'num' should be used for numeric values at line {}, column {}",
                                 token_line, token_column
                             ));
                         }
@@ -406,8 +402,8 @@ impl Parser {
                     }
                 }
             },
-            TokenType::Take => {
-                // take => for string variables and text manipulation
+            TokenType::Str => {
+                // str => for string variables and text manipulation
                 match value {
                     Expression::StringLiteral(_) => {},
                     Expression::InfixExpression { .. } => {}, // Allow expressions that might result in strings
@@ -418,12 +414,12 @@ impl Parser {
                         // Only show warning for obvious mismatches
                         if let Expression::NumberLiteral(_) = value {
                             self.errors.push(format!(
-                                "Type mismatch: 'take' should be used for string values at line {}, column {}",
+                                "Type mismatch: 'str' should be used for string values at line {}, column {}",
                                 token_line, token_column
                             ));
                         } else if let Expression::BooleanLiteral(_) = value {
                             self.errors.push(format!(
-                                "Type mismatch: 'take' should be used for string values at line {}, column {}",
+                                "Type mismatch: 'str' should be used for string values at line {}, column {}",
                                 token_line, token_column
                             ));
                         }
@@ -431,8 +427,8 @@ impl Parser {
                     }
                 }
             },
-            TokenType::Hold => {
-                // hold => for boolean variables and logical conditions
+            TokenType::Bool => {
+                // bool => for boolean variables and logical conditions
                 match value {
                     Expression::BooleanLiteral(_) => {},
                     Expression::InfixExpression { .. } => {}, // Allow expressions that might result in booleans
@@ -444,12 +440,12 @@ impl Parser {
                         // Only show warning for obvious mismatches
                         if let Expression::NumberLiteral(_) = value {
                             self.errors.push(format!(
-                                "Type mismatch: 'hold' should be used for boolean values at line {}, column {}",
+                                "Type mismatch: 'bool' should be used for boolean values at line {}, column {}",
                                 token_line, token_column
                             ));
                         } else if let Expression::StringLiteral(_) = value {
                             self.errors.push(format!(
-                                "Type mismatch: 'hold' should be used for boolean values at line {}, column {}",
+                                "Type mismatch: 'bool' should be used for boolean values at line {}, column {}",
                                 token_line, token_column
                             ));
                         }
@@ -457,37 +453,8 @@ impl Parser {
                     }
                 }
             },
-            TokenType::Put => {
-                // put => for variables of any type (no restrictions)
-            },
-            
-            // 2. Mathematical Variables
-            TokenType::Sum | TokenType::Diff | TokenType::Prod | TokenType::Div | TokenType::Mod => {
-                // Mathematical variables should be used with numeric values
-                // These tokens are aliases for 'let' and should behave the same way
-                match value {
-                    Expression::NumberLiteral(_) => {},
-                    Expression::InfixExpression { .. } => {}, // Allow expressions that might result in numbers
-                    Expression::PrefixExpression { .. } => {}, // Allow expressions that might result in numbers
-                    Expression::Identifier(_) => {}, // Allow identifiers (runtime check needed)
-                    Expression::CallExpression { .. } => {}, // Allow function calls (runtime check needed)
-                    Expression::LibraryCall { .. } => {}, // Allow library function calls
-                    _ => {
-                        // Only show warning for obvious mismatches
-                        if let Expression::StringLiteral(_) = value {
-                            self.errors.push(format!(
-                                "Type mismatch: '{}' should be used for numeric values at line {}, column {}",
-                                var_type, token_line, token_column
-                            ));
-                        } else if let Expression::BooleanLiteral(_) = value {
-                            self.errors.push(format!(
-                                "Type mismatch: '{}' should be used for numeric values at line {}, column {}",
-                                var_type, token_line, token_column
-                            ));
-                        }
-                        // Allow other types to pass through for flexibility
-                    }
-                }
+            TokenType::Var => {
+                // var => for variables of any type (no restrictions)
             },
             
             // String operations are handled with built-in operators
@@ -3087,7 +3054,7 @@ impl Parser {
         
         // Expect a variable type keyword (let, hold, etc.)
         let var_type = match self.current_token.token_type {
-            TokenType::Let | TokenType::Take | TokenType::Hold | TokenType::Put => {
+            TokenType::Num | TokenType::Str | TokenType::Bool | TokenType::Var | TokenType::Const => {
                 self.current_token.literal.clone()
             },
             _ => {

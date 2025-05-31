@@ -36,7 +36,7 @@ pub fn generate(args: Vec<Value>) -> Result<Value, String> {
 
 /// Create a 2D map from a seed string
 /// Example: map("razen123", 3, 3) => [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
-pub fn map(args: Vec<Value>) -> Result<Value, String> {
+pub fn map_seed(args: Vec<Value>) -> Result<Value, String> {
     if args.len() != 3 {
         return Err("Seed.map requires exactly 3 arguments: seed, width, height".to_string());
     }

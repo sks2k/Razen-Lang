@@ -77,16 +77,13 @@
         },
         {
           "name": "keyword.declaration.razen",
-          "match": "\\b(let|take|hold|put|sum|diff|prod|div|mod|text|concat|slice|len|list|arr|append|remove|map|key|value|store|box|ref|is)\\b"
+          "match": "\\b(num|str|bool|var|const|len|list|arr|append|remove|map|key|value|store|box|ref|is)\\b"
         },
         {
           "name": "storage.type.razen",
-          "match": "\\b(const|enum)\\b"
+          "match": "\\b(enum)\\b"
         },
-        {
-          "name": "keyword.other.razen",
-          "match": "\\b(current|now|year|month|day|hour|minute|second)\\b"
-        },
+
         {
           "name": "keyword.compiler.razen",
           "match": "\\b(token|lexer|parser|ast|node|visitor|symbol|scope|typesys|ir|codegen|optimize|target|grammar|rule|attribute)\\b"
@@ -136,11 +133,11 @@
       "patterns": [
         {
           "name": "storage.type.razen",
-          "match": "\\b(let|take|hold|put|sum|diff|prod|div|mod|power|is|text|concat|slice|len|split|trim|replace|find|list|arr|append|remove|size|clear|map|key|value|get|set|contains|keys|values|current|now|year|month|day|hour|minute|second|store|box|ref|show|read|write|read_file)\\b"
+          "match": "\\b(num|str|bool|var|const|power|is|len|split|trim|replace|find|list|arr|append|remove|size|clear|map|key|value|get|set|contains|keys|values|store|box|ref|show|read|write|read_file)\\b"
         },
         {
           "name": "variable.declaration.razen",
-          "match": "\\b(let|take|hold|put)\\s+([a-zA-Z_][a-zA-Z0-9_]*)\\b",
+          "match": "\\b(num|str|bool|var|const)\\s+([a-zA-Z_][a-zA-Z0-9_]*)\\b",
           "captures": {
             "1": { "name": "storage.type.razen" },
             "2": { "name": "variable.other.definition.razen" }

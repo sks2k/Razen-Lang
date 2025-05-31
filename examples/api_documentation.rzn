@@ -10,7 +10,7 @@ type freestyle;
 # post => for API requests. Use for sending data to external services.
 
 # Import required libraries
-lib validation;  # For input validation
+lib validation;  # For invar validation
 lib json;        # For JSON handling
 lib netlib;      # For network utilities
 lib timelib;     # For timestamp generation
@@ -66,7 +66,7 @@ call weather_response = complex_api with {
 };
 
 # API call with predefined parameters
-put search_params = {
+var search_params = {
     "q": "Razen programming language",
     "limit": 10
 };
@@ -84,7 +84,7 @@ get user_params = {
 call user_data = auth_api with user_params;
 
 # GET request with path parameters
-put product_id = "p-789";
+var product_id = "p-789";
 call product_data = complex_api with {
     "_path": "/products/" + product_id,
     "include_reviews": true
@@ -205,7 +205,7 @@ if (Validation[required](city)) {
     };
     
     # Parse the JSON response
-    let weather_obj = JSON[parse](JSON[stringify](weather_data));
+    num weather_obj = JSON[parse](JSON[stringify](weather_data));
     
     show "Weather in " + city + ":";
     show "Temperature: " + weather_obj["main"]["temp"] + "°C";
@@ -238,7 +238,7 @@ if (Validation[required](user_message)) {
     call chat_response = chat_api with chat_request;
     
     # Parse and display the response
-    let response_obj = JSON[parse](JSON[stringify](chat_response));
+    num response_obj = JSON[parse](JSON[stringify](chat_response));
     show "Assistant: " + response_obj["choices"][0]["message"]["content"];
 } else {
     show "Error: Message cannot be empty";
@@ -261,10 +261,10 @@ get catalog_params = {
 call catalog = shop_api with catalog_params;
 
 # Display products
-let products = JSON[parse](JSON[stringify](catalog))["products"];
+num products = JSON[parse](JSON[stringify](catalog))["products"];
 show "Available Products:";
-for (let i = 0; i < ArrLib[length](products); i++) {
-    put product = products[i];
+for (num i = 0; i < ArrLib[length](products); i++) {
+    var product = products[i];
     show (i + 1) + ". " + product["name"] + " - $" + product["price"];
 }
 
@@ -272,9 +272,9 @@ for (let i = 0; i < ArrLib[length](products); i++) {
 show "Enter product number to purchase (1-" + ArrLib[length](products) + "):";
 read product_num;
 
-let selected_index = StrLib[to_number](product_num) - 1;
+num selected_index = StrLib[to_number](product_num) - 1;
 if (selected_index >= 0 && selected_index < ArrLib[length](products)) {
-    put selected_product = products[selected_index];
+    var selected_product = products[selected_index];
     
     post purchase_request = {
         "product_id": selected_product["id"],
@@ -288,7 +288,7 @@ if (selected_index >= 0 && selected_index < ArrLib[length](products)) {
     call purchase_response = shop_api with purchase_request;
     
     # Check purchase status
-    let purchase_result = JSON[parse](JSON[stringify](purchase_response));
+    num purchase_result = JSON[parse](JSON[stringify](purchase_response));
     if (purchase_result["success"]) {
         show "Purchase successful!";
         show "Order ID: " + purchase_result["order_id"];
@@ -303,8 +303,8 @@ if (selected_index >= 0 && selected_index < ArrLib[length](products)) {
 # ===== SECTION 7: BEST PRACTICES =====
 show "\n===== API BEST PRACTICES =====";
 
-# 1. Always validate user input before making API calls
-show "1. Always validate user input before making API calls";
+# 1. Always validate user invar before making API calls
+show "1. Always validate user invar before making API calls";
 
 # 2. Use appropriate error handling
 show "2. Use appropriate error handling with try/catch blocks";
@@ -321,9 +321,9 @@ show "4. Use proper authentication methods for secure APIs";
 
 # 5. Handle rate limiting
 show "5. Handle rate limiting with exponential backoff";
-let max_retries = 3;
-let retry_count = 0;
-hold success = false;
+num max_retries = 3;
+num retry_count = 0;
+bool success = false;
 
 while (!success && retry_count < max_retries) {
     try {
@@ -334,7 +334,7 @@ while (!success && retry_count < max_retries) {
     } catch (error) {
         if (error["_status"] == 429) {  # Too Many Requests
             retry_count = retry_count + 1;
-            let wait_time = 2 ^ retry_count;  # Exponential backoff
+            num wait_time = 2 ^ retry_count;  # Exponential backoff
             show "Rate limited. Retrying in " + wait_time + " seconds...";
             # In a real implementation, we would wait here
         } else {
@@ -349,9 +349,9 @@ show "6. Cache responses when appropriate to reduce API calls";
 
 # 7. Use pagination for large datasets
 show "7. Use pagination for large datasets";
-let page = 1;
-let per_page = 10;
-hold has_more = true;
+num page = 1;
+num per_page = 10;
+bool has_more = true;
 
 while (has_more) {
     call paginated_response = complex_api with {
@@ -359,7 +359,7 @@ while (has_more) {
         "per_page": per_page
     };
     
-    let response_obj = JSON[parse](JSON[stringify](paginated_response));
+    num response_obj = JSON[parse](JSON[stringify](paginated_response));
     
     # Process current page
     show "Processing page " + page;

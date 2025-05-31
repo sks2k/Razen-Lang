@@ -12,4 +12,4 @@ show "===== Random Library Test =====";
 # Test random library
 show "Random number between 1-100: " + Random.int(1, 100);
 
-show "===== Test Completed =====";
+show "===== Test Compnumed =====";

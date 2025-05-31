@@ -49,7 +49,7 @@ show "is_even(7) = " + is_even(7);
 
 # Test 6: Function with no explicit return
 fun no_return() {
-    let x = 10;
+    num x = 10;
     x + 5; # No explicit return
 }
 
@@ -64,4 +64,4 @@ fun compound() {
 show "\nTest 7: Function that calls another function";
 show "compound() = " + compound();
 
-show "\n===== FUNCTION TEST COMPLETE =====";
+show "\n===== FUNCTION TEST COMPnumE =====";

@@ -13,7 +13,7 @@ fun get_message() {
 
 # Function with variable return
 fun get_variable() {
-    let x = 100
+    num x = 100
     return x
 }
 

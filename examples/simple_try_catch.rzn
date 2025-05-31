@@ -16,10 +16,10 @@ try {
 # Example 2: Array index out of bounds
 show "\n2. Array Index Out of Bounds";
 try {
-    put numbers = [1, 2, 3];
+    var numbers = [1, 2, 3];
     show "Array: " + numbers;
     show "Accessing invalid index";
-    put valueofindex = numbers[5]; # This should throw an exception
+    var valueofindex = numbers[5]; # This should throw an exception
     show "This line should not execute";
 } catch (error) {
     show "Caught error: " + error;
@@ -48,4 +48,4 @@ try {
     show "Outer finally block (should always execute)";
 }
 
-show "\nAll tests completed successfully!";
+show "\nAll tests compnumed successfully!";

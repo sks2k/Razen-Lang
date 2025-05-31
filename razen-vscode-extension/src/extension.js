@@ -110,7 +110,7 @@ function activate(context) {
                 const linePrefix = document.lineAt(position).text.substr(0, position.character);
                 
                 // Check if we're typing a variable declaration keyword
-                if (/^(let|take|hold|put)$/.test(linePrefix)) {
+                if (/^(num|str|bool|var|const)$/.test(linePrefix)) {
                     // Suggest shorthand notation
                     const item = new vscode.CompletionItem('Shorthand notation', vscode.CompletionItemKind.Snippet);
                     item.detail = 'Use shorthand notation for variable declaration';
@@ -118,9 +118,9 @@ function activate(context) {
                         'Razen supports shorthand notation for variable declarations:\n\n' +
                         '`keyword.variableName.value` expands to `keyword variableName = value`\n\n' +
                         'Examples:\n' +
-                        '- `let.count.0` → `let count = 0`\n' +
-                        '- `take.name."John"` → `take name = "John"`\n' +
-                        '- `hold.isActive.true` → `hold isActive = true`'
+                        '- `num.count.0` → `num count = 0`\n' +
+                        '- `str.name."John"` → `str name = "John"`\n' +
+                        '- `bool.isActive.true` → `bool isActive = true`'
                     );
                     
                     item.insertText = new vscode.SnippetString('.${1:variableName}.${2:value}');
@@ -160,10 +160,10 @@ function activate(context) {
                         '# Created: ${CURRENT_YEAR}-${CURRENT_MONTH}-${CURRENT_DATE}\n\n' +
                         '# Initialize DOM elements when page loads\n' +
                         'fun initializeApp() {\n' +
-                        '\ttake appContainer = document.getElementById("app");\n' +
+                        '\tstr appContainer = document.getElementById("app");\n' +
                         '\tappContainer.innerHTML = "<h1>Welcome to Razen Web App</h1>";\n\n' +
                         '\t# Add event listeners\n' +
-                        '\ttake button = document.createElement("button");\n' +
+                        '\tstr button = document.createElement("button");\n' +
                         '\tbutton.textContent = "Click Me";\n' +
                         '\tbutton.addEventListener("click", handleButtonClick);\n' +
                         '\tappContainer.appendChild(button);\n' +
@@ -171,11 +171,11 @@ function activate(context) {
                         '# Event handler for button click\n' +
                         'fun handleButtonClick() {\n' +
                         '\tshow "Button clicked!";\n' +
-                        '\ttake result = document.getElementById("result");\n' +
+                        '\tstr result = document.getElementById("result");\n' +
                         '\tif (result) {\n' +
                         '\t\tresult.textContent = "Button was clicked at " + new Date().toLocaleTimeString();\n' +
                         '\t} else {\n' +
-                        '\t\ttake resultElement = document.createElement("div");\n' +
+                        '\t\tstr resultElement = document.createElement("div");\n' +
                         '\t\tresultElement.id = "result";\n' +
                         '\t\tresultElement.textContent = "Button was clicked at " + new Date().toLocaleTimeString();\n' +
                         '\t\tdocument.getElementById("app").appendChild(resultElement);\n' +
@@ -196,7 +196,7 @@ function activate(context) {
                         '# ${1:Razen CLI Application}\n' +
                         '# Created: ${CURRENT_YEAR}-${CURRENT_MONTH}-${CURRENT_DATE}\n\n' +
                         '# Application version\n' +
-                        'take VERSION = "1.0.0";\n\n' +
+                        'const VERSION = "1.0.0";\n\n' +
                         '# Display welcome message\n' +
                         'fun showWelcome() {\n' +
                         '\tshow "===================================";\n' +
@@ -256,9 +256,9 @@ function activate(context) {
                         '# ${1:Razen Script}\n' +
                         '# Created: ${CURRENT_YEAR}-${CURRENT_MONTH}-${CURRENT_DATE}\n\n' +
                         '# Variables\n' +
-                        'let count = 0;\n' +
-                        'take message = "Hello, Razen!";\n' +
-                        'hold isActive = true;\n\n' +
+                        'num count = 0;\n' +
+                        'str message = "Hello, Razen!";\n' +
+                        'bool isActive = true;\n\n' +
                         '# Functions\n' +
                         'fun greet(name) {\n' +
                         '\treturn "Hello, " + name + "!";\n' +
@@ -305,7 +305,7 @@ function activate(context) {
                         'read userName;\n' +
                         'show "Hello, " + userName + "!";\n\n' +
                         '# Create a simple loop\n' +
-                        'let counter = 0;\n' +
+                        'num counter = 0;\n' +
                         'while (counter < 5) {\n' +
                         '\tshow "Counter: " + counter;\n' +
                         '\tcounter = counter + 1;\n' +

@@ -26,8 +26,8 @@ fun divide(a, b) {
 
 # Power function
 fun power(base, exponent) {
-    let result = 1;
-    let i = 0;
+    num result = 1;
+    num i = 0;
     while (i < exponent) {
         result = result * base;
         i = i + 1;
@@ -38,8 +38,8 @@ fun power(base, exponent) {
 # Square root function
 fun sqrt(x) {
     # Newton's method for square root
-    let guess = x / 2;
-    let epsilon = 0.0001;
+    num guess = x / 2;
+    num epsilon = 0.0001;
     
     while ((guess * guess - x) > epsilon || (x - guess * guess) > epsilon) {
         guess = (guess + x / guess) / 2;

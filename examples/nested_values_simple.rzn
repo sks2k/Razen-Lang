@@ -5,14 +5,14 @@ show "===== Razen Nested Values Simple Test =====";
 
 # Basic array access
 show "1. Basic Array Access:";
-put numbers = [10, 20, 30, 40, 50];
+var numbers = [10, 20, 30, 40, 50];
 show "Array: " + numbers;
 show "First element: " + numbers[0];
 show "Second element: " + numbers[1];
 
 # Key-value pairs using array syntax
 show "2. Key-Value Pairs:";
-put person = [
+var person = [
     "name", "John Doe",
     "age", 30
 ];
@@ -26,7 +26,7 @@ show "Trying to access name by key: " + person["name"];
 
 # Nested array test
 show "4. Nested Array:";
-put nested = [
+var nested = [
     [1, 2, 3],
     [4, 5, 6]
 ];
@@ -36,7 +36,7 @@ show "nested[0][1]: " + nested[0][1];
 
 # Nested object test
 show "5. Nested Object:";
-put user = [
+var user = [
     "name", "Alice",
     "profile", [
         "age", 25,
@@ -48,4 +48,4 @@ show "User name: " + user[1];
 show "User profile: " + user[3];
 show "User age (should be profile[1]): " + user[3][1];
 
-show "===== Test Completed =====";
+show "===== Test Compnumed =====";

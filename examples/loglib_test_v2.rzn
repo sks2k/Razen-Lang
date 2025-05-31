@@ -7,16 +7,16 @@ lib loglib;
 show "===== LOG LIBRARY TEST =====";
 
 # Test different log levels
-let info_result = LogLib[info]("This is an info message");
+num info_result = LogLib[info]("This is an info message");
 show "Info log: " + info_result;
 
-let warn_result = LogLib[warn]("This is a warning message");
+num warn_result = LogLib[warn]("This is a warning message");
 show "Warning log: " + warn_result;
 
-let error_result = LogLib[error]("This is an error message");
+num error_result = LogLib[error]("This is an error message");
 show "Error log: " + error_result;
 
-let debug_result = LogLib[debug]("This is a debug message");
+num debug_result = LogLib[debug]("This is a debug message");
 show "Debug log: " + debug_result;
 
-show "===== LOG LIBRARY TEST COMPLETE =====";
+show "===== LOG LIBRARY TEST COMPnumE =====";

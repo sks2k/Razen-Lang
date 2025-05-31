@@ -27,6 +27,6 @@ final class Config {
 show "Final class test";
 
 # Testing volatile variable
-volatile let counter = 0;
+volatile num counter = 0;
 counter = counter + 1;
 show "Counter: " + counter;

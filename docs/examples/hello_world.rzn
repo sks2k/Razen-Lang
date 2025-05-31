@@ -1,15 +1,15 @@
 # Hello World Example in Razen
 # This is the simplest Razen program
 
-# The 'show' keyword displays output to the console
+# The 'show' keyword displays outvar to the console
 show "Hello, World!";
 
 # You can also use variables
-take message = "Hello from Razen!";
+str message = "Hello from Razen!";
 show message;
 
 # String concatenation
-take name = "User";
+str name = "User";
 show "Welcome, " + name + "!";
 
 # String interpolation

@@ -11,7 +11,7 @@ show "===== Random Library Test =====";
 show "Random number between 1-100: " + Random[int](1, 100);
 
 # Test random choice from array
-let choices = ["apple", "banana", "orange", "grape", "mango"];
+num choices = ["apple", "banana", "orange", "grape", "mango"];
 show "Random fruit: " + Random[choice](choices);
 
-show "===== Random Library Test Completed =====";
+show "===== Random Library Test Compnumed =====";

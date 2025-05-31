@@ -15,14 +15,14 @@ fun test2() {
 
 # Test 3: Function with string concatenation
 fun test3() {
-    let a = "Hello";
-    let b = "World";
+    num a = "Hello";
+    num b = "World";
     return a + " " + b;
 }
 
 # Test 4: Function with variable return
 fun test4() {
-    let result = "test4 result";
+    num result = "test4 result";
     return result;
 }
 
@@ -51,13 +51,13 @@ show "Test 6 (parameter + operation): " + test6(5);
 show "Test 7 (string param + concat): " + test7("World");
 
 # Test storing function results
-let result1 = test1();
-let result2 = test2();
-let result3 = test3();
+num result1 = test1();
+num result2 = test2();
+num result3 = test3();
 
 show "\nStored results:";
 show "Result 1: " + result1;
 show "Result 2: " + result2;
 show "Result 3: " + result3;
 
-show "===== FUNCTION DEBUG TEST COMPLETE =====";
+show "===== FUNCTION DEBUG TEST COMPnumE =====";

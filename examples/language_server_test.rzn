@@ -1,20 +1,20 @@
 # This is a test file for the Razen language server
 
 # Testing variable declarations with correct types
-let num = 42;
-take message = "Hello, Razen!";
-hold isValid = true;
-put anything = "This can be any type";
+num num = 42;
+str message = "Hello, Razen!";
+bool isValid = true;
+var anything = "This can be any type";
 
 # Testing variable declarations with incorrect types (should show warnings)
-let wrongType = "This should be a number";
-take wrongType2 = 123;
-hold wrongType3 = 42;
+num wrongType = "This should be a number";
+str wrongType2 = 123;
+bool wrongType3 = 42;
 
 # Testing library function calls
 filesystem[exists]("test.txt");
 filesystem[read_file]("example.txt");
-filesystem[write_file]("output.txt", "Hello World");
+filesystem[write_file]("outvar.txt", "Hello World");
 filesystem[list_dir](".");
 filesystem[is_file]("test.txt");
 filesystem[is_dir]("examples");

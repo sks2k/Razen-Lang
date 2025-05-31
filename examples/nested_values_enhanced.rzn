@@ -5,14 +5,14 @@ show "===== Razen Nested Values Enhanced Test =====";
 
 # 1. Basic array with numeric indices
 show "1. Basic Array with Numeric Indices:";
-put numbers = [10, 20, 30, 40, 50];
+var numbers = [10, 20, 30, 40, 50];
 show "Array: " + numbers;
 show "numbers[0]: " + numbers[0];
 show "numbers[2]: " + numbers[2];
 
 # 2. Key-value pairs in arrays with string key access
 show "2. Key-Value Pairs with String Key Access:";
-put person = [
+var person = [
     "name", "John Doe",
     "age", 30,
     "isEmployed", true
@@ -24,7 +24,7 @@ show "person['isEmployed']: " + person["isEmployed"];
 
 # 3. Nested arrays with numeric indices
 show "3. Nested Arrays with Numeric Indices:";
-put matrix = [
+var matrix = [
     [1, 2, 3],
     [4, 5, 6],
     [7, 8, 9]
@@ -37,7 +37,7 @@ show "matrix[2][2]: " + matrix[2][2];
 
 # 4. Nested objects with string key access
 show "4. Nested Objects with String Key Access:";
-put employee = [
+var employee = [
     "name", "Jane Smith",
     "age", 28,
     "address", [
@@ -58,7 +58,7 @@ show "employee['skills'][2]: " + employee["skills"][2];
 
 # 5. Complex nested structure
 show "5. Complex Nested Structure:";
-put company = [
+var company = [
     "name", "Tech Innovations",
     "founded", 2010,
     "locations", [
@@ -94,4 +94,4 @@ show "company['name']: " + company["name"];
 show "company['locations'][0]['city']: " + company["locations"][0]["city"];
 show "company['departments'][0]['head']['name']: " + company["departments"][0]["head"]["name"];
 
-show "===== Test Completed =====";
+show "===== Test Compnumed =====";

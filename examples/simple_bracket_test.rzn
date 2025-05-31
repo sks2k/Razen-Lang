@@ -5,8 +5,8 @@ lib mathlib;
 
 # Test a simple math function with bracket notation
 show "Testing MathLib[add] function:";
-let result = MathLib[add](5, 3);
+num result = MathLib[add](5, 3);
 show "Result of 5 + 3 = " + result;
 
 # Test the return value directly in a show statement
-show "Direct output: " + MathLib[add](10, 20); 
+show "Direct outvar: " + MathLib[add](10, 20); 

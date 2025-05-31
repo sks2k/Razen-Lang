@@ -3,17 +3,10 @@ use std::fmt;
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum TokenType {
     // Variable declaration keywords
-    Let,    // Integer, Float, Number
-    Take,   // String, Text
-    Hold,   // Boolean
-    Put,    // Any
-    Sum,    // Numeric sum (alias for let)
-    
-    // Mathematical Variable Keywords
-    Diff,   // Difference (subtraction)
-    Prod,   // Product (multiplication)
-    Div,    // Division
-    Mod,    // Modulus/Remainder
+    Num,    // Number variable (replaces Let)
+    Str,    // String variable (replaces Take)
+    Bool,   // Boolean variable (replaces Hold)
+    Var,    // Any variable (replaces Put)
     
     // String operations are handled with built-in operators
     
@@ -237,17 +230,10 @@ impl fmt::Display for TokenType {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
             // Variable declaration keywords
-            TokenType::Let => write!(f, "LET"),
-            TokenType::Take => write!(f, "TAKE"),
-            TokenType::Hold => write!(f, "HOLD"),
-            TokenType::Put => write!(f, "PUT"),
-            TokenType::Sum => write!(f, "SUM"),
-            
-            // Mathematical Variable Keywords
-            TokenType::Diff => write!(f, "DIFF"),
-            TokenType::Prod => write!(f, "PROD"),
-            TokenType::Div => write!(f, "DIV"),
-            TokenType::Mod => write!(f, "MOD"),
+            TokenType::Num => write!(f, "NUM"),
+            TokenType::Str => write!(f, "STR"),
+            TokenType::Bool => write!(f, "BOOL"),
+            TokenType::Var => write!(f, "VAR"),
             
             // String Variables
             // String-related tokens removed
@@ -499,17 +485,10 @@ impl fmt::Display for Token {
 pub fn lookup_identifier(identifier: &str) -> TokenType {
     match identifier {
         // Variable declaration keywords
-        "let" => TokenType::Let,
-        "take" => TokenType::Take,
-        "hold" => TokenType::Hold,
-        "put" => TokenType::Put,
-        "sum" => TokenType::Sum,
-        
-        // Mathematical Variable Keywords
-        "diff" => TokenType::Diff,
-        "prod" => TokenType::Prod,
-        "div" => TokenType::Div,
-        "mod" => TokenType::Mod,
+        "num" => TokenType::Num,
+        "str" => TokenType::Str,
+        "bool" => TokenType::Bool,
+        "var" => TokenType::Var,
         
         // String Variables
         // String-related tokens removed

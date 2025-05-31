@@ -12,7 +12,7 @@ show "Direct enum value:";
 show Color[RED];
 
 # Store in variable and display
-let red = Color[RED];
+num red = Color[RED];
 show "Variable containing enum value:";
 show red;
 

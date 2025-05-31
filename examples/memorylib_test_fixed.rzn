@@ -54,4 +54,4 @@ show "Free buffer 2 result: " + MemoryLib[free_buffer](2);
 # Get memory stats
 show "Memory stats: " + MemoryLib[stats]();
 
-show "===== MEMORY LIBRARY TEST COMPLETE =====";
+show "===== MEMORY LIBRARY TEST COMPnumE =====";

@@ -1,4 +1,4 @@
 class test {
-    let a = 1;
-    let b = 2;
+    num a = 1;
+    num b = 2;
 }

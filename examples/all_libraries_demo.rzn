@@ -47,9 +47,9 @@ show "===== Razen Libraries Demo =====";
 show "--- Random Library ---";
 show "Random number (1-100): " + Random.int(1, 100);
 show "Random float (0-1): " + Random.float(0, 1);
-let fruits = ["apple", "banana", "orange", "grape", "mango"];
+num fruits = ["apple", "banana", "orange", "grape", "mango"];
 show "Random fruit: " + Random.choice(fruits);
-let numbers = [1, 2, 3, 4, 5];
+num numbers = [1, 2, 3, 4, 5];
 show "Shuffled array: " + Random.shuffle(numbers);
 
 # 2. HT (Head/Tails) library demo
@@ -70,7 +70,7 @@ show "Maximum of 3 and 7: " + Math.max(3, 7);
 
 # 4. String library demo
 show "--- String Library ---";
-let text = "Hello, Razen!";
+num text = "Hello, Razen!";
 show "Uppercase: " + String.toUpper(text);
 show "Lowercase: " + String.toLower(text);
 show "Length: " + String.length(text);
@@ -81,7 +81,7 @@ show "Split: " + String.split("a,b,c", ",");
 
 # 5. Array library demo
 show "--- Array Library ---";
-let arr = [5, 3, 8, 1, 7, 2];
+num arr = [5, 3, 8, 1, 7, 2];
 show "Original array: " + arr;
 show "Sorted array: " + Array.sort(arr);
 show "Reversed array: " + Array.reverse(arr);
@@ -111,8 +111,8 @@ show "File name: " + File.name("test.txt");
 
 # 8. JSON library demo
 show "--- JSON Library ---";
-let person = { "name": "John", "age": 30, "city": "New York" };
-let jsonStr = JSON.stringify(person);
+num person = { "name": "John", "age": 30, "city": "New York" };
+num jsonStr = JSON.stringify(person);
 show "JSON string: " + jsonStr;
 show "Parsed JSON: " + JSON.parse(jsonStr);
 show "Pretty JSON: " + JSON.pretty(person);
@@ -192,7 +192,7 @@ show "After removal, has key: " + Storage.has("username");
 show "--- UI Library ---";
 show "Alert dialog would show: 'Welcome to Razen!'";
 show "Confirm dialog would ask: 'Are you sure?'";
-show "Prompt dialog would ask for input with default: 'Enter your name'";
+show "Prompt dialog would ask for invar with default: 'Enter your name'";
 show "Progress bar at 50%: [=====     ]";
 
 # 20. Audio library demo
@@ -229,4 +229,4 @@ show "--- Coin Library ---";
 show "Coin toss: " + Coin.toss();
 show "Multiple coin tosses: " + Coin.multiToss(3);
 
-show "===== Demo Complete =====";
+show "===== Demo Compnume =====";

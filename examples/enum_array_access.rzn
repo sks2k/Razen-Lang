@@ -17,7 +17,7 @@ enum SkillIndex {
 }
 
 # Create a person array
-put person = [
+var person = [
     "John Doe",
     30,
     ["JavaScript", "Python", "Razen"]
@@ -43,7 +43,7 @@ enum AddressField {
 }
 
 # Create a more complex structure
-put employee = [
+var employee = [
     "Jane Smith",
     28,
     ["Java", "Rust", "Go"],
@@ -66,4 +66,4 @@ show "Employee first skill: " + employee[EmployeeField[SKILLS]][SkillIndex[FIRST
 show "Employee street: " + employee[EmployeeField[ADDRESS]][AddressField[STREET]];
 show "Employee city: " + employee[EmployeeField[ADDRESS]][AddressField[CITY]];
 
-show "===== Test Completed =====";
+show "===== Test Compnumed =====";

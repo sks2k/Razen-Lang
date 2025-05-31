@@ -7,63 +7,63 @@ lib binarylib;
 show "===== BINARY LIBRARY TEST =====";
 
 # Create a binary file
-let filename = "test_binary_v2.bin";
-let create_result = BinaryLib[create](filename);
+num filename = "test_binary_v2.bin";
+num create_result = BinaryLib[create](filename);
 show "Creating binary file: " + create_result;
 
 # Open the file for writing
-let write_handle = BinaryLib[open](filename, "w");
+num write_handle = BinaryLib[open](filename, "w");
 show "Opening binary file for writing: " + write_handle;
 
 # Write data to the file
-let data = "Hello Razen Binary World!";
-let bytes_written = BinaryLib[write_bytes](write_handle, data);
+num data = "Hello Razen Binary World!";
+num bytes_written = BinaryLib[write_bytes](write_handle, data);
 show "Writing to binary file: " + bytes_written + " bytes";
 
 # Get current position
-let write_pos = BinaryLib[tell](write_handle);
+num write_pos = BinaryLib[tell](write_handle);
 show "Current write position: " + write_pos;
 
 # Close the file after writing
-let close_write = BinaryLib[close](write_handle);
+num close_write = BinaryLib[close](write_handle);
 show "Closing write handle: " + close_write;
 
 # Open the file again for reading
-let read_handle = BinaryLib[open](filename, "r");
+num read_handle = BinaryLib[open](filename, "r");
 show "Opening binary file for reading: " + read_handle;
 
 # Seek to the beginning of the file
-let seek_result = BinaryLib[seek](read_handle, 0);
+num seek_result = BinaryLib[seek](read_handle, 0);
 show "Seeking to beginning of file: " + seek_result;
 
 # Read the first 5 bytes
-let first_bytes = BinaryLib[read_bytes](read_handle, 5);
+num first_bytes = BinaryLib[read_bytes](read_handle, 5);
 show "Reading first 5 bytes: " + first_bytes;
 
 # Get current position
-let read_pos = BinaryLib[tell](read_handle);
+num read_pos = BinaryLib[tell](read_handle);
 show "Current read position: " + read_pos;
 
 # Seek to position 6 and read more
-let seek_pos6 = BinaryLib[seek](read_handle, 6);
+num seek_pos6 = BinaryLib[seek](read_handle, 6);
 show "Seeking to position 6: " + seek_pos6;
-let next_bytes = BinaryLib[read_bytes](read_handle, 5);
+num next_bytes = BinaryLib[read_bytes](read_handle, 5);
 show "Reading next 5 bytes: " + next_bytes;
 
 # Test string to bytes conversion
-let str_to_bytes = BinaryLib[string_to_bytes]("Test");
+num str_to_bytes = BinaryLib[string_to_bytes]("Test");
 show "Converting string to bytes: " + str_to_bytes;
 
 # Test bytes to string conversion
-let bytes_to_str = BinaryLib[bytes_to_string]([72, 101, 108, 108, 111]);
+num bytes_to_str = BinaryLib[bytes_to_string]([72, 101, 108, 108, 111]);
 show "Converting bytes to string: " + bytes_to_str;
 
 # Close the file after reading
-let close_read = BinaryLib[close](read_handle);
+num close_read = BinaryLib[close](read_handle);
 show "Closing read handle: " + close_read;
 
 # Get file statistics
-let stats = BinaryLib[stats]();
+num stats = BinaryLib[stats]();
 show "File stats: " + stats;
 
-show "===== BINARY LIBRARY TEST COMPLETE =====";
+show "===== BINARY LIBRARY TEST COMPnumE =====";

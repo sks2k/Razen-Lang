@@ -7,53 +7,53 @@ lib processlib;
 show "===== PROCESS LIBRARY TEST =====";
 
 # Create a process
-let pid = ProcessLib[create]("echo Process created by Razen Process Library");
+num pid = ProcessLib[create]("echo Process created by Razen Process Library");
 show "Process ID: " + pid;
 
 # Wait for process
-let status = ProcessLib[wait](pid);
+num status = ProcessLib[wait](pid);
 show "Process exit status: " + status;
 
 # Check if process is running (should be false after wait)
-let is_running = ProcessLib[is_running](pid);
+num is_running = ProcessLib[is_running](pid);
 show "Is process still running: " + is_running;
 
 # Get process info
-let info = ProcessLib[info]();
+num info = ProcessLib[info]();
 show "Process info: " + info;
 
 # Create a process for testing I/O
 # Note: Using 'sleep' instead of 'cat' to avoid hanging
-let io_pid = ProcessLib[create]("sleep 1");
+num io_pid = ProcessLib[create]("sleep 1");
 show "IO Process ID: " + io_pid;
 
 # Test process I/O functions
 # Note: These might not work as expected with 'sleep', but we're testing the API
-let stdin_result = ProcessLib[write_stdin](io_pid, "Test input");
+num stdin_result = ProcessLib[write_stdin](io_pid, "Test invar");
 show "Write to stdin result: " + stdin_result;
 
-let stdout_result = ProcessLib[read_stdout](io_pid);
+num stdout_result = ProcessLib[read_stdout](io_pid);
 show "Read from stdout result: " + stdout_result;
 
-let stderr_result = ProcessLib[read_stderr](io_pid);
+num stderr_result = ProcessLib[read_stderr](io_pid);
 show "Read from stderr result: " + stderr_result;
 
-# Wait for the process to complete
-let io_status = ProcessLib[wait](io_pid);
+# Wait for the process to compnume
+num io_status = ProcessLib[wait](io_pid);
 show "IO Process exit status: " + io_status;
 
 # Test kill function on a new process
-let kill_pid = ProcessLib[create]("sleep 5");
+num kill_pid = ProcessLib[create]("sleep 5");
 show "Process to kill ID: " + kill_pid;
 
 # Kill the process
-let kill_result = ProcessLib[kill](kill_pid);
+num kill_result = ProcessLib[kill](kill_pid);
 show "Kill process result: " + kill_result;
 
 # Test signal function (commented out as it might not work in all environments)
-# let signal_pid = ProcessLib[create]("sleep 5");
+# num signal_pid = ProcessLib[create]("sleep 5");
 # show "Process to signal ID: " + signal_pid;
-# let signal_result = ProcessLib[signal](signal_pid, "SIGTERM");
+# num signal_result = ProcessLib[signal](signal_pid, "SIGTERM");
 # show "Signal process result: " + signal_result;
 
-show "===== PROCESS LIBRARY TEST COMPLETE =====";
+show "===== PROCESS LIBRARY TEST COMPnumE =====";

@@ -13,7 +13,7 @@ show Color[RED];
 
 # Store enum in variable directly - this is the issue
 show "Saving enum value to variable...";
-let red = Color[RED];
+num red = Color[RED];
 show "Variable enum value:";
 show red;
 

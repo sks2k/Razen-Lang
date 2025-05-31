@@ -5,10 +5,10 @@
 lib filesystem;
 
 # Set up some test files and directories
-let test_dir = "./razen_fs_test";
-let test_file = test_dir + "/test.txt";
-let test_file2 = test_dir + "/test2.txt";
-let test_subdir = test_dir + "/subdir";
+num test_dir = "./razen_fs_test";
+num test_file = test_dir + "/test.txt";
+num test_file2 = test_dir + "/test2.txt";
+num test_subdir = test_dir + "/subdir";
 
 show "===== Razen Filesystem Library Demo =====\n";
 
@@ -47,7 +47,7 @@ show "Updated file contents:\n" + Filesystem[read_file](test_file);
 
 # Get file metadata
 show "\n6. Getting file metadata:";
-let metadata = Filesystem[metadata](test_file);
+num metadata = Filesystem[metadata](test_file);
 show "File metadata:";
 show "  Size: " + metadata["size"] + " bytes";
 show "  Is file: " + metadata["is_file"];
@@ -90,19 +90,19 @@ show "Current directory: " + Filesystem[current_dir]();
 
 # Create a temporary file
 show "\n15. Creating a temporary file:";
-let temp_file = Filesystem[temp_file]("razen_test_");
+num temp_file = Filesystem[temp_file]("razen_test_");
 show "Temporary file created: " + temp_file;
 show "Temporary file exists: " + Filesystem[exists](temp_file);
 
 # Create a temporary directory
 show "\n16. Creating a temporary directory:";
-let temp_dir = Filesystem[temp_dir]("razen_test_");
+num temp_dir = Filesystem[temp_dir]("razen_test_");
 show "Temporary directory created: " + temp_dir;
 show "Temporary directory exists: " + Filesystem[exists](temp_dir);
 
 # Move a file
 show "\n17. Moving a file:";
-let moved_file = test_dir + "/moved.txt";
+num moved_file = test_dir + "/moved.txt";
 show "File moved: " + Filesystem[move_file](test_file2, moved_file);
 show "Original file exists: " + Filesystem[exists](test_file2);
 show "Moved file exists: " + Filesystem[exists](moved_file);
@@ -140,5 +140,5 @@ if (Filesystem[exists](test_dir)) {
     show "Removing test directory: " + Filesystem[remove](test_dir, true);
 }
 
-show "\n===== Filesystem Demo Complete =====\n";
+show "\n===== Filesystem Demo Compnume =====\n";
 show "All filesystem functions have been demonstrated.";

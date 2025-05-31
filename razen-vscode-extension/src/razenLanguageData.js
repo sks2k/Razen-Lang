@@ -29,7 +29,7 @@ const razenKeywords = [
     {
         name: 'for',
         description: 'Iterative loop',
-        documentation: 'Used for iterating over a range or collection.\n\n```razen\nfor (let i = 0; i < 10; i = i + 1) {\n  // code to execute for each iteration\n}\n```'
+        documentation: 'Used for iterating over a range or collection.\n\n```razen\nfor (num i = 0; i < 10; i = i + 1) {\n  // code to execute for each iteration\n}\n```'
     },
     {
         name: 'fun',
@@ -49,7 +49,7 @@ const razenKeywords = [
     {
         name: 'continue',
         description: 'Skip to next iteration',
-        documentation: 'Used to skip the current iteration and continue with the next one.\n\n```razen\nfor (let i = 0; i < 10; i = i + 1) {\n  if (i % 2 == 0) {\n    continue;\n  }\n  // This code will only execute for odd values of i\n}\n```'
+        documentation: 'Used to skip the current iteration and continue with the next one.\n\n```razen\nfor (num i = 0; i < 10; i = i + 1) {\n  if (i % 2 == 0) {\n    continue;\n  }\n  // This code will only execute for odd values of i\n}\n```'
     },
     {
         name: 'and',
@@ -194,80 +194,91 @@ const razenKeywords = [
     {
         name: 'true',
         description: 'Boolean true value',
-        documentation: 'Represents a boolean true value.\n\n```razen\nhold isActive = true;\n```'
+        documentation: 'Represents a boolean true value.\n\n```razen\nbool isActive = true;\n```'
     },
     {
         name: 'false',
         description: 'Boolean false value',
-        documentation: 'Represents a boolean false value.\n\n```razen\nhold isActive = false;\n```'
+        documentation: 'Represents a boolean false value.\n\n```razen\nbool isActive = false;\n```'
     },
     {
         name: 'null',
         description: 'Null/undefined value',
-        documentation: 'Represents a null or undefined value.\n\n```razen\nput value = null;\n```'
+        documentation: 'Represents a null or undefined value.\n\n```razen\nvar value = null;\n```'
     }
 ];
 
 // Razen Variables with snippets
 const razenVariables = [
     {
-        name: 'let',
-        signature: 'let variableName = value;',
+        name: 'num',
+        signature: 'num variableName = value;',
         description: 'Numeric variable declaration',
-        documentation: 'Used to declare a numeric variable. Should only be used with numeric values (integers or floats).\n\n```razen\n// Correct usage:\nlet counter = 42;\nlet pi = 3.14;\n\n// Incorrect usage (will cause errors):\n// let name = "John";  // Error: String value with let\n// let isActive = true;  // Error: Boolean value with let\n```',
-        snippet: 'let ${1:variableName} = ${2:numericValue};'
+        documentation: 'Used to declare a numeric variable. Should only be used with numeric values (integers or floats).\n\n```razen\n// Correct usage:\nnum counter = 42;\nnum pi = 3.14;\n\n// Incorrect usage (will cause errors):\n// num name = "John";  // Error: String value with num\n// num isActive = true;  // Error: Boolean value with num\n```',
+        snippet: 'num ${1:variableName} = ${2:numericValue};'
     },
     {
-        name: 'take',
+        name: 'str',
+        signature: 'str variableName = value;',
         description: 'String variable declaration',
-        documentation: 'Used for declaring string variables and text manipulation.\n\n```razen\ntake message = "Hello, World!";\n```',
-        snippet: 'take ${1:variableName} = "${2:value}"'
+        documentation: 'Used for declaring string variables and text manipulation.\n\n```razen\nstr message = "Hello, World!";\n```',
+        snippet: 'str ${1:variableName} = "${2:value}"'
     },
     {
-        name: 'hold',
-        signature: 'hold variableName = value;',
+        name: 'bool',
+        signature: 'bool variableName = value;',
         description: 'Boolean variable declaration',
-        documentation: 'Used to declare a boolean variable. Should only be used with boolean values (true/false).\n\n```razen\n// Correct usage:\nhold isActive = true;\nhold hasPermission = false;\nhold comparison = 5 > 3;  // Boolean expression\n\n// Incorrect usage (will cause errors):\n// hold count = 42;  // Error: Numeric value with hold\n// hold name = "John";  // Error: String value with hold\n```',
-        snippet: 'hold ${1:variableName} = ${2|true,false|};'
+        documentation: 'Used to declare a boolean variable. Should only be used with boolean values (true/false).\n\n```razen\n// Correct usage:\nbool isActive = true;\nbool hasPermission = false;\nbool comparison = 5 > 3;  // Boolean expression\n\n// Incorrect usage (will cause errors):\n// bool count = 42;  // Error: Numeric value with bool\n// bool name = "John";  // Error: String value with bool\n```',
+        snippet: 'bool ${1:variableName} = ${2|true,false|};'
     },
     {
-        name: 'put',
-        description: 'Any type variable declaration',
-        documentation: 'Used for declaring variables of any type.\n\n```razen\nput data = { name: "John", age: 30 };\n```',
-        snippet: 'put ${1:variableName} = ${2:value}'
+        name: 'var',
+        signature: 'var variableName = value;',
+        description: 'Generic variable declaration',
+        documentation: 'Used for declaring variables of any type.\n\n```razen\nvar data = { name: "John", age: 30 };\n```',
+        snippet: 'var ${1:variableName} = ${2:value}'
     },
     {
-        name: 'sum',
-        signature: 'sum variableName = value1 + value2;',
-        description: 'Sum calculation variable',
-        documentation: 'Used to declare a variable that stores the sum of numeric values. Should only be used with numeric expressions.\n\n```razen\n// Correct usage:\nsum total = 10 + 20;\nsum result = a + b;  // Where a and b are numeric\n\n// Incorrect usage (will cause errors):\n// sum message = "Hello" + "World";  // Error: String concatenation with sum\n```',
-        snippet: 'sum ${1:variableName} = ${2:numericValue1} + ${3:numericValue2};'
+        name: 'const',
+        signature: 'const variableName = value;',
+        description: 'Constant variable declaration',
+        documentation: 'Used to declare a constant variable.\n\n```razen\nconst PI = 3.14;\n```',
+        snippet: 'const ${1:variableName} = ${2:value}'
     },
     {
-        name: 'diff',
-        description: 'Subtraction operation',
-        documentation: 'Used for calculating the difference between values.\n\n```razen\ndiff result = a - b;\n```',
-        snippet: 'diff ${1:variableName} = ${2:a} - ${3:b}'
+        name: 'num',
+        signature: 'num variableName = value1 + value2;',
+        description: 'Numeric variable with addition',
+        documentation: 'Used to declare a numeric variable that stores the result of addition. Should only be used with numeric expressions.\n\n```razen\n// Correct usage:\nnum total = 10 + 20;\nnum result = a + b;  // Where a and b are numeric\n\n// Incorrect usage (will cause errors):\n// num message = "Hello" + "World";  // Error: String concatenation with num\n```',
+        snippet: 'num ${1:variableName} = ${2:numericValue1} + ${3:numericValue2};'
     },
     {
-        name: 'prod',
-        signature: 'prod variableName = value1 * value2;',
-        description: 'Product calculation variable',
-        documentation: 'Used to declare a variable that stores the product of numeric values. Should only be used with numeric expressions.\n\n```razen\n// Correct usage:\nprod result = 5 * 10;\nprod area = width * height;  // Where width and height are numeric\n\n// Incorrect usage (will cause errors):\n// prod result = "Hello" * 3;  // Error: String multiplication with prod\n```',
-        snippet: 'prod ${1:variableName} = ${2:numericValue1} * ${3:numericValue2};'
+        name: 'num',
+        signature: 'num variableName = value1 - value2;',
+        description: 'Numeric variable with subtraction',
+        documentation: 'Used for declaring a numeric variable with subtraction.\n\n```razen\nnum result = a - b;\n```',
+        snippet: 'num ${1:variableName} = ${2:a} - ${3:b}'
     },
     {
-        name: 'div',
-        description: 'Division operation',
-        documentation: 'Used for calculating the division of values.\n\n```razen\ndiv result = a / b;\n```',
-        snippet: 'div ${1:variableName} = ${2:a} / ${3:b}'
+        name: 'num',
+        signature: 'num variableName = value1 * value2;',
+        description: 'Numeric variable with multiplication',
+        documentation: 'Used to declare a numeric variable that stores the result of multiplication. Should only be used with numeric expressions.\n\n```razen\n// Correct usage:\nnum result = 5 * 10;\nnum area = width * height;  // Where width and height are numeric\n\n// Incorrect usage (will cause errors):\n// num result = "Hello" * 3;  // Error: String multiplication with num\n```',
+        snippet: 'num ${1:variableName} = ${2:numericValue1} * ${3:numericValue2};'
     },
     {
-        name: 'mod',
-        signature: 'mod variableName = value1 % value2;',
-        description: 'Modulus calculation variable',
-        documentation: 'Used to declare a variable that stores the remainder of division. Should only be used with numeric expressions.\n\n```razen\n// Correct usage:\nmod result = 10 % 3;  // result = 1\nmod isEven = number % 2;  // 0 if even, 1 if odd\n\n// Incorrect usage (will cause errors):\n// mod result = "Hello" % 2;  // Error: String modulus with mod\n```',
-        snippet: 'mod ${1:variableName} = ${2:numericValue1} % ${3:numericValue2};'
+        name: 'num',
+        signature: 'num variableName = value1 / value2;',
+        description: 'Numeric variable with division',
+        documentation: 'Used for declaring a numeric variable with division.\n\n```razen\nnum result = a / b;\n```',
+        snippet: 'num ${1:variableName} = ${2:a} / ${3:b}'
+    },
+    {
+        name: 'num',
+        signature: 'num variableName = value1 % value2;',
+        description: 'Numeric variable with modulus',
+        documentation: 'Used to declare a numeric variable that stores the remainder of division. Should only be used with numeric expressions.\n\n```razen\n// Correct usage:\nnum result = 10 % 3;  // result = 1\nnum isEven = number % 2;  // 0 if even, 1 if odd\n\n// Incorrect usage (will cause errors):\n// num result = "Hello" % 2;  // Error: String modulus with num\n```',
+        snippet: 'num ${1:variableName} = ${2:numericValue1} % ${3:numericValue2};'
     },
     {
         name: 'power',
@@ -506,27 +517,9 @@ const razenFunctions = [
         documentation: 'Returns the value associated with the specified key in an object.\n\n```razen\nmap person = { name: "John", age: 30 };\ntake name = get(person, "name"); // name = "John"\n```',
         snippet: 'get(${1:obj}, ${2:key})'
     },
-    {
-        name: 'time',
-        signature: 'time()',
-        description: 'Gets current timestamp',
-        documentation: 'Returns the current timestamp in milliseconds.\n\n```razen\nlet now = time(); // e.g., 1617184800000\n```',
-        snippet: 'time()'
-    },
-    {
-        name: 'date',
-        signature: 'date()',
-        description: 'Gets current date as string',
-        documentation: 'Returns the current date as an ISO string.\n\n```razen\ntake today = date(); // e.g., "2023-04-01T12:00:00.000Z"\n```',
-        snippet: 'date()'
-    },
-    {
-        name: 'timestamp',
-        signature: 'timestamp()',
-        description: 'Gets current timestamp',
-        documentation: 'Returns the current timestamp in milliseconds.\n\n```razen\nlet now = timestamp(); // e.g., 1617184800000\n```',
-        snippet: 'timestamp()'
-    },
+
+
+
     {
         name: 'sleep',
         signature: 'sleep(ms)',

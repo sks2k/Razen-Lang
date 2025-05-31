@@ -15,8 +15,8 @@ pub fn coin(args: Vec<Value>) -> Result<Value, String> {
 }
 
 /// Returns true or false randomly
-/// Example: bool() => true
-pub fn bool(args: Vec<Value>) -> Result<Value, String> {
+/// Example: bool_tos() => true
+pub fn bool_tos(args: Vec<Value>) -> Result<Value, String> {
     if !args.is_empty() {
         return Err("HT.bool requires no arguments".to_string());
     }

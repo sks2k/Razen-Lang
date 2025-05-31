@@ -322,12 +322,12 @@ mod tests {
         let mut lexer = Lexer::new(input.to_string());
         
         let expected_tokens = vec![
-            (TokenType::Let, "let"),
+            (TokenType::Num, "num"),
             (TokenType::Identifier, "x"),
             (TokenType::Assign, "="),
             (TokenType::NumberLiteral, "5"),
             (TokenType::Semicolon, ";"),
-            (TokenType::Take, "take"),
+            (TokenType::Str, "str"),
             (TokenType::Identifier, "greeting"),
             (TokenType::Assign, "="),
             (TokenType::StringLiteral, "hello"),

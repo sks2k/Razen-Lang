@@ -34,4 +34,4 @@ lib irlib;
 lib codegenlib;
 lib optimizelib;
 
-show "===== COMPILER CONSTRUCTION TOKENS TEST COMPLETE =====";
+show "===== COMPILER CONSTRUCTION TOKENS TEST COMPnumE =====";

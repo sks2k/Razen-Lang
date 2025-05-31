@@ -235,12 +235,15 @@ impl LibraryManager {
         let mut bolt_lib = Library::new("bolt");
         bolt_lib.register_function("run", crate::functions::boltlib::run);
         bolt_lib.register_function("parallel", crate::functions::boltlib::parallel);
+        bolt_lib.register_function("threads", crate::functions::boltlib::threads);
         self.register_library(bolt_lib);
 
         // Seed library
         let mut seed_lib = Library::new("seed");
         seed_lib.register_function("generate", crate::functions::seedlib::generate);
-        seed_lib.register_function("map", crate::functions::seedlib::map);
+        seed_lib.register_function("map_seed", crate::functions::seedlib::map_seed);
+        seed_lib.register_function("noise_map", crate::functions::seedlib::noise_map);
+        seed_lib.register_function("name", crate::functions::seedlib::name);
         self.register_library(seed_lib);
 
         // Memory library for memory management operations
@@ -471,7 +474,7 @@ impl LibraryManager {
         system_lib.register_function("info", crate::functions::systemlib::info);
         system_lib.register_function("current_time", crate::functions::systemlib::current_time);
         system_lib.register_function("system_name", crate::functions::systemlib::system_name);
-        self.register_library(system_lib);
+        self.register_library(system_lib); 
 
         // Register Box library functions
         let mut box_lib = Library::new("boxlib");
@@ -491,7 +494,7 @@ impl LibraryManager {
         // Register HT (Head/Tails) library functions
         let mut ht_lib = Library::new("htlib");
         ht_lib.register_function("coin", crate::functions::htlib::coin);
-        ht_lib.register_function("bool", crate::functions::htlib::bool);
+        ht_lib.register_function("bool_tos", crate::functions::htlib::bool_tos);
         self.register_library(ht_lib);
 
         // Register Audio library functions

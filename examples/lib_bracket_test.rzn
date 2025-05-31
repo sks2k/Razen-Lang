@@ -9,11 +9,11 @@ lib timelib; # Time library with new name to avoid conflicts
 
 # Test array library functions
 show "Testing Array library functions:";
-let myarray = [1, 2];
+num myarray = [1, 2];
 ArrLib[push](myarray, 3);
 show "Array after push: " + myarray;
 
-let popped = ArrLib[pop](myarray);
+num popped = ArrLib[pop](myarray);
 show "Popped value: " + popped;
 show "Array after pop: " + myarray;
 
@@ -21,7 +21,7 @@ show "Join example: " + ArrLib[join](["a", "b", "c"], "-");
 
 # Test string library functions
 show "\nTesting String library functions:";
-let mystring = "hello world";
+num mystring = "hello world";
 show "Upper case: " + StrLib[upper](mystring);
 show "Lower case: " + StrLib[lower]("HELLO WORLD");
 show "Substring: " + StrLib[substring](mystring, 0, 5);
@@ -36,7 +36,7 @@ show "Divide: " + MathLib[divide](20, 5);
 
 # Test time library functions
 show "\nTesting Time library functions:";
-let current_time = TimeLib[now]();
+num current_time = TimeLib[now]();
 show "Current time: " + current_time;
 
-show "\nAll tests completed!";
+show "\nAll tests compnumed!";

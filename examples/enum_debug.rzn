@@ -12,5 +12,5 @@ show Color[RED];
 
 # But this statement has an issue
 show "Variable assignment:";
-let red = Color[RED];
+num red = Color[RED];
 show red;

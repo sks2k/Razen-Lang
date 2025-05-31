@@ -29,14 +29,14 @@ final class Config {
 }
 
 # Testing volatile variable
-volatile let counter = 0;
+volatile num counter = 0;
 
 # Display results
 show "PI: " + PI;
 show "MAX_USERS: " + MAX_USERS;
 show "add(5, 3): " + add(5, 3);
 
-let config = new Config("timeout", 30);
+num config = new Config("timeout", 30);
 show "Config value: " + config.getValue();
 
 counter = counter + 1;

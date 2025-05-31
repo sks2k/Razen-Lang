@@ -11,42 +11,42 @@ show "------------------------------------------";
 
 # Test simple addition
 show "\n1. Testing MathLib[add] function:";
-let a = 5;
-let b = a + 3;  # Should be 8
+num a = 5;
+num b = a + 3;  # Should be 8
 show "Variable a = " + a;
 show "Variable b = a + 3 = " + b;
 
 # Now test with bracket notation
-let result_add = MathLib[add](5, 3);
+num result_add = MathLib[add](5, 3);
 show "MathLib[add](5, 3) = " + result_add;
 show "Should match b (8) = " + b;
 
 # Test subtraction
 show "\n2. Testing MathLib[subtract] function:";
-let result_sub = MathLib[subtract](10, 4);
+num result_sub = MathLib[subtract](10, 4);
 show "MathLib[subtract](10, 4) = " + result_sub;
 show "Expected: 6";
 
 # Test multiplication
 show "\n3. Testing MathLib[multiply] function:";
-let result_mul = MathLib[multiply](6, 7);
+num result_mul = MathLib[multiply](6, 7);
 show "MathLib[multiply](6, 7) = " + result_mul;
 show "Expected: 42";
 
 # Test division
 show "\n4. Testing MathLib[divide] function:";
-let result_div = MathLib[divide](20, 5);
+num result_div = MathLib[divide](20, 5);
 show "MathLib[divide](20, 5) = " + result_div;
 show "Expected: 4";
 
 # Test with variables as arguments
 show "\n5. Testing with variables as arguments:";
-let x = 10;
-let y = 5;
+num x = 10;
+num y = 5;
 show "x = " + x + ", y = " + y;
 show "MathLib[add](x, y) = " + MathLib[add](x, y);
 show "MathLib[subtract](x, y) = " + MathLib[subtract](x, y);
 show "MathLib[multiply](x, y) = " + MathLib[multiply](x, y);
 show "MathLib[divide](x, y) = " + MathLib[divide](x, y);
 
-show "\nAll tests completed!"; 
+show "\nAll tests compnumed!"; 

@@ -7,6 +7,6 @@ lib memory;
 show "===== Memory Library Test =====";
 
 # Test pointer operations
-let value = 42;
-let ptr = Memory.addressof(value);
+num value = 42;
+num ptr = Memory.addressof(value);
 show "Address of value: " + ptr;

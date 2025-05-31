@@ -8,7 +8,7 @@ lib compilerlib;  # Compiler operations library
 show "===== RAZEN SELF-COMPILATION PHASE 2: LEXER =====";
 
 # Define a simple source code with various token types
-take source = "let x = 5; # This is a comment\ntake message = \"Hello, World!\";\nshow message;";
+str source = "num x = 5; # This is a comment\nstr message = \"Hello, World!\";\nshow message;";
 show "Source code to tokenize:";
 show source;
 
@@ -20,19 +20,19 @@ show "Tokens: " + CompilerLib[tokenize](source);
 show "\nTesting different language constructs:";
 
 # Variables and assignments
-take var_test = "let num = 42; take text = \"string\"; hold flag = true;";
+str var_test = "num num = 42; str text = \"string\"; bool flag = true;";
 show "Variable declarations: " + CompilerLib[tokenize](var_test);
 
 # Control structures
-take control_test = "if x > 10 { show \"Greater\"; } else { show \"Less or equal\"; }";
+str control_test = "if x > 10 { show \"Greater\"; } else { show \"Less or equal\"; }";
 show "Control structures: " + CompilerLib[tokenize](control_test);
 
 # Functions
-take function_test = "fun add(a, b) { return a + b; }";
+str function_test = "fun add(a, b) { return a + b; }";
 show "Function definition: " + CompilerLib[tokenize](function_test);
 
 # Library import
-take import_test = "lib mathlib; show MathLib[sqrt](16);";
+str import_test = "lib mathlib; show MathLib[sqrt](16);";
 show "Library import: " + CompilerLib[tokenize](import_test);
 
-show "\n===== LEXER TEST COMPLETE =====";
+show "\n===== LEXER TEST COMPnumE =====";

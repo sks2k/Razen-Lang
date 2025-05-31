@@ -7,7 +7,7 @@ fun greet(name) {
 }
 
 # Calling a function
-take message = greet("Alice");
+str message = greet("Alice");
 show message;
 
 # Function with multiple parameters
@@ -19,11 +19,11 @@ show "5 + 3 = " + add(5, 3);
 
 # Function with default parameter values
 fun power(base, exponent = 2) {
-    take result = 1;
-    take i = 0;
+    str result = 1;
+    str i = 0;
     while (i < exponent) {
-        let result = result * base;
-        let i = i + 1;
+        num result = result * base;
+        num i = i + 1;
     }
     return result;
 }
@@ -37,23 +37,23 @@ fun min_max(numbers) {
         return [null, null];
     }
     
-    take min_val = numbers[0];
-    take max_val = numbers[0];
+    str min_val = numbers[0];
+    str max_val = numbers[0];
     
     for (num in numbers) {
         if (num < min_val) {
-            let min_val = num;
+            num min_val = num;
         }
         if (num > max_val) {
-            let max_val = num;
+            num max_val = num;
         }
     }
     
     return [min_val, max_val];
 }
 
-take numbers = [5, 3, 8, 1, 9, 2];
-take [min, max] = min_max(numbers);
+str numbers = [5, 3, 8, 1, 9, 2];
+str [min, max] = min_max(numbers);
 show "Min: " + min + ", Max: " + max;
 
 # Recursive function

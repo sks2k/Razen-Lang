@@ -5,19 +5,9 @@ lib uuid;
 # Incorrect variable declarations test file
 
 # 1. General Purpose Variables with incorrect types
-let stringInLet = "This should be a number";  # ERROR: let should be used for numeric values
-take numberInTake = 42;  # ERROR: take should be used for string values
-hold stringInHold = "This should be a boolean";  # ERROR: hold should be used for boolean values
-
-# 2. Mathematical Variables with incorrect types
-sum boolInSum = true;  # ERROR: sum should be used for numeric values
-diff arrayInDiff = [1, 2, 3];  # ERROR: diff should be used for numeric values
-prod stringInProd = "Product";  # ERROR: prod should be used for numeric values
-
-# 4. String Variables with incorrect types
-text numberInText = 123;  # ERROR: text should be used for string values
-concat boolInConcat = false;  # ERROR: concat should be used for string values
-slice numberInSlice = 42;  # ERROR: slice should be used for string values
+num stringInnum = "This should be a number";  # ERROR: num should be used for numeric values
+str numberInstr = 42;  # ERROR: str should be used for string values
+bool stringInbool = "This should be a boolean";  # ERROR: bool should be used for boolean values
 
 # 5. List & Array Variables with incorrect types
 list numberInList = 42;  # ERROR: list should be used for collection values
@@ -39,9 +29,9 @@ show "Testing incorrect variable declarations";
 
 # Try to use the variables
 show "Attempting to display variables with incorrect types:";
-show stringInLet;
-show numberInTake;
-show stringInHold;
+show stringInnum;
+show numberInstr;
+show stringInbool;
 
 # Exit program
 exit;

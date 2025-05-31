@@ -6,7 +6,7 @@ lib netlib;
 # I/O Statement for getting Website URL
 show(yellow) "Enter a website url here:";
 read website;
-take status = NetLib[ping](website);
+str status = NetLib[ping](website);
 
 # IF ELSE Condition for it if the website is Online so show Website is Online or Website is Offline
 if (status == "true") {

@@ -1,0 +1,210 @@
+# Razen Language - Improved Token System
+# This file demonstrates the proposed token improvements while maintaining Razen's unique identity
+
+# Document type declaration
+type: script;
+
+# ===== VARIABLE DECLARATIONS =====
+# Simplified variable declarations with clear purpose
+
+# Numbers (replaces 'let')
+num x = 42;
+num pi = 3.14159;
+
+# Strings (replaces 'take')
+str greeting = "Hello, Razen!";
+
+# Booleans (replaces 'hold')
+bool isActive = true;
+
+# Any type (replaces 'put')
+var data = null;
+
+# Constants (immutable values)
+const API_KEY = "razen_12345";
+const MAX_ATTEMPTS = 3;
+
+# ===== MATHEMATICAL OPERATIONS =====
+# Using more intuitive naming
+
+# Basic math
+num a = 10;
+num b = 5;
+num sum = a + b;       # Addition
+num diff = a - b;      # Subtraction (replaces 'diff')
+num product = a * b;   # Multiplication (replaces 'prod')
+num quotient = a / b;  # Division (replaces 'div')
+num remainder = a % b; # Modulus (replaces 'mod')
+num power = a ** 2;    # Exponentiation
+num floorDiv = a // b; # Floor division
+
+# ===== DATA STRUCTURES =====
+# Keeping Razen's unique bracket notation for libraries
+
+# Lists (dynamic arrays)
+list numbers = [1, 2, 3, 4, 5];
+ArrLib[append](numbers, 6);     # Add element using library function
+ArrLib[remove](numbers, 3);     # Remove element using library function
+
+# Arrays (fixed size)
+arr matrix = [[1, 2], [3, 4]];
+
+# Maps (dictionaries)
+map user = {
+    "name": "Razen Developer",
+    "age": 25,
+    "skills": ["programming", "design"]
+};
+
+# ===== CONTROL FLOW =====
+# Keeping familiar control flow with cleaner syntax
+
+# Conditionals
+if (x > 10) {
+    show("x is greater than 10")
+} elif (x == 10) {
+    show("x is exactly 10")
+} else {
+    show("x is less than 10")
+}
+
+# Pattern matching (keeping Razen's unique 'when' keyword)
+when (user.age) {
+    18 -> show "Just became an adult";
+    25 -> show "Quarter-century milestone";
+    _ -> show "Age is " + user.age;
+}
+
+# Loops
+for item in numbers {
+    show item;
+}
+
+num count = 0;
+while (count < 5) {
+    show "Count: " + count;
+    count += 1;
+}
+
+# ===== FUNCTIONS =====
+# Simplified function declaration
+
+fun greet(name) {
+    return "Hello, " + name + "!";
+}
+
+# Function with type hints (optional)
+fun add(num a, num b) -> num {
+    return a + b;
+}
+
+# ===== LIBRARY USAGE =====
+# Preserving Razen's unique bracket notation for library functions
+
+# Math operations
+num randomValue = Random[choice](1, 10);
+num squareRoot = MathLib[sqrt](16);
+
+# String operations
+str text = "razen language";
+str uppercased = StrLib[toUpper](text);
+
+# File operations
+File[write]("output.txt", "Hello from Razen!");
+str content = File[read]("input.txt");
+
+# ===== ERROR HANDLING =====
+# Simplified error handling
+
+try {
+    num result = 10 / 0;
+} catch {
+    show "Division by zero error";
+} finally {
+    show "Operation attempted";
+}
+
+# ===== CLASSES AND OBJECTS =====
+# Simplified class syntax
+
+class Person {
+    # Constructor
+    fun init(name, age) {
+        this.name = name;
+        this.age = age;
+    }
+    
+    # Method
+    fun describe() -> str {
+        return this.name + " is " + this.age + " years old";
+    }
+}
+
+# Create an object
+var john = Person("John", 30);
+show john.describe();
+
+# ===== ASYNCHRONOUS OPERATIONS =====
+# Simplified async syntax
+
+fun async fetchData(url) {
+    # Simulating network request
+    await NetLib[get](url);
+    return "Data received";
+}
+
+# ===== IMPORTS =====
+# Simplified import system
+
+lib mathlib as m;
+lib mathlib;
+
+# ===== ADVANCED FEATURES =====
+# Type checking
+TypeCheckLib[isNumber](42);  # Returns true
+
+# Unique Razen features preserved
+Bolt[optimize]({
+    "target": "performance",
+    "level": "high"
+});
+
+# ===== ADDITIONAL UNIQUE RAZEN FEATURES =====
+
+# Enhanced debugging with Trace
+Trace[start]();
+num factorial = 1;
+for i in 1..5 {
+    factorial *= i;
+    Trace[log]("Factorial of " + i + " is " + factorial);
+}
+Trace[end]();
+
+# ===== MEMORY MANAGEMENT =====
+# Improved memory handling with variable support (Rust/Python-inspired)
+
+# Basic memory allocation with variables
+var buffer = MemoryLib[alloc](1024);  # Allocate 1024 bytes
+MemoryLib[write_byte](buffer, 0, 65);  # Write 'A' to first byte
+num value = MemoryLib[read_byte](buffer, 0);  # Read first byte
+show "Read value: " + value;  # Shows 65 (ASCII for 'A')
+MemoryLib[free](buffer);  # Free the memory
+
+# Buffer with automatic cleanup (like Rust's ownership or Python's context managers)
+with MemoryLib[create_buffer](2048) as large_buffer {
+    # Buffer is automatically freed when exiting this block
+    str data = "Hello, Razen!";
+    MemoryLib[buffer_write_string](large_buffer, 0, data);
+    str read_data = MemoryLib[buffer_read_string](large_buffer, 0, data.length);
+    show read_data;  # Shows "Hello, Razen!"
+}
+
+# Memory statistics
+map memory_stats = MemoryLib[stats]();
+show "Total allocated: " + memory_stats["allocated"] + " bytes";
+show "Total buffers: " + memory_stats["buffers"];
+
+# Type conversion
+str numAsString = "42";
+num convertedNum = TypeConvertLib[toNumber](numAsString);
+show convertedNum + 8;  # Shows 50

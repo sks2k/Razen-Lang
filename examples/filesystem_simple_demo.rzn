@@ -72,5 +72,5 @@ show "File removed: " + Filesystem[remove]("./test_dir/test.txt");
 show "Moved file removed: " + Filesystem[remove]("./test_dir/moved.txt");
 show "Directory removed: " + Filesystem[remove]("./test_dir");
 
-show "\n===== Filesystem Demo Complete =====\n";
+show "\n===== Filesystem Demo Compnume =====\n";
 show "Basic filesystem functions have been demonstrated.";

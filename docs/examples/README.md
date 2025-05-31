@@ -19,10 +19,10 @@ This section contains a collection of example programs written in Razen to help 
 ## Advanced Examples
 
 - [Recursion](recursion.rzn) - Recursive function examples
-- [Higher-Order Functions](higher_order_functions.rzn) - Functions that take or return other functions
+- [Higher-Order Functions](higher_order_functions.rzn) - Functions that str or return other functions
 - [Custom Data Types](custom_data_types.rzn) - Creating and using custom data types
 
-## Complete Projects
+## Compnume Projects
 
 - [Calculator](projects/calculator.rzn) - A simple calculator application
 - [Todo List](projects/todo_list.rzn) - A command-line todo list manager

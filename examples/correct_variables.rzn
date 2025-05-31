@@ -7,10 +7,10 @@ lib arrlib;
 # Correct variable declarations test file
 
 # 1. General Purpose Variables
-let num = 42;  # Numeric variable
-take message = "Hello, Razen!";  # String variable
-hold isValid = true;  # Boolean variable
-put anything = "This can be any type";  # Any type variable
+num num = 42;  # Numeric variable
+str message = "Hello, Razen!";  # String variable
+bool isValid = true;  # Boolean variable
+var anything = "This can be any type";  # Any type variable
 
 # 2. Mathematical Variables
 sum total = 100 + 50;  # Sum calculation
@@ -23,7 +23,7 @@ mod remainder = 10 % 3;  # Modulus calculation
 text greeting = "Welcome to Razen";  # String data
 concat fullName = "John" + " " + "Doe";  # String concatenation
 slice firstName = "John Doe";  # Will use substring later
-let nameLength = 8;  # String length - using 'let' instead of 'len' for numeric value
+num nameLength = 8;  # String length - using 'num' instead of 'len' for numeric value
 
 # 5. List & Array Variables
 list dynamicList = [1, 2, 3, 4, 5];  # Dynamic array
@@ -38,7 +38,7 @@ value userValues = ["John", 30];  # Dictionary values
 
 # 7. Date & Time Variables
 current currentTime = TimeLib[now]();  # Current date/time
-take timestamp = TimeLib[timestamp]();  # Current timestamp
+str timestamp = TimeLib[timestamp]();  # Current timestamp
 year currentYear = TimeLib[year]();  # Year component
 month currentMonth = TimeLib[month]();  # Month component
 day currentDay = TimeLib[day]();  # Day component

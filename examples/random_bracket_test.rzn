@@ -12,4 +12,4 @@ show "===== Random Library Bracket Test =====";
 # Test random library with bracket notation
 show "Random number between 1-100: " + Random[int](1, 100);
 
-show "===== Test Completed =====";
+show "===== Test Compnumed =====";

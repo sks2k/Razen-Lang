@@ -9,8 +9,8 @@ show "Testing Section 12 - OOP Keywords";
 # Class declaration
 class User {
     # Class properties
-    let id = 1;
-    take name = "Default User";
+    num id = 1;
+    str name = "Default User";
     
     # Class method
     fun display() {
@@ -55,4 +55,4 @@ export User;
 # Note: Library support will be implemented separately
 
 # End of test
-show "All tests completed successfully";
+show "All tests compnumed successfully";

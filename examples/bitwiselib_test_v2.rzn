@@ -7,66 +7,66 @@ lib bitwiselib;
 show "===== BITWISE LIBRARY TEST =====";
 
 # Test basic bitwise operations
-let a = 5;  # 0101 in binary
-let b = 3;  # 0011 in binary
+num a = 5;  # 0101 in binary
+num b = 3;  # 0011 in binary
 show "Values: a = " + a + " (0101 in binary), b = " + b + " (0011 in binary)";
 
 # AND operation
-let and_result = BitwiseLib[and](a, b);
+num and_result = BitwiseLib[and](a, b);
 show "Bitwise AND (a & b): " + and_result + " (expected: 1)";
 
 # OR operation
-let or_result = BitwiseLib[or](a, b);
+num or_result = BitwiseLib[or](a, b);
 show "Bitwise OR (a | b): " + or_result + " (expected: 7)";
 
 # XOR operation
-let xor_result = BitwiseLib[xor](a, b);
+num xor_result = BitwiseLib[xor](a, b);
 show "Bitwise XOR (a ^ b): " + xor_result + " (expected: 6)";
 
 # NOT operation
-let not_result = BitwiseLib[not](a, 8);
+num not_result = BitwiseLib[not](a, 8);
 show "Bitwise NOT (~a, 8-bit): " + not_result + " (expected: 250)";
 
 # Left shift operation
-let left_shift = BitwiseLib[left_shift](a, 2);
+num left_shift = BitwiseLib[left_shift](a, 2);
 show "Left shift (a << 2): " + left_shift + " (expected: 20)";
 
 # Right shift operation
-let right_shift = BitwiseLib[right_shift](20, 2);
+num right_shift = BitwiseLib[right_shift](20, 2);
 show "Right shift (20 >> 2): " + right_shift + " (expected: 5)";
 
 # Unsigned right shift operation
-let unsigned_right_shift = BitwiseLib[unsigned_right_shift](-8, 2);
+num unsigned_right_shift = BitwiseLib[unsigned_right_shift](-8, 2);
 show "Unsigned right shift (-8 >>> 2): " + unsigned_right_shift;
 
 # Get bit operation
-let get_bit0 = BitwiseLib[get_bit](a, 0);
-let get_bit1 = BitwiseLib[get_bit](a, 1);
-let get_bit2 = BitwiseLib[get_bit](a, 2);
+num get_bit0 = BitwiseLib[get_bit](a, 0);
+num get_bit1 = BitwiseLib[get_bit](a, 1);
+num get_bit2 = BitwiseLib[get_bit](a, 2);
 show "Get bit (a, position 0): " + get_bit0 + " (expected: 1)";
 show "Get bit (a, position 1): " + get_bit1 + " (expected: 0)";
 show "Get bit (a, position 2): " + get_bit2 + " (expected: 1)";
 
 # Set bit operation
-let c = 0;  # 0000 in binary
-let set_bit = BitwiseLib[set_bit](c, 1, 1);
+num c = 0;  # 0000 in binary
+num set_bit = BitwiseLib[set_bit](c, 1, 1);
 show "Set bit (0, position 1, value 1): " + set_bit + " (expected: 2)";
 
 # Count bits operation
-let count_bits = BitwiseLib[count_bits](a);
+num count_bits = BitwiseLib[count_bits](a);
 show "Count bits in 5: " + count_bits + " (expected: 2)";
 
 # Binary and hex conversion
-let to_binary = BitwiseLib[to_binary](42);
+num to_binary = BitwiseLib[to_binary](42);
 show "Convert 42 to binary: " + to_binary + " (expected: 101010)";
 
-let to_hex = BitwiseLib[to_hex](42);
+num to_hex = BitwiseLib[to_hex](42);
 show "Convert 42 to hex: " + to_hex + " (expected: 2A)";
 
-let from_binary = BitwiseLib[from_binary]("101010");
+num from_binary = BitwiseLib[from_binary]("101010");
 show "Convert binary '101010' to decimal: " + from_binary + " (expected: 42)";
 
-let from_hex = BitwiseLib[from_hex]("2A");
+num from_hex = BitwiseLib[from_hex]("2A");
 show "Convert hex '2A' to decimal: " + from_hex + " (expected: 42)";
 
-show "===== BITWISE LIBRARY TEST COMPLETE =====";
+show "===== BITWISE LIBRARY TEST COMPnumE =====";

@@ -1,25 +1,25 @@
 # Variables in Razen
 # This example demonstrates variable declaration and usage
 
-# Variable declaration with 'take'
-take name = "John";
+# Variable declaration with 'str'
+str name = "John";
 show "Name: " + name;
 
 # Numbers
-take age = 30;
+str age = 30;
 show "Age: " + age;
 
 # Booleans
-take is_active = true;
+str is_active = true;
 show "Active: " + is_active;
 
-# Variable reassignment with 'let'
-let name = "Jane";
+# Variable reassignment with 'num'
+num name = "Jane";
 show "Updated name: " + name;
 
 # Arithmetic with variables
-take x = 10;
-take y = 5;
+str x = 10;
+str y = 5;
 
 show "x + y = " + (x + y);
 show "x - y = " + (x - y);
@@ -27,16 +27,16 @@ show "x * y = " + (x * y);
 show "x / y = " + (x / y);
 
 # Compound assignment
-let x += 5;  # Same as: let x = x + 5
+num x += 5;  # Same as: num x = x + 5
 show "x after += 5: " + x;
 
-let y *= 2;  # Same as: let y = y * 2
+num y *= 2;  # Same as: num y = y * 2
 show "y after *= 2: " + y;
 
 # Multiple variables at once
-take a = 1, b = 2, c = 3;
+str a = 1, b = 2, c = 3;
 show "a, b, c: " + a + ", " + b + ", " + c;
 
 # Null value
-take data = null;
+str data = null;
 show "Null value: " + data;

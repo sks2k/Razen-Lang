@@ -9,17 +9,17 @@ show "===== Memory Library Test =====";
 
 # Test pointer operations
 show "1. Testing Pointer Operations:";
-let value = 42;
-let ptr = Memory[addressof](value);
+num value = 42;
+num ptr = Memory[addressof](value);
 show "Address of value: " + ptr;
 
-let retrieved = Memory[deref](ptr);
+num retrieved = Memory[deref](ptr);
 show "Dereferenced value: " + retrieved;
 
 # Test memory allocation
 show "2. Testing Memory Allocation:";
-let size = 1024;  # bytes
-let memory_block = Memory[alloc](size);
+num size = 1024;  # bytes
+num memory_block = Memory[alloc](size);
 show "Allocated " + size + " bytes at address: " + memory_block;
 
 # Write to memory
@@ -27,8 +27,8 @@ Memory[write_byte](memory_block, 0, 65);  # Write 'A' to first byte
 Memory[write_byte](memory_block, 1, 66);  # Write 'B' to second byte
 
 # Read from memory
-let byte1 = Memory[read_byte](memory_block, 0);
-let byte2 = Memory[read_byte](memory_block, 1);
+num byte1 = Memory[read_byte](memory_block, 0);
+num byte2 = Memory[read_byte](memory_block, 1);
 show "Read bytes: " + byte1 + " " + byte2;
 
 # Free allocated memory
@@ -37,7 +37,7 @@ show "Memory freed";
 
 # Test buffer operations
 show "3. Testing Buffer Operations:";
-let buffer = Memory[create_buffer](10);
+num buffer = Memory[create_buffer](10);
 show "Created buffer with ID: " + buffer;
 
 # Write to buffer
@@ -45,15 +45,15 @@ Memory[buffer_write_string](buffer, "Hello");
 show "Wrote string to buffer";
 
 # Read from buffer
-let content = Memory[buffer_read_string](buffer, 0, 5);
+num content = Memory[buffer_read_string](buffer, 0, 5);
 show "Buffer content: " + content;
 
 # Copy between buffers
-let dest_buffer = Memory[create_buffer](10);
+num dest_buffer = Memory[create_buffer](10);
 Memory[buffer_copy](buffer, 0, dest_buffer, 0, 5);
 
 # Read from destination buffer
-let copied = Memory[buffer_read_string](dest_buffer, 0, 5);
+num copied = Memory[buffer_read_string](dest_buffer, 0, 5);
 show "Copied content: " + copied;
 
 # Free buffers
@@ -61,4 +61,4 @@ Memory[free_buffer](buffer);
 Memory[free_buffer](dest_buffer);
 show "Buffers freed";
 
-show "===== Memory Library Test Completed =====";
+show "===== Memory Library Test Compnumed =====";

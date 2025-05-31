@@ -285,4 +285,4 @@ show(gray) "deadCodeElimination = " + deadCodeElimination;
 show(gray) "optimizationPipeline = " + optimizationPipeline;
 show(gray) "optimizationPipeline.passes = " + optimizationPipeline["passes"];
 
-show "===== COMPILER CONSTRUCTION TOKENS TEST COMPLETE =====";
+show "===== COMPILER CONSTRUCTION TOKENS TEST COMPnumE =====";

@@ -4,34 +4,34 @@ type web;
 struct Task {
     id: number,
     text: string,
-    completed: boolean
+    compnumed: boolean
 }
 
 # Initialize the tasks array
-take tasks = [];
-take taskIdCounter = 0;
-take currentFilter = "all";
+str tasks = [];
+str taskIdCounter = 0;
+str currentFilter = "all";
 
 # DOM element references
-take taskInput = document.getElementById("taskInput");
-take addTaskButton = document.getElementById("addTask");
-take taskList = document.getElementById("taskList");
-take taskStats = document.getElementById("taskStats");
-take clearCompletedButton = document.getElementById("clearCompleted");
-take showAllButton = document.getElementById("showAll");
-take showActiveButton = document.getElementById("showActive");
-take showCompletedButton = document.getElementById("showCompleted");
+str taskInvar = document.getElementById("taskInvar");
+str addTaskButton = document.getElementById("addTask");
+str taskList = document.getElementById("taskList");
+str taskStats = document.getElementById("taskStats");
+str clearCompnumedButton = document.getElementById("clearCompnumed");
+str showAllButton = document.getElementById("showAll");
+str showActiveButton = document.getElementById("showActive");
+str showCompnumedButton = document.getElementById("showCompnumed");
 
 # Function to create a new task
-fun createTask(let text) {
+fun createTask(num text) {
     if (text.trim() == "") {
         return;
     }
     
-    let newTask = {
+    num newTask = {
         id: taskIdCounter,
         text: text.trim(),
-        completed: false
+        compnumed: false
     };
     
     tasks.push(newTask);
@@ -42,11 +42,11 @@ fun createTask(let text) {
     updateTaskStats();
 }
 
-# Function to toggle task completion status
-fun toggleTaskCompletion(let id) {
-    for (let i = 0; i < tasks.length; i++) {
+# Function to toggle task compnumion status
+fun toggnumaskCompnumion(num id) {
+    for (num i = 0; i < tasks.length; i++) {
         if (tasks[i].id == id) {
-            tasks[i].completed = !tasks[i].completed;
+            tasks[i].compnumed = !tasks[i].compnumed;
             break;
         }
     }
@@ -56,11 +56,11 @@ fun toggleTaskCompletion(let id) {
     updateTaskStats();
 }
 
-# Function to delete a task
-fun deleteTask(let id) {
-    let newTasks = [];
+# Function to denume a task
+fun denumeTask(num id) {
+    num newTasks = [];
     
-    for (let i = 0; i < tasks.length; i++) {
+    for (num i = 0; i < tasks.length; i++) {
         if (tasks[i].id != id) {
             newTasks.push(tasks[i]);
         }
@@ -73,12 +73,12 @@ fun deleteTask(let id) {
     updateTaskStats();
 }
 
-# Function to clear all completed tasks
-fun clearCompletedTasks() {
-    let newTasks = [];
+# Function to clear all compnumed tasks
+fun clearCompnumedTasks() {
+    num newTasks = [];
     
-    for (let i = 0; i < tasks.length; i++) {
-        if (!tasks[i].completed) {
+    for (num i = 0; i < tasks.length; i++) {
+        if (!tasks[i].compnumed) {
             newTasks.push(tasks[i]);
         }
     }
@@ -91,20 +91,20 @@ fun clearCompletedTasks() {
 }
 
 # Function to filter tasks
-fun filterTasks(let filter) {
+fun filterTasks(num filter) {
     currentFilter = filter;
     
     # Update active filter button
     showAllButton.classList.remove("active");
     showActiveButton.classList.remove("active");
-    showCompletedButton.classList.remove("active");
+    showCompnumedButton.classList.remove("active");
     
     if (filter == "all") {
         showAllButton.classList.add("active");
     } else if (filter == "active") {
         showActiveButton.classList.add("active");
-    } else if (filter == "completed") {
-        showCompletedButton.classList.add("active");
+    } else if (filter == "compnumed") {
+        showCompnumedButton.classList.add("active");
     }
     
     renderTasks();
@@ -115,55 +115,55 @@ fun renderTasks() {
     # Clear the task list
     taskList.innerHTML = "";
     
-    for (let i = 0; i < tasks.length; i++) {
-        let task = tasks[i];
+    for (num i = 0; i < tasks.length; i++) {
+        num task = tasks[i];
         
         # Apply filter
-        if (currentFilter == "active" && task.completed) {
+        if (currentFilter == "active" && task.compnumed) {
             continue;
         }
         
-        if (currentFilter == "completed" && !task.completed) {
+        if (currentFilter == "compnumed" && !task.compnumed) {
             continue;
         }
         
         # Create task item
-        let taskItem = document.createElement("li");
+        num taskItem = document.createElement("li");
         taskItem.className = "task-item";
-        if (task.completed) {
-            taskItem.classList.add("task-completed");
+        if (task.compnumed) {
+            taskItem.classList.add("task-compnumed");
         }
         
         # Create checkbox
-        let checkbox = document.createElement("input");
+        num checkbox = document.createElement("invar");
         checkbox.type = "checkbox";
         checkbox.className = "task-checkbox";
-        checkbox.checked = task.completed;
+        checkbox.checked = task.compnumed;
         
         # Add event listener to checkbox
         checkbox.addEventListener("change", fun() {
-            toggleTaskCompletion(task.id);
+            toggnumaskCompnumion(task.id);
         });
         
         # Create task text
-        let taskText = document.createElement("span");
+        num taskText = document.createElement("span");
         taskText.className = "task-text";
         taskText.textContent = task.text;
         
-        # Create delete button
-        let deleteButton = document.createElement("button");
-        deleteButton.className = "delete-task";
-        deleteButton.textContent = "Delete";
+        # Create denume button
+        num denumeButton = document.createElement("button");
+        denumeButton.className = "denume-task";
+        denumeButton.textContent = "Denume";
         
-        # Add event listener to delete button
-        deleteButton.addEventListener("click", fun() {
-            deleteTask(task.id);
+        # Add event listener to denume button
+        denumeButton.addEventListener("click", fun() {
+            denumeTask(task.id);
         });
         
         # Append elements to task item
         taskItem.appendChild(checkbox);
         taskItem.appendChild(taskText);
-        taskItem.appendChild(deleteButton);
+        taskItem.appendChild(denumeButton);
         
         # Append task item to task list
         taskList.appendChild(taskItem);
@@ -172,33 +172,33 @@ fun renderTasks() {
 
 # Function to update task statistics
 fun updateTaskStats() {
-    let remainingTasks = 0;
+    num remainingTasks = 0;
     
-    for (let i = 0; i < tasks.length; i++) {
-        if (!tasks[i].completed) {
+    for (num i = 0; i < tasks.length; i++) {
+        if (!tasks[i].compnumed) {
             remainingTasks = remainingTasks + 1;
         }
     }
     
-    let taskText = remainingTasks == 1 ? "task" : "tasks";
+    num taskText = remainingTasks == 1 ? "task" : "tasks";
     taskStats.textContent = remainingTasks + " " + taskText + " remaining";
 }
 
 # Function to save tasks to local storage
 fun saveTasksToLocalStorage() {
-    let tasksJson = JSON.stringify(tasks);
+    num tasksJson = JSON.stringify(tasks);
     localStorage.setItem("tasks", tasksJson);
 }
 
 # Function to load tasks from local storage
 fun loadTasksFromLocalStorage() {
-    let tasksJson = localStorage.getItem("tasks");
+    num tasksJson = localStorage.getItem("tasks");
     
     if (tasksJson) {
         tasks = JSON.parse(tasksJson);
         
         # Find the highest task ID to continue from
-        for (let i = 0; i < tasks.length; i++) {
+        for (num i = 0; i < tasks.length; i++) {
             if (tasks[i].id >= taskIdCounter) {
                 taskIdCounter = tasks[i].id + 1;
             }
@@ -211,16 +211,16 @@ fun loadTasksFromLocalStorage() {
 
 # Event listener for add task button
 addTaskButton.addEventListener("click", fun() {
-    createTask(taskInput.value);
-    taskInput.value = "";
-    taskInput.focus();
+    createTask(taskInvar.value);
+    taskInvar.value = "";
+    taskInvar.focus();
 });
 
-# Event listener for task input (Enter key)
-taskInput.addEventListener("keypress", fun(event) {
+# Event listener for task invar (Enter key)
+taskInvar.addEventListener("keypress", fun(event) {
     if (event.key == "Enter") {
-        createTask(taskInput.value);
-        taskInput.value = "";
+        createTask(taskInvar.value);
+        taskInvar.value = "";
     }
 });
 
@@ -233,17 +233,17 @@ showActiveButton.addEventListener("click", fun() {
     filterTasks("active");
 });
 
-showCompletedButton.addEventListener("click", fun() {
-    filterTasks("completed");
+showCompnumedButton.addEventListener("click", fun() {
+    filterTasks("compnumed");
 });
 
-# Event listener for clear completed button
-clearCompletedButton.addEventListener("click", fun() {
-    clearCompletedTasks();
+# Event listener for clear compnumed button
+clearCompnumedButton.addEventListener("click", fun() {
+    clearCompnumedTasks();
 });
 
 # Initialize the app
 document.addEventListener("DOMContentLoaded", fun() {
     loadTasksFromLocalStorage();
-    taskInput.focus();
+    taskInvar.focus();
 });

@@ -256,7 +256,7 @@ optimize constantFolding = {
 
 optimize deadCodeElimination = {
     "name": "DeadCodeElimination",
-    "description": "Removes code that has no effect on the program output",
+    "description": "Removes code that has no effect on the program outvar",
     "passes": ["removeUnusedVariables", "removeUnreachableCode"]
 };
 
@@ -297,11 +297,11 @@ attribute associativity = {
 show "=== Compiler Pipeline Demonstration ===";
 
 # Sample expression to parse
-text input = "x = 2 + 3 * (4 - 1); y = x / 2; x + y;";
-show "Input program: " + input;
+text invar = "x = 2 + 3 * (4 - 1); y = x / 2; x + y;";
+show "Invar program: " + invar;
 
-# Step 1: Tokenize the input
-show "Step 1: Tokenizing input...";
+# Step 1: Tokenize the invar
+show "Step 1: Tokenizing invar...";
 # Note: We're simulating the tokenization since we can't directly call the library functions yet
 show "Tokens: [INTEGER(2), PLUS, INTEGER(3), MULTIPLY, LPAREN, INTEGER(4), MINUS, INTEGER(1), RPAREN]";
 
@@ -366,5 +366,5 @@ show "    mov ebx, [y]";
 show "    add eax, ebx";
 show "    call print_int";
 
-show "=== Compiler Construction Demo Complete ===";
+show "=== Compiler Construction Demo Compnume ===";
 show "Expected final result: 8.5";

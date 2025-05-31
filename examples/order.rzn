@@ -1,23 +1,23 @@
 type freestyle;
 
-take product = "xAI API Key";
-let price = 1000;
-hold onSale = true;
+str product = "xAI API Key";
+num price = 1000;
+bool onSale = true;
 
-take MODEL1 = "Grok3 mini";
-take MODEL2 = "Grok2";
-take MODEL3 = "Grok3";
+str MODEL1 = "Grok3 mini";
+str MODEL2 = "Grok2";
+str MODEL3 = "Grok3";
 
 if (onSale) {
-    let model1 = 30;
-    let model2 = 55;
-    let model3 = 235;
+    num model1 = 30;
+    num model2 = 55;
+    num model3 = 235;
 
     sum modelTotal = model1 + model2 + model3;
 } else {
-    let model1 = 45;
-    let model2 = 75;
-    let model3 = 300;
+    num model1 = 45;
+    num model2 = 75;
+    num model3 = 300;
 
     sum modelTotal = model1 + model2 + model3;
 }

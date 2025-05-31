@@ -7,46 +7,46 @@ lib threadlib;
 show "===== THREAD LIBRARY TEST =====";
 
 # Get thread ID and count
-let thread_id = ThreadLib[thread_id]();
+num thread_id = ThreadLib[thread_id]();
 show "Thread ID: " + thread_id;
 
-let thread_count = ThreadLib[thread_count]();
+num thread_count = ThreadLib[thread_count]();
 show "Thread count: " + thread_count;
 
 # Test mutex operations
-let mutex = ThreadLib[mutex_create]();
+num mutex = ThreadLib[mutex_create]();
 show "Creating mutex: " + mutex;
 
-let lock_result = ThreadLib[mutex_lock](mutex);
+num lock_result = ThreadLib[mutex_lock](mutex);
 show "Locking mutex: " + lock_result;
 
-let unlock_result = ThreadLib[mutex_unlock](mutex);
+num unlock_result = ThreadLib[mutex_unlock](mutex);
 show "Unlocking mutex: " + unlock_result;
 
-let destroy_result = ThreadLib[mutex_destroy](mutex);
+num destroy_result = ThreadLib[mutex_destroy](mutex);
 show "Destroying mutex: " + destroy_result;
 
 # Test additional thread operations
-let cpu_count = ThreadLib[cpu_count]();
+num cpu_count = ThreadLib[cpu_count]();
 show "CPU count: " + cpu_count;
 
-let current_thread = ThreadLib[current_thread]();
+num current_thread = ThreadLib[current_thread]();
 show "Current thread: " + current_thread;
 
 # Test thread sleep
-let sleep_result = ThreadLib[sleep](10); # Sleep for 10ms
+num sleep_result = ThreadLib[sleep](10); # Sleep for 10ms
 show "Thread sleep result (10ms): " + sleep_result;
 
 # Note: Thread creation and joining are more complex and might not work in this simple test
 # Uncomment if you want to test these functions
-# let thread_func = "function() { show('Hello from thread'); }";
-# let create_result = ThreadLib[create](thread_func);
+# num thread_func = "function() { show('Hello from thread'); }";
+# num create_result = ThreadLib[create](thread_func);
 # show "Thread creation result: " + create_result;
 # 
-# let join_result = ThreadLib[join](create_result);
+# num join_result = ThreadLib[join](create_result);
 # show "Thread join result: " + join_result;
 # 
-# let running = ThreadLib[is_running](create_result);
+# num running = ThreadLib[is_running](create_result);
 # show "Is thread running: " + running;
 
-show "===== THREAD LIBRARY TEST COMPLETE =====";
+show "===== THREAD LIBRARY TEST COMPnumE =====";

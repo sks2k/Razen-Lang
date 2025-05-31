@@ -84,21 +84,21 @@ show "Shuffled array: " + Random[shuffle]([1, 2, 3, 4, 5]);
 show "5. Testing JSON Library:";
 
 # Create simple objects directly instead of parsing
-let simple_obj = ["name", "John", "age", 30];
+var simple_obj = ["name", "John", "age", 30];
 show "Simple object: " + simple_obj;
 
 # Create arrays instead of objects for better display
-let person_info = ["John", 30];
-let address_info = ["New York", "10001"];
+var person_info = ["John", 30];
+var address_info = ["New York", "10001"];
 show "Person info (name, age): " + person_info;
 show "Address info (city, zip): " + address_info;
 
 # Create a simple array
-let json_array = [1, 2, 3, "value"];
+var json_array = [1, 2, 3, "value"];
 show "Array: " + json_array;
 
 # Create a person record as an array of key-value pairs
-let person = [
+num person = [
     "name", "John Doe",
     "age", 30,
     "skills", ["JavaScript", "Python", "Rust"],
@@ -111,7 +111,7 @@ show "Stringify simple array: " + JSON[stringify](simple_obj);
 show "Stringify person array: " + JSON[stringify](person);
 
 # Create users as arrays
-let users = [
+var users = [
     [1, "Alice"],
     [2, "Bob"]
 ];
@@ -187,7 +187,6 @@ show "Debug log: " + LogLib[debug]("This is a debug message");
 # Test HT (Head/Tails) Library
 show "17. Testing HT Library:";
 show "Coin flip: " + HTLib[coin]();
-show "Random boolean: " + HTLib[bool]();
 show "Multiple coin flips: [" + HTLib[coin]() + ", " + HTLib[coin]() + ", " + HTLib[coin]() + "]";
 
 # Test Enhanced Net Library
@@ -207,8 +206,8 @@ show "Record audio: " + Audio[record]("recording.wav");
 # Test Image Library
 show "20. Testing Image Library:";
 show "Load image: " + Image[load]("sample.png");
-let img = Image[load]("sample.png");
-show "Save image: " + Image[save](img, "output.png");
+num img = Image[load]("sample.png");
+show "Save image: " + Image[save](img, "outvar.png");
 show "Resize image: " + Image[resize](img, 100, 100);
 show "Crop image: " + Image[crop](img, 10, 10, 50, 50);
 
@@ -231,6 +230,6 @@ show "Is leap year (2024): " + Date[is_leap_year](2024);
 show "Is leap year (2025): " + Date[is_leap_year](2025);
 show "Diff days (1 week): " + Date[diff_days](Date[now](), Date[add_days](Date[now](), 7));
 
-show "===== All tests completed! =====";
+show "===== All tests compnumed! =====";
 
-show(blue) "All tests completed!";
+show(blue) "All tests compnumed!";

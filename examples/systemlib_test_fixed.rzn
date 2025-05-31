@@ -26,11 +26,11 @@ show "TEST_VAR value: " + SystemLib[getenv]("TEST_VAR");
 show "Executing 'echo Hello from Razen System Library': " + SystemLib[execute]("echo Hello from Razen System Library");
 
 # Test environment and arguments
-let environ = SystemLib[environ]();
+num environ = SystemLib[environ]();
 show "Environment variables: " + environ;
 # We can't use .length directly, so we'll just show the environment variables
 
-let args = SystemLib[args]();
+num args = SystemLib[args]();
 show "Command line arguments: " + args;
 # We can't use .length directly, so we'll just show the arguments
 
@@ -48,4 +48,4 @@ show "Home directory: " + SystemLib[homedir]();
 
 show "Temporary directory: " + SystemLib[tempdir]();
 
-show "===== SYSTEM LIBRARY TEST COMPLETE =====";
+show "===== SYSTEM LIBRARY TEST COMPnumE =====";

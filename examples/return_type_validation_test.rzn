@@ -1,56 +1,56 @@
 # This is a test file for the Razen language server's return type validation
 
 # Correct usage - matching token types with library function return types
-let num_length = strlib[length]("Hello, World!");  # Correct: length returns a number, use 'let'
-take upper_text = strlib[upper]("hello");          # Correct: upper returns a string, use 'take'
-hold is_valid = filesystem[exists]("test.txt");    # Correct: exists returns a boolean, use 'hold'
+num num_length = strlib[length]("Hello, World!");  # Correct: length returns a number, use 'num'
+str upper_text = strlib[upper]("hello");          # Correct: upper returns a string, use 'str'
+bool is_valid = filesystem[exists]("test.txt");    # Correct: exists returns a boolean, use 'bool'
 list files = filesystem[list_dir](".");            # Correct: list_dir returns an array, use 'list'
-put anything = random[choice]([1, 2, 3]);          # Correct: put can be used with any return type
+var anything = random[choice]([1, 2, 3]);          # Correct: var can be used with any return type
 
 # Incorrect usage - mismatched token types with library function return types
-take num_length = strlib[length]("Hello, World!"); # Incorrect: length returns a number, should use 'let'
-let upper_text = strlib[upper]("hello");           # Incorrect: upper returns a string, should use 'take'
-let is_valid = filesystem[exists]("test.txt");     # Incorrect: exists returns a boolean, should use 'hold'
-take files = filesystem[list_dir](".");            # Incorrect: list_dir returns an array, should use 'list'
+str num_length = strlib[length]("Hello, World!"); # Incorrect: length returns a number, should use 'num'
+num upper_text = strlib[upper]("hello");           # Incorrect: upper returns a string, should use 'str'
+num is_valid = filesystem[exists]("test.txt");     # Incorrect: exists returns a boolean, should use 'bool'
+str files = filesystem[list_dir](".");            # Incorrect: list_dir returns an array, should use 'list'
 
 # More filesystem library function examples with correct token types
-hold is_file = filesystem[is_file]("example.txt");
-hold is_dir = filesystem[is_dir]("examples");
-hold created = filesystem[create_dir]("new_folder");
-hold removed = filesystem[remove]("temp.txt");
-take content = filesystem[read_file]("example.txt");
-hold written = filesystem[write_file]("output.txt", "Hello World");
+bool is_file = filesystem[is_file]("example.txt");
+bool is_dir = filesystem[is_dir]("examples");
+bool created = filesystem[create_dir]("new_folder");
+bool removed = filesystem[remove]("temp.txt");
+str content = filesystem[read_file]("example.txt");
+bool written = filesystem[write_file]("outvar.txt", "Hello World");
 list dir_contents = filesystem[list_dir](".");
-put meta = filesystem[metadata]("example.txt");
-take abs_path = filesystem[absolute_path]("relative/path");
-hold copied = filesystem[copy]("source.txt", "destination.txt");
-hold moved = filesystem[move]("old.txt", "new.txt");
-take ext = filesystem[extension]("file.txt");
-take name = filesystem[file_stem]("file.txt");
-take parent = filesystem[parent_dir]("path/to/file.txt");
-take joined = filesystem[join_path]("path", "to", "file.txt");
-hold changed = filesystem[change_dir]("new/directory");
-take current = filesystem[current_dir]();
-take temp = filesystem[temp_file]();
-take temp_dir_path = filesystem[temp_dir]();
+var meta = filesystem[metadata]("example.txt");
+str abs_path = filesystem[absolute_path]("relative/path");
+bool copied = filesystem[copy]("source.txt", "destination.txt");
+bool moved = filesystem[move]("old.txt", "new.txt");
+str ext = filesystem[extension]("file.txt");
+str name = filesystem[file_stem]("file.txt");
+str parent = filesystem[parent_dir]("path/to/file.txt");
+str joined = filesystem[join_path]("path", "to", "file.txt");
+bool changed = filesystem[change_dir]("new/directory");
+str current = filesystem[current_dir]();
+str temp = filesystem[temp_file]();
+str temp_dir_path = filesystem[temp_dir]();
 
 # Math library function examples with correct token types
-let sum = mathlib[add](5, 3);
-let diff = mathlib[subtract](10, 4);
-let product = mathlib[multiply](6, 7);
-let quotient = mathlib[divide](20, 5);
-let pow = mathlib[power](2, 8);
-let root = mathlib[sqrt](16);
-let absolute = mathlib[abs](-10);
-let rounded = mathlib[round](3.7);
-let floored = mathlib[floor](3.7);
-let ceiling = mathlib[ceil](3.2);
-let sine = mathlib[sin](0.5);
-let cosine = mathlib[cos](0.5);
-let tangent = mathlib[tan](0.5);
-let logarithm = mathlib[log](100);
-let exponential = mathlib[exp](2);
-let rand = mathlib[random]();
-let maximum = mathlib[max](5, 10);
-let minimum = mathlib[min](5, 10);
-let modulus = mathlib[modulo](10, 3);
+num sum = mathlib[add](5, 3);
+num diff = mathlib[subtract](10, 4);
+num product = mathlib[multiply](6, 7);
+num quotient = mathlib[divide](20, 5);
+num pow = mathlib[power](2, 8);
+num root = mathlib[sqrt](16);
+num absolute = mathlib[abs](-10);
+num rounded = mathlib[round](3.7);
+num floored = mathlib[floor](3.7);
+num ceiling = mathlib[ceil](3.2);
+num sine = mathlib[sin](0.5);
+num cosine = mathlib[cos](0.5);
+num tangent = mathlib[tan](0.5);
+num logarithm = mathlib[log](100);
+num exponential = mathlib[exp](2);
+num rand = mathlib[random]();
+num maximum = mathlib[max](5, 10);
+num minimum = mathlib[min](5, 10);
+num modulus = mathlib[modulo](10, 3);

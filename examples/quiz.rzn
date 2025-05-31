@@ -1,8 +1,8 @@
 type freestyle;
 
-take q1 = "Who is the First Indian Prime Minister?";
-take o1 = "A. Narendra Modi, B. Mahatma Gandhi, C. Javaharlal Naheru, D. Lal bahadur Sastri";
-take a1 = "C";
+str q1 = "Who is the First Indian Prime Minister?";
+str o1 = "A. Narendra Modi, B. Mahatma Gandhi, C. Javaharlal Naheru, D. Lal bahadur Sastri";
+str a1 = "C";
 
 show q1;
 show o1;
@@ -10,15 +10,15 @@ read a;
 
 if (a == a1) {
     show "Congratulations right awnser!"
-    let point = 1;
+    num point = 1;
 } else {
     show "Wrong awnser"
-    let point = 0;
+    num point = 0;
 }
 
-take q2 = "Who is the Richesect man in the india?";
-take o2 = "A. Mukesh Ambani, B. Goatam Adani, C. Ratan Tata, D. Prathmesh Barot";
-take a2 = "A";
+str q2 = "Who is the Richesect man in the india?";
+str o2 = "A. Mukesh Ambani, B. Goatam Adani, C. Ratan Tata, D. Prathmesh Barot";
+str a2 = "A";
 
 show q2;
 show o2;
@@ -26,10 +26,10 @@ read a;
 
 if (a == a2) {
     show "Congratulations right awnser!"
-    let point2 = 1;
+    num point2 = 1;
 } else {
     show "Wrong awnser"
-    let point2 = 0;
+    num point2 = 0;
 }
 
 sum total = point + point2;

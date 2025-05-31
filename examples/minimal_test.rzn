@@ -11,4 +11,4 @@ show "===== Minimal Library Test =====";
 # Test random library functions
 show "Random number between 1-100: " + Random[int](1, 100);
 
-show "===== Test Completed =====";
+show "===== Test Compnumed =====";

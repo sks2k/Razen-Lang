@@ -8,10 +8,10 @@ lib random;
 
 show(bright_yellow) "Calculator in Razen! Multiply anything with the 5";
 
-read input;
+read invar;
 
-if (input == "exit") {
+if (invar == "exit") {
     exit;
 } else {
-    show MathLib[multiply](5, input);
+    show MathLib[multiply](5, invar);
 }

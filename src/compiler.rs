@@ -619,30 +619,29 @@ impl Compiler {
             // Type checking based on variable type
             match var_type.as_str() {
                 // Numeric types
-                "let" | "sum" | "diff" | "prod" | "div" | "mod" => {
+                "num" => {
                     // Check that the value is a number
                     if !self.is_number_expression(&expr) {
                         self.errors.push(format!("Type error: '{}' variables can only be used with numeric values, but '{}' was assigned a non-numeric value", var_type, name));
                     }
                 },
                 // String types
-                "take" | "text" | "concat" | "slice" => {
+                "str" => {
                     // Check that the value is a string
                     if !self.is_string_expression(&expr) {
                         self.errors.push(format!("Type error: '{}' variables can only be used with string values, but '{}' was assigned a non-string value", var_type, name));
                     }
                 },
                 // Boolean types
-                "hold" => {
+                "bool" => {
                     // Check that the value is a boolean
                     if !self.is_boolean_expression(&expr) {
                         self.errors.push(format!("Type error: '{}' variables can only be used with boolean values, but '{}' was assigned a non-boolean value", var_type, name));
                     }
                 },
                 // Generic types - no type checking needed
-                "put" | "list" | "arr" | "map" | "store" | "box" | "ref" |
-                "len" | "key" | "value" | "current" | "now" | "year" | "month" |
-                "day" | "hour" | "minute" | "second" | "append" | "remove" => {
+                "var" | "list" | "arr" | "map" | "store" | "box" | "ref" |
+                "len" | "key" | "value" | "append" | "remove" => {
                     // These can hold any type, so no type checking needed
                 },
                 _ => {

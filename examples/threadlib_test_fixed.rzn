@@ -31,4 +31,4 @@ show "Thread sleep result (10ms): " + ThreadLib[sleep](10); # Sleep for 10ms
 # show "Thread join result: " + ThreadLib[join](1);
 # show "Is thread running: " + ThreadLib[is_running](1);
 
-show "===== THREAD LIBRARY TEST COMPLETE =====";
+show "===== THREAD LIBRARY TEST COMPnumE =====";

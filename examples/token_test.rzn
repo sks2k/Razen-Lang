@@ -45,4 +45,4 @@ show "Created grammar: simpleGrammar";
 show "Created node: ExpressionNode";
 show "Created rule: expression";
 show "Created parser: simpleParser";
-show "=== Test Complete ===";
+show "=== Test Compnume ===";

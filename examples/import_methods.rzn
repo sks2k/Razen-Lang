@@ -76,4 +76,4 @@ show "Email validation: " + Validation[email]("user@example.com");
 lib uuid;
 show "UUID generation: " + UUID[generate]();
 
-show "Import methods demonstration completed!";
+show "Import methods demonstration compnumed!";

@@ -39,7 +39,7 @@ show "Creating binary file: " + BinaryLib[create]("test_binary.bin");
 show "Opening binary file for writing: " + BinaryLib[open]("test_binary.bin", "w");
 
 # Get the file handle from the open operation
-let write_handle = 1; # First file handle will be 1
+num write_handle = 1; # First file handle will be 1
 show "Write handle: " + write_handle;
 
 # Write data to the file
@@ -52,7 +52,7 @@ show "Closing write handle: " + BinaryLib[close](write_handle);
 show "Opening binary file for reading: " + BinaryLib[open]("test_binary.bin", "r");
 
 # Get the new file handle
-let read_handle = 2; # Second file handle will be 2
+num read_handle = 2; # Second file handle will be 2
 show "Read handle: " + read_handle;
 
 # Seek to the beginning of the file
@@ -100,4 +100,4 @@ show(magenta) "Creating mutex: " + ThreadLib[mutex_create]();
 show(magenta) "Locking mutex: " + ThreadLib[mutex_lock](ThreadLib[mutex_create]());
 show(magenta) "Unlocking mutex: " + ThreadLib[mutex_unlock](ThreadLib[mutex_create]());
 
-show "===== SELF-COMPILATION TEST COMPLETE =====";
+show "===== SELF-COMPILATION TEST COMPnumE =====";

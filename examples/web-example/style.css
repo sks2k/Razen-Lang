@@ -6,7 +6,7 @@
     --background-color: #f9f9f9;
     --text-color: #333;
     --light-gray: #e0e0e0;
-    --completed-color: #888;
+    --compnumed-color: #888;
 }
 
 * {
@@ -39,12 +39,12 @@ h1 {
     font-weight: 600;
 }
 
-.input-section {
+.invar-section {
     display: flex;
     margin-bottom: 20px;
 }
 
-input[type="text"] {
+invar[type="text"] {
     flex: 1;
     padding: 12px 15px;
     border: 1px solid var(--light-gray);
@@ -54,7 +54,7 @@ input[type="text"] {
     transition: border-color 0.3s;
 }
 
-input[type="text"]:focus {
+invar[type="text"]:focus {
     border-color: var(--primary-color);
 }
 
@@ -122,12 +122,12 @@ button:hover {
     transition: color 0.3s;
 }
 
-.task-completed .task-text {
+.task-compnumed .task-text {
     text-decoration: line-through;
-    color: var(--completed-color);
+    color: var(--compnumed-color);
 }
 
-.delete-task {
+.denume-task {
     background-color: transparent;
     color: var(--accent-color);
     padding: 5px 10px;
@@ -136,7 +136,7 @@ button:hover {
     border-radius: 4px;
 }
 
-.delete-task:hover {
+.denume-task:hover {
     background-color: rgba(255, 107, 107, 0.1);
     opacity: 1;
 }
@@ -145,28 +145,28 @@ button:hover {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    color: var(--completed-color);
+    color: var(--compnumed-color);
     font-size: 14px;
 }
 
-#clearCompleted {
+#clearCompnumed {
     background-color: transparent;
     color: var(--accent-color);
     font-size: 14px;
     padding: 5px 10px;
 }
 
-#clearCompleted:hover {
+#clearCompnumed:hover {
     background-color: rgba(255, 107, 107, 0.1);
 }
 
 /* Responsive adjustments */
 @media (max-width: 480px) {
-    .input-section {
+    .invar-section {
         flex-direction: column;
     }
     
-    input[type="text"], #addTask {
+    invar[type="text"], #addTask {
         width: 100%;
         border-radius: 4px;
         margin-bottom: 10px;

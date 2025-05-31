@@ -168,9 +168,9 @@ show "Parser: SimpleCalculator";
 show "Target: x86_64";
 
 # 18. Sample expression to parse
-text input = "2 + 3 * (4 - 1)";
-show "Input: " + input;
-show "Expected output: 11";
+text invar = "2 + 3 * (4 - 1)";
+show "Invar: " + invar;
+show "Expected outvar: 11";
 
 # This is a demonstration of the syntax and grammar for compiler construction
-# In a real implementation, the libraries would process this input and generate code
+# In a real implementation, the libraries would process this invar and generate code

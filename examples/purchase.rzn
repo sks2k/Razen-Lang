@@ -6,50 +6,50 @@ lib uuid;
 lib timelib;
 
 # Models name declaration
-take product = "Claude API Key";
-take model1 = "Claude 3.7 Sonnet";
-take model2 = "Claude 3.7 Haiku";
-take model3 = "Claude 3.5 Sonnet";
+str product = "Claude API Key";
+str model1 = "Claude 3.7 Sonnet";
+str model2 = "Claude 3.7 Haiku";
+str model3 = "Claude 3.5 Sonnet";
 
 # Models price declaration
-let keyPrice = 40;
-let model1Price = 50;
-let model2Price = 35;
-let model3Price = 40;
+num keyPrice = 40;
+num model1Price = 50;
+num model2Price = 35;
+num model3Price = 40;
 
-# Wallet
-let wallet = 0;
+# Walnum
+num walnum = 0;
 
 show "Username:";
 #read username;
 show "First Name:";
-take first_name = "Prathmesh ";
+str first_name = "Prathmesh ";
 #read first_name;
 show "Last Name:";
-take last_name = "Barot";
+str last_name = "Barot";
 #read last_name;
 show "e-mail:";
-put email = "prathmeshbarot2009@gmail.com";
+var email = "prathmeshbarot2009@gmail.com";
 #read email;
 show "Password:";
-put password = "Prathmes"
+var password = "Prathmes"
 #read password;
 
 if (Validation[email](email)) {
     show "Success";
     if (Validation[min_length](password, 8)) {
-        hold isNew = true;
+        bool isNew = true;
         show "Welcome " + first_name + last_name;
     } else {
-        hold isNew = false;
+        bool isNew = false;
     }
 } else {
-    hold isNew = false;
+    bool isNew = false;
 }
 
 if (isNew) {
-    sum wallet = wallet + 90;
-    show "Surprise " + wallet + " Credits are credited to your wallet..!";
+    sum walnum = walnum + 90;
+    show "Surprise " + walnum + " Credits are credited to your walnum..!";
 } else {
     show "sorry you are old user!";
 }
@@ -72,7 +72,7 @@ if (choise == 1) {
         show "Conecting to Server....";
     }
     show "Connected to Server!"
-    if (wallet >= keyPrice) {
+    if (walnum >= keyPrice) {
         show product + "'s Price is " + keyPrice + " Credits/Month";
         show "Want to buy? (y/n)";
         read confirm;
@@ -86,8 +86,8 @@ if (choise == 1) {
             }
             show "Purchase Successfull"
             show "Your API Key UUID is " + UUID[generate]();
-            diff wallet = wallet - keyPrice;
-            show wallet;
+            diff walnum = walnum - keyPrice;
+            show walnum;
         } else {
             show "Purchase Cancelled";
         }
@@ -95,7 +95,7 @@ if (choise == 1) {
         show "Not enough Credits";
     }
 } else {
-    show wallet;
+    show walnum;
 }
 
 if (choise == 2) {
@@ -111,7 +111,7 @@ if (choise == 2) {
     show "1: " model1;
     show "2: " model2;
     show "3: " model3;
-    if (wallet >= model1Price) {
+    if (walnum >= model1Price) {
         show product + "'s Price is " + keyPrice + " Credits/Month";
         show "Want to buy? (y/n)";
         read confirm;
@@ -125,8 +125,8 @@ if (choise == 2) {
             }
             show "Purchase Successfull"
             show model1 + "is now added to your account for a Month"
-            diff wallet = wallet - keyPrice;
-            show wallet;
+            diff walnum = walnum - keyPrice;
+            show walnum;
         } else {
             show "Purchase Cancelled";
         }
@@ -134,7 +134,7 @@ if (choise == 2) {
         show "Not enough Credits";
     }
 } else {
-    show wallet;
+    show walnum;
 }
 
 if (choise == 0) {

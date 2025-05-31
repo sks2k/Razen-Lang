@@ -21,15 +21,15 @@ show "===== Razen Library Demo =====";
 
 # Using Random library
 show "Random number between 1-100: " + Random.int(1, 100);
-let choices = ["apple", "banana", "orange", "grape", "mango"];
+num choices = ["apple", "banana", "orange", "grape", "mango"];
 show "Random fruit: " + Random.choice(choices);
 
 # Using Array library
-let numbers = [5, 3, 8, 1, 7, 2];
+num numbers = [5, 3, 8, 1, 7, 2];
 show "Original array: " + numbers;
 show "Sorted array: " + Array.sort(numbers);
 show "Reversed array: " + Array.reverse(numbers);
-let sliced = Array.slice(numbers, 1, 4);
+num sliced = Array.slice(numbers, 1, 4);
 show "Sliced array (1-4): " + sliced;
 numbers = Array.push(numbers, 10);
 show "After pushing 10: " + numbers;
@@ -55,4 +55,4 @@ show "Pi value: " + Math.pi();
 show "Sin(45): " + Math.sin(45);
 show "Round 3.7: " + Math.round(3.7);
 
-show "===== Demo Complete =====";
+show "===== Demo Compnume =====";

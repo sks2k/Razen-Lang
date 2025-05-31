@@ -7,56 +7,56 @@ type freestyle;
 # 1️⃣ General Purpose Variables for basic data types
 # ========================================================================
 
-# 'let' - for declaring numeric variables and calculations
+# 'num' - for declaring numeric variables and calculations
 # Use for integers, floats, and mathematical operations
-let integer = 42;                  # Integer value
-let float = 3.14159;              # Float value
-let calculation = 10 + 5 * 2;      # Mathematical operation
-let negative = -10;               # Negative number
-let hex = 0xFF;                   # Hexadecimal number
-let binary = 0b1010;              # Binary number
-let scientific = 1.2e3;           # Scientific notation (1200)
+num integer = 42;                  # Integer value
+num float = 3.14159;              # Float value
+num calculation = 10 + 5 * 2;      # Mathematical operation
+num negative = -10;               # Negative number
+num hex = 0xFF;                   # Hexadecimal number
+num binary = 0b1010;              # Binary number
+num scientific = 1.2e3;           # Scientific notation (1200)
 
-show "Numeric variables with 'let':";
+show "Numeric variables with 'num':";
 show "integer: " + integer;
 show "float: " + float;
 show "calculation: " + calculation;
 
-# 'take' - for declaring string variables and text manipulation
+# 'str' - for declaring string variables and text manipulation
 # Use for text data, string operations, and string interpolation
-take greeting = "Hello, World!";   # Basic string
-take name = "Razen";              # Another string
-take multiline = "This is a\nmultiline string";  # String with newline
-take concatenated = greeting + " Welcome to " + name;  # String concatenation
-take escaped = "Quotes: \"example\"";  # Escaped quotes
+str greeting = "Hello, World!";   # Basic string
+str name = "Razen";              # Another string
+str multiline = "This is a\nmultiline string";  # String with newline
+str concatenated = greeting + " Welcome to " + name;  # String concatenation
+str escaped = "Quotes: \"example\"";  # Escaped quotes
 
-show "String variables with 'take':";
+show "String variables with 'str':";
 show greeting;
 show "Concatenated: " + concatenated;
 show multiline;
 
-# 'hold' - for declaring boolean variables and logical conditions
+# 'bool' - for declaring boolean variables and logical conditions
 # Use for true/false values and control flow
-hold isTrue = true;               # Boolean true
-hold isFalse = false;             # Boolean false
-hold comparison = 5 > 3;          # Comparison (true)
-hold logicalAnd = true && false;  # Logical AND (false)
-hold logicalOr = true || false;   # Logical OR (true)
-hold logicalNot = !true;          # Logical NOT (false)
+bool isTrue = true;               # Boolean true
+bool isFalse = false;             # Boolean false
+bool comparison = 5 > 3;          # Comparison (true)
+bool logicalAnd = true && false;  # Logical AND (false)
+bool logicalOr = true || false;   # Logical OR (true)
+bool logicalNot = !true;          # Logical NOT (false)
 
-show "Boolean variables with 'hold':";
+show "Boolean variables with 'bool':";
 show "isTrue: " + isTrue;
 show "comparison (5 > 3): " + comparison;
 show "logicalAnd (true && false): " + logicalAnd;
 
-# 'put' - for declaring variables of any type
+# 'var' - for declaring variables of any type
 # Use when type is unknown or mixed types are needed
-put anything = 42;                # Number
-put anything = "text";            # Reassign to string
-put anything = true;              # Reassign to boolean
-put mixed = [1, "two", true];    # Array with mixed types
+var anything = 42;                # Number
+var anything = "text";            # Reassign to string
+var anything = true;              # Reassign to boolean
+var mixed = [1, "two", true];    # Array with mixed types
 
-show "Mixed type variables with 'put':";
+show "Mixed type variables with 'var':";
 show "anything: " + anything;
 show "mixed array: " + mixed;
 
@@ -70,10 +70,10 @@ sum total = 0;                    # Initialize sum
 total = total + 10;               # Add to sum
 total = total + 20;               # Add more to sum
 sum arraySum = 0;                 # For summing array elements
-let numbers = [1, 2, 3, 4, 5];
+num numbers = [1, 2, 3, 4, 5];
 
 # Summing array elements
-let i = 0;
+num i = 0;
 while (i < 5) {
     arraySum = arraySum + numbers[i];
     i = i + 1;
@@ -91,8 +91,8 @@ result = result - 20;             # Subtract from diff
 result = result - 30;             # Subtract more
 
 diff absoluteDiff = 0;            # For absolute difference
-let num1 = 10;
-let num2 = 25;
+num num1 = 10;
+num num2 = 25;
 
 # Calculate absolute difference
 if (num1 > num2) {
@@ -112,7 +112,7 @@ product = product * 5;            # Multiply by 5
 product = product * 2;            # Multiply by 2
 
 prod factorial = 1;               # For calculating factorial
-let n = 5;
+num n = 5;
 i = 1;
 while (i <= n) {
     factorial = factorial * i;
@@ -141,7 +141,7 @@ show "average of array elements: " + average;
 mod remainder = 17 % 5;           # 17 mod 5 = 2
 
 # Using mod for cyclic values (e.g., clock hours)
-let hour = 14;
+num hour = 14;
 mod clockHour = hour % 12;        # Convert 24h to 12h format
 if (clockHour == 0) {
     clockHour = 12;               # Handle 0 as 12
@@ -180,11 +180,11 @@ enum Status {
     PENDING = 0,
     ACTIVE = 1,
     INACTIVE = 2,
-    DELETED = 3
+    DEnumED = 3
 }
 
-let selectedColor = Color.BLUE;
-let currentStatus = Status.ACTIVE;
+num selectedColor = Color.BLUE;
+num currentStatus = Status.ACTIVE;
 
 show "Enums:";
 show "Selected color: " + selectedColor;
@@ -217,14 +217,14 @@ final class Configuration {
     }
 }
 
-let config = new Configuration("timeout", 30);
+num config = new Configuration("timeout", 30);
 show "Final class:";
 show "Config value: " + config.getValue();
 
 # 'volatile' - for declaring variables that might change externally
 # Use for variables modified by external processes
-volatile let sharedCounter = 0;   # Could be modified by another thread
-volatile hold isRunning = true;   # Flag that might be changed externally
+volatile num sharedCounter = 0;   # Could be modified by another thread
+volatile bool isRunning = true;   # Flag that might be changed externally
 
 # Simulating external changes
 sharedCounter = sharedCounter + 1;
@@ -254,8 +254,8 @@ inline fun fahrenheitToCelsius(f) {
 }
 
 # Example temperatures
-let tempC = 25;
-let tempF = celsiusToFahrenheit(tempC);
+num tempC = 25;
+num tempF = celsiusToFahrenheit(tempC);
 
 show tempC + "°C = " + tempF + "°F";
 show tempF + "°F = " + fahrenheitToCelsius(tempF) + "°C";
@@ -268,9 +268,9 @@ enum TempScale {
 }
 
 # Using different variable types together
-let temperature = 20;
-take unit = "Celsius";
-hold isMetric = true;
+num temperature = 20;
+str unit = "Celsius";
+bool isMetric = true;
 prod factor = 1.8;  # For C to F conversion
 sum offset = 32;    # For C to F conversion
 
