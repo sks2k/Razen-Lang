@@ -1,0 +1,22 @@
+# Basic boolen Varibles and Values in true/false/null declaration
+bool isActive = true; # bool token is used here
+bool isFail = false; # bool token is used here
+bool isVoid = null; # bool token is used here
+
+if (isActive) {
+    show "User is Active!";
+} else {
+    show "User is Inactive";
+} # if/else tokens are used here that i will explain and teach you later.
+
+if (isFail) {
+    show "Student is Fail";
+} else {
+    show "Student is Pass";
+} # if/else tokens are used here that i will explain and teach you later.
+
+if (isVoid) {
+    show "Noting"
+} else {
+    show "Here is a void!";
+} # if/else tokens are used here that i will explain and teach you later.
