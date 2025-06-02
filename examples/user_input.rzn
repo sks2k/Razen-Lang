@@ -1,0 +1,11 @@
+# Get user input and display a greeting
+show "What is your name?";
+read name;
+show "Hello " + name + "!";
+
+# When you run this program, it will:
+# 1. Ask for your name
+# 2. Wait for you to type your name and press Enter
+# 3. Greet you by name
+
+# You want to understand full code so check out our docs on our website

@@ -1,0 +1,41 @@
+# Basic boolean variables declaration
+bool isActive = true;      # bool token with true value
+bool isFail = false;       # bool token with false value
+bool isVoid = null;        # bool token with null value
+
+# Logical operations
+bool isLoggedIn = true;
+bool hasPermission = false;
+# bool canAccess = isLoggedIn and hasPermission;  # Logical AND
+# bool canView = isLoggedIn or hasPermission;     # Logical OR
+# bool isRestricted = not isLoggedIn;             # Logical NOT
+
+# Comparison operations
+num score = 85;
+bool isPassing = score >= 70;                   # Greater than or equal
+bool isExcellent = score > 90;                  # Greater than
+bool isAverage = score == 85;                   # Equality check
+bool needsImprovement = score < 60;             # Less than
+
+# Conditional statements with boolean variables
+if (isActive) {
+    show "User is Active!";                      # Executes when isActive is true
+} else {
+    show "User is Inactive";                     # Executes when isActive is false
+}
+
+if (isFail) {
+    show "Student is Fail";                      # Executes when isFail is true
+} else {
+    show "Student is Pass";                      # Executes when isFail is false
+}
+
+if (isVoid) {
+    show "Nothing";                              # Executes when isVoid is not null
+} else {
+    show "Here is a void!";                      # Executes when isVoid is null
+}
+
+# This program demonstrates how to use the `bool` token for declaring boolean variables and performing various boolean operations. Boolean variables can be used in conditional statements to control program flow.
+
+# You want to understand full code so check out our docs on our website

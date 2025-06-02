@@ -1,0 +1,23 @@
+# Basic integer variables declaration
+num integer = 16;       # Integer value using the num token
+num count = 42;         # Another integer example
+
+# Basic float variables declaration
+num float = 1.45;       # Float value using the num token
+num pi = 3.14159;       # Another float example
+
+# Mathematical operations
+num sum = integer + count;          # Addition
+num product = integer * float;      # Multiplication
+num power = integer ^ 2;            # Exponentiation
+
+# Show statement for displaying output to the console
+show "This is an integer: " + integer;
+show "This is a float: " + float;
+show "Sum: " + sum;
+show "Product: " + product;
+show "Power: " + power;
+
+# This program demonstrates how to use the `num` token for declaring numeric variables and performing basic mathematical operations. The `show` statement is used to display the results to the console.
+
+# You want to understand full code so check out our docs on our website

@@ -1,0 +1,26 @@
+# Basic string variables declaration
+str first_name = "Prathmesh";    # str token is used for string variables
+str last_name = "Barot";        # Another string variable
+
+# String concatenation (joining strings)
+str full_name = first_name + " " + last_name;
+
+# String methods
+str uppercase_name = StrLib[upper](full_name);
+str first_initial = StrLib[substring](first_name, 0, 1);
+
+# String formatting
+str greeting = "Hello, " + full_name + "!";    # Using string interpolation
+str message = first_initial + " is the first initial of " + first_name;  # Using format function
+
+# Show statement for displaying output
+show greeting;
+show "Full name: " + full_name;
+show "Uppercase: " + uppercase_name;
+show "First initial: " + first_initial;
+show "Greeting: " + greeting;
+show "Message: " + message;
+
+# This program demonstrates how to use the `str` token for declaring string variables and performing various string operations. Strings in Razen can be manipulated using built-in methods.
+
+# You want to understand full code so check out our docs on our website
