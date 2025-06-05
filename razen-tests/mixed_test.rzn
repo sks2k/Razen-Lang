@@ -1,22 +1,75 @@
-type freestyle;
+# Import the date library
+lib date;
 
-# Mixed Library Test
-# This file tests both a working library (random) and a self-compilation library (memory)
+# Function to calculate age in years, months, and days
+fun calculateAge(birthdate, format) {
+    # Parse birthdate
+    num birthdateTimestamp = date::parse(birthdate, format);
 
-# Import libraries
-lib random;
-lib memory;
+    # Get current timestamp
+    num now = date::now();
 
-# Main program
-show "===== Mixed Library Test =====";
+    # Extract birth year, month, and day
+    num birthYear = date::year(birthdateTimestamp);
+    num birthMonth = date::month(birthdateTimestamp);
+    num birthDay = date::day(birthdateTimestamp);
 
-# Test random library
-show "Random number between 1-100: " + Random.int(1, 100);
+    # Extract current year, month, and day
+    num currentYear = date::year(now);
+    num currentMonth = date::month(now);
+    num currentDay = date::day(now);
 
-# Test memory library
-num value = 42;
-# Uncomment the line below to test memory library
-# num ptr = Memory.addressof(value);
-# show "Address of value: " + ptr;
+    # Calculate age in years
+    num years = currentYear - birthYear;
 
-show "===== Test Compnumed =====";
+    # Adjust years if birthday hasn't occurred this year yet
+    if (currentMonth < birthMonth || (currentMonth == birthMonth && currentDay < birthDay)) {
+        years = years - 1;
+    }
+
+    # Calculate months
+    num months = currentMonth - birthMonth;
+    if (months < 0) {
+        months = months + 12;
+    }
+
+    # Adjust months if day of month hasn't occurred yet
+    if (currentDay < birthDay) {
+        months = months - 1;
+        if (months < 0) {
+            months = months + 12;
+        }
+    }
+
+    # Calculate days
+    num days = currentDay - birthDay;
+    if (days < 0) {
+        # Get days in previous month
+        num prevMonth = currentMonth - 1;
+        if (prevMonth == 0) {
+            prevMonth = 12;
+            years = years - 1;
+        }
+        days = days + date::days_in_month(currentYear, prevMonth);
+    }
+
+    # Create result object
+    map result = {
+        "years": years,
+        "months": months,
+        "days": days,
+        "totalDays": date::diff_days(birthdateTimestamp, now)
+    };
+
+    return result;
+}
+
+# Calculate age for a birthdate
+str birthdate = "1990-05-15";
+map age = calculateAge(birthdate, "YYYY-MM-DD");
+
+show "Age for someone born on " + birthdate + ":";
+show "Years: " + age["years"];
+show "Months: " + age["months"];
+show "Days: " + age["days"];
+show "Total days: " + age["totalDays"];

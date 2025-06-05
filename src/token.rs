@@ -177,6 +177,7 @@ pub enum TokenType {
     Dot,            // .
     Semicolon,      // ;
     Colon,          // :
+    ColonColon,     // ::
     
     // Literals
     Identifier,     // Variable names, function names, etc.
@@ -405,6 +406,7 @@ impl fmt::Display for TokenType {
             TokenType::Dot => write!(f, "."),
             TokenType::Semicolon => write!(f, ";"),
             TokenType::Colon => write!(f, ":"),
+            TokenType::ColonColon => write!(f, "::"),
             
             // Literals
             TokenType::Identifier => write!(f, "IDENTIFIER"),

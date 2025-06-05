@@ -1,0 +1,4 @@
+str first_name = "Taksit mama";
+str last_name = "Barot";
+
+show "Hello, " + first_name " " + last_name;

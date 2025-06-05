@@ -1,0 +1,29 @@
+# Function to convert string to title case
+fun toTitleCase(str text) {
+    if (strlib::length(text) == 0) {
+        return "";
+    }
+    
+    # Split into words
+    str words = strlib::split(text, " ");
+    str result = "";
+    
+    # Capitalize first letter of each word
+    for (num i = 0; i < strlib::length(words); i = i + 1) {
+        if (strlib::length(words[i]) > 0) {
+            str firstChar = strlib::upper(strlib::substring(words[i], 0, 1));
+            str rest = strlib::lower(strlib::substring(words[i], 1));
+            
+            if (i > 0) {
+                result = result + " ";
+            }
+            result = result + firstChar + rest;
+        }
+    }
+    
+    return result;
+}
+
+# Test the function
+str title = toTitleCase("the quick brown fox");
+show title;  # Output: "The Quick Brown Fox"

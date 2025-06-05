@@ -1,4 +1,4 @@
-# Razen Programming Language beta v0.1.7 - (Tokens Update)
+# Razen Programming Language beta v0.1.75 - Library Call Update & Namespace Notation
 
 ## Overview
 Razen is a modern, intuitive programming language designed for clarity, performance, and ease of use. With a clean syntax inspired by Python and strong type safety, Razen offers an excellent balance between development speed and runtime performance.
@@ -22,24 +22,22 @@ Developed by Prathmesh Barot, Basai Corporation.
 
 ## Changelog
 
-Razen is under active development with regular updates. The latest version is **beta v0.1.695** which includes language streamlining and error handling enhancements.
+Razen is under active development with regular updates. The latest version is **beta v0.1.75** which brings a major update to the library call system and namespace support.
 
-### Latest Release: beta v0.1.695 - Language Streamlining & Error Handling Enhancements
+### Latest Release: beta v0.1.75 – Library Call Update & Namespace Notation
 
-This release focuses on streamlining the Razen language by removing redundant tokens and enhancing the error handling mechanism. View the full changelog in your preferred format:
+This release introduces powerful new ways to call library functions and modernizes the Razen library experience. View the full changelog:
 
-- [Markdown Version (beta_v0.1.695.md)](changelogs/beta_v0.1.695.md) - Best for GitHub viewing
-- [MDX Version (beta_v0.1.695.mdx)](changelogs/beta_v0.1.695.mdx) - Enhanced with interactive components
-- [AsciiDoc Version (beta_v0.1.695.adoc)](changelogs/beta_v0.1.695.adoc) - Rich formatting with advanced features
+- [Markdown Version (beta_v0.1.75.md)](changelogs/beta_v0.1.75.md)
 
-### Key Improvements in v0.1.695
+#### Key Improvements in v0.1.75
 
-- Enhanced try-catch-finally mechanism for robust exception handling
-- Improved error reporting with detailed line and column information
-- Removed redundant string-related tokens (Text, Concat, Slice, Len)
-- Removed redundant date/time tokens in favor of TimeLib integration
-- Optimized library loading for commonly used libraries
-- Streamlined parser with simplified token registration
+- **Namespace Notation (`lib::function`)**: Call library functions with the modern `namespace::function(args...)` syntax, in addition to the classic `Library[function](args...)` bracket notation.
+- **Full Parity**: Both notations are fully supported and interchangeable for all libraries.
+- **Improved Parser & Compiler**: Robust handling of all library call forms, including nested and chained calls.
+- **Better Error Messages**: Parser errors now include precise line and column info.
+- **Consistent Metadata Extraction**: Docs, examples, and changelogs auto-update with function difficulty and version badges.
+- **Backward Compatibility**: All previous scripts using bracket notation continue to work without changes.
 
 For a complete history of all version changelogs, please visit the [changelogs.mdx](changelogs/changelogs.mdx) file or browse the [changelogs](changelogs/) directory for individual version details.
 
@@ -475,8 +473,8 @@ class Person {
 put person = new Person("John", 30);
 
 # Call methods
-person.display();
-person.haveBirthday();
+person:display();
+person:haveBirthday();
 ```
 
 ### Inheritance

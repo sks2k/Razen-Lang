@@ -484,7 +484,7 @@ get_version() {
         # Download version file if not present
         if ! curl -s -o "$TMP_DIR/version" "$RAZEN_REPO/version" &>/dev/null; then
             echo -e "${RED}Failed to download version information. Using default version.${NC}"
-            RAZEN_VERSION="beta v0.1.7 - (Tokens Update)"
+            RAZEN_VERSION="beta v0.1.75 - Library Call Update & Namespace Notation"
         else
             RAZEN_VERSION=$(cat "$TMP_DIR/version")
             # Store the version file for future reference
@@ -971,20 +971,30 @@ install_ide_extensions() {
                     esac
                 fi
                 
-                # First try command-line installation if available
-                if command -v "$ide_cmd" &>/dev/null; then
-                    # Try to install extension using VSIX file
-                    echo -e "${YELLOW}Installing Razen extension for $ide_name using command line...${NC}"
-                    if "$ide_cmd" --install-extension "$INSTALL_DIR/razen-vscode-extension/razen-language-0.3.0.vsix" &>/dev/null; then
-                        echo -e "  ${GREEN}✓${NC} Razen extension installed for $ide_name using command line"
-                        installation_success=true
+                # Find the Razen VSIX file
+                echo -e "${YELLOW}Searching for Razen VSIX extension file in $INSTALL_DIR/razen-vscode-extension/...${NC}"
+                RAZEN_VSIX_FILE=$(ls "$INSTALL_DIR/razen-vscode-extension/razen-language-"*.vsix 2>/dev/null | head -n 1)
+
+                if [[ -n "$RAZEN_VSIX_FILE" ]]; then
+                    echo -e "  ${GREEN}✓${NC} Found Razen VSIX file: $RAZEN_VSIX_FILE"
+                    # Try command-line installation if IDE command is available
+                    if command -v "$ide_cmd" &>/dev/null; then
+                        echo -e "${YELLOW}Attempting to install/update Razen extension for $ide_name using: $RAZEN_VSIX_FILE...${NC}"
+                        # Using --force to ensure update or reinstallation
+                        if "$ide_cmd" --install-extension "$RAZEN_VSIX_FILE" --force &>/dev/null; then
+                            echo -e "  ${GREEN}✓${NC} Razen extension successfully installed/updated for $ide_name."
+                            installation_success=true
+                        else
+                            echo -e "  ${RED}✗ Command line installation with $RAZEN_VSIX_FILE failed for $ide_name.${NC}"
+                            installation_success=false # Explicitly set for clarity
+                        fi
                     else
-                        echo -e "  ${YELLOW}Command line installation failed, trying folder copy method...${NC}"
-                        installation_success=false
+                        echo -e "${YELLOW}$ide_name command ('$ide_cmd') not found. Cannot install extension via command line.${NC}"
+                        installation_success=false # Explicitly set for clarity
                     fi
                 else
-                    echo -e "${YELLOW}$ide_name command not found, trying folder copy method...${NC}"
-                    installation_success=false
+                    echo -e "  ${RED}✗ Error: Razen VSIX file (razen-language-*.vsix) not found in $INSTALL_DIR/razen-vscode-extension/${NC}"
+                    installation_success=false # Explicitly set for clarity
                 fi
                 
                 # If command-line installation failed or command not available, try folder copy method
@@ -994,7 +1004,7 @@ install_ide_extensions() {
                     
                     # Copy extension to the extension directory with the same name
                     echo -e "${YELLOW}Installing Razen extension for $ide_name using folder copy...${NC}"
-                    cp -r "$INSTALL_DIR/razen-vscode-extension" "$ext_dir/razen.razen-lang" || handle_error $? "Failed to install extension" "Check permissions"
+                    cp -r "$INSTALL_DIR/razen-vscode-extension" "$ext_dir/razen-language-extension" || handle_error $? "Failed to install extension" "Check permissions"
                     echo -e "  ${GREEN}✓${NC} Razen extension installed for $ide_name using folder copy"
                 fi
                 ;;

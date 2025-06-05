@@ -22,6 +22,14 @@ const { TextDocument } = require('vscode-languageserver-textdocument');
 // Create a connection for the server
 const connection = createConnection(ProposedFeatures.all);
 
+function toPascalCase(str) {
+  if (!str) return '';
+  // Find the canonical name from LIBRARIES keys if it exists, otherwise, simple capitalize
+  const lowerStr = str.toLowerCase();
+  const canonicalKey = Object.keys(LIBRARIES).find(key => key.toLowerCase() === lowerStr);
+  return canonicalKey || (str.charAt(0).toUpperCase() + str.slice(1));
+}
+
 // Create a document manager
 const documents = new TextDocuments(TextDocument);
 
@@ -523,125 +531,45 @@ const LIBRARY_RETURN_TYPES = {
 
 // Library definitions
 const LIBRARIES = {
-  // Array library
-  'arrlib': ['push', 'pop', 'join', 'length', 'unique'],
-  
-  // String library
-  'strlib': ['upper', 'lower', 'substring', 'replace', 'length', 'split', 'trim', 'starts_with', 'ends_with', 'contains', 'repeat'],
-  
-  // Math library
-  'mathlib': ['add', 'subtract', 'multiply', 'divide', 'power', 'sqrt', 'abs', 'round', 'floor', 'ceil', 'sin', 'cos', 'tan', 'log', 'exp', 'random', 'max', 'min', 'modulo'],
-  
-  // Time library
-  'timelib': ['now', 'format', 'parse', 'add', 'year', 'month', 'day'],
-  
-  // Random library
-  'random': ['int', 'float', 'choice', 'shuffle'],
-  
-  // File library (legacy)
-  'file': ['read', 'write', 'append', 'exists', 'delete'],
-  
-  // Filesystem library (extended)
-  'filesystem': ['exists', 'is_file', 'is_dir', 'create_dir', 'remove', 'read_file', 'write_file', 'list_dir', 'metadata', 'absolute_path', 'copy', 'move', 'extension', 'file_stem', 'parent_dir', 'join_path', 'change_dir', 'current_dir', 'temp_file', 'temp_dir'],
-  
-  // JSON library
-  'json': ['parse', 'stringify'],
-  
-  // Bolt library
-  'bolt': ['run', 'parallel'],
-  
-  // Seed library
-  'seed': ['generate', 'map'],
-  
-  // Memory library
-  'memorylib': ['addressof', 'deref', 'add_offset', 'alloc', 'free', 'write_byte', 'read_byte', 'create_buffer', 'free_buffer', 'buffer_write_string', 'buffer_read_string', 'buffer_copy', 'stats'],
-  
-  // Binary library
-  'binarylib': ['create', 'open', 'close', 'write_bytes', 'read_bytes', 'seek', 'tell', 'bytes_to_string', 'string_to_bytes', 'stats'],
-  
-  // Bitwise library
-  'bitwiselib': ['and', 'or', 'xor', 'not', 'left_shift', 'right_shift', 'unsigned_right_shift', 'get_bit', 'set_bit', 'count_bits', 'to_binary', 'to_hex', 'from_binary', 'from_hex'],
-  
-  // System library
-  'systemlib': ['getpid', 'getcwd', 'execute', 'getenv', 'setenv', 'environ', 'args', 'path_exists', 'realpath', 'exit', 'sleep', 'hostname', 'username', 'current_time', 'system_name'],
-  
-  // Process library
-  'processlib': ['create', 'wait', 'is_running', 'kill', 'signal', 'info', 'read_stdout', 'read_stderr', 'write_stdin'],
-  
-  // Thread library
-  'threadlib': ['create', 'join', 'is_running', 'sleep', 'mutex_create', 'mutex_lock', 'mutex_unlock', 'mutex_destroy', 'current', 'cpu_count', 'thread_id', 'thread_count'],
-  
-  // Compiler library
-  'compilerlib': ['create_node', 'add_child', 'node_to_string', 'create_symbol_table', 'add_symbol', 'lookup_symbol', 'generate_ir', 'optimize_ir', 'generate_assembly', 'parse', 'tokenize', 'compile'],
-  
-  // Lexer library
-  'lexerlib': ['create_lexer', 'tokenize', 'define_token'],
-  
-  // Parser library
-  'parserlib': ['create_parser', 'parse', 'define_rule', 'create_grammar'],
-  
-  // AST library
-  'astlib': ['create_node', 'define_node_type', 'traverse', 'create_visitor'],
-  
-  // Symbol library
-  'symbollib': ['create_symbol_table', 'define_symbol', 'add_symbol', 'lookup_symbol'],
-  
-  // Type library
-  'typelib': ['define_type', 'check_type', 'create_type_system', 'infer_type'],
-  
-  // IR library
-  'irlib': ['create_instruction', 'generate', 'optimize', 'to_string'],
-  
-  // CodeGen library
-  'codegenlib': ['create_generator', 'generate', 'define_target', 'emit_code'],
-  
-  // Optimize library
-  'optimizelib': ['create_pass', 'apply', 'analyze', 'create_pipeline'],
-  
-  // Color library
-  'color': ['hex_to_rgb', 'rgb_to_hex', 'lighten', 'darken', 'get_ansi_color'],
-  
-  // Crypto library
-  'crypto': ['hash', 'encrypt', 'decrypt'],
-  
-  // Regex library
-  'regex': ['match', 'search', 'replace'],
-  
-  // UUID library
-  'uuid': ['generate', 'parse', 'is_valid'],
-  
-  // OS library
-  'os': ['env', 'cwd', 'platform'],
-  
-  // Validation library
-  'validation': ['email', 'phone', 'required', 'min_length'],
-  
-  // System library
-  'system': ['exec', 'uptime', 'info', 'current_time', 'system_name'],
-  
-  // Box library
-  'boxlib': ['put', 'get', 'is_box'],
-  
-  // Log library
-  'loglib': ['info', 'warn', 'error', 'debug'],
-  
-  // HT library
-  'htlib': ['coin', 'bool'],
-  
-  // Net library
-  'netlib': ['ping', 'get', 'post'],
-  
-  // Audio library
-  'audio': ['play', 'pause', 'stop', 'record'],
-  
-  // Image library
-  'image': ['load', 'save', 'resize', 'crop'],
-  
-  // Date library
-  'date': ['now', 'year', 'month', 'day', 'format', 'parse', 'add_days', 'add_months', 'add_years', 'weekday', 'weekday_name', 'days_in_month', 'is_leap_year', 'diff_days'],
-  
-  // API library
-  'apilib': ['get', 'post', 'putmethod', 'delete', 'patch', 'call', 'parse_json', 'to_json', 'create_api', 'execute_api', 'url_encode', 'url_decode', 'form_data', 'is_success', 'is_client_error', 'is_server_error']
+    "ArrLib": ["push", "pop", "join", "length", "unique"],
+    "StrLib": ["upper", "lower", "substring", "replace", "length", "split", "trim", "starts_with", "ends_with", "contains", "repeat"],
+    "MathLib": ["add", "subtract", "multiply", "divide", "power", "sqrt", "abs", "round", "floor", "ceil", "sin", "cos", "tan", "log", "exp", "random", "max", "min", "modulo"],
+    "Random": ["int", "float", "choice", "shuffle"],
+    "File": ["read", "write", "append", "exists", "delete"],
+    "Filesystem": ["exists", "is_file", "is_dir", "create_dir", "remove", "read_file", "write_file", "list_dir", "metadata", "absolute_path", "copy", "move", "extension", "file_stem", "parent_dir", "join_path", "change_dir", "current_dir", "temp_file", "temp_dir"],
+    "ApiLib": ["get", "post", "putmethod", "delete", "patch", "call", "parse_json", "to_json", "create_api", "execute_api", "url_encode", "url_decode", "form_data", "is_success", "is_client_error", "is_server_error"],
+    "Json": ["parse", "stringify"],
+    "Bolt": ["run", "parallel", "threads"],
+    "Seed": ["generate", "map_seed", "noise_map", "name"],
+    "MemoryLib": ["addressof", "deref", "add_offset", "alloc", "free", "write_byte", "read_byte", "create_buffer", "free_buffer", "buffer_write_string", "buffer_read_string", "buffer_copy", "stats"],
+    "BinaryLib": ["create", "open", "close", "write_bytes", "read_bytes", "seek", "tell", "bytes_to_string", "string_to_bytes", "stats"],
+    "BitwiseLib": ["and", "or", "xor", "not", "left_shift", "right_shift", "unsigned_right_shift", "get_bit", "set_bit", "count_bits", "to_binary", "to_hex", "from_binary", "from_hex"],
+    "SystemLib": ["getpid", "getcwd", "execute", "getenv", "setenv", "environ", "args", "path_exists", "realpath", "exit", "sleep", "hostname", "username", "current_time", "system_name"],
+    "ProcessLib": ["create", "wait", "is_running", "kill", "signal", "info", "read_stdout", "read_stderr", "write_stdin"],
+    "ThreadLib": ["create", "join", "is_running", "sleep", "mutex_create", "mutex_lock", "mutex_unlock", "mutex_destroy", "current", "cpu_count", "thread_id", "thread_count"],
+    "CompilerLib": ["create_node", "add_child", "node_to_string", "create_symbol_table", "add_symbol", "lookup_symbol", "generate_ir", "optimize_ir", "generate_assembly", "parse", "tokenize", "compile"],
+    "LexerLib": ["create_lexer", "tokenize", "define_token"],
+    "ParserLib": ["create_parser", "parse", "define_rule", "create_grammar"],
+    "AstLib": ["create_node", "define_node_type", "traverse", "create_visitor"],
+    "SymbolLib": ["create_symbol_table", "define_symbol", "add_symbol", "lookup_symbol"],
+    "TypeLib": ["define_type", "check_type", "create_type_system", "infer_type"],
+    "IrLib": ["create_instruction", "generate", "optimize", "to_string"],
+    "CodegenLib": ["create_generator", "generate", "define_target", "emit_code"],
+    "OptimizeLib": ["create_pass", "apply", "analyze", "create_pipeline"],
+    "Color": ["hex_to_rgb", "rgb_to_hex", "lighten", "darken", "get_ansi_color"],
+    "Crypto": ["hash", "encrypt", "decrypt"],
+    "Regex": ["match", "search", "replace"],
+    "Uuid": ["generate", "parse", "is_valid"],
+    "Os": ["env", "cwd", "platform"],
+    "Validation": ["email", "phone", "required", "min_length"],
+    "System": ["exec", "uptime", "info", "current_time", "system_name"],
+    "BoxLib": ["put", "get", "is_box"],
+    "LogLib": ["info", "warn", "error", "debug"],
+    "HtLib": ["coin", "bool_tos"],
+    "Audio": ["play", "pause", "stop", "record"],
+    "Image": ["load", "save", "resize", "crop"],
+    "Date": ["now", "year", "month", "day", "format", "parse", "add_days", "add_months", "add_years", "weekday", "weekday_name", "days_in_month", "is_leap_year", "diff_days"],
+    "NetLib": ["ping", "get", "post"]
 };
 
 // Helper function to determine value type
@@ -799,19 +727,34 @@ function validateRazenDocument(textDocument) {
       continue;
     }
     
-    // Check for library imports
+    // Check for library imports (e.g., using ArrLib;)
     let libraryImportMatch;
+    // Assuming 'libraryImportRegex' is the regex for 'using LibraryName;'
     const lineLibraryImportRegex = new RegExp(libraryImportRegex.source, libraryImportRegex.flags);
     while ((libraryImportMatch = lineLibraryImportRegex.exec(line)) !== null) {
-      const [fullMatch, libraryName] = libraryImportMatch;
-      
-      // Track library import
-      libraryMap.set(libraryName.toLowerCase(), {
-        line: i,
-        character: libraryImportMatch.index + fullMatch.indexOf(libraryName),
-        length: libraryName.length,
-        used: false
-      });
+      const [fullMatch, originalLibraryName] = libraryImportMatch; // originalLibraryName is from the 'using' statement
+      const pascalCaseLibraryName = toPascalCase(originalLibraryName);
+
+      if (LIBRARIES[pascalCaseLibraryName]) { // Check LIBRARIES using the PascalCase name
+        libraryMap.set(pascalCaseLibraryName, { // Store in libraryMap with PascalCase key
+          line: i,
+          character: libraryImportMatch.index + fullMatch.indexOf(originalLibraryName),
+          length: originalLibraryName.length,
+          used: false // Initially marked as unused
+        });
+      } else {
+        // Library specified in 'using' statement not found in LIBRARIES
+        const diagnostic = {
+          severity: DiagnosticSeverity.Warning,
+          range: {
+            start: { line: i, character: libraryImportMatch.index + fullMatch.indexOf(originalLibraryName) },
+            end: { line: i, character: libraryImportMatch.index + fullMatch.indexOf(originalLibraryName) + originalLibraryName.length }
+          },
+          message: `Library '${originalLibraryName}' (resolved to '${pascalCaseLibraryName}') not found. Available libraries: ${Object.keys(LIBRARIES).join(', ')}`,
+          source: 'Razen Linter'
+        };
+        diagnostics.push(diagnostic);
+      }
     }
 
     // Check library function assignment with token type
@@ -894,17 +837,17 @@ function validateRazenDocument(textDocument) {
       const [fullMatch, library, functionName] = libraryMatch;
       const error = validateLibraryUsage(library, functionName);
       
-      // Mark library as used if it exists in our library map
-      const libraryLower = library.toLowerCase();
-      if (libraryMap.has(libraryLower)) {
-        const libInfo = libraryMap.get(libraryLower);
+      // Mark library as used if it exists in our library map (using PascalCase keys)
+      const pascalCaseLibrary = toPascalCase(library);
+      if (libraryMap.has(pascalCaseLibrary)) {
+        const libInfo = libraryMap.get(pascalCaseLibrary);
         libInfo.used = true;
-        libraryMap.set(libraryLower, libInfo);
+        libraryMap.set(pascalCaseLibrary, libInfo);
       }
       
       if (error) {
         const diagnostic = {
-          severity: DiagnosticSeverity.Warning,
+          severity: DiagnosticSeverity.Error,
           range: {
             start: { line: i, character: libraryMatch.index },
             end: { line: i, character: libraryMatch.index + fullMatch.length }
@@ -914,6 +857,71 @@ function validateRazenDocument(textDocument) {
         };
         diagnostics.push(diagnostic);
       }
+    }
+
+    // Check for namespace library calls (e.g., arrlib::push())
+    let namespaceMatch;
+    const namespaceCallRegex = /\b([a-z_][a-z0-9_]*)::([a-zA-Z_][a-zA-Z0-9_]*)\b(?=\s*\()/g;
+    while ((namespaceMatch = namespaceCallRegex.exec(line)) !== null) {
+      const [fullMatch, libNameLower, funcName] = namespaceMatch;
+      const pascalCaseLibraryName = toPascalCase(libNameLower);
+
+      if (LIBRARIES[pascalCaseLibraryName] && LIBRARIES[pascalCaseLibraryName].includes(funcName)) {
+        // Valid library and function
+        if (libraryMap.has(pascalCaseLibraryName)) { // libraryMap should store PascalCase keys
+          const libInfo = libraryMap.get(pascalCaseLibraryName);
+          libInfo.used = true;
+          libraryMap.set(pascalCaseLibraryName, libInfo);
+        } else {
+          // This case might occur if a library is used with namespace notation 
+          // but not explicitly imported with 'using'. Depending on Razen's import rules,
+          // this might be an error or an implicit import.
+          // For now, we assume if it's a valid library, it's okay.
+          // If 'using' is mandatory, a diagnostic should be added here.
+        }
+      } else if (LIBRARIES[pascalCaseLibraryName]) {
+        // Library exists, but function does not
+        const diagnostic = {
+          severity: DiagnosticSeverity.Error,
+          range: {
+            start: { line: i, character: namespaceMatch.index + libNameLower.length + 2 }, // Start of function name
+            end: { line: i, character: namespaceMatch.index + libNameLower.length + 2 + funcName.length } // End of function name
+          },
+          message: `Function '${funcName}' not found in library '${pascalCaseLibraryName}'.`,
+          source: 'Razen Linter'
+        };
+        diagnostics.push(diagnostic);
+      } else {
+        // Library does not exist
+        const diagnostic = {
+          severity: DiagnosticSeverity.Error,
+          range: {
+            start: { line: i, character: namespaceMatch.index }, // Start of library name
+            end: { line: i, character: namespaceMatch.index + libNameLower.length } // End of library name
+          },
+          message: `Library '${libNameLower}' (resolved to '${pascalCaseLibraryName}') not found.`,
+          source: 'Razen Linter'
+        };
+        diagnostics.push(diagnostic);
+      }
+    }
+
+    // Check for bracket notation for library calls and add warning
+    let bracketMatch;
+    const bracketNotationWarningRegex = new RegExp(/\b([A-Za-z_][A-Za-z0-9_]*)\s*\[\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*\]\s*(\(.*?\))/g.source, 'g');
+    while ((bracketMatch = bracketNotationWarningRegex.exec(line)) !== null) {
+      const [fullMatch, libraryName, functionName, args] = bracketMatch;
+      const diagnostic = {
+        severity: DiagnosticSeverity.Warning,
+        range: {
+          start: { line: i, character: bracketMatch.index },
+          end: { line: i, character: bracketMatch.index + fullMatch.length }
+        },
+        message: `Bracket notation for library calls is deprecated and will be removed after beta v0.1.80. Use namespace notation: '${libraryName.toLowerCase()}::${functionName}${args}'.`,
+        source: 'Razen Linter',
+        code: 'razen-bracket-to-namespace'
+      };
+      diagnostics.push(diagnostic);
     }
     
     // Check variable usages
@@ -975,7 +983,8 @@ connection.onInitialize((params) => {
         full: {
           delta: false // We don't support delta requests yet
         }
-      }
+      },
+      codeActionProvider: true // Signal that we provide code actions
     }
   };
 });
@@ -1106,6 +1115,48 @@ connection.languages.semanticTokens.on((params) => {
   
   return builder.build();
 });
+
+// Handle Code Action requests for quick fixes
+connection.onCodeAction(params => {
+  const textDocument = documents.get(params.textDocument.uri);
+  if (!textDocument) {
+    return undefined;
+  }
+  const codeActions = [];
+  params.context.diagnostics.forEach(diagnostic => {
+    if (diagnostic.code === 'razen-bracket-to-namespace') {
+      // Extract the library, function, and args from the diagnostic message or by re-matching the text
+      // For simplicity, we'll re-match the text at the diagnostic range.
+      const documentText = textDocument.getText(diagnostic.range);
+      const bracketRegex = /\b([A-Za-z_][A-Za-z0-9_]*)\s*\[\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*\]\s*(\(.*?\))/;
+      const match = documentText.match(bracketRegex);
+
+      if (match) {
+        const [, libraryName, functionName, args] = match;
+        const newText = `${libraryName.toLowerCase()}::${functionName}${args}`;
+        
+        codeActions.push({
+          title: `Convert to namespace notation: ${newText}`,
+          kind: 'QuickFix', // Use CodeActionKind.QuickFix if imported
+          diagnostics: [diagnostic],
+          isPreferred: true,
+          edit: {
+            changes: {
+              [params.textDocument.uri]: [
+                {
+                  range: diagnostic.range,
+                  newText: newText
+                }
+              ]
+            }
+          }
+        });
+      }
+    }
+  });
+  return codeActions;
+});
+
 
 // Handle completion requests
 connection.onCompletion((textDocumentPosition) => {

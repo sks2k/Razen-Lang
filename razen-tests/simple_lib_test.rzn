@@ -1,0 +1,1 @@
+var file_read = filesystem[read_file]("file.txt")

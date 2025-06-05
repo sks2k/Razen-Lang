@@ -14,12 +14,10 @@ import {main, secondary} from {index.json};
 lib random;
 
 # here is the downloaded library import method
-require @discordRZN; # not use now (add later)
+require discordRZN; # not use now (add later)
 
 # here is the example of laod entire razen file
 get {index}; # make sure that the razen files are used with out .rzn file type but for laod other use proper name.
 
 # here is the example of laod entire file like json and other
 get {users.json};
-
-

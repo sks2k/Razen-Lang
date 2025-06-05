@@ -1,0 +1,234 @@
+# Razen Library System Test
+# This file tests the namespace (::) notation for library function calls
+
+# Import libraries
+lib arrlib;   # Array library
+lib strlib;   # String library
+lib mathlib;  # Math library
+lib random;   # Random library
+lib file;     # File library
+lib json;     # JSON library
+lib bolt;     # Bolt library for intensive operations
+lib seed;     # Seed library for generating game maps
+lib color;    # Color library for color manipulation
+lib crypto;   # Crypto library for encryption and hashing
+lib regex;    # Regular expression library
+lib uuid;     # UUID generation and validation
+lib os;       # Operating system information
+lib validation; # Data validation
+lib system;   # System commands and information
+lib boxlib;   # Box library for value boxing
+lib loglib;   # Logging utilities
+lib htlib;    # Head/Tails coin flip utilities
+lib netlib;   # Network library for HTTP requests
+lib audio;    # Audio library for playback and recording
+lib image;    # Image library for image processing
+lib date;     # Date library for date/time operations
+
+show "===== Razen Library System Test =====";
+
+# Test array library functions
+show "1. Testing Array Library:";
+show "Original array: " + [1, 2, 3];
+show "After push: " + ArrLib::push([1, 2, 3], 4); 
+show "Popped value: " + arrlib::pop([1, 2, 3, 4]);
+show "After pop: " + arrlib::pop([1, 2, 3, 4]);
+show "Join with dash: " + arrlib::join(["a", "b", "c"], "-");
+show "Array length: " + arrlib::length([1, 2, 3]);
+
+# Test string library functions
+show "2. Testing String Library:";
+show "Original string: " + "Hello, Razen!";
+show "Uppercase: " + strlib::upper("Hello, Razen!");
+show "Lowercase: " + strlib::lower("Hello, Razen!");
+show "Substring (0,5): " + strlib::substring("Hello, Razen!", 0, 5);
+show "Replace: " + strlib::replace("Hello, Razen!", "Razen", "World");
+show "Length: " + strlib::length("Hello, Razen!");
+show "Split by comma: " + strlib::split("Hello, Razen!", ",");
+show "Trimmed: " + strlib::trim("  spaced  ");
+show "Starts with 'Hello': " + strlib::starts_with("Hello, Razen!", "Hello");
+show "Ends with 'Razen!': " + strlib::ends_with("Hello, Razen!", "Razen!");
+show "Contains 'Raz': " + strlib::contains("Hello, Razen!", "Raz");
+show "Repeat 3 times: " + strlib::repeat("abc", 3);
+
+# Test math library functions
+show "3. Testing Math Library:";
+show "Add: " + mathlib::add(5, 3);
+show "Subtract: " + mathlib::subtract(10, 4);
+show "Multiply: " + mathlib::multiply(6, 7);
+show "Divide: " + mathlib::divide(20, 5);
+show "Power: " + mathlib::power(2, 3);
+show "Square root: " + mathlib::sqrt(16);
+show "Absolute: " + mathlib::abs(-15);
+show "Round: " + mathlib::round(3.7);
+show "Floor: " + mathlib::floor(3.7);
+show "Ceiling: " + mathlib::ceil(3.2);
+show "Sin(0): " + mathlib::sin(0);
+show "Cos(0): " + mathlib::cos(0);
+show "Tan(0): " + mathlib::tan(0);
+show "Log(100, 10): " + mathlib::log(100, 10);
+show "Exp(1): " + mathlib::exp(1);
+show "Max(3, 7, 2): " + mathlib::max(3, 7, 2);
+show "Min(3, 7, 2): " + mathlib::min(3, 7, 2);
+show "Modulo(10, 3): " + mathlib::modulo(10, 3);
+
+# Test random library functions
+show "4. Testing Random Library:";
+show "Random integer (1-10): " + random::int(1, 10);
+show "Random float (0-1): " + random::float(0, 1);
+show "Random choice: " + random::choice(["apple", "banana", "cherry"]);
+show "Shuffled array: " + random::shuffle([1, 2, 3, 4, 5]);
+
+# Test JSON library functions
+show "5. Testing JSON Library:";
+
+# Create simple objects directly instead of parsing
+var simple_obj = ["name", "John", "age", 30];
+show "Simple object: " + simple_obj;
+
+# Create arrays instead of objects for better display
+var person_info = ["John", 30];
+var address_info = ["New York", "10001"];
+show "Person info (name, age): " + person_info;
+show "Address info (city, zip): " + address_info;
+
+# Create a simple array
+var json_array = [1, 2, 3, "value"];
+show "Array: " + json_array;
+
+# Create a person record as an array of key-value pairs
+map person = [
+    "name", "John Doe",
+    "age", 30,
+    "skills", ["JavaScript", "Python", "Rust"],
+    "active", true,
+    "salary", 75000.50
+];
+
+# Test stringify on arrays
+show "Stringify simple array: " + json::stringify(simple_obj);
+show "Stringify person array: " + json::stringify(person);
+
+# Create users as arrays
+var users = [
+    [1, "Alice"],
+    [2, "Bob"]
+]; 
+show "Users data: " + users;
+show "First user ID: " + users[0][0];
+show "First user name: " + users[0][1];
+
+# Test seed library functions
+show "6. Testing Seed Library:";
+show "Generated seed: " + seed::generate(10);
+# show "2D map from seed: " + seed::map("razen123", 3, 3);
+
+# Test Color Library
+show "7. Testing Color Library:";
+show "Hex to RGB: #3366ff => " + color::hex_to_rgb("#3366ff");
+show "RGB to Hex: [0, 204, 102] => " + color::rgb_to_hex([0, 204, 102]);
+show "Lighten #888888 by 20%: " + color::lighten("#888888", 20);
+show "Darken #888888 by 20%: " + color::darken("#888888", 20);
+
+# Test Crypto Library
+show "8. Testing Crypto Library:";
+show "Hash of 'Hello, Razen!': " + crypto::hash("Hello, Razen!");
+show "Encrypted message test: " + crypto::decrypt(crypto::encrypt("Hello, Razen!", "secret_key"), "secret_key");
+
+# Test Regex Library
+show "9. Testing Regex Library:";
+show "Match test: " + regex::match("abc123", "\\d+");
+show "Search test: " + regex::search("abc123", "\\d+");
+show "Replace test: " + regex::replace("abc123def", "\\d+", "X");
+
+# Test UUID Library
+show "10. Testing UUID Library:";
+show "UUID generate: " + uuid::generate();
+show "UUID is_valid (valid): " + uuid::is_valid("550e8400-e29b-41d4-a716-446655440000");
+show "UUID is_valid (invalid): " + uuid::is_valid("not-a-uuid");
+
+# Test OS Library
+show "11. Testing OS Library:";
+show "OS platform: " + os::platform();
+show "OS current directory: " + os::cwd();
+show "OS environment variable PATH: " + os::env("PATH");
+
+# Test Validation Library
+show "12. Testing Validation Library:";
+show "Email validation (valid): " + validation::email("user@example.com");
+show "Email validation (invalid): " + validation::email("not-an-email");
+show "Phone validation (valid): " + validation::phone("1234567890");
+show "Required validation (empty): " + validation::required("");
+show "Required validation (non-empty): " + validation::required("value");
+show "Min length validation: " + validation::min_length("abcdef", 3);
+
+# Test System Library
+show "13. Testing System Library:";
+show "System uptime: " + system::uptime();
+show "System info: " + system::info();
+
+# Test bolt library functions (for intensive operations)
+show "14. Testing Bolt Library:";
+show "Bolt run result: " + bolt::run("test");
+show "Bolt parallel result: " + bolt::parallel([1, 2, 3], "double");
+
+# Test Box Library
+show "15. Testing Box Library:";
+# We'll implement more BoxLib tests in a separate file later
+
+# Test Log Library
+show "16. Testing Log Library:";
+show "Info log: " + loglib::info("This is an info message");
+show "Warning log: " + loglib::warn("This is a warning message");
+show "Error log: " + loglib::error("This is an error message");
+show "Debug log: " + loglib::debug("This is a debug message");
+
+# Test HT (Head/Tails) Library
+show "17. Testing HT Library:";
+# show "Coin flip: " + htlib::coin();
+# show "Multiple coin flips: [" + htlib::coin() + ", " + htlib::coin() + ", " + htlib::coin() + "]";
+
+# Test Enhanced Net Library
+show "18. Testing Net Library:";
+show "Ping test: " + netlib::ping("https://www.google.com");
+# Uncomment to test with actual network calls:
+# show "GET request: " + netlib::get("https://example.com");
+# show "POST request: " + netlib::post("https://httpbin.org/post", {test: "data"});
+
+# Test Audio Library
+show "19. Testing Audio Library:";
+show "Play audio: " + audio::play("sample.mp3");
+show "Pause audio: " + audio::pause();
+show "Stop audio: " + audio::stop();
+show "Record audio: " + audio::record("recording.wav");
+
+# Test Image Library
+show "20. Testing Image Library:";
+show "Load image: " + image::load("sample.png");
+num img = image::load("sample.png");
+show "Save image: " + image::save(img, "outvar.png");
+show "Resize image: " + image::resize(img, 100, 100);
+show "Crop image: " + image::crop(img, 10, 10, 50, 50);
+
+# Test Date Library
+show "21. Testing Date Library:";
+show "Current timestamp: " + date::now();
+show "Current year: " + date::year();
+show "Current month: " + date::month();
+show "Current day: " + date::day();
+show "Format date: " + date::format(date::now(), "YYYY-MM-DD");
+show "Parse date: " + date::parse("2025-04-24", "YYYY-MM-DD");
+show "Add days: " + date::format(date::add_days(date::now(), 7), "YYYY-MM-DD");
+show "Add months: " + date::format(date::add_months(date::now(), 3), "YYYY-MM-DD");
+show "Add years: " + date::format(date::add_years(date::now(), 1), "YYYY-MM-DD");
+show "Weekday (0-6): " + date::weekday(date::now());
+show "Weekday name: " + date::weekday_name(date::now());
+show "Days in month (Feb 2024): " + date::days_in_month(2024, 2);
+show "Days in month (Feb 2025): " + date::days_in_month(2025, 2);
+show "Is leap year (2024): " + date::is_leap_year(2024);
+show "Is leap year (2025): " + date::is_leap_year(2025);
+show "Diff days (1 week): " + date::diff_days(date::now(), date::add_days(date::now(), 7));
+
+show "===== All tests compnumed! =====";
+
+show(blue) "All tests compnumed!";

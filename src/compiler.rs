@@ -1096,6 +1096,9 @@ impl Compiler {
             Expression::LibraryCall { library, function, arguments } => {
                 self.compile_library_call(*library, *function, arguments);
             },
+            Expression::NamespaceCall { namespace, function, arguments } => {
+                self.compile_namespace_call(namespace, function, arguments);
+            },
         }
     }
     
@@ -1292,6 +1295,25 @@ impl Compiler {
 
         // Call the library function with the given number of arguments
         self.emit(IR::LibraryCall(lib_name, full_func_name, arguments.len()));
+
+        // For show statements, we need to handle the return value
+        if self.in_show_statement {
+            // The return value is already on the stack
+            // No need to do anything special
+        }
+    }
+
+    fn compile_namespace_call(&mut self, namespace: String, function: String, arguments: Vec<Expression>) {
+        // Compile each argument
+        for arg in &arguments {
+            self.compile_expression(arg.clone());
+        }
+
+        // Create the full function name in the format "namespace.function"
+        let full_func_name = format!("{}.{}", namespace, function);
+
+        // Call the library function with the given number of arguments
+        self.emit(IR::LibraryCall(namespace, full_func_name, arguments.len()));
 
         // For show statements, we need to handle the return value
         if self.in_show_statement {

@@ -1,0 +1,10 @@
+# Simple test for :: namespace syntax
+
+lib arrlib;
+lib mathlib;
+lib strlib;
+
+show "Testing namespace syntax:";
+show "Array push: " + arrlib::push([1, 2, 3], 4);
+show "Math add: " + mathlib::add(5, 3);
+show "String upper: " + strlib::upper("hello");

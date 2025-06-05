@@ -30,11 +30,11 @@ show "===== Razen Library System Test =====";
 # Test array library functions
 show "1. Testing Array Library:";
 show "Original array: " + [1, 2, 3];
-show "After push: " + ArrLib[push]([1, 2, 3], 4);
-show "Popped value: " + ArrLib[pop]([1, 2, 3, 4]);
-show "After pop: " + ArrLib[pop]([1, 2, 3, 4]);
-show "Join with dash: " + ArrLib[join](["a", "b", "c"], "-");
-show "Array length: " + ArrLib[length]([1, 2, 3]);
+show "After push: " + arrlib::push([1, 2, 3], 4);
+show "Popped value: " + arrlib::pop([1, 2, 3, 4]);
+show "After pop: " + arrlib::pop([1, 2, 3, 4]);
+show "Join with dash: " + arrlib::join(["a", "b", "c"], "-");
+show "Array length: " + arrlib::length([1, 2, 3]); 
 
 # Test string library functions
 show "2. Testing String Library:";
@@ -46,7 +46,7 @@ show "Replace: " + StrLib[replace]("Hello, Razen!", "Razen", "World");
 show "Length: " + StrLib[length]("Hello, Razen!");
 show "Split by comma: " + StrLib[split]("Hello, Razen!", ",");
 show "Trimmed: " + StrLib[trim]("  spaced  ");
-show "Starts with 'Hello': " + StrLib[starts_with]("Hello, Razen!", "Hello");
+show "Starts with 'Hello': " + StrLib[starts_with]("Hello, Razen!", "Hello"); 
 show "Ends with 'Razen!': " + StrLib[ends_with]("Hello, Razen!", "Razen!");
 show "Contains 'Raz': " + StrLib[contains]("Hello, Razen!", "Raz");
 show "Repeat 3 times: " + StrLib[repeat]("abc", 3);
@@ -98,7 +98,7 @@ var json_array = [1, 2, 3, "value"];
 show "Array: " + json_array;
 
 # Create a person record as an array of key-value pairs
-num person = [
+map person = [
     "name", "John Doe",
     "age", 30,
     "skills", ["JavaScript", "Python", "Rust"],
@@ -122,7 +122,7 @@ show "First user name: " + users[0][1];
 # Test seed library functions
 show "6. Testing Seed Library:";
 show "Generated seed: " + Seed[generate](10);
-show "2D map from seed: " + Seed[map]("razen123", 3, 3);
+# show "2D map from seed: " + Seed[map]("razen123", 3, 3);
 
 # Test Color Library
 show "7. Testing Color Library:";

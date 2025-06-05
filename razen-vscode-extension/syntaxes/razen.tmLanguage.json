@@ -31,6 +31,23 @@
       "include": "#colored-output"
     },
     {
+      "name": "meta.namespace-call.razen",
+      "begin": "\\b([a-zA-Z_][a-zA-Z0-9_]*)(::)([a-zA-Z_][a-zA-Z0-9_]*)\\s*(\\()",
+      "beginCaptures": {
+        "1": { "name": "entity.name.function.definition.razen" },
+        "2": { "name": "keyword.operator.accessor.razen" },
+        "3": { "name": "entity.name.function.library.razen" },
+        "4": { "name": "punctuation.definition.parameters.begin.razen" }
+      },
+      "end": "\\)",
+      "endCaptures": {
+        "0": { "name": "punctuation.definition.parameters.end.razen" }
+      },
+      "patterns": [
+        { "include": "#expression" }
+      ]
+    },
+    {
       "include": "#libraries"
     },
     {
@@ -214,7 +231,7 @@
       "patterns": [
         {
           "name": "keyword.operator.arithmetic.razen",
-          "match": "\\+|\\-|\\*|\\/|\\%|\\*\\*|\\/\\/"
+          "match": "\\+|\\-|\\*|\\/|%|\\*\\*|\\/\\/"
         },
         {
           "name": "keyword.operator.assignment.razen",
@@ -231,6 +248,18 @@
         {
           "name": "keyword.operator.accessor.razen",
           "match": "\\."
+        },
+        {
+          "name": "keyword.operator.namespace.razen",
+          "match": "::"
+        },
+        {
+          "name": "keyword.operator.bitwise.razen",
+          "match": "\\^|&|\\||~|<<|>>"
+        },
+        {
+          "name": "keyword.operator.other.razen",
+          "match": "\\?|:|=>"
         }
       ]
     },
@@ -250,11 +279,11 @@
       "patterns": [
         {
           "name": "entity.name.class.library.razen",
-          "match": "\\b(ArrLib|StrLib|MathLib|TimeLib|Random|File|Filesystem|JSON|Bolt|Seed|MemoryLib|BinaryLib|BitwiseLib|SystemLib|ProcessLib|ThreadLib|CompilerLib|LexerLib|ParserLib|ASTLib|SymbolLib|TypeLib|IRLib|CodeGenLib|OptimizeLib|Color|Crypto|Regex|UUID|OS|Validation|System|BoxLib|LogLib|HTLib|NetLib|Audio|Image|Date)\\b"
+          "match": "\\b(ArrLib|arrlib|StrLib|strlib|MathLib|mathlib|TimeLib|timelib|Random|random|File|file|Filesystem|filesystem|ApiLib|apilib|Json|json|Bolt|bolt|Seed|seed|MemoryLib|memorylib|BinaryLib|binarylib|BitwiseLib|bitwiselib|SystemLib|systemlib|ProcessLib|processlib|ThreadLib|threadlib|CompilerLib|compilerlib|LexerLib|lexerlib|ParserLib|parserlib|AstLib|astlib|SymbolLib|symbollib|TypeLib|typelib|IrLib|irlib|CodegenLib|codegenlib|OptimizeLib|optimizelib|Color|color|Crypto|crypto|Regex|regex|Uuid|uuid|Os|os|Validation|validation|System|system|BoxLib|boxlib|LogLib|loglib|HtLib|htlib|Audio|audio|Image|image|Date|date|NetLib|netlib)\\b"
         },
         {
           "name": "entity.name.function.library.razen",
-          "match": "\\b(push|pop|join|length|map|filter|unique|upper|lower|substring|replace|length|split|trim|starts_with|ends_with|contains|repeat|add|subtract|multiply|divide|power|sqrt|abs|round|floor|ceil|sin|cos|tan|log|exp|random|max|min|modulo|now|format|parse|add|year|month|day|int|float|choice|shuffle|read|write|append|exists|delete|is_file|is_dir|create_dir|remove|read_file|write_file|list_dir|metadata|absolute_path|copy|move|extension|file_stem|parent_dir|join_path|change_dir|current_dir|temp_file|temp_dir|parse|stringify|run|parallel|generate|map|addressof|deref|add_offset|alloc|free|write_byte|read_byte|create_buffer|free_buffer|buffer_write_string|buffer_read_string|buffer_copy|stats|create|open|close|write_bytes|read_bytes|seek|tell|bytes_to_string|string_to_bytes|and|or|xor|not|left_shift|right_shift|unsigned_right_shift|get_bit|set_bit|count_bits|to_binary|to_hex|from_binary|from_hex|getpid|getcwd|execute|getenv|setenv|environ|args|path_exists|realpath|exit|sleep|hostname|username|current_time|system_name|create|wait|is_running|kill|signal|info|read_stdout|read_stderr|write_stdin|create|join|is_running|sleep|mutex_create|mutex_lock|mutex_unlock|mutex_destroy|current|cpu_count|thread_id|thread_count|create_node|add_child|node_to_string|create_symbol_table|add_symbol|lookup_symbol|generate_ir|optimize_ir|generate_assembly|parse|tokenize|compile|create_lexer|define_token|create_parser|define_rule|create_grammar|define_node_type|traverse|create_visitor|define_symbol|define_type|check_type|create_type_system|infer_type|create_instruction|generate|optimize|to_string|create_generator|define_target|emit_code|create_pass|apply|analyze|create_pipeline|hex_to_rgb|rgb_to_hex|lighten|darken|get_ansi_color|hash|encrypt|decrypt|match|search|is_valid|env|cwd|platform|email|phone|required|min_length|exec|uptime|info|put|get|is_box|info|warn|error|debug|coin|bool|play|pause|stop|record|load|save|resize|crop|weekday|weekday_name|days_in_month|is_leap_year|diff_days|ping|get|post)\\b"
+          "match": "\\b(abs|add|add_child|add_days|add_months|add_offset|add_symbol|add_years|addressof|alloc|analyze|and|append|apply|args|absolute_path|bool_tos|buffer_copy|buffer_read_string|buffer_write_string|bytes_to_string|call|ceil|change_dir|check_type|choice|close|coin|compile|contains|copy|cos|count_bits|cpu_count|create|create_api|create_buffer|create_dir|create_generator|create_grammar|create_instruction|create_lexer|create_node|create_parser|create_pass|create_pipeline|create_symbol_table|create_type_system|create_visitor|crop|current|current_dir|current_time|darken|day|debug|decrypt|define_node_type|define_rule|define_symbol|define_target|define_token|define_type|delete|deref|diff_days|divide|days_in_month|email|emit_code|encrypt|ends_with|env|environ|error|exec|execute|execute_api|exists|exp|extension|file_stem|filter|float|floor|form_data|format|free|free_buffer|from_binary|from_hex|generate|generate_assembly|generate_ir|get|get_ansi_color|get_bit|getcwd|getenv|getpid|hash|hex_to_rgb|hostname|info|int|infer_type|is_box|is_client_error|is_dir|is_file|is_leap_year|is_running|is_server_error|is_success|is_valid|join|join_path|kill|length|left_shift|lighten|list_dir|load|log|lookup_symbol|lower|map|map_seed|match|max|metadata|min|min_length|modulo|month|move|multiply|mutex_create|mutex_destroy|mutex_lock|mutex_unlock|name|node_to_string|noise_map|not|now|open|optimize|optimize_ir|or|parallel|parent_dir|parse|parse_json|patch|path_exists|pause|phone|ping|platform|play|pop|post|power|push|put|putmethod|read|read_byte|read_bytes|read_file|read_stderr|read_stdout|realpath|record|remove|repeat|replace|required|resize|rgb_to_hex|right_shift|round|run|save|search|seek|set_bit|setenv|shuffle|signal|sin|sleep|split|sqrt|starts_with|stats|stop|string_to_bytes|stringify|subtract|substring|system_name|tan|tell|temp_dir|temp_file|thread_count|thread_id|threads|to_binary|to_hex|to_json|to_string|tokenize|traverse|trim|unique|unsigned_right_shift|upper|uptime|url_decode|url_encode|username|wait|warn|weekday|weekday_name|write|write_byte|write_bytes|write_file|write_stdin|xor|year)\\b"
         }
       ]
     },

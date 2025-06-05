@@ -1,0 +1,196 @@
+# Razen Language: Library Namespace Notation Example
+# This file demonstrates the modern namespace (::) notation for calling library functions.
+# This notation is available from Razen beta v0.1.75 onwards.
+
+# Import necessary libraries
+lib arrlib;     # For array manipulations
+lib strlib;     # For string operations
+lib mathlib;    # For mathematical functions
+lib random;     # For random number generation and choices
+lib file;       # For file system operations
+lib json;       # For JSON parsing and stringification
+lib bolt;       # For computationally intensive tasks (example)
+lib seed;       # For generating seeds (e.g., for games)
+lib color;      # For color conversions and manipulations
+lib crypto;     # For hashing and encryption
+lib regex;      # For regular expression matching
+lib uuid;       # For UUID generation and validation
+lib os;         # For interacting with the operating system
+lib validation; # For data validation (emails, phone numbers, etc.)
+lib system;     # For system-level information and commands
+lib boxlib;     # For boxing values (advanced use)
+lib loglib;     # For logging messages
+lib htlib;      # For simple head/tails utilities
+lib netlib;     # For network requests (HTTP GET/POST, ping)
+lib date;       # For date and time operations
+
+show "===== Razen Library Namespace Notation Showcase =====";
+
+# 1. Array Library (arrlib)
+show "\n--- 1. Array Library Examples ---";
+var initial_array = [10, 20, 30];
+show "Initial array: " + initial_array;
+show "Push 40: " + arrlib::push(initial_array, 40); # Note: push modifies in place and returns the new array in some contexts
+show "Pop element: " + arrlib::pop([1, 2, 3, 4]); # Pop from a new literal array
+show "Join ['x', 'y', 'z'] with ', ': " + arrlib::join(["x", "y", "z"], ", ");
+show "Length of [5, 10, 15]: " + arrlib::length([5, 10, 15]);
+
+# 2. String Library (strlib)
+show "\n--- 2. String Library Examples ---";
+var sample_string = "Razen Lang Rocks!";
+show "Original string: " + sample_string;
+show "Uppercase: " + strlib::upper(sample_string);
+show "Lowercase: " + strlib::lower(sample_string);
+show "Substring (0,5): " + strlib::substring(sample_string, 0, 5); # Extracts "Razen"
+show "Replace 'Rocks' with 'Rules': " + strlib::replace(sample_string, "Rocks", "Rules");
+show "Length of string: " + strlib::length(sample_string);
+show "Split by space: " + strlib::split(sample_string, " ");
+show "Trim '  extra spaces  ': " + strlib::trim("  extra spaces  ");
+show "Starts with 'Razen': " + strlib::starts_with(sample_string, "Razen");
+show "Ends with 'Rocks!': " + strlib::ends_with(sample_string, "Rocks!");
+show "Contains 'Lang': " + strlib::contains(sample_string, "Lang");
+show "Repeat 'Beetlejuice ' 3 times: " + strlib::repeat("Beetlejuice ", 3);
+
+# 3. Math Library (mathlib)
+show "\n--- 3. Math Library Examples ---";
+show "Add 15 + 7: " + mathlib::add(15, 7);
+show "Subtract 100 - 55: " + mathlib::subtract(100, 55);
+show "Multiply 12 * 12: " + mathlib::multiply(12, 12);
+show "Divide 144 / 12: " + mathlib::divide(144, 12);
+show "Power 2^10: " + mathlib::power(2, 10);
+show "Square root of 169: " + mathlib::sqrt(169);
+show "Absolute of -99: " + mathlib::abs(-99);
+show "Round 7.77: " + mathlib::round(7.77);
+show "Floor 7.77: " + mathlib::floor(7.77);
+show "Ceiling 7.11: " + mathlib::ceil(7.11);
+show "Sin(PI/2): " + mathlib::sin(mathlib::PI / 2); # Using mathlib::PI constant
+show "Cos(PI): " + mathlib::cos(mathlib::PI);
+show "Tan(0): " + mathlib::tan(0);
+show "Log10(1000): " + mathlib::log(1000, 10);
+show "Exp(2) (e^2): " + mathlib::exp(2);
+show "Max of (10, 50, 20): " + mathlib::max(10, 50, 20);
+show "Min of (10, 50, 20): " + mathlib::min(10, 50, 20);
+show "Modulo 17 % 5: " + mathlib::modulo(17, 5);
+
+# 4. Random Library (random)
+show "\n--- 4. Random Library Examples ---";
+show "Random integer (1-100): " + random::int(1, 100);
+show "Random float (0.0-1.0): " + random::float(0.0, 1.0);
+show "Random choice from ['red', 'green', 'blue']: " + random::choice(["red", "green", "blue"]);
+show "Shuffled array [a, b, c, d, e]: " + random::shuffle(["a", "b", "c", "d", "e"]);
+
+# 5. JSON Library (json)
+show "\n--- 5. JSON Library Examples ---";
+map simple_data = ["name", "Alice", "level", 99];
+show "Simple data (map): " + simple_data;
+show "Stringify simple_data: " + json::stringify(simple_data);
+
+map complex_data = [
+    "user", "Bob The Builder",
+    "id", 12345,
+    "tools", ["hammer", "wrench", "tape measure"],
+    "canFixIt", true
+];
+show "Complex data (map): " + complex_data;
+show "Stringify complex_data: " + json::stringify(complex_data);
+
+# 6. Seed Library (seed)
+show "\n--- 6. Seed Library Examples ---";
+show "Generated 8-char seed: " + seed::generate(8);
+# Example: show "2D map from seed 'razensuperseed': " + seed::map("razensuperseed", 5, 5);
+
+# 7. Color Library (color)
+show "\n--- 7. Color Library Examples ---";
+show "Hex #FF5733 to RGB: " + color::hex_to_rgb("#FF5733");
+show "RGB [46, 204, 113] to Hex: " + color::rgb_to_hex([46, 204, 113]);
+show "Lighten #777777 by 30%: " + color::lighten("#777777", 30);
+show "Darken #777777 by 30%: " + color::darken("#777777", 30);
+
+# 8. Crypto Library (crypto)
+show "\n--- 8. Crypto Library Examples ---";
+var secret_message = "Razen is awesome!";
+var crypto_key = "super_secret_key_123";
+show "Hash of '" + secret_message + "': " + crypto::hash(secret_message);
+var encrypted = crypto::encrypt(secret_message, crypto_key);
+show "Encrypted message: " + encrypted; # Output will be the encrypted string
+show "Decrypted message: " + crypto::decrypt(encrypted, crypto_key);
+
+# 9. Regex Library (regex)
+show "\n--- 9. Regex Library Examples ---";
+show "Match 'Razen123' with '\\d+': " + regex::match("Razen123", "\\d+"); # Matches '123'
+show "Search 'Code-1A-Rev2' for pattern '[A-Z]-\\d+[A-Z]': " + regex::search("Code-1A-Rev2", "[A-Z]-\\d+[A-Z]"); # Finds 'A-Rev'
+show "Replace digits in 'R2D2C3PO' with 'X': " + regex::replace("R2D2C3PO", "\\d", "X"); # RXDXCXPO
+
+# 10. UUID Library (uuid)
+show "\n--- 10. UUID Library Examples ---";
+var new_uuid = uuid::generate();
+show "Generated UUID: " + new_uuid;
+show "Is '" + new_uuid + "' valid?: " + uuid::is_valid(new_uuid);
+show "Is 'not-a-real-uuid' valid?: " + uuid::is_valid("not-a-real-uuid");
+
+# 11. OS Library (os)
+show "\n--- 11. OS Library Examples ---";
+show "OS Platform: " + os::platform();
+show "Current Working Directory: " + os::cwd();
+show "Value of PATH environment variable (first 50 chars): " + strlib::substring(os::env("PATH"), 0, 50) + "...";
+
+# 12. Validation Library (validation)
+show "\n--- 12. Validation Library Examples ---";
+show "Email 'test@razen.dev' valid?: " + validation::email("test@razen.dev");
+show "Email 'invalid-email' valid?: " + validation::email("invalid-email");
+show "Phone '555-1234' valid?: " + validation::phone("555-1234"); # Simple validation, specific formats might need regex
+show "Required '' (empty string) valid?: " + validation::required("");
+show "Required 'not empty' valid?: " + validation::required("not empty");
+show "Min length 'Razen' (5 chars) for min 3: " + validation::min_length("Razen", 3);
+
+# 13. System Library (system)
+show "\n--- 13. System Library Examples ---";
+show "System Uptime (seconds): " + system::uptime();
+show "System Info: " + system::info();
+
+# 14. Bolt Library (bolt) - Example for intensive operations
+show "\n--- 14. Bolt Library Examples ---";
+show "Bolt run 'sample_task': " + bolt::run("sample_task"); # Placeholder, actual task depends on Bolt setup
+# Example: show "Bolt parallel double [10, 20, 30]: " + bolt::parallel([10, 20, 30], "double_value_function");
+
+# 15. Box Library (boxlib) - For advanced value boxing
+show "\n--- 15. Box Library Examples ---";
+# BoxLib is for more advanced scenarios, typically not used in basic scripts.
+# show "Boxed value: " + boxlib::box(100);
+
+# 16. Log Library (loglib)
+show "\n--- 16. Log Library Examples ---";
+loglib::info("This is an informational log message from LogLib.");
+loglib::warn("This is a warning log message from LogLib.");
+loglib::error("This is an error log message from LogLib.");
+loglib::debug("This is a debug log message. (May not show by default)");
+show "(Log messages are typically printed to console/log file, not returned as strings)";
+
+# 17. HT (Head/Tails) Library (htlib)
+show "\n--- 17. HT Library Examples ---";
+# show "Coin flip: " + htlib::coin(); # Uncomment if htlib is fully implemented
+# show "Three coin flips: [" + htlib::coin() + ", " + htlib::coin() + ", " + htlib::coin() + "]";
+
+# 18. Net Library (netlib)
+show "\n--- 18. Net Library Examples ---";
+show "Ping 'google.com': " + netlib::ping("google.com");
+# Uncomment for actual network calls (ensure internet access):
+# show "GET request to 'https://jsonplaceholder.typicode.com/todos/1': " + netlib::get("https://jsonplaceholder.typicode.com/todos/1");
+# show "POST request to 'https://jsonplaceholder.typicode.com/posts': " + netlib::post("https://jsonplaceholder.typicode.com/posts", {title: "Razen Test", body: "Hello from Razen!"});
+
+# 19. Date Library (date)
+show "\n--- 19. Date Library Examples ---";
+show "Current Timestamp: " + date::now();
+show "Current Year: " + date::year();
+show "Current Month: " + date::month();
+show "Current Day: " + date::day();
+show "Formatted Date (YYYY-MM-DD): " + date::format("YYYY-MM-DD");
+
+show "\n===== End of Namespace Notation Showcase =====";
+show "The namespace notation (e.g., strlib::upper) is valid from Razen beta v0.1.75.";
+show "For more detailed and powerful examples, please visit our official website:";
+show "https://razen-lang.vercel.app/examples"; # Or your specific examples page
+
+# Note: The classic bracket notation (e.g., StrLib[upper]) is still supported
+# but will be deprecated after beta v0.1.80. It's recommended to use the
+# namespace notation for new code.

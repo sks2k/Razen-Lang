@@ -176,7 +176,16 @@ impl Lexer {
                 }
             },
             ';' => Token::new(TokenType::Semicolon, self.ch.to_string(), self.line, self.column),
-            ':' => Token::new(TokenType::Colon, self.ch.to_string(), self.line, self.column),
+            ':' => {
+                if self.peek_char() == ':' {
+                    let ch = self.ch;
+                    self.read_char();
+                    let literal = format!("{}{}", ch, self.ch);
+                    Token::new(TokenType::ColonColon, literal, self.line, self.column - 1)
+                } else {
+                    Token::new(TokenType::Colon, self.ch.to_string(), self.line, self.column)
+                }
+            },
             '(' => Token::new(TokenType::LeftParen, self.ch.to_string(), self.line, self.column),
             ')' => Token::new(TokenType::RightParen, self.ch.to_string(), self.line, self.column),
             ',' => Token::new(TokenType::Comma, self.ch.to_string(), self.line, self.column),

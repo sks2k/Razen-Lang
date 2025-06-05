@@ -264,6 +264,11 @@ pub enum Expression {
         function: Box<Expression>,
         arguments: Vec<Expression>,
     },
+    NamespaceCall {
+        namespace: String,
+        function: String,
+        arguments: Vec<Expression>,
+    },
 }
 
 impl fmt::Display for Node {
@@ -624,6 +629,14 @@ impl fmt::Display for Node {
                         }
                         let args_str = args.join(", ");
                         write!(f, "{}[{}].call({})", Node::Expression(*library.clone()), Node::Expression(*function.clone()), args_str)
+                    },
+                    Expression::NamespaceCall { namespace, function, arguments } => {
+                        let mut args = Vec::new();
+                        for arg in arguments {
+                            args.push(format!("{}", Node::Expression(arg.clone())));
+                        }
+                        let args_str = args.join(", ");
+                        write!(f, "{}::{}({})", namespace, function, args_str)
                     },
                 }
             },

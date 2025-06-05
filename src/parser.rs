@@ -18,6 +18,7 @@ enum Precedence {
     Product,     // *, /, %
     Power,       // **
     Prefix,      // -X, !X
+    Namespace,   // namespace::function
     Call,        // myFunction(X)
     Index,       // array[index]
 }
@@ -198,6 +199,7 @@ impl Parser {
         parser.register_infix(TokenType::SlashAssign, Parser::parse_assignment_expression);
         parser.register_infix(TokenType::PercentAssign, Parser::parse_assignment_expression);
         parser.register_infix(TokenType::LeftParen, Parser::parse_call_expression);
+        parser.register_infix(TokenType::ColonColon, Parser::parse_namespace_expression);
         parser.register_infix(TokenType::LeftBracket, Parser::parse_index_expression);
         parser.register_infix(TokenType::Dot, Parser::parse_dot_expression);
         
@@ -2172,6 +2174,51 @@ impl Parser {
         })
     }
     
+    fn parse_namespace_expression(&mut self, left: Expression) -> Option<Expression> {
+        // left should be the namespace identifier
+        let namespace = match left {
+            Expression::Identifier(name) => name,
+            _ => return None,
+        };
+        
+        self.next_token(); // Skip '::' token
+        
+        if !self.current_token_is(TokenType::Identifier) {
+            return None;
+        }
+        
+        let function = self.current_token.literal.clone();
+        
+        // Check if this is a function call (has parentheses)
+        if self.peek_token_is(TokenType::LeftParen) {
+            self.next_token(); // Move to '('
+            
+            // Parse arguments or empty arguments list
+            let arguments = if self.peek_token_is(TokenType::RightParen) {
+                self.next_token(); // Consume right paren for empty args
+                vec![]
+            } else {
+                match self.parse_expression_list(TokenType::RightParen) {
+                    Some(args) => args,
+                    None => return None
+                }
+            };
+            
+            return Some(Expression::NamespaceCall {
+                namespace,
+                function,
+                arguments,
+            });
+        }
+        
+        // If no parentheses, treat as namespace access (for future use)
+        Some(Expression::InfixExpression {
+            left: Box::new(Expression::Identifier(namespace)),
+            operator: "::".to_string(),
+            right: Box::new(Expression::Identifier(function)),
+        })
+    }
+    
     fn parse_expression_list(&mut self, end: TokenType) -> Option<Vec<Expression>> {
         let mut list = Vec::new();
         
@@ -2219,6 +2266,7 @@ impl Parser {
             TokenType::LeftParen => Precedence::Call,
             TokenType::LeftBracket => Precedence::Index,
             TokenType::Dot => Precedence::Call, // Dot has same precedence as function call
+            TokenType::ColonColon => Precedence::Namespace,
             _ => Precedence::Lowest,
         }
     }
