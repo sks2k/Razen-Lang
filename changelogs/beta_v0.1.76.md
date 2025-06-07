@@ -1,4 +1,4 @@
-# Razen v0.1.76 - Performance Boost & Enhanced Tooling
+# Razen Beta v0.1.76 - Performance Boost & Enhanced Tooling
 
 **Release Date**: June 7, 2025  
 **Status**: Beta
