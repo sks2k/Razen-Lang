@@ -231,25 +231,25 @@ razen-run hello.rzn
 show "Hello, World!";
 
 # Variables with type enforcement
-let num = 42;  # Numeric variable
-take name = "Alice";  # String variable
-hold is_active = true;  # Boolean variable
-put anything = "This can be any type";  # Any type variable
+num int = 42;  # Numeric variable
+str name = "Alice";  # String variable
+bool is_active = true;  # Boolean variable
+var anything = "This can be any type";  # Any type variable
 
-# Mathematical operations with specialized tokens
-sum total = 100 + 50;  # Sum calculation
-diff result = 100 - 50;  # Difference calculation
-prod product = 5 * 10;  # Product calculation
-div quotient = 20 / 4;  # Division calculation
-mod remainder = 10 % 3;  # Modulus calculation
+# Mathematical operations 
+num total = 100 + 50;  # Sum calculation
+num result = 100 - 50;  # Difference calculation
+num product = 5 * 10;  # Product calculation
+num quotient = 20 / 4;  # Division calculation
+num remainder = 10 % 3;  # Modulus calculation
 
-take message = "Hello, " + name + "!";
+str message = "Hello, " + name + "!";
 show message;
 
 # Conditional statements
-if (num > 40) {
+if (int > 40) {
     show "Number is greater than 40";
-} else if (num == 40) {
+} else if (int == 40) {
     show "Number is exactly 40";
 } else {
     show "Number is less than 40";
@@ -263,8 +263,8 @@ while (i < 5) {
 }
 
 # Using library functions
-show "Current time: " + TimeLib[now]();
-show "Random number: " + Random[int](1, 100);
+show "Current time: " + date::now();
+show "Random number: " + random::int(1, 100);
 
 # Colored output
 show(red) "This is a red error message";
@@ -287,8 +287,8 @@ fun factorial(n) {
 }
 
 # Use the function
-let num = 5;
-show "Factorial of " + num + " is " + factorial(num);
+num int = 5;
+show "Factorial of " + int + " is " + factorial(num);
 
 # Function with multiple parameters
 fun greet(name, age) {
@@ -311,27 +311,27 @@ lib crypto;   # Crypto library for encryption and hashing
 # Using library functions with bracket notation
 show "Array operations:";
 show "Original array: " + [1, 2, 3];
-show "After push: " + ArrLib[push]([1, 2, 3], 4);
-show "Join with dash: " + ArrLib[join](["a", "b", "c"], "-");
+show "After push: " + arrlib::push([1, 2, 3], 4);
+show "Join with dash: " + arrlib::join(["a", "b", "c"], "-");
 
 # String operations
 show "String operations:";
-show "Uppercase: " + StrLib[upper]("Hello, Razen!");
-show "Replace: " + StrLib[replace]("Hello, Razen!", "Razen", "World");
+show "Uppercase: " + strlib::upper("Hello, Razen!");
+show "Replace: " + strlib::replace("Hello, Razen!", "Razen", "World");
 
 # Math operations
 show "Math operations:";
-show "Square root: " + MathLib[sqrt](16);
-show "Power: " + MathLib[power](2, 3);
+show "Square root: " + mathlib::sqrt(16);
+show "Power: " + mathlib::power(2, 3);
 
 # Random operations
 show "Random operations:";
-show "Random integer (1-10): " + Random[int](1, 10);
-show "Random choice: " + Random[choice](["apple", "banana", "cherry"]);
+show "Random integer (1-10): " + arndom::int(1, 10);
+show "Random choice: " + Random::choice(["apple", "banana", "cherry"]);
 
 # Crypto operations
 show "Crypto operations:";
-show "Hash of 'Hello, Razen!': " + Crypto[hash]("Hello, Razen!");
+show "Hash of 'Hello, Razen!': " + Crypto::hash("Hello, Razen!");
 ```
 
 Check the `examples` folder for more sample programs and tutorials.
@@ -379,68 +379,81 @@ razen-test my-program.rzn
 
 Razen supports different variable types with type enforcement:
 
-- **let**: For numeric values (integers and floats)
+- **num**: For numeric values (integers and floats)
   ```razen
-  let count = 42;
-  let price = 9.99;
+  num count = 42;
+  num price = 9.99;
   ```
 
-- **take**: For string values
+- **str**: For string values
   ```razen
-  take name = "John";
-  take message = "Hello, World!";
+  str name = "John";
+  str message = "Hello, World!";
   ```
 
-- **hold**: For boolean values
+- **bool**: For boolean values
   ```razen
-  hold is_active = true;
-  hold has_permission = false;
+  bool is_active = true;
+  bool has_permission = false;
   ```
 
-- **put**: For any type (no type restrictions)
+- **var**: For any type (no type restrictions)
   ```razen
-  put anything = 42;
-  put anything = "Now I'm a string";
-  put anything = true;
+  var anything = 42;
+  var anything = "Now I'm a string";
+  var anything = true;
   ```
 
 ### Mathematical Variables
 
-- **sum**, **diff**, **prod**, **div**, **mod**: For numeric operations
+- **num**: For numeric operations & mathematical operations
   ```razen
-  sum total = 100 + 50;  # Sum calculation
-  diff result = 100 - 50;  # Difference calculation
-  prod product = 5 * 10;  # Product calculation
-  div quotient = 20 / 4;  # Division calculation
-  mod remainder = 10 % 3;  # Modulus calculation
+  num total = 100 + 50;  # Sum calculation
+  num result = 100 - 50;  # Difference calculation
+  num product = 5 * 10;  # Product calculation
+  num quotient = 20 / 4;  # Division calculation
+  num remainder = 10 % 3;  # Modulus calculation
   ```
 
 ### Collection Variables
 
 - **list**, **arr**, **append**, **remove**: For array operations
   ```razen
-  list dynamicList = [1, 2, 3, 4, 5];  # Dynamic array
-  arr fixedArray = [10, 20, 30];  # Fixed-size array
-  append newList = [1, 2, 3, 4, 5, 6];  # Array with appended element
-  remove shorterList = [2, 3, 4, 5];  # Array after removal
+  list fruits = ["apple", "banana", "orange"];  # Dynamic array
+  arr<num> temperatures = [72, 68, 75, 79, 71];  # Fixed-size array
+  append(fruits, "mango");  # Array with appended element
+  remove(fruits, "banana");  # Array after removal
   ```
 
 ### Dictionary/Map Variables
 
 - **map**, **key**, **value**: For dictionary operations
   ```razen
-  map userInfo = ["name", "John", "age", 30];  # Key-value storage using arrays
-  key userKeys = ["name", "age"];  # Dictionary keys
-  value userValues = ["John", 30];  # Dictionary values
+  map userProfile = {
+    "name": "Alex",
+    "age": 28,
+    "isActive": true
+  }  # Key-value storage using arrays
+  for (key in userProfile) {
+    show key + ": " + userProfile:key; 
+  }  # Dictionary keys
+  for (value in userProfile) {
+    show value;
+  }  # Dictionary values
   ```
 
 ### User-Defined Variables
 
 - **store**, **box**, **ref**: For special variable operations
   ```razen
-  store savedData = "This will be saved";  # Persistent storage
-  box tempData = "Temporary data";  # Temporary storage
-  ref nameRef = message;  # Reference to another variable
+  store userData = loadUserData();
+  saveToStore(userData);  # Persistent storage
+  with box tempFile = File["open"]("data.txt") {
+    # Process file
+    # File will be automatically closed when exiting this block
+  }  # Temporary storage
+  ref currentUser = users:activeIndex;
+  currentUser:lastLogin = now();  # Reference to another variable
   ```
 
 ## Object-Oriented Programming
@@ -453,19 +466,19 @@ Razen supports class-based object-oriented programming with a clean and intuitiv
 class Person {
     # Constructor (implicitly called when creating new instances)
     fun init(name, age) {
-        this[name] = name;
-        this[age] = age;
+        this:name = name;
+        this:age = age;
     }
 
     # Method to display information
     fun display() {
-        show "Name: " + this[name] + ", Age: " + this[age];
+        show "Name: " + this:name + ", Age: " + this:age; 
     }
 
     # Method to have a birthday
     fun haveBirthday() {
-        this[age] = this[age] + 1;
-        show this[name] + " is now " + this[age] + " years old!";
+        this:age = this:age + 1;
+        show this:name + " is now " + this:age + " years old!";
     }
 }
 
@@ -473,8 +486,8 @@ class Person {
 put person = new Person("John", 30);
 
 # Call methods
-person:display();
-person:haveBirthday();
+person::display();
+person::haveBirthday();
 ```
 
 ### Inheritance
@@ -484,13 +497,13 @@ Razen supports class inheritance using the `extends` keyword:
 ```razen
 class Employee extends Person {
     fun init(name, age, position) {
-        super[init](name, age);
-        this[position] = position;
+        super:init(name, age);
+        this:position = position;
     }
 
     fun display() {
-        super[display]();
-        show "Position: " + this[position];
+        super:display();
+        show "Position: " + this:position;
     }
 }
 ```

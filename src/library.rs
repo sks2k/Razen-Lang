@@ -488,7 +488,7 @@ impl LibraryManager {
         log_lib.register_function("info", crate::functions::loglib::info);
         log_lib.register_function("warn", crate::functions::loglib::warn);
         log_lib.register_function("error", crate::functions::loglib::error);
-        log_lib.register_function("debug", crate::functions::loglib::debug);
+        log_lib.register_function("debuglog", crate::functions::loglib::debug);
         self.register_library(log_lib);
 
         // Register HT (Head/Tails) library functions

@@ -124,6 +124,26 @@ EOF
     echo -e "${GREEN}✓${NC} Created $FILENAME"
     exit 0
 
+elif [ "$1" == "create" ]; then
+    if [ -z "$2" ]; then
+        echo -e "${RED}Error: Missing project name${NC}"
+        echo "Usage: razen create <project-name>"
+        echo "       razen create --help"
+        exit 1
+    fi
+    
+    # Check if the razen-create script exists
+    if [ -f "$SCRIPT_DIR/razen-create" ]; then
+        # Pass all arguments except the first one (create) to razen-create
+        shift
+        "$SCRIPT_DIR/razen-create" "$@"
+        exit $?
+    else
+        echo -e "${RED}Error: razen-create script not found in $SCRIPT_DIR${NC}"
+        echo "Please ensure the razen-create script is installed correctly."
+        exit 1
+    fi
+
 elif [ "$1" == "version" ] || [ "$1" == "--version" ] || [ "$1" == "-v" ]; then
     VERSION=$(get_version)
     echo "Razen Language $VERSION"
@@ -137,11 +157,14 @@ elif [ "$1" == "help" ] || [ "$1" == "--help" ] || [ "$1" == "-h" ]; then
     else
         echo "Razen Language - Usage:"
         echo "  razen <filename.rzn>     Run a Razen script"
-        echo "  razen new <filename>     Create a new Razen program"
+        echo "  razen new <filename>     Create a new Razen program (single file)"
+        echo "  razen create <project>   Create a new Razen project (directory structure)"
         echo "  razen version            Display version information"
         echo "  razen help               Display this help message"
         echo "  razen uninstall          Uninstall Razen"
         echo "  razen update             Update Razen to the latest version"
+        echo ""
+        echo "Run 'razen create --help' for more options on creating projects."
     fi
     exit 0
 

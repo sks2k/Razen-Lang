@@ -6,6 +6,7 @@ use std::time::Duration;
 
 /// Ping a host to check connectivity
 /// Example: ping("google.com") => true
+/// Example: ping("https://google.com") => true
 pub fn ping(args: Vec<Value>) -> Result<Value, String> {
     if args.len() != 1 {
         return Err("Net.ping requires exactly 1 argument: host".to_string());
@@ -16,29 +17,36 @@ pub fn ping(args: Vec<Value>) -> Result<Value, String> {
     // Extract hostname from URL if needed
     let host = if url.starts_with("http://") || url.starts_with("https://") {
         // Try to extract the hostname from the URL
-        match url.split("://").nth(1) {
-            Some(remainder) => remainder.split('/').next().unwrap_or(url.as_str()),
-            None => url.as_str()
-        }
+        url.trim_start_matches("http://")
+           .trim_start_matches("https://")
+           .split('/')
+           .next()
+           .unwrap_or("")
+           .to_string()
     } else {
-        url.as_str()
+        url.to_string()
     };
     
+    if host.is_empty() {
+        return Ok(Value::Bool(false));
+    }
+    
     // Use the system ping command with a timeout
-    #[cfg(target_os = "windows")]
-    let output = Command::new("ping")
-        .args(["-n", "1", "-w", "1000", host])
-        .output();
-        
-    #[cfg(not(target_os = "windows"))]
-    let output = Command::new("ping")
-        .args(["-c", "1", "-W", "1", host])
-        .output();
+    let output = if cfg!(target_os = "windows") {
+        Command::new("ping")
+            .args(["-n", "1", "-w", "1000", &host])
+            .output()
+    } else {
+        Command::new("ping")
+            .args(["-c", "1", "-W", "1", &host])
+            .output()
+    };
     
     match output {
         Ok(output) => {
             // Check if ping was successful (exit code 0)
-            Ok(Value::Bool(output.status.success()))
+            let success = output.status.success();
+            Ok(Value::Bool(success))
         },
         Err(_) => Ok(Value::Bool(false)),
     }

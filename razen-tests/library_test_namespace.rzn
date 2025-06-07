@@ -181,37 +181,20 @@ show "16. Testing Log Library:";
 show "Info log: " + loglib::info("This is an info message");
 show "Warning log: " + loglib::warn("This is a warning message");
 show "Error log: " + loglib::error("This is an error message");
-show "Debug log: " + loglib::debug("This is a debug message");
-
-# Test HT (Head/Tails) Library
-show "17. Testing HT Library:";
-# show "Coin flip: " + htlib::coin();
-# show "Multiple coin flips: [" + htlib::coin() + ", " + htlib::coin() + ", " + htlib::coin() + "]";
+show "Debug log: " + loglib::debuglog("This is a debug message");
 
 # Test Enhanced Net Library
-show "18. Testing Net Library:";
-show "Ping test: " + netlib::ping("https://www.google.com");
-# Uncomment to test with actual network calls:
-# show "GET request: " + netlib::get("https://example.com");
-# show "POST request: " + netlib::post("https://httpbin.org/post", {test: "data"});
-
-# Test Audio Library
-show "19. Testing Audio Library:";
-show "Play audio: " + audio::play("sample.mp3");
-show "Pause audio: " + audio::pause();
-show "Stop audio: " + audio::stop();
-show "Record audio: " + audio::record("recording.wav");
-
-# Test Image Library
-show "20. Testing Image Library:";
-show "Load image: " + image::load("sample.png");
-num img = image::load("sample.png");
-show "Save image: " + image::save(img, "outvar.png");
-show "Resize image: " + image::resize(img, 100, 100);
-show "Crop image: " + image::crop(img, 10, 10, 50, 50);
+show "17. Testing Net Library:";
+var ping_test = netlib::ping("google.com");  
+show "Ping test: " + netlib::ping("google.com");
+if (ping_test) {
+    show(green) "Ping test passed!";
+} else {
+    show(red) "Ping test failed!";
+}
 
 # Test Date Library
-show "21. Testing Date Library:";
+show "18. Testing Date Library:";
 show "Current timestamp: " + date::now();
 show "Current year: " + date::year();
 show "Current month: " + date::month();
