@@ -172,309 +172,6 @@ add_to_path_windows() {
     fi
 }
 
-# Add Cargo to PATH for Windows
-add_cargo_to_path_windows() {
-    echo -e "${YELLOW}Adding Cargo to your PATH...${NC}"
-    local cargo_bin_dir="$HOME/.cargo/bin"
-
-    if command -v powershell &>/dev/null; then
-        # Convert to Windows path format
-        local win_cargo_path=$(echo "$cargo_bin_dir" | sed 's|^/c/|C:\\|' | sed 's|/|\\|g')
-
-        # Check if already in PATH
-        local current_path=$(powershell -Command "[Environment]::GetEnvironmentVariable('Path', 'User')" 2>/dev/null || echo "")
-
-        if [[ "$current_path" != *"$win_cargo_path"* ]]; then
-            powershell -Command "[Environment]::SetEnvironmentVariable('Path', [Environment]::GetEnvironmentVariable('Path', 'User') + ';$win_cargo_path', 'User')" 2>/dev/null || true
-            echo -e "  ${GREEN}✓${NC} Added Cargo ($win_cargo_path) to your PATH"
-        else
-            echo -e "  ${BLUE}ℹ${NC} Cargo already in PATH"
-        fi
-
-        # Also update current session
-        export PATH="$cargo_bin_dir:$PATH"
-    else
-        echo -e "${YELLOW}Could not add Cargo to PATH automatically.${NC}"
-        echo -e "${YELLOW}Please add $cargo_bin_dir to your PATH manually.${NC}"
-    fi
-}
-
-# Download and install MinGW-w64 automatically
-install_mingw_w64_automatically() {
-    echo -e "${YELLOW}Downloading and installing MinGW-w64...${NC}"
-
-    # Create MinGW installation directory
-    local mingw_install_dir="C:/mingw64"
-    local mingw_bin_dir="$mingw_install_dir/bin"
-
-    # Try to download MinGW-w64 - prefer ZIP format for easier extraction
-    echo -e "  ${CYAN}Downloading MinGW-w64 from GitHub...${NC}"
-    local mingw_url_zip="https://github.com/brechtsanders/winlibs_mingw/releases/download/13.2.0-16.0.6-11.0.0-ucrt-r1/winlibs-x86_64-posix-seh-gcc-13.2.0-mingw-w64ucrt-11.0.0-r1.zip"
-    local mingw_archive="$TMP_DIR/mingw-w64.zip"
-
-    if curl -L -o "$mingw_archive" "$mingw_url_zip" 2>/dev/null; then
-        echo -e "  ${GREEN}✓${NC} MinGW-w64 downloaded successfully"
-
-        # Extract using PowerShell
-        if command -v powershell &>/dev/null; then
-            echo -e "  ${CYAN}Extracting MinGW-w64...${NC}"
-
-            # Create extraction directory
-            mkdir -p "$(dirname "$mingw_install_dir")" 2>/dev/null
-
-            # PowerShell extraction command for ZIP files
-            powershell -Command "
-                Add-Type -AssemblyName System.IO.Compression.FileSystem
-                try {
-                    [System.IO.Compression.ZipFile]::ExtractToDirectory('$(cygpath -w "$mingw_archive")', 'C:\\temp\\mingw-extract')
-
-                    # Find the mingw64 directory and move it
-                    \$mingwDirs = Get-ChildItem -Path 'C:\\temp\\mingw-extract' -Directory | Where-Object { \$_.Name -like '*mingw*' -or \$_.Name -like '*gcc*' }
-                    if (\$mingwDirs.Count -gt 0) {
-                        \$sourcePath = \$mingwDirs[0].FullName + '\\mingw64'
-                        if (Test-Path \$sourcePath) {
-                            if (Test-Path 'C:\\mingw64') { Remove-Item 'C:\\mingw64' -Recurse -Force }
-                            Move-Item \$sourcePath 'C:\\mingw64'
-                            Write-Host 'MinGW-w64 moved to C:\\mingw64'
-                        } else {
-                            # Try moving the first directory directly
-                            if (Test-Path 'C:\\mingw64') { Remove-Item 'C:\\mingw64' -Recurse -Force }
-                            Move-Item \$mingwDirs[0].FullName 'C:\\mingw64'
-                            Write-Host 'MinGW-w64 moved to C:\\mingw64'
-                        }
-                    }
-
-                    # Cleanup
-                    Remove-Item 'C:\\temp\\mingw-extract' -Recurse -Force -ErrorAction SilentlyContinue
-                    Write-Host 'Extraction completed'
-                } catch {
-                    Write-Host 'Extraction failed:' \$_.Exception.Message
-                    exit 1
-                }
-            " 2>/dev/null && {
-                echo -e "  ${GREEN}✓${NC} MinGW-w64 extracted to $mingw_install_dir"
-
-                # Add to PATH
-                if [ -f "$mingw_bin_dir/gcc.exe" ]; then
-                    export PATH="$mingw_bin_dir:$PATH"
-                    echo -e "  ${GREEN}✓${NC} Added MinGW-w64 to PATH"
-
-                    # Add to Windows PATH permanently
-                    if command -v powershell &>/dev/null; then
-                        local win_mingw_path=$(echo "$mingw_bin_dir" | sed 's|^/c/|C:\\|' | sed 's|/|\\|g')
-                        powershell -Command "[Environment]::SetEnvironmentVariable('Path', [Environment]::GetEnvironmentVariable('Path', 'User') + ';$win_mingw_path', 'User')" 2>/dev/null || true
-                        echo -e "  ${GREEN}✓${NC} Added MinGW-w64 to Windows PATH permanently"
-                    fi
-
-                    return 0
-                else
-                    echo -e "  ${RED}✗${NC} MinGW-w64 extraction failed - gcc.exe not found"
-                    return 1
-                fi
-            } || {
-                echo -e "  ${RED}✗${NC} Failed to extract MinGW-w64"
-                return 1
-            }
-        else
-            echo -e "  ${RED}✗${NC} PowerShell not available for extraction"
-            return 1
-        fi
-    else
-        echo -e "  ${RED}✗${NC} Failed to download MinGW-w64"
-        return 1
-    fi
-}
-
-# Comprehensive Windows setup function
-setup_windows_environment() {
-    echo -e "${YELLOW}Setting up Windows development environment...${NC}"
-
-    local setup_success=false
-
-    # Check if we already have a working setup
-    if command -v gcc &>/dev/null && command -v rustc &>/dev/null; then
-        echo -e "  ${GREEN}✓${NC} Development environment already configured"
-        add_cargo_to_path_windows
-        return 0
-    fi
-
-    # Try existing package managers first
-    if command -v pacman &>/dev/null; then
-        echo -e "  ${CYAN}Using MSYS2 for setup...${NC}"
-        if pacman -S --noconfirm mingw-w64-x86_64-gcc mingw-w64-x86_64-toolchain mingw-w64-x86_64-pkg-config 2>/dev/null; then
-            setup_success=true
-        fi
-    elif command -v choco &>/dev/null; then
-        echo -e "  ${CYAN}Using Chocolatey for setup...${NC}"
-        if choco install mingw -y 2>/dev/null; then
-            setup_success=true
-        fi
-    fi
-
-    # If no package manager worked, try automatic installation
-    if [ "$setup_success" = false ]; then
-        echo -e "  ${YELLOW}Attempting automatic installation...${NC}"
-
-        # Try direct MinGW-w64 download first
-        if install_mingw_w64_automatically; then
-            setup_success=true
-        else
-            # Try installing Chocolatey and then MinGW
-            if install_chocolatey_automatically; then
-                setup_success=true
-            fi
-        fi
-    fi
-
-    # Update PATH and verify
-    if [ "$setup_success" = true ]; then
-        # Update PATH for common MinGW-w64 locations
-        MINGW_PATHS=(
-            "/c/msys64/mingw64/bin"
-            "/c/mingw64/bin"
-            "/mingw64/bin"
-            "/c/tools/mingw64/bin"
-            "/c/ProgramData/chocolatey/lib/mingw/tools/install/mingw64/bin"
-        )
-
-        for mingw_path in "${MINGW_PATHS[@]}"; do
-            if [ -d "$mingw_path" ] && [ -f "$mingw_path/gcc.exe" ]; then
-                export PATH="$mingw_path:$PATH"
-                echo -e "  ${GREEN}✓${NC} Found and added MinGW-w64: $mingw_path"
-                break
-            fi
-        done
-
-        # Verify gcc is available
-        if command -v gcc &>/dev/null; then
-            echo -e "  ${GREEN}✓${NC} Windows development environment ready"
-            return 0
-        fi
-    fi
-
-    # If everything failed, provide manual instructions
-    echo -e "  ${RED}Automatic setup failed${NC}"
-    echo -e "  ${YELLOW}Manual installation required:${NC}"
-    echo -e "  ${YELLOW}1. MSYS2: https://www.msys2.org/${NC}"
-    echo -e "  ${YELLOW}   Then run: pacman -S mingw-w64-x86_64-gcc mingw-w64-x86_64-toolchain${NC}"
-    echo -e "  ${YELLOW}2. Chocolatey: https://chocolatey.org/install${NC}"
-    echo -e "  ${YELLOW}   Then run: choco install mingw${NC}"
-    echo -e "  ${YELLOW}3. Visual Studio Build Tools: https://visualstudio.microsoft.com/visual-cpp-build-tools/${NC}"
-    return 1
-}
-
-# Install Chocolatey automatically
-install_chocolatey_automatically() {
-    echo -e "${YELLOW}Installing Chocolatey package manager...${NC}"
-
-    if command -v powershell &>/dev/null; then
-        powershell -Command "
-            Set-ExecutionPolicy Bypass -Scope Process -Force
-            [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072
-            try {
-                iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
-                Write-Host 'Chocolatey installed successfully'
-            } catch {
-                Write-Host 'Chocolatey installation failed:' \$_.Exception.Message
-                exit 1
-            }
-        " 2>/dev/null && {
-            echo -e "  ${GREEN}✓${NC} Chocolatey installed successfully"
-
-            # Refresh environment to make choco available
-            export PATH="/c/ProgramData/chocolatey/bin:$PATH"
-
-            # Install MinGW via Chocolatey
-            echo -e "  ${CYAN}Installing MinGW-w64 via Chocolatey...${NC}"
-            if powershell -Command "choco install mingw -y" 2>/dev/null; then
-                echo -e "  ${GREEN}✓${NC} MinGW-w64 installed via Chocolatey"
-
-                # Add Chocolatey MinGW to PATH
-                local choco_mingw_path="/c/ProgramData/chocolatey/lib/mingw/tools/install/mingw64/bin"
-                if [ -d "$choco_mingw_path" ] && [ -f "$choco_mingw_path/gcc.exe" ]; then
-                    export PATH="$choco_mingw_path:$PATH"
-                    echo -e "  ${GREEN}✓${NC} Added Chocolatey MinGW-w64 to PATH"
-                    return 0
-                fi
-            fi
-
-            return 1
-        } || {
-            echo -e "  ${RED}✗${NC} Failed to install Chocolatey"
-            return 1
-        }
-    else
-        echo -e "  ${RED}✗${NC} PowerShell not available for Chocolatey installation"
-        return 1
-    fi
-}
-
-# Check for Visual Studio build tools on Windows
-check_vs_build_tools() {
-    # Check for Visual Studio build tools
-    if command -v cl.exe &>/dev/null || \
-       [ -f "C:/Program Files (x86)/Microsoft Visual Studio/2019/BuildTools/VC/Tools/MSVC/*/bin/Hostx64/x64/cl.exe" ] || \
-       [ -f "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/VC/Tools/MSVC/*/bin/Hostx64/x64/cl.exe" ] || \
-       [ -f "C:/Program Files/Microsoft Visual Studio/2019/*/VC/Tools/MSVC/*/bin/Hostx64/x64/cl.exe" ] || \
-       [ -f "C:/Program Files/Microsoft Visual Studio/2022/*/VC/Tools/MSVC/*/bin/Hostx64/x64/cl.exe" ]; then
-        return 0
-    else
-        return 1
-    fi
-}
-
-# Detect current Rust toolchain
-detect_rust_toolchain() {
-    if command -v rustup &>/dev/null; then
-        rustup show active-toolchain 2>/dev/null | cut -d' ' -f1
-    else
-        echo "unknown"
-    fi
-}
-
-# Install Rust based on OS
-install_rust() {
-    echo -e "${YELLOW}Installing Rust...${NC}"
-
-    if [[ "$OS" == "windows" ]]; then
-        # Check for Visual Studio build tools first
-        if check_vs_build_tools; then
-            echo -e "  ${GREEN}✓${NC} Visual Studio build tools detected"
-            # Download and run rustup-init.exe for Windows with MSVC toolchain
-            curl -sSf -o "$TMP_DIR/rustup-init.exe" https://win.rustup.rs/x86_64
-            "$TMP_DIR/rustup-init.exe" -y --no-modify-path --default-toolchain stable-x86_64-pc-windows-msvc
-        else
-            echo -e "  ${YELLOW}⚠${NC} Visual Studio build tools not detected"
-            echo -e "  ${YELLOW}Installing Rust with GNU toolchain (recommended for this system)${NC}"
-
-            # Check if MinGW-w64 is available
-            if ! command -v x86_64-w64-mingw32-gcc &>/dev/null && ! command -v gcc &>/dev/null; then
-                echo -e "  ${YELLOW}Setting up MinGW-w64 for GNU toolchain...${NC}"
-                setup_windows_environment
-            fi
-
-            # Download and run rustup-init.exe for Windows with GNU toolchain
-            curl -sSf -o "$TMP_DIR/rustup-init.exe" https://win.rustup.rs/x86_64
-            "$TMP_DIR/rustup-init.exe" -y --no-modify-path --default-toolchain stable-x86_64-pc-windows-gnu
-        fi
-        export PATH="$HOME/.cargo/bin:$PATH"
-    else
-        # Linux/macOS
-        curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-        source "$HOME/.cargo/env"
-    fi
-
-    echo -e "  ${GREEN}✓${NC} Rust installed successfully"
-
-    # Display toolchain information
-    if [[ "$OS" == "windows" ]]; then
-        toolchain=$(detect_rust_toolchain)
-        echo -e "  ${BLUE}ℹ${NC} Active toolchain: $toolchain"
-
-        # Add Cargo to PATH
-        add_cargo_to_path_windows
-    fi
-}
 
 # Get version information
 get_version() {
@@ -619,8 +316,27 @@ clone_repository() {
         exit 1
     fi
 
+    # Check for Git LFS
+    if ! command -v git-lfs &>/dev/null; then
+        echo -e "${RED}Error: Git LFS is not installed.${NC}"
+        echo -e "${YELLOW}Git LFS is required to download the Razen compiler.${NC}"
+        echo -e "${YELLOW}Please install Git LFS from https://git-lfs.github.com/ and try again.${NC}"
+        exit 1
+    fi
+    echo -e "  ${GREEN}✓${NC} Git LFS found."
+
+    # Clone the repository
+    echo -e "${YELLOW}Cloning repository using Git...${NC}"
     git clone --depth=1 "$RAZEN_GIT_REPO" "$TMP_DIR/razen" || handle_error $? "Failed to clone repository" "Check your internet connection and GitHub access"
-    echo -e "  ${GREEN}✓${NC} Razen repository cloned successfully"
+    echo -e "  ${GREEN}✓${NC} Razen repository cloned successfully."
+
+    # Pull LFS files
+    echo -e "${YELLOW}Fetching large files using Git LFS (this may take a moment)...${NC}"
+    (
+        cd "$TMP_DIR/razen" || handle_error $? "Failed to change directory to $TMP_DIR/razen"
+        git lfs pull --include="razen-c/razen_compiler" || handle_error $? "Failed to pull Git LFS files" "Check your Git LFS setup and internet connection"
+    )
+    echo -e "  ${GREEN}✓${NC} Large files (compiler) fetched successfully."
 }
 
 # Step 2: Copy Required Files and Folders
@@ -754,10 +470,6 @@ create_symlinks() {
     # For Windows, add to PATH
     if [[ "$OS" == "windows" ]]; then
         add_to_path_windows
-        # Ensure Cargo is in PATH if Rust is already installed
-        if command -v cargo &>/dev/null; then
-            add_cargo_to_path_windows
-        fi
     fi
 
     echo -e "  ${GREEN}✓${NC} All command links created successfully"
@@ -1027,7 +739,7 @@ copy_compiler_to_system_path() {
         # Copy the file (with admin privileges if possible)
         if [ -d "$win_dest_dir" ] && [ -w "$win_dest_dir" ]; then
             # Direct copy if we have write permissions
-            cp "$src_path.exe" "$win_dest_path" || {
+            cp "$src_path" "$win_dest_path" || {
                 echo -e "${RED}Failed to copy Razen compiler to $win_dest_path${NC}"
                 return 1
             }
@@ -1035,14 +747,14 @@ copy_compiler_to_system_path() {
             # Try with elevated privileges
             if command -v powershell &>/dev/null; then
                 echo -e "${YELLOW}Copying with elevated privileges...${NC}"
-                powershell -Command "Start-Process powershell -Verb RunAs -ArgumentList 'Copy-Item -Force \"$(cygpath -w "$src_path.exe")\" \"C:\Program Files\Razen\razen_compiler.exe\"'" 2>/dev/null || {
+                powershell -Command "Start-Process powershell -Verb RunAs -ArgumentList 'Copy-Item -Force \"$(cygpath -w "$src_path")\" \"C:\Program Files\Razen\razen_compiler.exe\"'" 2>/dev/null || {
                     echo -e "${RED}Failed to copy with elevated privileges${NC}"
-                    echo -e "${YELLOW}Please manually copy $src_path.exe to C:\Program Files\Razen\razen_compiler.exe${NC}"
+                    echo -e "${YELLOW}Please manually copy $(cygpath -w "$src_path") to C:\Program Files\Razen\razen_compiler.exe${NC}"
                     return 1
                 }
             else
                 echo -e "${RED}PowerShell not available for elevated copy${NC}"
-                echo -e "${YELLOW}Please manually copy $src_path.exe to C:\Program Files\Razen\razen_compiler.exe${NC}"
+                echo -e "${YELLOW}Please manually copy $(cygpath -w "$src_path") to C:\Program Files\Razen\razen_compiler.exe${NC}"
                 return 1
             fi
         fi
