@@ -69,64 +69,9 @@ curl -o installer.sh "https://raw.githubusercontent.com/BasaiCorp/razen-lang/mai
 
 #### Windows Installation Notes
 
-Windows installation has been significantly improved in recent versions with better toolchain detection and automatic dependency installation. For detailed information about Windows-specific improvements, please refer to the changelogs.
-
-#### Windows Troubleshooting
-
-If you encounter installation issues:
-
-**Build Tool Requirements:**
-- **MSVC Toolchain**: Requires Visual Studio Build Tools or Visual Studio
-- **GNU Toolchain**: Requires MinGW-w64 (automatically installed when possible)
-
-**Step-by-Step Solutions:**
-
-1. **For MSVC Toolchain Issues**:
-   ```bash
-   # Install Visual Studio Build Tools
-   # Download from: https://visualstudio.microsoft.com/visual-cpp-build-tools/
-   # Select "C++ build tools" workload during installation
-
-   # Verify installation
-   rustup default stable-x86_64-pc-windows-msvc
-   rustc --version
-   ```
-
-2. **For GNU Toolchain Issues**:
-   ```bash
-   # The installer attempts automatic installation, but if it fails:
-
-   # Via MSYS2 (recommended)
-   pacman -S mingw-w64-x86_64-gcc mingw-w64-x86_64-toolchain
-
-   # Via Chocolatey
-   choco install mingw -y
-
-   # Verify installation
-   rustup default stable-x86_64-pc-windows-gnu
-   rustc --version
-   ```
-
-3. **Manual Toolchain Management**:
-   ```bash
-   # Check available toolchains
-   rustup toolchain list
-
-   # Install specific toolchain
-   rustup toolchain install stable-x86_64-pc-windows-gnu
-   rustup toolchain install stable-x86_64-pc-windows-msvc
-
-   # Switch between toolchains
-   rustup default stable-x86_64-pc-windows-msvc  # For Visual Studio users
-   rustup default stable-x86_64-pc-windows-gnu   # For MinGW-w64 users
-   ```
-
-4. **Common Error Solutions**:
-   - **"link.exe failed"**: Install Visual Studio Build Tools or switch to GNU toolchain
-   - **"gcc not found"**: Install MinGW-w64 or switch to MSVC toolchain
-   - **Permission errors**: Run Git Bash as Administrator
-   - **PATH issues**: Restart terminal after installing build tools
-   - **Compilation failures**: Run installer again - it will automatically retry with different toolchain
+- **Git LFS Required**: The Razen installer relies on a pre-compiled compiler binary distributed via Git LFS. Please ensure you have Git LFS installed and that it's functioning correctly before running the installer. You can download it from [https://git-lfs.github.com/](https://git-lfs.github.com/).
+- If you encounter issues, ensure Git LFS successfully pulled the compiler binary during the `git clone` step. You can manually run `git lfs pull` in the cloned repository directory if needed.
+- Running Git Bash as Administrator might be necessary for the installer to copy files to system locations.
 
 **Environment Requirements:**
 - Git Bash (from Git for Windows)
