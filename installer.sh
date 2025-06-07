@@ -484,7 +484,7 @@ get_version() {
         # Download version file if not present
         if ! curl -s -o "$TMP_DIR/version" "$RAZEN_REPO/version" &>/dev/null; then
             echo -e "${RED}Failed to download version information. Using default version.${NC}"
-            RAZEN_VERSION="beta v0.1.75 - Library Call Update & Namespace Notation"
+            RAZEN_VERSION="beta v0.1.76 - Performance Boost & Enhanced Tooling"
         else
             RAZEN_VERSION=$(cat "$TMP_DIR/version")
             # Store the version file for future reference
@@ -636,12 +636,11 @@ copy_files() {
     echo -e "${YELLOW}Copying Razen files to $INSTALL_DIR...${NC}"
     REQUIRED_ITEMS=(
         "properties"
-        "src"
         "examples"
         "docs"
         "core"
         "scripts"
-        "Cargo.toml"
+        "razen-c"
         "version"
         "LICENSE"
         "README.md"
@@ -762,144 +761,6 @@ create_symlinks() {
     fi
 
     echo -e "  ${GREEN}✓${NC} All command links created successfully"
-}
-
-# Step 5: Rust Dependency Check and Build
-setup_rust_and_build() {
-    echo -e "${YELLOW}Checking for Rust installation...${NC}"
-
-    # Check if Rust is installed
-    if ! command -v rustc &>/dev/null || ! command -v cargo &>/dev/null; then
-        echo -e "${RED}Rust is not installed on your system.${NC}"
-        read -p "Would you like to install Rust now? (y/n): " install_rust_choice
-
-        if [[ "$install_rust_choice" =~ ^[Yy]$ ]]; then
-            install_rust
-        else
-            handle_error 1 "Rust is required to build Razen" "Please install Rust from https://rustup.rs/ and run the installer again"
-        fi
-    else
-        echo -e "  ${GREEN}✓${NC} Rust is installed"
-        if [[ "$OS" == "windows" ]]; then
-            toolchain=$(detect_rust_toolchain)
-            echo -e "  ${BLUE}ℹ${NC} Active toolchain: $toolchain"
-        fi
-    fi
-
-    # Build Razen
-    echo -e "${YELLOW}Building Razen...${NC}"
-    cd "$INSTALL_DIR" || handle_error $? "Failed to navigate to installation directory" "Check if the directory exists"
-
-    # Ensure PATH includes cargo
-    export PATH="$HOME/.cargo/bin:$PATH"
-
-    # Verify toolchain before building on Windows
-    if [[ "$OS" == "windows" ]]; then
-        echo -e "${YELLOW}Verifying Rust toolchain...${NC}"
-        if ! rustc --version &>/dev/null; then
-            handle_error 1 "Rust compiler not accessible" "Ensure Rust is properly installed and in PATH"
-        fi
-
-        # Test basic compilation
-        echo 'fn main() { println!("test"); }' > "$TMP_DIR/test.rs"
-        if ! rustc "$TMP_DIR/test.rs" -o "$TMP_DIR/test.exe" &>/dev/null; then
-            echo -e "${RED}Toolchain verification failed. Build tools may be missing.${NC}"
-            toolchain=$(detect_rust_toolchain)
-            if [[ "$toolchain" == *"msvc"* ]]; then
-                echo -e "${YELLOW}MSVC toolchain detected but build tools missing.${NC}"
-                echo -e "${YELLOW}Trying to switch to GNU toolchain...${NC}"
-                if rustup toolchain install stable-x86_64-pc-windows-gnu &>/dev/null &&
-                   rustup default stable-x86_64-pc-windows-gnu &>/dev/null; then
-                    echo -e "  ${GREEN}✓${NC} Switched to GNU toolchain"
-                    # Update toolchain info
-                    toolchain=$(detect_rust_toolchain)
-                    echo -e "  ${BLUE}ℹ${NC} Active toolchain: $toolchain"
-                    # Test again
-                    if ! rustc "$TMP_DIR/test.rs" -o "$TMP_DIR/test.exe" &>/dev/null; then
-                        echo -e "${RED}GNU toolchain also failed. Checking for gcc...${NC}"
-                        if ! command -v gcc &>/dev/null; then
-                            echo -e "${RED}gcc not found in PATH.${NC}"
-                            echo -e "${YELLOW}Please install MinGW-w64:${NC}"
-                            echo -e "  ${CYAN}1. Via MSYS2:${NC} pacman -S mingw-w64-x86_64-gcc"
-                            echo -e "  ${CYAN}2. Via Chocolatey:${NC} choco install mingw"
-                            echo -e "  ${CYAN}3. Manual download:${NC} https://www.mingw-w64.org/"
-                        fi
-                        handle_error 1 "Both MSVC and GNU toolchains failed" "Please install Visual Studio Build Tools or MinGW-w64"
-                    fi
-                else
-                    handle_error 1 "Failed to switch to GNU toolchain" "Please install Visual Studio Build Tools"
-                fi
-            else
-                echo -e "${RED}GNU toolchain compilation failed.${NC}"
-                if ! command -v gcc &>/dev/null; then
-                    echo -e "${RED}gcc not found in PATH.${NC}"
-                    echo -e "${YELLOW}MinGW-w64 installation required. Please run one of:${NC}"
-                    echo -e "  ${CYAN}MSYS2:${NC} pacman -S mingw-w64-x86_64-gcc mingw-w64-x86_64-toolchain"
-                    echo -e "  ${CYAN}Chocolatey:${NC} choco install mingw"
-                    echo -e "  ${CYAN}Manual:${NC} Download from https://www.mingw-w64.org/"
-                    echo -e "  ${CYAN}Then add MinGW-w64 bin directory to your PATH${NC}"
-                fi
-                handle_error 1 "GNU toolchain compilation failed" "Please ensure MinGW-w64 is properly installed and in PATH"
-            fi
-        fi
-        echo -e "  ${GREEN}✓${NC} Toolchain verification successful"
-    fi
-
-    # Fix permissions before building
-    if [[ "$OS" == "windows" ]]; then
-        # Windows doesn't need permission fixes
-        if ! cargo build --release; then
-            echo -e "${RED}Build failed. Analyzing the issue...${NC}"
-            toolchain=$(detect_rust_toolchain)
-            echo -e "${BLUE}Current toolchain: $toolchain${NC}"
-
-            if [[ "$toolchain" == *"gnu"* ]]; then
-                if ! command -v gcc &>/dev/null; then
-                    echo -e "${RED}gcc not found! MinGW-w64 is required for GNU toolchain.${NC}"
-                    echo -e "${YELLOW}Quick fix options:${NC}"
-                    echo -e "  ${CYAN}1. Install MSYS2 and run:${NC}"
-                    echo -e "     pacman -S mingw-w64-x86_64-gcc mingw-w64-x86_64-toolchain"
-                    echo -e "     export PATH=\"/c/msys64/mingw64/bin:\$PATH\""
-                    echo -e "  ${CYAN}2. Install via Chocolatey:${NC}"
-                    echo -e "     choco install mingw"
-                    echo -e "  ${CYAN}3. Switch to MSVC toolchain:${NC}"
-                    echo -e "     rustup default stable-x86_64-pc-windows-msvc"
-                    echo -e "     (Requires Visual Studio Build Tools)"
-                else
-                    echo -e "${YELLOW}gcc found but build still failed. Missing dependencies.${NC}"
-                    echo -e "${YELLOW}Try installing complete MinGW-w64 toolchain:${NC}"
-                    echo -e "  pacman -S mingw-w64-x86_64-toolchain mingw-w64-x86_64-pkg-config"
-                fi
-            else
-                echo -e "${RED}MSVC toolchain requires Visual Studio Build Tools.${NC}"
-                echo -e "${YELLOW}Options:${NC}"
-                echo -e "  ${CYAN}1. Install Visual Studio Build Tools:${NC}"
-                echo -e "     https://visualstudio.microsoft.com/visual-cpp-build-tools/"
-                echo -e "  ${CYAN}2. Switch to GNU toolchain:${NC}"
-                echo -e "     rustup default stable-x86_64-pc-windows-gnu"
-                echo -e "     (Requires MinGW-w64)"
-            fi
-
-            echo -e "${YELLOW}After fixing dependencies, restart terminal and run installer again.${NC}"
-            handle_error $? "Failed to build Razen" "Install required build tools for your toolchain"
-        fi
-    else
-        # For Linux/macOS, temporarily change ownership to current user for the build
-        echo -e "${YELLOW}Setting proper permissions for build...${NC}"
-        current_user=$(whoami)
-        sudo chown -R "$current_user" "$INSTALL_DIR"
-
-        # Build with current user permissions
-        cargo build --release || handle_error $? "Failed to build Razen" "Check for compilation errors and ensure Rust is properly installed"
-
-        # Return ownership to root for system directories
-        sudo chown -R root:root "$INSTALL_DIR"
-    fi
-
-    echo -e "  ${GREEN}✓${NC} Razen built successfully"
-    
-    # Copy the compiler to system path
-    copy_compiler_to_system_path
 }
 
 # Step 6: IDE Extension Installation
@@ -1121,7 +982,7 @@ copy_compiler_to_system_path() {
     echo -e "${YELLOW}Copying Razen compiler to system path...${NC}"
     
     # Source path (where the compiled binary is located)
-    local src_path="$INSTALL_DIR/target/release/razen_compiler"
+    local src_path="$INSTALL_DIR/razen-c/razen_compiler"
     
     # Check if the binary exists
     if [ ! -f "$src_path" ]; then
@@ -1359,8 +1220,8 @@ main() {
     # Step 4: Create Symbolic Links
     create_symlinks
 
-    # Step 5: Rust Dependency Check and Build
-    setup_rust_and_build
+    # Step 5: Copy Pre-compiled Compiler to System Path
+    copy_compiler_to_system_path
 
     # Step 6: IDE Extension Installation
     install_ide_extensions

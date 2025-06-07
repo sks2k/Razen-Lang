@@ -4,15 +4,15 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-# For machine code generation
-cranelift = "0.104"
-cranelift-module = "0.104"
-cranelift-jit = "0.104"      # For potentially running code directly (optional, good for testing)
-cranelift-object = "0.104" # For writing object files
-target-lexicon = "0.12"     # For defining target architecture
+# For machine code generation (Cranelift dependencies removed)
 
 # For linking object files (simplest way)
 cc = "1.0"
+
+# For LLVM-based code generation backend
+# IMPORTANT: Requires a compatible version of LLVM development libraries to be installed on the system.
+# See Inkwell documentation for compatible LLVM versions (e.g., LLVM 14, 15, 16, etc.).
+inkwell = { version = "0.2.0", features = ["llvm15-0"] } # Example, adjust LLVM feature as needed
 
 # Error handling helper
 thiserror = "1.0"

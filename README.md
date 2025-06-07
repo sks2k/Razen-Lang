@@ -1,4 +1,4 @@
-# Razen Programming Language beta v0.1.75 - Library Call Update & Namespace Notation
+# Razen Programming Language beta v0.1.76 - Performance Boost & Enhanced Tooling
 
 ## Overview
 Razen is a modern, intuitive programming language designed for clarity, performance, and ease of use. With a clean syntax inspired by Python and strong type safety, Razen offers an excellent balance between development speed and runtime performance.
@@ -22,22 +22,22 @@ Developed by Prathmesh Barot, Basai Corporation.
 
 ## Changelog
 
-Razen is under active development with regular updates. The latest version is **beta v0.1.75** which brings a major update to the library call system and namespace support.
+Razen is under active development with regular updates. The latest version is **beta v0.1.76** which brings significant performance improvements and enhanced tooling.
 
-### Latest Release: beta v0.1.75 – Library Call Update & Namespace Notation
+### Latest Release: beta v0.1.76 – Performance Boost & Enhanced Tooling
 
-This release introduces powerful new ways to call library functions and modernizes the Razen library experience. View the full changelog:
+This release focuses on performance optimizations, LLVM integration, and improved developer experience. View the full changelog:
 
-- [Markdown Version (beta_v0.1.75.md)](changelogs/beta_v0.1.75.md)
+- [Markdown Version (beta_v0.1.76.md)](changelogs/beta_v0.1.76.md)
 
-#### Key Improvements in v0.1.75
+#### Key Improvements in v0.1.76
 
-- **Namespace Notation (`lib::function`)**: Call library functions with the modern `namespace::function(args...)` syntax, in addition to the classic `Library[function](args...)` bracket notation.
-- **Full Parity**: Both notations are fully supported and interchangeable for all libraries.
-- **Improved Parser & Compiler**: Robust handling of all library call forms, including nested and chained calls.
-- **Better Error Messages**: Parser errors now include precise line and column info.
-- **Consistent Metadata Extraction**: Docs, examples, and changelogs auto-update with function difficulty and version badges.
-- **Backward Compatibility**: All previous scripts using bracket notation continue to work without changes.
+- **Faster Installation**: Completely revamped installation process that's significantly faster and more lightweight
+- **LLVM Integration**: Experimental support for LLVM-based compilation, enabling more powerful optimizations
+- **Logging Updates**: Renamed logging functions to avoid conflicts (`info`→`infolog`, `warn`→`warnlog`, etc.)
+- **VS Code Extension**: Improved syntax highlighting and smarter code completion
+- **Memory Management**: Reduced memory usage and optimized performance across the board
+- **Build System**: Streamlined build process with better dependency management
 
 For a complete history of all version changelogs, please visit the [changelogs.mdx](changelogs/changelogs.mdx) file or browse the [changelogs](changelogs/) directory for individual version details.
 

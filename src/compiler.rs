@@ -14,7 +14,7 @@ use crate::library;
 
 // Intermediate representation for code generation
 #[derive(Debug, Clone)]
-enum IR {
+pub enum IR {
     // Stack operations
     PushNumber(f64),
     PushString(String),
@@ -162,7 +162,7 @@ impl FunctionTable {
 
 // Compiler for translating AST to machine code
 pub struct Compiler {
-    ir: Vec<IR>,
+    pub ir: Vec<IR>,
     symbol_table: SymbolTable,
     function_table: FunctionTable,
     current_function: Option<String>,
@@ -2295,7 +2295,14 @@ impl Compiler {
                                 args.push(crate::value::Value::Array(elements));
                             } else {
                                 // Default to string
-                                args.push(crate::value::Value::String(arg));
+                                let mut final_arg_str = arg.clone();
+                                if final_arg_str.starts_with('"') && final_arg_str.ends_with('"') && final_arg_str.len() >= 2 {
+                                    final_arg_str = final_arg_str[1..final_arg_str.len()-1].to_string();
+                                }
+                                // TODO: Consider a more general unescaping mechanism for strings from Razen literals
+                                // if they can contain escape sequences like \", \n, etc.
+                                // For now, this handles the common case of simple quoted strings for URLs.
+                                args.push(crate::value::Value::String(final_arg_str));
                             }
                         }
                     }

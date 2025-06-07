@@ -137,7 +137,7 @@ else
     # Download version file if not present
     if ! curl -s -o version "$RAZEN_REPO/version" &>/dev/null; then
         echo -e "${RED}Failed to download version information. Using default version.${NC}"
-        RAZEN_VERSION="beta v0.1.75 - Library Call Update & Namespace Notation"
+        RAZEN_VERSION="beta v0.1.76 - Performance Boost & Enhanced Tooling"
     else
         RAZEN_VERSION=$(cat version)
         # Store the version file for future reference

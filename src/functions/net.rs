@@ -3,6 +3,7 @@ use std::process::Command;
 use std::collections::HashMap;
 use reqwest::blocking::Client;
 use std::time::Duration;
+use url::Url;
 
 /// Ping a host to check connectivity
 /// Example: ping("google.com") => true
@@ -15,39 +16,55 @@ pub fn ping(args: Vec<Value>) -> Result<Value, String> {
     let url = args[0].as_string()?;
     
     // Extract hostname from URL if needed
-    let host = if url.starts_with("http://") || url.starts_with("https://") {
-        // Try to extract the hostname from the URL
-        url.trim_start_matches("http://")
-           .trim_start_matches("https://")
-           .split('/')
-           .next()
-           .unwrap_or("")
-           .to_string()
-    } else {
-        url.to_string()
+    let host = match Url::parse(&url) {
+        Ok(parsed_url) => {
+            parsed_url.host_str().unwrap_or("").to_string()
+        }
+        Err(_) => {
+            // Fallback to simple host extraction
+            if url.starts_with("http://") || url.starts_with("https://") {
+                url.trim_start_matches("http://")
+                   .trim_start_matches("https://")
+                   .split('/')
+                   .next()
+                   .unwrap_or("")
+                   .split(':')
+                   .next()
+                   .unwrap_or("")
+                   .to_string()
+            } else {
+                url.to_string()
+            }
+        }
     };
     
     if host.is_empty() {
         return Ok(Value::Bool(false));
     }
-    
-    // Use the system ping command with a timeout
-    let output = if cfg!(target_os = "windows") {
+
+    let ping_cmd = if cfg!(target_os = "windows") {
         Command::new("ping")
-            .args(["-n", "1", "-w", "1000", &host])
+            .arg("-n")
+            .arg("1")
+            .arg("-w")
+            .arg("1000")
+            .arg(&host)
             .output()
     } else {
         Command::new("ping")
-            .args(["-c", "1", "-W", "1", &host])
+            .arg("-c")
+            .arg("1")
+            .arg("-W")
+            .arg("1")
+            .arg(&host)
             .output()
     };
-    
-    match output {
+
+    match ping_cmd {
         Ok(output) => {
-            // Check if ping was successful (exit code 0)
             let success = output.status.success();
             Ok(Value::Bool(success))
-        },
+        }
         Err(_) => Ok(Value::Bool(false)),
     }
 }

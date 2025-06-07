@@ -444,10 +444,10 @@ const LIBRARY_RETURN_TYPES = {
   
   // Log library return types
   'loglib': {
-    'info': 'boolean',        // Returns true if logged successfully
-    'warn': 'boolean',        // Returns true if logged successfully
-    'error': 'boolean',       // Returns true if logged successfully
-    'debug': 'boolean'        // Returns true if logged successfully
+    'infolog': 'boolean',        // Returns true if logged successfully
+    'warnlog': 'boolean',        // Returns true if logged successfully
+    'errorlog': 'boolean',       // Returns true if logged successfully
+    'debuglog': 'boolean'        // Returns true if logged successfully
   },
   
   // HT library return types
@@ -564,7 +564,7 @@ const LIBRARIES = {
     "Validation": ["email", "phone", "required", "min_length"],
     "System": ["exec", "uptime", "info", "current_time", "system_name"],
     "BoxLib": ["put", "get", "is_box"],
-    "LogLib": ["info", "warn", "error", "debug"],
+    "LogLib": ["infolog", "warnlog", "errorlog", "debuglog"],
     "HtLib": ["coin", "bool_tos"],
     "Audio": ["play", "pause", "stop", "record"],
     "Image": ["load", "save", "resize", "crop"],

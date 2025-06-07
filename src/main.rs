@@ -7,6 +7,7 @@ mod syntax;
 mod value;
 mod functions;
 mod library;
+mod llvm;
 
 use std::env;
 use std::path::Path;
@@ -14,6 +15,10 @@ use std::process;
 use std::fs;
 use std::io;
 use std::time::Instant;
+
+use crate::llvm::LlvmCompiler;
+use crate::value::Value as RazenValue; // Assuming RazenValue is needed for return type
+use inkwell::context::Context;
 
 fn print_usage() {
     println!("Usage: razen <command> [args]\n");
@@ -57,30 +62,61 @@ fn main() {
                 process::exit(1);
             }
             
-            let source_path = &filtered_args[2];
-            let output_path = if filtered_args.len() > 3 {
-                &filtered_args[3]
+            let source_path_str = &filtered_args[2];
+            let output_path_str = if filtered_args.len() > 3 {
+                filtered_args[3].clone() // Clone to own the String for output_path_str
             } else {
-                // Default output path: replace .rzn extension with .bin
-                let source_path_obj = Path::new(source_path);
+                let source_path_obj = Path::new(source_path_str);
                 let stem = source_path_obj.file_stem().unwrap_or_default().to_str().unwrap_or("output");
-                &format!("{}.bin", stem)
+                format!("{}.o", stem) // Default to .o for object file
             };
             
-            println!("Compiling {} to {}", source_path, output_path);
+            println!("Compiling {} to LLVM IR and then to {}", source_path_str, output_path_str);
             
-            match compiler::Compiler::from_file(source_path) {
-                Ok(compiler) => {
-                    match compiler.write_to_file(output_path) {
-                        Ok(_) => println!("Compilation successful!"),
+            // 1. Compile Razen source to Razen IR
+            match compiler::Compiler::from_file(source_path_str) {
+                Ok(razen_compiler) => {
+                    let razen_ir_sequence = razen_compiler.ir;
+
+                    if debug_mode {
+                        println!("Successfully parsed Razen source. Number of Razen IR instructions: {}", razen_ir_sequence.len());
+                    }
+
+                    // 2. Initialize LLVM Context and our LlvmCompiler
+                    let context = Context::create();
+                    let module_name = Path::new(source_path_str).file_stem().unwrap_or_default().to_str().unwrap_or("razen_module");
+                    let mut llvm_compiler = LlvmCompiler::new(&context, module_name, !debug_mode); // Enable optimizations if not in debug mode
+
+                    // 3. Compile Razen IR to LLVM IR (into a 'main' function)
+                    match llvm_compiler.compile_function("main", vec![], RazenValue::Int(0), &razen_ir_sequence) {
+                        Ok(_main_function) => {
+                            if debug_mode {
+                                println!("Successfully generated LLVM IR for 'main' function.");
+                                llvm_compiler.dump_module(); // Print LLVM IR to stderr
+                            }
+
+                            // 4. Emit LLVM IR to a .ll file (placeholder for object file emission)
+                            let ll_path = format!("{}.ll", Path::new(&output_path_str).file_stem().unwrap_or_default().to_str().unwrap_or("output"));
+                            match llvm_compiler.module.print_to_file(&Path::new(&ll_path)) {
+                                Ok(_) => {
+                                    println!("LLVM IR written to {}", ll_path);
+                                    println!("Compilation (to LLVM IR) successful!");
+                                    println!("Next steps: Implement object file emission in llvm.rs and linking.");
+                                }
+                                Err(e) => {
+                                    println!("Error writing LLVM IR to file: {:?}", e.to_string());
+                                    process::exit(1);
+                                }
+                            }
+                        }
                         Err(e) => {
-                            println!("Error writing output file: {}", e);
+                            println!("LLVM Compilation Error: {}", e);
                             process::exit(1);
                         }
                     }
                 },
                 Err(e) => {
-                    println!("Compilation error: {}", e);
+                    println!("Razen Compilation error: {}", e);
                     process::exit(1);
                 }
             }

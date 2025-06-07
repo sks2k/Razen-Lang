@@ -9,6 +9,22 @@ This document provides a comprehensive history of all Razen language versions an
 
 ## Beta Releases
 
+### Beta v0.1.76 - Performance Boost & Enhanced Tooling (June 7, 2025)
+
+This version brings significant performance improvements, LLVM integration, and logging function updates. The installation process has been revamped to be faster and more lightweight, and the compiler now includes experimental LLVM support for better optimizations.
+
+**Key Improvements:**
+- **Performance & Installation**: Completely revamped installation process with reduced footprint
+- **LLVM Integration**: Experimental support for LLVM-based compilation
+- **Logging Updates**: Renamed logging functions to avoid conflicts (`info`→`infolog`, `warn`→`warnlog`, etc.)
+- **VS Code Extension**: Improved syntax highlighting and code completion
+- **Memory Management**: Reduced memory usage and optimized performance
+
+**Detailed Changelog:**
+- [Markdown Version (beta_v0.1.76.md)](beta_v0.1.76.md)
+
+---
+
 ### Beta v0.1.75 - Library Call Update & Namespace Notation (June 5, 2025)
 
 This version introduces the modern namespace notation (`lib::function`) for library calls, providing full parity with the classic bracket notation. The parser and compiler have been significantly enhanced to handle complex library calls robustly. The overall library experience is modernized with consistent metadata extraction for documentation, including difficulty and version badges. Error handling and messaging for library calls have also been improved.

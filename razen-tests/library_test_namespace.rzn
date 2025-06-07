@@ -178,16 +178,16 @@ show "15. Testing Box Library:";
 
 # Test Log Library
 show "16. Testing Log Library:";
-show "Info log: " + loglib::info("This is an info message");
-show "Warning log: " + loglib::warn("This is a warning message");
-show "Error log: " + loglib::error("This is an error message");
+show "Info log: " + loglib::infolog("This is an info message");
+show "Warning log: " + loglib::warnlog("This is a warning message");
+show "Error log: " + loglib::errorlog("This is an error message");
 show "Debug log: " + loglib::debuglog("This is a debug message");
 
 # Test Enhanced Net Library
 show "17. Testing Net Library:";
-var ping_test = netlib::ping("google.com");  
-show "Ping test: " + netlib::ping("google.com");
-if (ping_test) {
+var ping_test = netlib::ping("https://google.com");  
+show "Ping test: " + ping_test;
+if (ping_test == true) {
     show(green) "Ping test passed!";
 } else {
     show(red) "Ping test failed!";

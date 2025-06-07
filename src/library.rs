@@ -485,9 +485,9 @@ impl LibraryManager {
 
         // Register Log library functions
         let mut log_lib = Library::new("loglib");
-        log_lib.register_function("info", crate::functions::loglib::info);
-        log_lib.register_function("warn", crate::functions::loglib::warn);
-        log_lib.register_function("error", crate::functions::loglib::error);
+        log_lib.register_function("infolog", crate::functions::loglib::info);
+        log_lib.register_function("warnlog", crate::functions::loglib::warn);
+        log_lib.register_function("errorlog", crate::functions::loglib::error);
         log_lib.register_function("debuglog", crate::functions::loglib::debug);
         self.register_library(log_lib);
 
