@@ -1493,9 +1493,6 @@ impl Compiler {
 
     // Execute the compiled code directly
     pub fn execute(&self) -> Result<(), String> {
-        // In a real implementation, this would execute the generated machine code
-        // For now, we'll just interpret the IR directly
-
         if !self.clean_output {
             println!("Executing Razen program...");
             for (i, ir) in self.ir.iter().enumerate() {
@@ -1515,16 +1512,13 @@ impl Compiler {
         let mut current_exception: Option<String> = None;
         let mut in_exception_handling = false;
 
-        // Pre-pass to register all functions before execution.
-        // This is simple and only registers the function name and address.
-        // Parameter handling is now done at call time.
         for ir in self.ir.iter() {
             if let IR::DefineFunction(name, address) = ir {
                 variables.insert(name.clone(), address.to_string());
             }
         }
 
-        let mut pc = 0; // Program counter
+        let mut pc = 0;
         while pc < self.ir.len() {
             let ir = &self.ir[pc];
             match ir {
@@ -1548,8 +1542,6 @@ impl Compiler {
                 },
                 IR::StoreVar(name) => {
                     if let Some(value) = stack.pop() {
-                        // When a function returns, its scope is on top of the call stack.
-                        // We need to store variables in the correct scope.
                         if let Some((_, func_vars)) = call_stack.last_mut() {
                             func_vars.insert(name.clone(), value);
                         } else {
@@ -1558,7 +1550,6 @@ impl Compiler {
                     }
                 },
                 IR::LoadVar(name) => {
-                    // Check current scope first, then global.
                     let value = if let Some((_, func_vars)) = call_stack.last() {
                         func_vars.get(name)
                     } else {
@@ -1612,7 +1603,6 @@ impl Compiler {
                         }
                     }
                 },
-                // START: FIXED/ADDED OPERATORS
                 IR::Modulo => {
                     if let (Some(b), Some(a)) = (stack.pop(), stack.pop()) {
                         if let (Ok(a_num), Ok(b_num)) = (a.parse::<f64>(), b.parse::<f64>()) {
@@ -1621,8 +1611,6 @@ impl Compiler {
                             } else {
                                 return Err("Modulo by zero".to_string());
                             }
-                        } else {
-                            stack.push("undefined".to_string());
                         }
                     }
                 },
@@ -1630,8 +1618,6 @@ impl Compiler {
                     if let (Some(b), Some(a)) = (stack.pop(), stack.pop()) {
                         if let (Ok(a_num), Ok(b_num)) = (a.parse::<f64>(), b.parse::<f64>()) {
                             stack.push(a_num.powf(b_num).to_string());
-                        } else {
-                            stack.push("undefined".to_string());
                         }
                     }
                 },
@@ -1643,8 +1629,6 @@ impl Compiler {
                             } else {
                                 return Err("Division by zero".to_string());
                             }
-                        } else {
-                            stack.push("undefined".to_string());
                         }
                     }
                 },
@@ -1652,27 +1636,9 @@ impl Compiler {
                     if let Some(a) = stack.pop() {
                         if let Ok(a_num) = a.parse::<f64>() {
                             stack.push((-a_num).to_string());
-                        } else {
-                            stack.push("undefined".to_string());
                         }
                     }
                 },
-                IR::And => {
-                    if let (Some(b), Some(a)) = (stack.pop(), stack.pop()) {
-                        stack.push((is_truthy(&a) && is_truthy(&b)).to_string());
-                    }
-                },
-                IR::Or => {
-                    if let (Some(b), Some(a)) = (stack.pop(), stack.pop()) {
-                        stack.push((is_truthy(&a) || is_truthy(&b)).to_string());
-                    }
-                },
-                IR::Not => {
-                    if let Some(a) = stack.pop() {
-                        stack.push((!is_truthy(&a)).to_string());
-                    }
-                },
-                // END: FIXED/ADDED OPERATORS
                 IR::Equal => {
                     if let (Some(b), Some(a)) = (stack.pop(), stack.pop()) {
                         if let (Ok(a_num), Ok(b_num)) = (a.parse::<f64>(), b.parse::<f64>()) {
@@ -1727,6 +1693,21 @@ impl Compiler {
                         }
                     }
                 },
+                IR::And => {
+                    if let (Some(b), Some(a)) = (stack.pop(), stack.pop()) {
+                        stack.push((is_truthy(&a) && is_truthy(&b)).to_string());
+                    }
+                },
+                IR::Or => {
+                    if let (Some(b), Some(a)) = (stack.pop(), stack.pop()) {
+                        stack.push((is_truthy(&a) || is_truthy(&b)).to_string());
+                    }
+                },
+                IR::Not => {
+                    if let Some(a) = stack.pop() {
+                        stack.push((!is_truthy(&a)).to_string());
+                    }
+                },
                 IR::Jump(target) => {
                     pc = *target;
                     continue;
@@ -1749,20 +1730,20 @@ impl Compiler {
                 },
                 IR::Return => {
                     let return_value = stack.pop().unwrap_or_else(|| "null".to_string());
-                    
+
                     if let Some((return_addr, caller_variables)) = call_stack.pop() {
                         variables = caller_variables;
                         stack.push(return_value);
                         pc = return_addr;
                         continue;
                     } else {
-                        // Top-level return, effectively ends program
                         stack.push(return_value);
                     }
                 },
+                // START: FIXED USER-DEFINED FUNCTION CALL LOGIC
                 IR::Call(name, arg_count) => {
                     if !self.clean_output {
-                        println!("Calling function: {} with {} arguments", name, arg_count);
+                        println!("Calling user function: {} with {} arguments", name, arg_count);
                     }
 
                     let mut args = Vec::new();
@@ -1773,53 +1754,33 @@ impl Compiler {
                     }
                     args.reverse();
 
-                    // START: REWRITTEN FUNCTION CALL LOGIC
-                    // Look for a user-defined function.
                     if let Some(func_addr_str) = variables.get(name) {
                         if let Ok(func_addr) = func_addr_str.parse::<usize>() {
-                            if !self.clean_output {
-                                println!("Found user function {} at address {}", name, func_addr);
-                            }
-
-                            // 1. Create a new variable scope for the function, inheriting the global scope.
                             let mut func_variables = variables.clone();
 
-                            // 2. Get parameter names from the reliable source: `self.function_param_names`.
                             if let Some(param_names) = self.function_param_names.get(name) {
-                                if !self.clean_output {
-                                    println!("  Binding parameters: {:?}", param_names);
-                                }
-                                // 3. Assign arguments to parameters in the new scope.
                                 for (i, param_name) in param_names.iter().enumerate() {
                                     if i < args.len() {
                                         func_variables.insert(param_name.clone(), args[i].clone());
-                                        if !self.clean_output {
-                                            println!("    - {}: {}", param_name, args[i]);
-                                        }
                                     } else {
-                                        // Assign "undefined" if not enough arguments were passed.
                                         func_variables.insert(param_name.clone(), "undefined".to_string());
                                     }
                                 }
-                            } else if !self.clean_output {
-                                println!("Warning: No parameter information found for function '{}'.", name);
                             }
 
-                            // 4. Save current state and jump to the function.
                             call_stack.push((pc + 1, variables.clone()));
                             variables = func_variables;
                             pc = func_addr;
-                            continue; // Jump to the function, skip the pc++ at the end of the loop.
+                            continue;
                         }
                     } else {
-                        // Handle built-in or unknown functions here if necessary
                         if !self.clean_output {
                             println!("Unknown function: {}", name);
                         }
                         stack.push("undefined".to_string());
                     }
-                    // END: REWRITTEN FUNCTION CALL LOGIC
                 },
+                // END: FIXED USER-DEFINED FUNCTION CALL LOGIC
                 IR::Print => {
                     if let Some(value) = stack.pop() {
                         use std::io::{self, Write};
@@ -1827,10 +1788,175 @@ impl Compiler {
                         io::stdout().flush().unwrap();
                     }
                 },
+                IR::ReadInput => {
+                    use std::io::{self, BufRead};
+                    let stdin = io::stdin();
+                    let mut line = String::new();
+                    stdin.lock().read_line(&mut line).expect("Failed to read line");
+                    if line.ends_with('\n') {
+                        line.pop();
+                        if line.ends_with('\r') {
+                            line.pop();
+                        }
+                    }
+                    stack.push(line);
+                },
                 IR::Exit => {
                     return Ok(());
                 },
-                // ... Other IR handlers like GetIndex, LibraryCall, etc., remain here ...
+                IR::Sleep => {
+                    if let Some(duration_str) = stack.pop() {
+                        if let Ok(duration) = duration_str.parse::<f64>() {
+                            thread::sleep(Duration::from_secs_f64(duration));
+                        }
+                    }
+                },
+                
+                // START: RESTORED AND VERIFIED BLOCKS
+                IR::GetIndex => {
+                    if let (Some(index_str), Some(container_str)) = (stack.pop(), stack.pop()) {
+                        // Try numeric index first for arrays
+                        if container_str.starts_with('[') && container_str.ends_with(']') {
+                            let content = &container_str[1..container_str.len() - 1];
+                            let elements: Vec<&str> = content.split(',').map(|s| s.trim()).collect();
+                            if let Ok(idx) = index_str.parse::<usize>() {
+                                if idx < elements.len() {
+                                    stack.push(elements[idx].to_string());
+                                } else {
+                                    stack.push("undefined".to_string());
+                                }
+                            } else {
+                                stack.push("undefined".to_string());
+                            }
+                        } 
+                        // Handle map-like strings
+                        else if container_str.starts_with('{') && container_str.ends_with('}') {
+                            let content = &container_str[1..container_str.len() - 1];
+                            let mut map = HashMap::new();
+                            for pair in content.split(',') {
+                                let parts: Vec<&str> = pair.split(':').map(|s| s.trim()).collect();
+                                if parts.len() == 2 {
+                                    map.insert(parts[0].to_string(), parts[1].to_string());
+                                }
+                            }
+                            if let Some(value) = map.get(&index_str) {
+                                stack.push(value.clone());
+                            } else {
+                                stack.push("undefined".to_string());
+                            }
+                        } else {
+                            stack.push("undefined".to_string());
+                        }
+                    }
+                },
+                IR::SetIndex => {
+                    if let (Some(value), Some(index_str), Some(container_str)) = (stack.pop(), stack.pop(), stack.pop()) {
+                        if container_str.starts_with('[') && container_str.ends_with(']') {
+                            let content = &container_str[1..container_str.len() - 1];
+                            let mut elements: Vec<String> = content.split(',').map(|s| s.trim().to_string()).collect();
+                            if let Ok(idx) = index_str.parse::<usize>() {
+                                if idx < elements.len() {
+                                    elements[idx] = value;
+                                } else {
+                                    // Extend array if index is out of bounds
+                                    while elements.len() < idx {
+                                        elements.push("null".to_string());
+                                    }
+                                    elements.push(value);
+                                }
+                                stack.push(format!("[{}]", elements.join(", ")));
+                            }
+                        }
+                    }
+                },
+                IR::CreateArray(count) => {
+                    let mut array = Vec::new();
+                    for _ in 0..*count {
+                        if let Some(value) = stack.pop() {
+                            array.push(value);
+                        }
+                    }
+                    array.reverse();
+                    stack.push(format!("[{}]", array.join(", ")));
+                },
+                IR::CreateMap(count) => {
+                    let mut map_entries = Vec::new();
+                    for _ in 0..*count {
+                        if let (Some(value), Some(key)) = (stack.pop(), stack.pop()) {
+                            map_entries.push(format!("{}:{}", key, value));
+                        }
+                    }
+                    map_entries.reverse();
+                    stack.push(format!("{{{}}}", map_entries.join(", ")));
+                },
+                IR::LibraryCall(lib_name, func_name, arg_count) => {
+                    if !self.clean_output {
+                        println!("Calling library function: {}.{} with {} arguments", lib_name, func_name, arg_count);
+                    }
+
+                    let function_name_only = func_name.split('.').last().unwrap_or(func_name);
+                    
+                    let mut args = Vec::new();
+                    for _ in 0..*arg_count {
+                        if let Some(arg) = stack.pop() {
+                            if let Ok(i) = arg.parse::<i64>() {
+                                args.push(crate::value::Value::Int(i));
+                            } else if let Ok(f) = arg.parse::<f64>() {
+                                args.push(crate::value::Value::Float(f));
+                            } else if arg == "true" {
+                                args.push(crate::value::Value::Bool(true));
+                            } else if arg == "false" {
+                                args.push(crate::value::Value::Bool(false));
+                            } else if arg.starts_with('[') && arg.ends_with(']') {
+                                let inner = &arg[1..arg.len()-1];
+                                let elements = inner.split(',')
+                                    .map(|s| crate::value::Value::String(s.trim().to_string()))
+                                    .collect();
+                                args.push(crate::value::Value::Array(elements));
+                            }
+                            else {
+                                args.push(crate::value::Value::String(arg));
+                            }
+                        }
+                    }
+                    args.reverse();
+
+                    match crate::library::call_library(&lib_name.to_lowercase(), function_name_only, args) {
+                        Ok(value) => {
+                            stack.push(value.to_string());
+                        },
+                        Err(e) => {
+                            stack.push(format!("Error: {}", e));
+                        }
+                    };
+                },
+                IR::SetupTryCatch => {
+                    if let Some(handler_label) = stack.pop() {
+                        let handler_pc = self.ir.iter().position(|ir| matches!(ir, IR::Label(l) if l == &handler_label));
+                        if let Some(pc) = handler_pc {
+                            exception_handlers.push((handler_label, pc));
+                        }
+                    }
+                },
+                IR::ClearTryCatch => {
+                    exception_handlers.pop();
+                },
+                IR::ThrowException => {
+                    if let Some(error_message) = stack.pop() {
+                        if let Some((_, handler_pc)) = exception_handlers.pop() {
+                            stack.push(error_message);
+                            pc = handler_pc;
+                            continue;
+                        } else {
+                            return Err(format!("Unhandled exception: {}", error_message));
+                        }
+                    }
+                },
+                // END: RESTORED AND VERIFIED BLOCKS
+                
+                IR::DefineFunction(_, _) | IR::Label(_) => {
+                    // These are handled by pre-pass or jumps, do nothing at runtime.
+                }
                 _ => {
                     if !self.clean_output {
                         println!("Unimplemented or ignored instruction: {:?}", ir);
