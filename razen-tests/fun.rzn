@@ -35,8 +35,8 @@ show "\nTest 4: Function with string manipulation";
 show "greet('World') = " + greet("World");
 
 # Test 5: Function with conditional logic
-fun is_even(num) {
-    if (num % 2 == 0) {
+fun is_even(nums) {
+    if (nums % 2 == 0) {
         return "Even";
     } else {
         return "Odd";
@@ -64,4 +64,4 @@ fun compound() {
 show "\nTest 7: Function that calls another function";
 show "compound() = " + compound();
 
-show "\n===== FUNCTION TEST COMPnumE =====";
+show "\n===== FUNCTION TEST COMPLETE =====";
