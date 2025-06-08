@@ -1,0 +1,213 @@
+# Razen Error Handling Examples
+# This file demonstrates error handling patterns in Razen
+
+# Import libraries
+lib mathlib;
+lib arrlib;
+lib strlib;
+
+show "===== Razen Error Handling Examples =====";
+
+# Example 1: Basic try-catch with division by zero
+show "\n1. Basic Error Handling - Division by Zero";
+try {
+    num a = 10;
+    num b = 0;
+    show "Attempting to divide " + a + " by " + b;
+    num result = MathLib[divide](a, b);
+    show "Result: " + result; # This line shouldn't execute
+} catch (error) {
+    # Currently shows "true" instead of error message
+    show "Caught error: " + error;
+    show "Issue: Error should show 'Division by zero' message";
+} finally {
+    show "Finally block executed (should always run)";
+}
+
+# Example 2: Multiple statements in try block
+show "\n2. Multiple Statements - Only First Error Should Be Caught";
+try {
+    var numbers = [1, 2, 3];
+    show "Array: " + numbers;
+    show "First operation - accessing invalid index";
+    var value1 = numbers[5]; # First error
+    show "Issue: This line shouldn't execute";
+    
+    num c = 10;
+    num d = 0;
+    show "Second operation - division by zero";
+    num result2 = c / d; # Second error (shouldn't be reached)
+    show "Issue: This line shouldn't execute either";
+} catch (error) {
+    # Should only catch the first error (array index)
+    show "Caught error: " + error;
+    show "Issue: Should only catch first error (array index)";
+}
+
+# Example 3: Nested try-catch blocks
+show "\n3. Nested Try-Catch Blocks";
+try {
+    show "Outer try block";
+    try {
+        show "Inner try block";
+        throw "Inner exception thrown";
+        show "Issue: This line shouldn't execute";
+    } catch (innerError) {
+        show "Inner catch block caught: " + innerError;
+        # Re-throw to outer block
+        throw "Re-thrown from inner catch: " + innerError;
+    } finally {
+        show "Inner finally block (should always execute)";
+    }
+    show "Issue: This line shouldn't execute (after inner try-catch)";
+} catch (outerError) {
+    show "Outer catch block caught: " + outerError;
+} finally {
+    show "Outer finally block (should always execute)";
+}
+
+# Example 4: Error type checking simulation
+show "\n4. Error Type Checking";
+try {
+    num choice = 2;
+    
+    if (choice == 1) {
+        throw "TypeError: Invalid type";
+    }
+    if (choice == 2) {
+        throw "RangeError: Value out of range";
+    } else {
+        throw "GenericError: Something went wrong";
+    }
+} catch (error) {
+    # In many languages, you can catch specific error types
+    # Razen should support: catch (TypeError error) { ... }
+    
+    # Simulating type checking
+    if (StrLib[contains](error, "TypeError")) {
+        show "Caught TypeError: " + error;
+    }
+    if (StrLib[contains](error, "RangeError")) {
+        show "Caught RangeError: " + error;
+    } else {
+        show "Caught generic error: " + error;
+    }
+    show "Issue: Should support typed catch blocks";
+}
+
+# Example 5: Try-catch with return values
+show "\n5. Return Values from Try-Catch";
+var result = getValueSafely();
+show "Safe operation result: " + result;
+
+# Function with internal try-catch
+fun getValueSafely() {
+    try {
+        # Risky operation
+        return 10 / 0;
+    } catch (error) {
+        # Return fallback value on error
+        show "Error in function: " + error;
+        return "fallback_value";
+    } finally {
+        show "Function finally block (should execute before return)";
+    }
+}
+
+# Example 6: Cleanup pattern with finally
+show "\n6. Resource Cleanup Pattern";
+# Create a test file for demonstration
+show "Creating test file...";
+show Filesystem[write_file]("./test_cleanup.txt", "Test content", false);
+
+try {
+    show "Opening and reading file...";
+    str fileContent = Filesystem[read_file]("./test_cleanup.txt");
+    show "File content: " + fileContent;
+    
+    # Simulate an error during file processing
+    if (true) { # Simulate error condition
+        throw "Error processing file";
+    }
+    
+    show "Issue: This line shouldn't execute";
+} catch (error) {
+    show "File operation error: " + error;
+} finally {
+    # Cleanup code that always runs regardless of error
+    show "Cleaning up - removing test file...";
+    show Filesystem[remove]("./test_cleanup.txt");
+}
+
+# Verify file was removed in finally block
+show "File exists after cleanup: " + Filesystem[exists]("./test_cleanup.txt");
+
+# Example 7: Custom error objects
+show "\n7. Custom Error Objects";
+try {
+    # Simple string error instead of object since Razen doesn't fully support complex arrays
+    str errorMessage = "ValidationError: Invalid invar data (code 400, field: username)";
+    throw errorMessage;
+} catch (error) {
+    show "Caught custom error: " + error;
+    show "Issue: Should support throwing and catching structured error objects";
+    show "Issue: Error objects should have properties like type, message, code, etc.";
+}
+
+# Example 8: Try-catch in loops
+show "\n8. Try-Catch in Loops";
+# Simplified version without complex array operations
+num i = 0;
+while (i < 5) {
+    try {
+        # Create some test cases that will sometimes succeed, sometimes fail
+        num divisor = 0;
+        if (i == 0 || i == 2 || i == 4) {
+            divisor = 10; # These will succeed
+        }
+        
+        show "Processing item " + i + ": 100/" + divisor;
+        num calc = 100 / divisor;
+        show "Result: " + calc;
+    } catch (error) {
+        show "Error processing item " + i + ": " + error;
+    }
+    num i = i + 1;
+}
+
+show "Issue: Should be able to use try-catch in loops with array operations";
+show "Issue: Should be able to store results in arrays";
+
+# Example 9: Stack traces and debugging
+show "\n9. Stack Traces and Error Information";
+try {
+    recursiveFunction(3);
+} catch (error) {
+    show "Caught error from recursive function: " + error;
+    show "Issue: Should include stack trace with function calls";
+}
+
+fun recursiveFunction(depth) {
+    show "Recursive function at depth: " + depth;
+    
+    if (depth <= 0) {
+        throw "Reached maximum recursion depth";
+    } else {
+        # Add a proper return to avoid infinite recursion
+        recursiveFunction(depth - 1);
+        return "Compnumed recursion at depth " + depth;
+    }
+}
+
+# Example 10: Try without catch (should error)
+show "\n10. Try Without Catch (should error)";
+try {
+    show "This try block has no catch";
+    throw "Uncaught error";
+    show "This line shouldn't execute";
+} catch (error) {
+    show "This catch should handle the error: " + error;
+} finally {
+    show "Finally block should always execute";
+    show "Issue: Try-finally without catch should be supported";
+}

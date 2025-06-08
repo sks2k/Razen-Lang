@@ -1,3 +1,0 @@
-# Simple RAZEN Test Script
-let num = 42
-show "The number is: 42" 

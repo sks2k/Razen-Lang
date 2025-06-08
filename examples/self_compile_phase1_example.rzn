@@ -1,0 +1,103 @@
+# Razen Self-Compilation Phase 1
+# This file demonstrates the essential features needed for self-compilation
+
+# Import libraries
+lib memorylib;    # Memory management library
+lib binarylib;    # Binary file operations library
+lib bitwiselib;   # Bit manipulation library
+lib systemlib;    # System library
+lib compilerlib;  # Compiler operations library
+lib threadlib;    # Thread management library
+
+show "===== RAZEN SELF-COMPILATION PHASE 1 =====";
+
+# Memory Management Operations
+show(yellow) "1. Testing Memory Operations:";
+show(yellow) "Allocating memory: " + MemoryLib::alloc(1024);
+show(yellow) "Memory stats: " + MemoryLib::stats();
+
+# Create two buffers for testing
+show(yellow) "Creating buffer 1: " + MemoryLib::create_buffer(100);
+show(yellow) "Creating buffer 2: " + MemoryLib::create_buffer(100);
+
+# Write to first buffer
+show(yellow) "Writing to buffer: " + MemoryLib::buffer_write_string(1, "Hello Razen");
+
+# Read from first buffer
+show(yellow) "Reading from buffer: " + MemoryLib::buffer_read_string(1, 0, 5);
+
+# Copy between buffers
+show(yellow) "Copying between buffers: " + MemoryLib::buffer_copy(1, 0, 2, 0, 5);
+
+# Binary File Operations
+show "2. Testing Binary File Operations:";
+
+# First, create a test file
+show "Creating binary file: " + BinaryLib::create("test_binary.bin");
+
+# Open the file for writing (simplified mode)
+show "Opening binary file for writing: " + BinaryLib::open("test_binary.bin", "w");
+
+# Get the file handle from the open operation
+num write_handle = 1; # First file handle will be 1
+show "Write handle: " + write_handle;
+
+# Write data to the file
+show "Writing to binary file: " + BinaryLib::write_bytes(write_handle, "Hello Razen Binary World!");
+
+# Close the file after writing
+show "Closing write handle: " + BinaryLib::close(write_handle);
+
+# Open the file again for reading
+show "Opening binary file for reading: " + BinaryLib::open("test_binary.bin", "r");
+
+# Get the new file handle
+num read_handle = 2; # Second file handle will be 2
+show "Read handle: " + read_handle;
+
+# Seek to the beginning of the file
+show "Seeking to beginning of file: " + BinaryLib::seek(read_handle, 0);
+
+# Read the first 5 bytes
+show "Reading first 5 bytes: " + BinaryLib::read_bytes(read_handle, 5);
+
+# Seek to position 6 and read more
+show "Seeking to position 6: " + BinaryLib::seek(read_handle, 6);
+show "Reading next 5 bytes: " + BinaryLib::read_bytes(read_handle, 5);
+
+# Close the file after reading
+show "Closing read handle: " + BinaryLib::close(read_handle);
+
+# Get file statistics
+show "File stats: " + BinaryLib::stats();
+
+# Bit Operations
+show(red) "3. Testing Bit Operations:";
+show(red) "Bitwise AND: " + BitwiseLib::and(5, 3);
+show(red) "Bitwise OR: " + BitwiseLib::or(5, 3);
+show(red) "Bitwise XOR: " + BitwiseLib::xor(5, 3);
+show(red) "Bitwise NOT: " + BitwiseLib::not(5, 8);
+show(red) "Left shift: " + BitwiseLib::left_shift(5, 2);
+show(red) "Right shift: " + BitwiseLib::right_shift(20, 2);
+
+# System Operations
+show(green) "4. Testing System Operations:";
+show(green) "Process ID: " + SystemLib::getpid();
+show(green) "Current time: " + SystemLib::current_time();
+show(green) "System name: " + SystemLib::system_name();
+
+# Compiler Operations
+show(cyan) "5. Testing Compiler Operations:";
+show(cyan) "Tokenizing code: " + CompilerLib::tokenize("fun test() { return 42; }");
+show(cyan) "Parsing code: " + CompilerLib::parse("fun test() { return 42; }");
+show(cyan) "Compiling code: " + CompilerLib::compile("fun test() { return 42; }");
+
+# Threading Operations
+show(magenta) "6. Testing Threading Operations:";
+show(magenta) "Thread ID: " + ThreadLib::thread_id();
+show(magenta) "Thread count: " + ThreadLib::thread_count();
+show(magenta) "Creating mutex: " + ThreadLib::mutex_create();
+show(magenta) "Locking mutex: " + ThreadLib::mutex_lock(ThreadLib::mutex_create());
+show(magenta) "Unlocking mutex: " + ThreadLib::mutex_unlock(ThreadLib::mutex_create());
+
+show "===== SELF-COMPILATION TEST COMPnumE =====";

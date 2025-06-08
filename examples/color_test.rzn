@@ -1,0 +1,31 @@
+# Razen Color Outvar Test
+# This demonstrates the new colored outvar feature
+
+show "===== Razen Color Outvar Test =====";
+
+# Test different colors
+show(red) "This text should be RED";
+show(green) "This text should be GREEN";
+show(blue) "This text should be BLUE";
+show(yellow) "This text should be YELLOW";
+show(magenta) "This text should be MAGENTA";
+show(cyan) "This text should be CYAN";
+show(white) "This text should be WHITE";
+
+# Test bright colors
+show(bright_red) "This text should be BRIGHT RED";
+show(bright_green) "This text should be BRIGHT GREEN";
+show(bright_blue) "This text should be BRIGHT BLUE";
+show(bright_yellow) "This text should be BRIGHT YELLOW";
+show(bright_magenta) "This text should be BRIGHT MAGENTA";
+show(bright_cyan) "This text should be BRIGHT CYAN";
+show(bright_white) "This text should be BRIGHT WHITE";
+
+# Test with expressions
+num message = "Dynamic colored message";
+show(green) "Green: " + message;
+
+# Test with numbers
+show(blue) "The answer is: " + 42;
+
+show "===== Color Test Compnumed =====";
