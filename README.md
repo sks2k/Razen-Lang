@@ -154,7 +154,7 @@ This creates a new file `hello.rzn` with a Hello World template:
 # Powered by Razen Language
 
 # Your code goes here
-take message = "Hello, World!";
+str message = "Hello, World!";
 show message;
 
 # Read user input
