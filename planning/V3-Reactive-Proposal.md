@@ -1,6 +1,6 @@
 Here is the corrected version of your Markdown file with lines 18–110 (the `SmartTree` class example) properly formatted as a fenced code block, while preserving every character exactly as requested:
 
-```markdown
+
 # Razen's Reactive Model
 
 I've been working on a refined reactive model for Razen that blends **strictness**, **simplicity**, **elegance**, and **speed** — and I wanted to share both a working example and the under-the-hood plan.
@@ -21,8 +21,7 @@ Additionally, **rule inheritance** ensures that effects automatically respect th
 ---
 
 ## 📜 Working Example — SmartTree
-
-```razen
+```markdown
 class SmartTree {
 var name: str
 var health: int = use.state(80)
@@ -157,4 +156,3 @@ This approach is designed for high performance:
 That's the full picture — a working, readable example plus the technical plan to make it a reality.
 
 Created by K.Sujith sujithks2k@outlook.com https://github.com/sks2k/
-```
