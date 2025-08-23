@@ -1,18 +1,17 @@
-
 ```rzn
-// planning/reflex/examples/tree_simulation.rzn
-// Reactive Ecological Simulation using `reflex`
-//
-// Demonstrates:
-// - State management with `reflex.state`
-// - Rule-based mutation guards
-// - Side effects with `reflex.effect`
-// - Fallbacks for blocked changes
-// - Realistic environmental interactions
+# examples/tree_simulation.rzn
+# Reactive Ecological Simulation using `reflex`
+#
+# Demonstrates:
+# - State management with `reflex.state`
+# - Rule-based mutation guards
+# - Side effects with `reflex.effect`
+# - Fallbacks for blocked changes
+# - Realistic environmental interactions
 
 register type Tree, GrowthStage
 
-// Enum for growth stages (assumed to exist or be defined)
+# Enum for growth stages
 enum GrowthStage {
     Seed,
     Sprout,
@@ -26,8 +25,8 @@ class Tree {
     var name: str
     var stage: GrowthStage = GrowthStage.Seed
 
-    // Reactive environmental state
-    var soilQuality: int = reflex.state(70)     // 0-100
+    # Reactive environmental state
+    var soilQuality: int = reflex.state(70)     # 0-100
     var waterLevel: int = reflex.state(50)
     var sunlight: int = reflex.state(80)
     var infectionLevel: int = reflex.state(0)
@@ -36,18 +35,18 @@ class Tree {
         self.name = name
     }
 
-    // === RULES: Define mutation safety and reactions ===
+    # === RULES: Define mutation safety and reactions ===
     rules {
         soilQuality {
-            when soilQuality < 40 { }  // Block if degraded
+            when soilQuality < 40 { }  # Block if degraded
             reflex.fallback(fun() {
                 print("🌿 Soil too poor! Change blocked for {self.name}")
             })
         }
 
         waterLevel {
-            when waterLevel < 30 { }   // Too dry
-            when waterLevel > 100 { }  // Flooding
+            when waterLevel < 30 { }   # Too dry
+            when waterLevel > 100 { }  # Flooding
             reflex.fallback(fun() {
                 print("💧 Water level unsafe! Blocked for {self.name}")
             })
@@ -61,7 +60,7 @@ class Tree {
         }
 
         sunlight {
-            // Trigger effect when dependent values change
+            # Trigger effect when dependent values change
             reflex.effect([soilQuality, waterLevel], fun() {
                 print("🌞 Sunlight response: Soil={soilQuality}, Water={waterLevel}")
             })
@@ -71,13 +70,13 @@ class Tree {
         }
     }
 
-    // Natural decay over time
+    # Natural decay over time
     fun tick() {
         reflex.set(sunlight, sunlight - 1)
         reflex.set(waterLevel, waterLevel - 2)
     }
 
-    // Actions
+    # Actions
     fun hydrate() {
         reflex.set(waterLevel, waterLevel + 20)
     }
@@ -113,7 +112,7 @@ class Tree {
     }
 }
 
-// === Main Program ===
+# === Main Program ===
 fun main() {
     let tree = Tree("Mango")
     tree.describe()
