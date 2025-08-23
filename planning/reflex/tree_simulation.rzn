@@ -1,0 +1,129 @@
+
+```rzn
+// planning/reflex/examples/tree_simulation.rzn
+// Reactive Ecological Simulation using `reflex`
+//
+// Demonstrates:
+// - State management with `reflex.state`
+// - Rule-based mutation guards
+// - Side effects with `reflex.effect`
+// - Fallbacks for blocked changes
+// - Realistic environmental interactions
+
+register type Tree, GrowthStage
+
+// Enum for growth stages (assumed to exist or be defined)
+enum GrowthStage {
+    Seed,
+    Sprout,
+    Sapling,
+    Mature,
+    Flowering,
+    Fruiting
+}
+
+class Tree {
+    var name: str
+    var stage: GrowthStage = GrowthStage.Seed
+
+    // Reactive environmental state
+    var soilQuality: int = reflex.state(70)     // 0-100
+    var waterLevel: int = reflex.state(50)
+    var sunlight: int = reflex.state(80)
+    var infectionLevel: int = reflex.state(0)
+
+    fun init(name: str) {
+        self.name = name
+    }
+
+    // === RULES: Define mutation safety and reactions ===
+    rules {
+        soilQuality {
+            when soilQuality < 40 { }  // Block if degraded
+            reflex.fallback(fun() {
+                print("🌿 Soil too poor! Change blocked for {self.name}")
+            })
+        }
+
+        waterLevel {
+            when waterLevel < 30 { }   // Too dry
+            when waterLevel > 100 { }  // Flooding
+            reflex.fallback(fun() {
+                print("💧 Water level unsafe! Blocked for {self.name}")
+            })
+        }
+
+        stage {
+            when soilQuality < 40 or waterLevel < 30 { }
+            reflex.fallback(fun() {
+                print("❌ Growth blocked for {self.name}: poor conditions")
+            })
+        }
+
+        sunlight {
+            // Trigger effect when dependent values change
+            reflex.effect([soilQuality, waterLevel], fun() {
+                print("🌞 Sunlight response: Soil={soilQuality}, Water={waterLevel}")
+            })
+            reflex.fallback(fun() {
+                print("⚠️ Sunlight effect failed for {self.name}")
+            })
+        }
+    }
+
+    // Natural decay over time
+    fun tick() {
+        reflex.set(sunlight, sunlight - 1)
+        reflex.set(waterLevel, waterLevel - 2)
+    }
+
+    // Actions
+    fun hydrate() {
+        reflex.set(waterLevel, waterLevel + 20)
+    }
+
+    fun photosynthesize() {
+        reflex.set(sunlight, sunlight + 15)
+    }
+
+    fun fertilize() {
+        reflex.set(soilQuality, soilQuality + 10)
+    }
+
+    fun growSafely() {
+        reflex.set(stage, stage.next())
+    }
+
+    fun combatInfection() {
+        print("🦠 {self.name} fighting infection...")
+        let healthScore = soilQuality + waterLevel + sunlight
+        let chance = (healthScore / 3) + random.int(1, 10)
+
+        if chance > 40 {
+            reflex.set(infectionLevel, 0)
+            print("💪 {self.name} resisted!")
+        } else {
+            reflex.set(infectionLevel, infectionLevel + 5)
+            print("💀 Infection worsened. Level: {infectionLevel}")
+        }
+    }
+
+    fun describe() {
+        print("🌱 {self.name} is at stage: {stage}")
+    }
+}
+
+// === Main Program ===
+fun main() {
+    let tree = Tree("Mango")
+    tree.describe()
+
+    tree.hydrate()
+    tree.photosynthesize()
+    tree.fertilize()
+
+    tree.growSafely()
+    tree.describe()
+
+    tree.combatInfection()
+}
