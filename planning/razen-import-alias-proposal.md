@@ -188,3 +188,9 @@ This change is:
 ## 📣 Call to Action
 
 > **"Make Razen not just expressive, but elegant. Accept `as` — a tiny token that unlocks clean, scalable code."**
+> 
+---
+Author: K.Sujith (GitHub: @sks2k, Email:sujithks2k@outlook.com)  
+Date: August 2025
+---
+
