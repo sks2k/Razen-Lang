@@ -70,3 +70,8 @@ Razen V3 introduces hooks as first-class language primitives, extending reactive
 The goal is not to copy React, but to adapt its proven concepts for general-purpose programming. Where React hooks manage component lifecycle, Razen hooks will manage application lifecycle, file system events, network requests, and data transformations.
 
 This represents a fundamental shift toward declarative system programming - where developers describe what should happen rather than imperatively managing how it happens.
+
+---
+Concept Author: K.Sujith (GitHub: @sks2k, Email:sujithks2k@outlook.com)  
+Date:23 August 2025
+---
