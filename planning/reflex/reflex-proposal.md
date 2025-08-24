@@ -238,7 +238,16 @@ This gives you:
 - ✅ **Benefits and future extensions**
 - ✅ **Final recommendation**
 
-- ---
-Author: K.Sujith (GitHub: @sks2k, Email:sujithks2k@outlook.com)  
-Date:23 August 2025
 ---
+- **Proposal**: `Reflex`: Reactive State System for Domain Modeling in Razen v3
+- **Authored**: K.Sujith (github: sks2k, email: sujithks2k@outlook.com).
+  
+- **Creator**: Prathmesh Barot (@Prathmesh-Pro)
+Built the core language architecture and foundational logic.
+
+- **Co-Creator**: K. Sujith (@sks2k, [sujithks2k@outlook.com](mailto:sujithks2k@outlook.com))
+Worked on syntax design refinements and introduced the reflex/hook concept.
+Contributed to modular system enhancements and collaborative integration.
+
+**Version**: Preview 3
+**Date**: August 2025
