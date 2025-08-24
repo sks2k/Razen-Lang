@@ -1,7 +1,10 @@
 ```rzn
 # examples/tree_simulation.rzn
 # Reactive Ecological Simulation using `reflex`
-#
+# -----------------------------------------------------------------
+# Author: K.Sujith (GitHub: @sks2k, Email:sujithks2k@outlook.com)  
+# Date:23 August 2025
+# -----------------------------------------------------------------
 # Demonstrates:
 # - State management with `reflex.state`
 # - Rule-based mutation guards

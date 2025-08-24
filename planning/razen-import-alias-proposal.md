@@ -188,3 +188,18 @@ This change is:
 ## 📣 Call to Action
 
 > **"Make Razen not just expressive, but elegant. Accept `as` — a tiny token that unlocks clean, scalable code."**
+> 
+--- 
+## Team & Attribution – Razen-Lang v3
+- **Proposal**: Add `as` Keyword for Import Aliasing in Raze
+- **Authored**: K.Sujith (github: sks2k, email: sujithks2k@outlook.com).
+  
+- **Creator**: Prathmesh Barot (@Prathmesh-Pro)
+Built the core language architecture and foundational logic.
+
+- **Co-Creator**: K. Sujith (@sks2k, [sujithks2k@outlook.com](mailto:sujithks2k@outlook.com))
+Worked on syntax design refinements and introduced the reflex/hook concept.
+Contributed to modular system enhancements and collaborative integration.
+
+**Version**: Preview 3
+**Date**: August 2025

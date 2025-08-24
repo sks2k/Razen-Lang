@@ -70,3 +70,17 @@ Razen V3 introduces hooks as first-class language primitives, extending reactive
 The goal is not to copy React, but to adapt its proven concepts for general-purpose programming. Where React hooks manage component lifecycle, Razen hooks will manage application lifecycle, file system events, network requests, and data transformations.
 
 This represents a fundamental shift toward declarative system programming - where developers describe what should happen rather than imperatively managing how it happens.
+
+## Team & Attribution – Razen-Lang v3
+- **Proposal**: Reflex proposal, refined from earlier planning notes.
+- **Authored**: K.Sujith (github: sks2k, email: sujithks2k@outlook.com).
+ 
+- **Creator**: Prathmesh Barot (@Prathmesh-Pro)
+Built the core language architecture and foundational logic.
+
+- **Co-Creator**: K. Sujith (@sks2k, [sujithks2k@outlook.com](mailto:sujithks2k@outlook.com))
+Worked on syntax design refinements and introduced the reflex/hook concept.
+Contributed to modular system enhancements and collaborative integration.
+
+**Version**: Preview 3
+**Date**: August 2025
