@@ -72,13 +72,15 @@ The goal is not to copy React, but to adapt its proven concepts for general-purp
 This represents a fundamental shift toward declarative system programming - where developers describe what should happen rather than imperatively managing how it happens.
 
 ## Team & Attribution – Razen-Lang v3
-
-- **Creator**: Prathmesh (github: @Prathmesh-Pro)
+- **Proposal**: Reflex proposal, refined from earlier planning notes.
+- **Authored**: K.Sujith (github: sks2k, email: sujithks2k@outlook.com).
+- 
+- **Creator**: Prathmesh Barot (@Prathmesh-Pro)
 Built the core language architecture and foundational logic.
 
-- **Co-Creator**: K. Sujith (github: @sks2k, sujithks2k@outlook.com)
-Led syntax design refinements and introduced the reflex/hook concept.
+- **Co-Creator**: K. Sujith (@sks2k, [sujithks2k@outlook.com](mailto:sujithks2k@outlook.com))
+Worked on syntax design refinements and introduced the reflex/hook concept.
 Contributed to modular system enhancements and collaborative integration.
-
-**Version**: v3
+-
+**Version**: Preview 3
 **Date**: August 2025
