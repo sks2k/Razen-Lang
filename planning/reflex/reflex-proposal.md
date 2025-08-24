@@ -239,6 +239,8 @@ This gives you:
 - ✅ **Final recommendation**
 
 ---
+## Team & Attribution – Razen-Lang v3
+
 - **Proposal**: `Reflex`: Reactive State System for Domain Modeling in Razen v3
 - **Authored**: K.Sujith (github: sks2k, email: sujithks2k@outlook.com).
   
